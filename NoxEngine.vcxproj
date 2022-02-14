@@ -89,8 +89,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <ExternalIncludePath>S:\Masters\COMP5530M Group Project\Work\code\NoxEngine\3rdParty\headers;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>S:\Masters\COMP5530M Group Project\Work\code\NoxEngine\3rdParty\lib;$(LibraryPath)</LibraryPath>
+    <ExternalIncludePath>3rdParty\headers\;$(ExternalIncludePath)</ExternalIncludePath>
+    <LibraryPath>3rdParty\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
