@@ -1,3 +1,4 @@
+#define GLEW_STATIC
 #include <Windows.h>
 #include <iostream>
 
@@ -15,15 +16,23 @@ GLFWwindow* initialize_window() {
 		std::cout << "Error initializing glfw...exiting.";
 		exit(1);
 	}
+	
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
 	GLFWwindow* win = glfwCreateWindow(500, 500, "Nox Engine", nullptr, nullptr);
-
+	
 	glfwMakeContextCurrent(win);
 	if (win == nullptr) {
 		std::cout << "Failed to create window" << std::endl;
+		exit(1);
+	}
+
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK) {
+		std::cout << " Error Initializing Glew" << std::endl;
 		exit(1);
 	}
 
@@ -46,6 +55,12 @@ int main(int argc, char** argv) {
 
 	bool open_demo = true;
 
+	unsigned int buf;
+	glGenBuffers(1, &buf);
+
+
+
+#if 0
 	while (!should_close) {
 		glfwPollEvents();
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -65,6 +80,7 @@ int main(int argc, char** argv) {
 	
 		glfwSwapBuffers(win);
 	}
+#endif
 
 	return 0;
 }
