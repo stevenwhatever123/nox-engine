@@ -10,22 +10,23 @@
 
 #include <Utils.h>
 #include <EventManager.h>
+#include <PermanentMemAllocator.h>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
+using NoxEngine::PermanentMemAllocator;
+
+
+void init() {
+	auto *perm_mem_alloc = PermanentMemAllocator::Instance();
+	auto *perm_mem_alloc2 = PermanentMemAllocator::Instance();
+
+	Logger::debug("%p == %p", perm_mem_alloc, perm_mem_alloc2);
+
+}
 
 int main(int argc, char** argv) {
-
-
-	Logger::debug("hello world");
-
-	EventManager *event_manager = EventManager::Instance();
-	event_manager->addListener("meow", []() { Logger::debug("Hello World From event Meow"); });
-	event_manager->addListener("meow", []() { Logger::debug("Second Hello world"); });
-	event_manager->addListener("onDraw", []() { Logger::debug("func 2"); });
-	event_manager->addListener("onDraw", []() { Logger::debug("func 1"); });
-	event_manager->signal("onDraw");
-	event_manager->signal("meow");
+	init();
 
 	return 0;
 }

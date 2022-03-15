@@ -1,7 +1,9 @@
 #ifndef NOX_UTILS_H
 #define NOX_UTILS_H
 
+#include <Types.h>
 #include <string>
+
 
 namespace NoxEngineUtils {
 
@@ -15,6 +17,15 @@ namespace NoxEngineUtils {
 		private:
 			Logger(){};
 			static char text_temp_buf[MAX_TEMP_BUFFER];
+	};
+
+
+	class MemUtils {
+		public:
+			inline static i64 Bytes(i64 size_bytes)  { return size_bytes; }
+			inline static i64 KBytes(i64 size_bytes) { return size_bytes; }
+			inline static i64 MBytes(i64 size_bytes) { return KBytes(size_bytes)*1024; }
+			inline static i64 GBytes(i64 size_bytes) { return MBytes(size_bytes)*1024; }
 	};
 
 }

@@ -28,10 +28,12 @@
     <ClCompile Include="3rdParty\headers\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\EventManager.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\PermanentMemAllocator.cpp" />
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\EventManager.h" />
+    <ClInclude Include="headers\PermanentMemAllocator.h" />
     <ClInclude Include="headers\Singleton.h" />
     <ClInclude Include="headers\Types.h" />
     <ClInclude Include="headers\Utils.h" />
