@@ -125,7 +125,6 @@ public:
     inline void setFrameBufferToTexture() { curFBO = FBO; }
 
 
-
     glm::mat4 getProjMatr() { return projection; }
 
     glm::mat4 getCameraMatr() { return camera->getCameraTransf(); }
