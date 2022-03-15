@@ -48,11 +48,17 @@
     <ClCompile Include="src\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MeshNode.cpp">
+	  <ClCompile Include="src\MeshNode.cpp">
+		  <Filter>Source Files</Filter>
+	  </ClCompile>
+    <ClCompile Include="src\AudioManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="headers\AudioManager.h">
+		<Filter>Header Files</Filter>
+	</ClInclude>
     <ClInclude Include="ImGuiCustom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
