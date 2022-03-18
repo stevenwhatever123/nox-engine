@@ -205,16 +205,27 @@ public:
 	int getNumOfNormals() { return normalsFin.size() / 3; }
 
 
-	float* getArrayOfVertices() { return verticesFin.data(); }
+	//float* getArrayOfVertices() { return verticesFin.data(); }
 
-	float* getArrayOfTexCoord() { return texCoordFin.data(); }
+	//float* getArrayOfTexCoord() { return texCoordFin.data(); }
 
-	float* getArrayOfNormals() { return normalsFin.data(); }
+	//float* getArrayOfNormals() { return normalsFin.data(); }
 
 
 	int getNumOfElements() { return elements.size() / 3; }
 
-	int* getArrayOfElements() { return elements.data(); }
+	//void getArrayOfElements(std::vector<int> *el) {  }
+
+
+
+	void getArrayOfVertices(std::vector<float>* v) { *v = verticesFin; }
+	void getArrayOfTexCoord(std::vector<float>* tC) { *tC = texCoordFin; }
+	void getArrayOfNormals(std::vector<float>* n) { *n = normalsFin; }
+
+	//int getNumOfElements() = 0;
+	void getArrayOfElements(std::vector<int>* el) { *el = elements; }
+
+
 
 
 	virtual const char* getNormalTexture() { return "textures/leaves_normal.jpg"; }

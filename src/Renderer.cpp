@@ -296,8 +296,14 @@ void Renderer::createVertexArray(IRenderable* mesh)
 {
     numberOfVertices += mesh->getNumOfVertices();
 
-    copy(&mesh->getArrayOfVertices()[0], &mesh->getArrayOfVertices()[3 * mesh->getNumOfVertices()],
+    std::vector<float>* v = new std::vector<float>;
+    mesh->getArrayOfVertices(v);
+
+    copy(&v->data()[0],
+        &v->data()[3 * mesh->getNumOfVertices()],
         back_inserter(vertices));
+
+    delete v;
 }
 
 
@@ -306,16 +312,28 @@ void Renderer::createTexCoordArray(IRenderable* mesh)
 {
     numOfTexCoords += mesh->getNumOfTexCoord();
 
-    copy(&mesh->getArrayOfTexCoord()[0], &mesh->getArrayOfTexCoord()[2 * mesh->getNumOfTexCoord()],
+    std::vector<float>* tC = new std::vector<float>;
+    mesh->getArrayOfTexCoord(tC);
+
+    copy(&tC->data()[0],
+        &tC->data()[2 * mesh->getNumOfTexCoord()],
         back_inserter(texCoords));
+
+    delete tC;
 }
 
 void Renderer::createNormalsArray(IRenderable* mesh)
 {
     numberOfNormals += mesh->getNumOfNormals();
 
-    copy(&mesh->getArrayOfNormals()[0], &mesh->getArrayOfNormals()[3 * mesh->getNumOfNormals()],
+    std::vector<float>* n = new std::vector<float>;
+    mesh->getArrayOfNormals(n);
+
+    copy(&n->data()[0],
+        &n->data()[3 * mesh->getNumOfNormals()],
         back_inserter(normals));
+
+    delete n;
 }
 
 
@@ -328,9 +346,14 @@ void Renderer::createElementArray(IRenderable* mesh)
 
     numberOfElements += mesh->getNumOfElements();
 
-    copy(&mesh->getArrayOfElements()[0],
-        &mesh->getArrayOfElements()[3 * mesh->getNumOfElements()],
+    std::vector<int>* elem = new std::vector<int>;
+    mesh->getArrayOfElements(elem);
+
+    copy(&elem->data()[0],
+        &elem->data()[3 * mesh->getNumOfElements()],
         back_inserter(elements));
+
+    delete elem;
 
     for (unsigned int i = el_shift; i < elements.size(); i++)
     {

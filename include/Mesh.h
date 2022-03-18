@@ -54,27 +54,20 @@ public:
 
 	// Implementation of interface IRenderable
 
-	int getNumOfVertices() { return verticesPreped.size() / 3; }
-
-	int getNumOfTexCoord() { return texCoordPreped.size() / 2; }
-
-	int getNumOfNormals() { return normalsPreped.size() / 3; }
-
-
-	float* getArrayOfVertices() { return verticesPreped.data(); }
-
-	float* getArrayOfTexCoord() { return texCoordPreped.data(); }
-
-	float* getArrayOfNormals() { return normalsPreped.data(); }
+	inline int getNumOfVertices() { return vertices[0].size(); }
+	inline int getNumOfTexCoord() { return texCoord[0].size(); }
+	inline int getNumOfNormals() { return normals[0].size(); }
+	inline int getNumOfElements() { return faceIndices[0].size() / 3; }
 
 
-	int getNumOfElements() { return elements.size() / 3; }
+	void getArrayOfVertices(std::vector<float>* v);
+	void getArrayOfTexCoord(std::vector<float>* tC);
+	void getArrayOfNormals(std::vector<float>* n);
 
-	int* getArrayOfElements() { return elements.data(); }
+	void getArrayOfElements(std::vector<int>* el);
 
 
 	const char* getNormalTexture() { return texName; }
-
 	const char* getAmbientTexture() { return texName;}
 
 	const char* texName = "textures/leaves_normal.jpg";

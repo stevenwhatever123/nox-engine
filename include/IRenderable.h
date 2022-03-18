@@ -22,33 +22,16 @@ public:
     virtual int getNumOfTexCoord() = 0;
     virtual int getNumOfNormals() = 0;
 
-    virtual float* getArrayOfVertices() = 0;
-    virtual float* getArrayOfTexCoord() = 0;
-    virtual float* getArrayOfNormals() = 0;
+    virtual void getArrayOfVertices(std::vector<float>* v) = 0;
+    virtual void getArrayOfTexCoord(std::vector<float>* tC) = 0;
+    virtual void getArrayOfNormals(std::vector<float>* n) = 0;
 
     virtual int getNumOfElements() = 0;
-    virtual int* getArrayOfElements() = 0;
+    virtual void getArrayOfElements(std::vector<int> * el) = 0;
 
 
     virtual const char* getNormalTexture() = 0;
     virtual const char* getAmbientTexture() = 0;
-
-
-
-
-    //virtual int getNumOfFacesV() = 0;
-    //virtual int getNumOfFacesT() = 0;
-    //virtual int getNumOfFacesN() = 0;
-
-    //virtual const int* getArrayOfFacesV() = 0;
-    //virtual const int* getArrayOfFacesT() = 0;
-    //virtual const int* getArrayOfFacesN() = 0;
-
-
-
-
-
-
 
     //virtual float* getAnimationMatrices(int frame_index) = 0; // Probably will be separated into its own animation part
 
