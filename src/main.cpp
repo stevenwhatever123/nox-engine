@@ -10,7 +10,7 @@
 
 #include <Utils.h>
 #include <EventManager.h>
-#include <PermanentMemAllocator.h>
+#include <MemAllocator.h>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -23,7 +23,6 @@ void init() {
 
 	Logger::debug("%p == %p", perm_mem_alloc, perm_mem_alloc2);
 
-
 	void* mem = perm_mem_alloc->allocate(1024);
 	void* mem1 = perm_mem_alloc->allocate(1024);
 
@@ -34,8 +33,6 @@ void init() {
 	for(i32 i = 0; i < allocation_count; i++) {
 		Logger::debug("Allocation %d: ptr: %p - size: %lld", i, allocations[i].ptr, allocations[i].size);
 	}
-
-
 
 }
 

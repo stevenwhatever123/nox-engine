@@ -1,4 +1,4 @@
-#include <PermanentMemAllocator.h>
+#include <MemAllocator.h>
 #include <Utils.h>
 #include <cstdio>
 #include <cassert>
@@ -14,11 +14,11 @@ namespace NoxEngine {
 
 		_allocation_capacity = 0;
 		_allocation_count = 0;
-		_allocations = (PermanentMemAllocator::Allocations*)calloc(INITIAL_ALLOC_COUNT, sizeof(PermanentMemAllocator::Allocations));
+		_allocations = (PermanentMemAllocator::Allocations*)calloc(PERM_MEM_ALLOC_MAX_COUNT, sizeof(PermanentMemAllocator::Allocations));
 	}
 
 	// size is in bytes
-	void* PermanentMemAllocator::allocate(i64 size) {
+	u8* PermanentMemAllocator::allocate(i64 size) {
 
 		u8 *data_to_return = (u8*)_data + _size;
 		i32 bytes_to_alignment = align_ptr_needed_bytes(data_to_return, DEFAULT_PTR_ALIGNMENT);
@@ -80,5 +80,22 @@ namespace NoxEngine {
 		return remaining;
 	}
 
+	ScratchMemAllocator::ScratchMemAllocator() {
+		_size = NoxEngineUtils::MemUtils::MBytes(INITIAL_SCARTCH_MEM);
+		_data = (u8*)calloc(1, _size );
+	}
+
+	// size is in bytes
+	u8* ScratchMemAllocator::allocate(i64 size) {
+
+		if(size < _size) {
+			memset(_data, 0, _size);
+			return _data;
+		}
+
+		Logger::debug("Size (%d) is bigger than scratch memory size %d", size, _size);
+		return NULL;
+
+	}
 
 }

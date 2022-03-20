@@ -16,7 +16,6 @@ namespace NoxEngineUtils {
 			static void debug(std::string fmt_str, ...);
 		private:
 			Logger(){};
-			static char text_temp_buf[MAX_TEMP_BUFFER];
 	};
 
 
