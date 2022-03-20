@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
 	Renderer* renderer = init_renderer(camera);
 
 	while (!should_close) {
-		
+
 		glfwPollEvents();
 
 		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(win)) {
@@ -241,15 +241,15 @@ int main(int argc, char** argv) {
 
 		ImGui::End();
 
-
 		// If there was a mesh loaded by user
 		if (isAlreadyLoaded){
 			// Add mesh to renderer
 			mesh->prepForRenderer();
 			renderer->addObject(mesh);
 			renderer->updateBuffers();
-			isAlreadyLoaded = false;
-
+			//isAlreadyLoaded = false;
+			mesh->update();
+			mesh->verticesPreped.clear();
 		}
 
 
