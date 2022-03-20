@@ -41,28 +41,28 @@ void Mesh::createNodeHierarchy(aiNode* aiRootnode, MeshNode* rootNode)
 	// We can convert this to a tool later on
 	glm::mat4 transformation;
 	transformation[0][0] = aiRootnode->mTransformation.a1;
-	transformation[0][1] = aiRootnode->mTransformation.b1;
-	transformation[0][2] = aiRootnode->mTransformation.c1;
-	transformation[0][3] = aiRootnode->mTransformation.d1;
+	transformation[0][1] = aiRootnode->mTransformation.a2;
+	transformation[0][2] = aiRootnode->mTransformation.a3;
+	transformation[0][3] = aiRootnode->mTransformation.a4;
 
-	transformation[1][0] = aiRootnode->mTransformation.a2;
+	transformation[1][0] = aiRootnode->mTransformation.b1;
 	transformation[1][1] = aiRootnode->mTransformation.b2;
-	transformation[1][2] = aiRootnode->mTransformation.c2;
-	transformation[1][3] = aiRootnode->mTransformation.d2;
+	transformation[1][2] = aiRootnode->mTransformation.b3;
+	transformation[1][3] = aiRootnode->mTransformation.b4;
 
-	transformation[2][0] = aiRootnode->mTransformation.a3;
-	transformation[2][1] = aiRootnode->mTransformation.b3;
+	transformation[2][0] = aiRootnode->mTransformation.c1;
+	transformation[2][1] = aiRootnode->mTransformation.c2;
 	transformation[2][2] = aiRootnode->mTransformation.c3;
-	transformation[2][3] = aiRootnode->mTransformation.d3;
+	transformation[2][3] = aiRootnode->mTransformation.c4;
 
-	transformation[3][0] = aiRootnode->mTransformation.a4;
-	transformation[3][1] = aiRootnode->mTransformation.b4;
-	transformation[3][2] = aiRootnode->mTransformation.c4;
+	transformation[3][0] = aiRootnode->mTransformation.d1;
+	transformation[3][1] = aiRootnode->mTransformation.d2;
+	transformation[3][2] = aiRootnode->mTransformation.d3;
 	transformation[3][3] = aiRootnode->mTransformation.d4;
 	// =====================================================
 
 	rootNode->transformation = transformation;
-
+	
 	allNodes.push_back(rootNode);
 
 	copyNodesWithMeshes(aiRootnode, rootNode);
@@ -163,6 +163,17 @@ void Mesh::loopAllNodes(MeshNode node, std::vector<MeshNode>& list)
 	}
 }
 
+void Mesh::update()
+{
+	if (nodeAnimTransformation.size() > 0)
+	{
+		if (frameIndex < nodeAnimTransformation[animationIndex][0].size() - 1)
+		{
+			frameIndex++;
+		}
+	}
+}
+
 
 void Mesh::prepForRenderer()
 {
@@ -170,26 +181,79 @@ void Mesh::prepForRenderer()
 	mVertices.resize(vertices.size());
 
 	// Apply transformation from nodes
+	//for (unsigned int i = 0; i < allNodes.size(); i++)
+	//{
+	//	//std::cout << glm::to_string(allNodes[i]->transformation) << "\n";
+	//	if (!allNodes[i]->hasMesh)
+	//	{
+	//		// Get which mesh to transform
+	//		unsigned int meshIndex = allNodes[i]->meshIndex;
+
+	//		mVertices[meshIndex].resize(vertices[meshIndex].size());
+
+	//		// Apply Transformation to all vertices of the mesh
+	//		for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+	//		{
+	//			//mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+	//				//glm::vec4(vertices[meshIndex][j], 1.0));
+	//		}
+
+	//		//for (unsigned int j = 0; j < mVertices[meshIndex].size(); j++)
+	//		//{
+	//		//	std::cout << glm::to_string(mVertices[meshIndex][j]) << "\n";
+	//		//}
+	//	}
+	//}
+
+	// Apply transformation from nodes
 	for (unsigned int i = 0; i < allNodes.size(); i++)
 	{
-		if (!allNodes[i]->hasMesh)
+		unsigned int meshIndex = allNodes[i]->meshIndex;
+
+		mVertices[meshIndex].resize(vertices[meshIndex].size());
+
+		if (animations.size() < 1)
 		{
-			// Get which mesh to transform
-			unsigned int meshIndex = allNodes[i]->meshIndex;
-
-			mVertices[meshIndex].resize(vertices[meshIndex].size());
-
-			// Apply Transformation to all vertices of the mesh
-			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+			if (!allNodes[i]->hasMesh)
 			{
-				mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-					glm::vec4(vertices[meshIndex][j], 1.0));
+				for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+				{
+					std::cout << glm::to_string(allNodes[i]->transformation) << "\n";
+					mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+						glm::vec4(vertices[meshIndex][j], 1.0));
+				}
 			}
+		}
+		else
+		{
+			if (allNodes[i]->hasMesh)
+			{
+				// Loop node
+				glm::mat4 transformation(1);
+				for (unsigned int j = 0;
+					j < nodeAnimations[animationIndex].size();
+					j++)
+				{
+					std::cout << "Name: " << allNodes[i]->name << "\n";
 
-			//for (unsigned int j = 0; j < mVertices[meshIndex].size(); j++)
-			//{
-			//	std::cout << glm::to_string(mVertices[meshIndex][j]) << "\n";
-			//}
+					std::cout << nodeAnimations[animationIndex][j]
+						->mNodeName.C_Str() << "\n";
+
+					if (allNodes[i]->name
+						== nodeAnimations[animationIndex][j]->mNodeName.C_Str())
+					{
+						transformation
+							= nodeAnimTransformation[animationIndex][j][frameIndex];
+					}
+				}
+
+				// Apply Transformation to all vertices of the mesh
+				for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+				{
+					mVertices[meshIndex][j] = glm::vec3(transformation *
+						glm::vec4(vertices[meshIndex][j], 1.0));
+				}
+			}
 		}
 	}
 

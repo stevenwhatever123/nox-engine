@@ -28,9 +28,14 @@ public:
 	void printAllNodes();
 	void printAllMeshNodes();
 
+	void update();
+
 	void prepForRenderer();
 
 public:
+
+	unsigned int frameIndex = 0;
+	unsigned int animationIndex = 0;
 
 	MeshNode nodeHierarchy;
 	std::vector<MeshNode*> allNodes;
@@ -46,10 +51,11 @@ public:
 	// Animation data
 	std::vector<aiAnimation*> animations;
 	std::vector<std::vector<aiNodeAnim*>> nodeAnimations;
-	std::vector<std::vector<glm::mat4>> nodeAnimTransformation;
-	std::vector<std::vector<glm::mat4>> nodeAnimTranslationMatrices;
-	std::vector<std::vector<glm::mat4>> nodeAnimRotationMatrices;
-	std::vector<std::vector<glm::mat4>> nodeAnimScalingMatrices;
+	// Animation clip -> node -> keyframe transformation
+	std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimTransformation;
+	std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimTranslationMatrices;
+	std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimRotationMatrices;
+	std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimScalingMatrices;
 
 
 	// Implementation of interface IRenderable
