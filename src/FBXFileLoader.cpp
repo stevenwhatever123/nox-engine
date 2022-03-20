@@ -17,18 +17,35 @@ namespace FBXFileLoader
 		Assimp::Importer importer;
 
 		importer.ReadFile(filename,
-						aiProcess_Triangulate |
-						aiProcess_GenSmoothNormals|
-						aiProcess_FlipUVs|
-						aiProcess_JoinIdenticalVertices);
+			aiProcess_Triangulate |
+			aiProcess_GenSmoothNormals |
+			aiProcess_FlipUVs |
+			aiProcess_JoinIdenticalVertices);
 
 		// The code above only returns a pointer to the imported data
 		// It will be destroyed after exiting the block
 		// Therefore, we use GetOrphanedScene to get ownership
-		const aiScene* pScene = importer.GetOrphanedScene();
+		aiScene* pScene = importer.GetOrphanedScene();
+
+		// Check if the file contains any animation
+		// Otherwise we read again and apply aiProcess_PreTransformVertices
 
 		if (pScene)
 		{
+			if (pScene->mNumAnimations < 1)
+			{
+				std::cout << "HIU: " << pScene->mNumAnimations << "\n";
+				//delete pScene;
+				importer.ReadFile(filename,
+					aiProcess_Triangulate |
+					aiProcess_GenSmoothNormals |
+					aiProcess_FlipUVs |
+					aiProcess_JoinIdenticalVertices | 
+					aiProcess_PreTransformVertices);
+
+				pScene = importer.GetOrphanedScene();
+			}
+
 			printf("Success reading '%s'\n", filename);
 
 			//std::cout << pScene->mNumMeshes << "\n";
@@ -132,6 +149,8 @@ namespace FBXFileLoader
 			}
 		}
 
+		std::cout << "Number of animations: " << pScene->mNumAnimations << "\n";
+
 		// Animation Data
 		if (pScene->mNumAnimations > 0)
 		{
@@ -142,6 +161,9 @@ namespace FBXFileLoader
 			for (unsigned int i = 0; i < numAnimation; i++)
 			{
 				mesh->animations.push_back(pScene->mAnimations[i]);
+
+				// Resize
+				mesh->nodeAnimTranslationMatrices[i].resize(pScene->mAnimations[i]->mNumChannels);
 
 				// Loop through every node
 				for (unsigned int j = 0; j < pScene->mAnimations[i]->mNumChannels; j++)
@@ -158,7 +180,22 @@ namespace FBXFileLoader
 						pScene->mAnimations[i]->mChannels[j]
 					);
 
-					// Retrieve animation data to transformation matrices
+					// Resize
+					mesh->nodeAnimTransformation[i].resize(
+						pScene->mAnimations[i]->mNumChannels
+					);
+					mesh->nodeAnimTranslationMatrices[i].resize(
+						pScene->mAnimations[i]->mNumChannels
+					);
+					mesh->nodeAnimRotationMatrices[i].resize(
+						pScene->mAnimations[i]->mNumChannels
+					);
+					mesh->nodeAnimScalingMatrices[i].resize(
+						pScene->mAnimations[i]->mNumChannels
+					);
+
+					// Retrieve transformation matrices from keyframes in ascending
+					// order
 					for (unsigned int z = 0;
 						z < pScene->mAnimations[i]->mChannels[j]->mNumPositionKeys;
 						z++)
@@ -167,7 +204,7 @@ namespace FBXFileLoader
 						// Translation matrix
 						glm::mat4 translationMatrix =
 							glm::translate(
-								glm::mat4(),
+								glm::mat4(1),
 								glm::vec3(
 									pScene->mAnimations[i]
 										->mChannels[j]->mPositionKeys[z].mValue.x,
@@ -197,25 +234,25 @@ namespace FBXFileLoader
 						// I think this is how it works, row based
 						glm::mat4 rotationMatrix = glm::mat4(1.0f);
 						rotationMatrix[0][0] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().a1;
+							->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().a1;
 						rotationMatrix[0][1] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().a2;
+							->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().b1;
 						rotationMatrix[0][2] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().a3;
+							->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().c1;
 
 						rotationMatrix[1][0] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().b1;
+							->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().a2;
 						rotationMatrix[1][1] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().b2;
+							->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().b2;
 						rotationMatrix[1][2] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().b3;
+							->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().c2;
 
 						rotationMatrix[2][0] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().c1;
+							->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().a3;
 						rotationMatrix[2][1] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().c2;
+							->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().b3;
 						rotationMatrix[2][2] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().c3;
+							->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().c3;
 
 						// Combine all of them to get the transformation matrix
 						// Notes: I don't think it's a good idea to include translation
@@ -227,17 +264,28 @@ namespace FBXFileLoader
 						// object rotations only and we define how the gameobject
 						// moves via scripts/our tools
 
-						mesh->nodeAnimTranslationMatrices[i].push_back(
+						//mesh->nodeAnimTranslationMatrices[i].push_back(
+						//	translationMatrix
+						//);
+						mesh->nodeAnimTranslationMatrices[i][j].push_back(
 							translationMatrix
 						);
 
-						mesh->nodeAnimRotationMatrices[i].push_back(
+						mesh->nodeAnimRotationMatrices[i][j].push_back(
 							rotationMatrix
 						);
 
-						mesh->nodeAnimScalingMatrices[i].push_back(
+						mesh->nodeAnimScalingMatrices[i][j].push_back(
 							scalingMatrix
 						);
+
+						glm::mat4 transformationMatrix =
+							translationMatrix * rotationMatrix * scalingMatrix;
+
+						mesh->nodeAnimTransformation[i][j].push_back(
+							transformationMatrix
+						);
+
 					}
 				}
 
@@ -256,6 +304,33 @@ namespace FBXFileLoader
 		aiNode* aiRootNode = pScene->mRootNode;
 		mesh->createNodeHierarchy(aiRootNode, rootNode);
 
+		// Apply transformation from the first animation as the idle transformation
+		//if (pScene->mNumAnimations > 0)
+		//{
+		//	unsigned int index = 0;
+
+		//	for (unsigned int i = 0; i < mesh->nodeAnimations[index].size(); i++)
+		//	{
+		//		// Loop through every node by name
+		//		for (unsigned int j = 0; j < mesh->allNodes.size(); j++)
+		//		{
+		//			if (mesh->allNodes[j]->name ==
+		//				mesh->nodeAnimations[index][i]->mNodeName.C_Str())
+		//			{
+		//				std::cout << glm::to_string(
+		//					mesh->nodeAnimRotationMatrices[index][i]
+		//				) << "\n";
+		//			}
+		//		}
+		//	}
+		//}
+
+		//for (unsigned int i = 0; i < mesh->nodeAnimTranslationMatrices[0][0].size(); i++)
+		//{
+		//	std::cout << glm::to_string(mesh->nodeAnimRotationMatrices[0][0][i])
+		//		<< "\n";
+		//}
+
 		// Apply transformation to all vertices from nodes
 
 
@@ -265,43 +340,52 @@ namespace FBXFileLoader
 
 		//std::cout << rootNode->child[0].child[0].name << "\n";
 		//std::cout << glm::to_string(rootNode->child[0].child[0].transformation) 
-		//	<< "\n";
+			//<< "\n";
+
+		//for (unsigned int i = 0; i < mesh->nodeAnimRotationMatrices.size(); i++)
+		//{
+		//	for (unsigned int j = 0; j < mesh->nodeAnimRotationMatrices[i].size(); j++)
+		//	{
+		//		std::cout << glm::to_string(mesh->nodeAnimRotationMatrices[i][j]) 
+		//			<< "\n";
+		//	}
+		//}
 
 		// Optional: Print out all the data
-		//unsigned int count = 0;
-		//for (unsigned int i = 0; i < mesh->vertices.size(); i++)
-		//{
-		//	for (unsigned int j = 0; j < mesh->vertices[i].size(); j++)
-		//	{
-		//		std::cout << "Vertex " << count << ": " << mesh->vertices[i][j].x <<
-		//			" " << mesh->vertices[i][j].y << " "
-		//			<< mesh->vertices[i][j].z << "\n";
-		//		count++;
-		//	}
-		//}
+		unsigned int count = 0;
+		for (unsigned int i = 0; i < mesh->vertices.size(); i++)
+		{
+			for (unsigned int j = 0; j < mesh->vertices[i].size(); j++)
+			{
+				std::cout << "Vertex " << count << ": " << mesh->vertices[i][j].x <<
+					" " << mesh->vertices[i][j].y << " "
+					<< mesh->vertices[i][j].z << "\n";
+				count++;
+			}
+		}
 
-		//count = 0;
-		//for (unsigned int i = 0; i < mesh->normals.size(); i++)
-		//{
-		//	for (unsigned int j = 0; j < mesh->normals[i].size(); j++)
-		//	{
-		//		std::cout << "Normal " << count << ": " << mesh->normals[i][j].x <<
-		//			" " << mesh->normals[i][j].y << " "
-		//			<< mesh->normals[i][j].z << "\n";
-		//		count++;
-		//	}
-		//}
+		count = 0;
+		for (unsigned int i = 0; i < mesh->normals.size(); i++)
+		{
+			for (unsigned int j = 0; j < mesh->normals[i].size(); j++)
+			{
+				std::cout << "Normal " << count << ": " << mesh->normals[i][j].x <<
+					" " << mesh->normals[i][j].y << " "
+					<< mesh->normals[i][j].z << "\n";
+				count++;
+			}
+		}
 
-		//count = 0;
-		//for (unsigned int i = 0; i < mesh->texCoord.size(); i++)
-		//{
-		//	for (unsigned int j = 0; j < mesh->texCoord[i].size(); j++)
-		//	{
-		//		std::cout << "TexCoord " << count << ": " << mesh->texCoord[i][j].x <<
-		//			" " << mesh->texCoord[i][j].y << "\n";
-		//		count++;
-		//	}
-		//}
+		count = 0;
+		for (unsigned int i = 0; i < mesh->texCoord.size(); i++)
+		{
+			for (unsigned int j = 0; j < mesh->texCoord[i].size(); j++)
+			{
+				std::cout << "TexCoord " << count << ": " << mesh->texCoord[i][j].x <<
+					" " << mesh->texCoord[i][j].y << "\n";
+				count++;
+			}
+		}
 
 		return mesh;
 	}
