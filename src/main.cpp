@@ -23,6 +23,20 @@ void init() {
 
 	Logger::debug("%p == %p", perm_mem_alloc, perm_mem_alloc2);
 
+
+	void* mem = perm_mem_alloc->allocate(1024);
+	void* mem1 = perm_mem_alloc->allocate(1024);
+
+	auto* allocations = perm_mem_alloc->getAllocations();
+	const i64 allocation_count = perm_mem_alloc->getAllocationsCount();
+
+	Logger::debug("allocated: %d", allocation_count);
+	for(i32 i = 0; i < allocation_count; i++) {
+		Logger::debug("Allocation %d: ptr: %p - size: %lld", i, allocations[i].ptr, allocations[i].size);
+	}
+
+
+
 }
 
 int main(int argc, char** argv) {
