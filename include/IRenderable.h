@@ -52,7 +52,7 @@ public:
 
 
 
-    float color[3] = { 0.2f, 0.7f, 0.5f }; // Color
+    float color[3] = { 0.0f, 0.0f, 0.0f }; // Color
     bool prim_type = 0; // If 0 - triangles, 1 - lines
     bool renderAsDots = 0; // 0 - if not, 1 - if yes
 

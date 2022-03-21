@@ -79,6 +79,7 @@ Renderer::Renderer(int width, int height, Camera* cam) :
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &NBO);
     glGenBuffers(1, &TCBO);
+    glGenBuffers(1, &TANBO);
 
     glGenBuffers(1, &EBO);
 }
@@ -103,12 +104,12 @@ void Renderer::updateBuffers()
     std::cout << "VBO " << glGetError() << std::endl; fflush(NULL);
 
 
-    // Normal positions. At the moment uses textCoord because the normals are submitted with texture
+    // Normal positions
     glBindBuffer(GL_ARRAY_BUFFER, NBO);
-    glBufferData(GL_ARRAY_BUFFER, 2 * numOfTexCoords * sizeof(GLfloat), texCoords.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 3 * numOfTexCoords * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
 
     int normalAtr = shader->getAtrributeLocation("normal");
-    glVertexAttribPointer(normalAtr, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glVertexAttribPointer(normalAtr, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexArrayAttrib(VAO, normalAtr);
     std::cout << "NBO " << glGetError() << std::endl; fflush(NULL);
 
@@ -123,6 +124,17 @@ void Renderer::updateBuffers()
     glVertexAttribPointer(texCoordAtr, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexArrayAttrib(VAO, texCoordAtr);
     std::cout << "TCBO " << glGetError() << std::endl; fflush(NULL);
+
+
+    // Tangents
+    glBindBuffer(GL_ARRAY_BUFFER, TANBO);
+    glBufferData(GL_ARRAY_BUFFER, 3 * numOfTangents* sizeof(GLfloat), tangents.data(), GL_STATIC_DRAW);
+
+    int tangentAtr = shader->getAtrributeLocation("tangent");
+    glVertexAttribPointer(tangentAtr, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glEnableVertexArrayAttrib(VAO, tangentAtr);
+    std::cout << "TANBO " << glGetError() << std::endl; fflush(NULL);
+
 
 
     // Elements
@@ -153,6 +165,8 @@ void Renderer::addObject(IRenderable *mesh)
     createVertexArray(mesh);
     createTexCoordArray(mesh);
     createNormalsArray(mesh);
+
+    createTangents(mesh);
 
     createElementArray(mesh);
     newObj.endInd = elements.size();
@@ -219,6 +233,7 @@ void Renderer::draw()
 
     glBindVertexArray(VAO);
 
+
     for (unsigned int i = 0; i < objects.size(); i++)
     {
         // Activate and bind textures of the object
@@ -261,10 +276,12 @@ void Renderer::updateProjection(int width, int height)
     glViewport(0, 0, w, h);
 
     // Set up Projection matrix
-    int toProjectionLoc = shader->getUniformLocation("toProjection");
+    projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
 
-    projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 200.0f);
-    glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    //int toProjectionLoc = shader->getUniformLocation("toProjection");
+    //glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    shader->set4Matrix("toProjection", projection);
 
     glBindFramebuffer(GL_FRAMEBUFFER, curFBO);
 
@@ -363,18 +380,133 @@ void Renderer::createElementArray(IRenderable* mesh)
 }
 
 
+
+
+
+void Renderer::createTangents(IRenderable* mesh)
+{
+    std::vector<float>* v = new std::vector<float>;
+    mesh->getArrayOfVertices(v);
+
+    std::vector<float>* tc = new std::vector<float>;
+    mesh->getArrayOfTexCoord(tc);
+
+    std::vector<float>* n = new std::vector<float>;
+    mesh->getArrayOfNormals(n);
+
+    std::vector<int>* elem = new std::vector<int>;
+    mesh->getArrayOfElements(elem);
+
+    int i = v->at(elem->at(0));
+
+
+
+
+    std::vector<float> newTangents;
+    newTangents.resize(mesh->getNumOfVertices()*3);
+    for (auto itr = newTangents.begin(); itr != newTangents.end(); ++itr) *itr = 0.0f;
+
+
+    // For each triangle in the mesh
+    for (int i = 0; i < elem->size(); i+=3)
+    {
+        // Get the positions of the vertices, their tex coordinates and the normal coordinates
+
+        // Positions
+        int el_ind1 = elem->at(i);
+        int el_ind2 = elem->at(i + 1);
+        int el_ind3 = elem->at(i + 2);
+
+
+        glm::vec3 pos1(v->at(el_ind1 * 3), v->at(el_ind1 * 3 + 1), v->at(el_ind1 * 3 + 2));
+        glm::vec3 pos2(v->at(el_ind2 * 3), v->at(el_ind2 * 3 + 1), v->at(el_ind2 * 3 + 2));
+        glm::vec3 pos3(v->at(el_ind3 * 3), v->at(el_ind3 * 3 + 1), v->at(el_ind3 * 3 + 2));
+
+        // Texture coordinates
+        glm::vec2 uv1(tc->at(el_ind1 * 2), tc->at(el_ind1 * 2 + 1));
+        glm::vec2 uv2(tc->at(el_ind2 * 2), tc->at(el_ind2 * 2 + 1));
+        glm::vec2 uv3(tc->at(el_ind3 * 2), tc->at(el_ind3 * 2 + 1));
+
+        glm::vec3 edge1 = pos2 - pos1;
+        glm::vec3 edge2 = pos3 - pos1;
+        glm::vec2 deltaUV1 = uv2 - uv1;
+        glm::vec2 deltaUV2 = uv3 - uv1;
+
+
+        glm::vec3 tangent;
+
+
+        float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+        tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+        tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+        tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+
+
+        // Save the tangents to each vertice of the triangle
+        newTangents[el_ind1 * 3] += tangent.x; newTangents[el_ind1 * 3 + 1] += tangent.y; newTangents[el_ind1 * 3 + 2] += tangent.z;
+        newTangents[el_ind2 * 3] += tangent.x; newTangents[el_ind2 * 3 + 1] += tangent.y; newTangents[el_ind2 * 3 + 2] += tangent.z;
+        newTangents[el_ind3 * 3] += tangent.x; newTangents[el_ind3 * 3 + 1] += tangent.y; newTangents[el_ind3 * 3 + 2] += tangent.z;
+    }
+
+
+    // Once all of the tangents have been calculated, some would have summed tangents.
+    // Devide by the number of triangles the vertice is the part of to find the average
+    std::vector<int> verticeTrianglesCount;
+    verticeTrianglesCount.resize(mesh->getNumOfVertices());
+    for (auto itr = verticeTrianglesCount.begin(); itr != verticeTrianglesCount.end(); ++itr) *itr = 0;
+
+    for (int i = 0; i < elem->size(); i++)
+    {
+        verticeTrianglesCount[elem->at(i)]++;
+    }
+
+    for (int i = 0; i < newTangents.size() / 3; i++)
+    {
+        newTangents[i * 3] = newTangents[i * 3] / verticeTrianglesCount[i];
+        newTangents[i * 3 + 1] = newTangents[i * 3 + 1] / verticeTrianglesCount[i];
+        newTangents[i * 3 + 2] = newTangents[i * 3 + 2] / verticeTrianglesCount[i];
+    }
+
+
+    // Add calculated tangents to the container
+    copy(&newTangents.data()[0],
+        &newTangents.data()[newTangents.size()],
+        back_inserter(tangents));
+
+    delete v, tc, n, elem;
+
+    numOfTangents = tangents.size()/3.0f;
+
+}
+
+
+
+
+
+
+
+
+
+
+
 void Renderer::updateCamera()
 {
-    int toCameraLoc = shader->getUniformLocation("toCamera");
-    glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
+    //int toCameraLoc = shader->getUniformLocation("toCamera");
+    //glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
+
+    shader->set4Matrix("toCamera", camera->getCameraTransf());
 }
 
 
 void Renderer::updateCamera(Camera* cam)
 {
     camera = cam;
-    int toCameraLoc = shader->getUniformLocation("toCamera");
-    glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
+    //int toCameraLoc = shader->getUniformLocation("toCamera");
+    //glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
+
+    shader->set4Matrix("toCamera", camera->getCameraTransf());
 }
 
 
@@ -388,17 +520,37 @@ void Renderer::setUpShader()
 
 
     // Set up Projection matrix
-    int toProjectionLoc = shader->getUniformLocation("toProjection");
+    projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
 
-    projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 200.0f);
+    //int toProjectionLoc = shader->getUniformLocation("toProjection");
 
-    glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+    //glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    shader->set4Matrix("toProjection", projection);
 
 
     // Set up Camera
     updateCamera();
 
     // Set up color for mesh
-    glUniform3f(shader->getUniformLocation("Color"), color.x, color.y, color.z);
+    //glUniform3f(shader->getUniformLocation("Color"), color.x, color.y, color.z);
 
+
+    // Set up camera position
+    shader->set3Float("cameraPosition", camera->currCamPos.x, camera->currCamPos.y, camera->currCamPos.z);
+
+    // Set up light position
+    shader->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
+
+
+    
+}
+
+
+void Renderer::updateLightPos(float x, float y, float z) 
+{
+    shader->use();
+    shader->set3Float("lightPosition",x, y, z);
 }

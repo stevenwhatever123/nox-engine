@@ -48,13 +48,15 @@ private:
 
     
     // Global buffers of attributes
-    GLuint VBO, NBO, TCBO, VAO, EBO;
+    GLuint VBO, NBO, TCBO, VAO, EBO, TANBO;
 
-    int numberOfVertices, numberOfNormals, numberOfElements,  numOfTexCoords;
+    int numberOfVertices, numberOfNormals, numberOfElements,  numOfTexCoords, numOfTangents;
 
     std::vector<GLfloat> vertices;
     std::vector<GLfloat> normals;
     std::vector<GLfloat> texCoords;
+    std::vector<GLfloat> tangents;
+
     std::vector<GLint> elements;
 
 
@@ -75,6 +77,14 @@ private:
 
     void createElementArray(IRenderable* mesh);
 
+    // This atribute is needed for Normal Mapping. 
+    // Basically, need to transform the normals in the map into tangent space (space of the primitive (triangle))
+    // To do so:
+    //              - callculate tangents to vertices and submit them in the shader
+    //              - in shader create transformation matrices using them. 
+    // More in detail in the report section on Normal Mapping
+    void createTangents(IRenderable* mesh); 
+
 
 
     void setUpShader();
@@ -92,7 +102,6 @@ public:
      * param:
      *        width - the width of the window to render to
      *        height - the height of the window to render to
-     *        type - the type of promitive this renderer handles.
      *        camera - a camera to render from
     */
     Renderer(int width, int height, Camera* camera);
@@ -137,6 +146,8 @@ public:
 
     // Updates the view transformation using the current camera
     void updateCamera();
+
+    void updateLightPos(float x, float y, float z);
 
 
 };

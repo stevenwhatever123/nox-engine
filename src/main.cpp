@@ -24,7 +24,7 @@
 #include "RenderableComp.h"
 
 
-unsigned int winWidth = 1300 , winHeight = 1000;
+unsigned int winWidth = 1900 , winHeight = 1000;
 
 GLFWwindow* initialize_window() {
 	if (!glfwInit()) {
@@ -146,9 +146,17 @@ int main(int argc, char** argv) {
 	RenderableComp* obj3 = new RenderableComp(-3.0f, 0.0f, -2.0f, "textures/beije.png");
 	
 	// Create Camera
-	Camera* camera = new Camera(glm::vec3(0.0f, 10.0f, 200.0f));
+	Camera* camera = new Camera(glm::vec3(0.0f, 260.0f, 0.0f));
+	camera->turnVerBy(90.0f);
+	Camera * camera2 = new Camera(glm::vec3(0.0f, 100.0f, 150.0f));
+	camera2->turnVerBy(40.0f);
+	
 
 	Renderer* renderer = init_renderer(camera);
+
+	glm::vec3 light(0.0f, 50.0f, 0.0f);
+
+	static float f1 = 0.0f;
 
 	while (!should_close) {
 		
@@ -183,6 +191,8 @@ int main(int argc, char** argv) {
 		audioManager->SetChannel3dPosition(0, {soundX, soundY, soundZ});
 		audioManager->SetChannelVolume(0, soundVolume);
 		//customWindow->showFBXLoaderMenu(mesh);
+
+
 
 
 		ImGui::Begin("Settings");
@@ -242,6 +252,17 @@ int main(int argc, char** argv) {
 		ImGui::End();
 
 
+		// One more window just cause
+		ImGui::Begin("Light Position");
+
+
+		ImGui::SliderFloat("slider x", &light.x, -100.0f, 100.0f, " %.3f");
+		ImGui::SliderFloat("slider y", &light.y, -100.0f, 100.0f, " %.3f");
+		ImGui::SliderFloat("slider z", &light.z, -100.0f, 100.0f, " %.3f");
+
+		ImGui::End();
+
+
 		// If there was a mesh loaded by user
 		if (isAlreadyLoaded){
 			// Add mesh to renderer
@@ -263,6 +284,8 @@ int main(int argc, char** argv) {
 
 		//Render background of the app
 		renderer->fillBackground(1.0f, 0.5f, 0.9f);
+		
+		renderer->updateLightPos(light.x, light.y, light.z);
 		renderer->draw();
 
 		// Use IMGUI to show rendered to framebuffer 
@@ -279,11 +302,11 @@ int main(int argc, char** argv) {
 
 		} ImGui::End();
 
-		// One more window just cause
-		ImGui::Begin("One more window");
-		ImGui::Button("Hello!");
 
-		ImGui::End();
+
+
+
+
 
 		// Finally show UI
 		ImGui::Render();

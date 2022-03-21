@@ -67,10 +67,11 @@ public:
 	void getArrayOfElements(std::vector<int>* el);
 
 
-	const char* getNormalTexture() { return texName; }
-	const char* getAmbientTexture() { return texName;}
+	const char* getNormalTexture() { return normTexName; }
+	const char* getAmbientTexture() { return ambTexName;}
 
-	const char* texName = "textures/leaves_normal.jpg";
+	const char* ambTexName = "textures/Terracotta_Tiles_002_Base_Color.jpg";
+	const char* normTexName = "textures/Terracotta_Tiles_002_Normal.jpg";
 
 private:
 

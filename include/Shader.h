@@ -15,6 +15,10 @@
 
 #include <string>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 
 
 
@@ -42,7 +46,11 @@ public:
 
 	void setFloat(const std::string& name, float value) const;
 
+	void set3Float(const std::string& name, float x, float y, float z) const;
+
 	void set4Float(const std::string& name, float x, float y, float z, float w) const;
+
+	void set4Matrix(const std::string& name, glm::mat4 mat) const;
 
 	// Getters
 	int getUniformLocation(const std::string& name);
