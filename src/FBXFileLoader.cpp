@@ -352,40 +352,40 @@ namespace FBXFileLoader
 		//}
 
 		// Optional: Print out all the data
-		unsigned int count = 0;
-		for (unsigned int i = 0; i < mesh->vertices.size(); i++)
-		{
-			for (unsigned int j = 0; j < mesh->vertices[i].size(); j++)
-			{
-				std::cout << "Vertex " << count << ": " << mesh->vertices[i][j].x <<
-					" " << mesh->vertices[i][j].y << " "
-					<< mesh->vertices[i][j].z << "\n";
-				count++;
-			}
-		}
+		//unsigned int count = 0;
+		//for (unsigned int i = 0; i < mesh->vertices.size(); i++)
+		//{
+		//	for (unsigned int j = 0; j < mesh->vertices[i].size(); j++)
+		//	{
+		//		std::cout << "Vertex " << count << ": " << mesh->vertices[i][j].x <<
+		//			" " << mesh->vertices[i][j].y << " "
+		//			<< mesh->vertices[i][j].z << "\n";
+		//		count++;
+		//	}
+		//}
 
-		count = 0;
-		for (unsigned int i = 0; i < mesh->normals.size(); i++)
-		{
-			for (unsigned int j = 0; j < mesh->normals[i].size(); j++)
-			{
-				std::cout << "Normal " << count << ": " << mesh->normals[i][j].x <<
-					" " << mesh->normals[i][j].y << " "
-					<< mesh->normals[i][j].z << "\n";
-				count++;
-			}
-		}
+		//count = 0;
+		//for (unsigned int i = 0; i < mesh->normals.size(); i++)
+		//{
+		//	for (unsigned int j = 0; j < mesh->normals[i].size(); j++)
+		//	{
+		//		std::cout << "Normal " << count << ": " << mesh->normals[i][j].x <<
+		//			" " << mesh->normals[i][j].y << " "
+		//			<< mesh->normals[i][j].z << "\n";
+		//		count++;
+		//	}
+		//}
 
-		count = 0;
-		for (unsigned int i = 0; i < mesh->texCoord.size(); i++)
-		{
-			for (unsigned int j = 0; j < mesh->texCoord[i].size(); j++)
-			{
-				std::cout << "TexCoord " << count << ": " << mesh->texCoord[i][j].x <<
-					" " << mesh->texCoord[i][j].y << "\n";
-				count++;
-			}
-		}
+		//count = 0;
+		//for (unsigned int i = 0; i < mesh->texCoord.size(); i++)
+		//{
+		//	for (unsigned int j = 0; j < mesh->texCoord[i].size(); j++)
+		//	{
+		//		std::cout << "TexCoord " << count << ": " << mesh->texCoord[i][j].x <<
+		//			" " << mesh->texCoord[i][j].y << "\n";
+		//		count++;
+		//	}
+		//}
 
 		return mesh;
 	}
