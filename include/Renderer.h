@@ -101,6 +101,7 @@ public:
 
     // Add object to renderer to render
     void addObject(IRenderable *mesh);
+    void clearObject();
 
     void updateBuffers();
 

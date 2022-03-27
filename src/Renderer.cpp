@@ -161,6 +161,10 @@ void Renderer::addObject(IRenderable *mesh)
 
 }
 
+void Renderer::clearObject()
+{
+    objects.clear();
+}
 
 
 
