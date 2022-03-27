@@ -1,9 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include"Renderer.h"
 
-//TODO: update uniform submissions to use Shader class
 //TODO: fix drawing to default buffer
-//TODO: get some light going
 //TODO: material class
 
 
