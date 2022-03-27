@@ -29,6 +29,7 @@ public:
 	void printAllMeshNodes();
 
 	void update();
+	void update(float dt);
 
 	void prepForRenderer();
 
@@ -36,6 +37,8 @@ public:
 
 	unsigned int frameIndex = 0;
 	unsigned int animationIndex = 0;
+
+	float timer = 0;
 
 	MeshNode nodeHierarchy;
 	std::vector<MeshNode*> allNodes;

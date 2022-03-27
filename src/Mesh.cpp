@@ -174,6 +174,30 @@ void Mesh::update()
 	}
 }
 
+void Mesh::update(float dt)
+{
+	timer += dt;
+
+	if (nodeAnimTransformation.size() > 0)
+	{
+		if (frameIndex < nodeAnimTransformation[animationIndex][0].size() - 1)
+		{
+			// Interpolate time into tick
+			// Because 0 is the idle animation that every object shares
+			// even when it does not have any animation data
+			int tickPerSec = animations[animationIndex + 1]->mTicksPerSecond;
+			int numTicks = animations[animationIndex + 1]
+				->mChannels[0]->mNumPositionKeys;
+			float animationDuration = animations[animationIndex + 1]->mDuration
+				/ animations[animationIndex + 1]->mTicksPerSecond;
+
+			int whichTick = (timer / animationDuration) * numTicks;
+
+			frameIndex = whichTick >= numTicks ? numTicks - 1 : whichTick;
+		}
+	}
+}
+
 
 void Mesh::prepForRenderer()
 {
@@ -257,10 +281,18 @@ void Mesh::prepForRenderer()
 		}
 	}
 
-	for (unsigned int i = 0; i < vertices[0].size(); i++)
+	//for (unsigned int i = 0; i < vertices[0].size(); i++)
+	//{
+	//	verticesPreped.push_back(vertices[0][i].x); verticesPreped.push_back(vertices[0][i].y); verticesPreped.push_back(vertices[0][i].z);
+	//	verticesPreped.push_back(mVertices[0][i].x); verticesPreped.push_back(mVertices[0][i].y); verticesPreped.push_back(mVertices[0][i].z);
+	//}
+
+	for (unsigned int i = 0; i < mVertices.size(); i++)
 	{
-		//verticesPreped.push_back(vertices[0][i].x); verticesPreped.push_back(vertices[0][i].y); verticesPreped.push_back(vertices[0][i].z);
-		verticesPreped.push_back(mVertices[0][i].x); verticesPreped.push_back(mVertices[0][i].y); verticesPreped.push_back(mVertices[0][i].z);
+		for (unsigned int j = 0; j < mVertices[i].size(); j++)
+		{
+			verticesPreped.push_back(mVertices[i][j].x); verticesPreped.push_back(mVertices[i][j].y); verticesPreped.push_back(mVertices[i][j].z);
+		}
 	}
 
 	for (unsigned int i = 0; i < normals[0].size(); i++)
