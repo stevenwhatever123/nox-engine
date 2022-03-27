@@ -23,6 +23,8 @@
 #include "Renderer.h"
 #include "RenderableComp.h"
 
+#include <glm/gtx/string_cast.hpp>
+
 
 unsigned int winWidth = 1300 , winHeight = 1000;
 
@@ -130,12 +132,15 @@ int main(int argc, char** argv) {
 
 	init_imgui(win);
 	
-
+	float currentFrame = glfwGetTime();
+	float lastFrame = currentFrame;
+	float deltaTime = 0;
 
 	ImGuiCustomWindow* customWindow = new ImGuiCustomWindow();
 
 	Mesh* mesh = NULL;
 	bool isAlreadyLoaded = false;
+	bool playAnimation = false;
 
 	// Used to detect change in window size
 	int locWidth = winWidth, locHeight = winHeight, prevWidth = winWidth, prevHeight = winHeight;
@@ -151,6 +156,15 @@ int main(int argc, char** argv) {
 	Renderer* renderer = init_renderer(camera);
 
 	while (!should_close) {
+
+		// Update delta Time
+		currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		//std::cout << "Current Frame: " << currentFrame << "\n";
+		//std::cout << "Last Frame: " << lastFrame << "\n";
+		//std::cout << "Delta Time: " << deltaTime << "\n";
 
 		glfwPollEvents();
 
@@ -244,11 +258,13 @@ int main(int argc, char** argv) {
 		// If there was a mesh loaded by user
 		if (isAlreadyLoaded){
 			// Add mesh to renderer
+			renderer->clearObject();
 			mesh->prepForRenderer();
 			renderer->addObject(mesh);
 			renderer->updateBuffers();
 			//isAlreadyLoaded = false;
-			mesh->update();
+
+			mesh->update(deltaTime);
 			mesh->verticesPreped.clear();
 		}
 
