@@ -188,10 +188,17 @@ void Mesh::update(float dt)
 			int tickPerSec = animations[animationIndex + 1]->mTicksPerSecond;
 			int numTicks = animations[animationIndex + 1]
 				->mChannels[0]->mNumPositionKeys;
-			float animationDuration = animations[animationIndex + 1]->mDuration
+			float animationDuration = numTicks
 				/ animations[animationIndex + 1]->mTicksPerSecond;
 
-			int whichTick = (timer / animationDuration) * numTicks;
+			whichTick = ((timer / animationDuration) * numTicks);
+			whichTickFloat = ((timer / animationDuration) * numTicks) >= numTicks?
+				numTicks - 1: ((timer / animationDuration) * numTicks);
+			whichTickFloor = floor(whichTickFloat);
+			whichTickCeil = ceil(whichTickFloat);
+
+			float ratio = whichTickFloat
+				/ (whichTickFloor + whichTickCeil);
 
 			frameIndex = whichTick >= numTicks ? numTicks - 1 : whichTick;
 		}
@@ -266,8 +273,22 @@ void Mesh::prepForRenderer()
 					if (allNodes[i]->name
 						== nodeAnimations[animationIndex][j]->mNodeName.C_Str())
 					{
+						// Interpolate between two keyframe
+						float ratio = whichTickFloat
+							/ (whichTickFloor + whichTickCeil);
+
+						glm::mat4 matrixFloor
+							= nodeAnimTransformation[animationIndex][j][whichTickFloor];
+
+						glm::mat4 matrixCeil
+							= nodeAnimTransformation[animationIndex][j][whichTickCeil];
+
+						//transformation
+							//= nodeAnimTransformation[animationIndex][j][frameIndex];
+
+						// Linear interpolation
 						transformation
-							= nodeAnimTransformation[animationIndex][j][frameIndex];
+							= (matrixFloor + matrixCeil) * ratio;
 					}
 				}
 

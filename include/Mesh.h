@@ -39,6 +39,10 @@ public:
 	unsigned int animationIndex = 0;
 
 	float timer = 0;
+	int whichTick = 0;
+	float whichTickFloat = 0;
+	int whichTickFloor = 0;
+	int whichTickCeil = 0;
 
 	MeshNode nodeHierarchy;
 	std::vector<MeshNode*> allNodes;
