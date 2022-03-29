@@ -197,9 +197,6 @@ void Mesh::update(float dt)
 			whichTickFloor = floor(whichTickFloat);
 			whichTickCeil = ceil(whichTickFloat);
 
-			float ratio = whichTickFloat
-				/ (whichTickFloor + whichTickCeil);
-
 			frameIndex = whichTick >= numTicks ? numTicks - 1 : whichTick;
 		}
 	}
@@ -288,7 +285,7 @@ void Mesh::prepForRenderer()
 
 						// Linear interpolation
 						transformation
-							= (matrixFloor + matrixCeil) * ratio;
+							= (matrixFloor * ratio) + ((1 - ratio) * matrixCeil);
 					}
 				}
 
