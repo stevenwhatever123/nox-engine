@@ -16,6 +16,19 @@
 #include <EventManager.h>
 #include <MemAllocator.h>
 
+#include "../FBXFileLoader.h"
+#include "../ImGuiCustomWindow.h"
+#include <fmod/core/fmod.hpp>
+#include <fmod/core/fmod_errors.h>
+
+#include "AudioManager.h"
+
+
+//#include "Shader.h"
+#include "Renderer.h"
+#include "RenderableComp.h"
+
+
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
 using NoxEngine::PermanentMemAllocator;
@@ -39,21 +52,6 @@ void init() {
 	}
 
 }
-
-int main(int argc, char** argv) {
-	init();
-#include "../FBXFileLoader.h"
-#include "../ImGuiCustomWindow.h"
-#include <fmod/core/fmod.hpp>
-#include <fmod/core/fmod_errors.h>
-
-#include "AudioManager.h"
-
-
-//#include "Shader.h"
-#include "Renderer.h"
-#include "RenderableComp.h"
-
 
 unsigned int winWidth = 1300 , winHeight = 1000;
 
@@ -122,14 +120,8 @@ void init_imgui(GLFWwindow *win) {
 
 Renderer* init_renderer(Camera* camera) {
 	// ------------------------------ Set up of the render --------------------------
-	
-	
-	
-
 	// Create Renderer
 	Renderer* renderer = new Renderer(winWidth, winHeight, camera);
-
-
 
 	// Add objects to Renderer
 	//renderer->addObject(obj);
@@ -144,12 +136,9 @@ Renderer* init_renderer(Camera* camera) {
 }
 
 int main(int argc, char** argv) {
-	
-	
-
-
 	// Initialize GLFW
 	GLFWwindow* win = initialize_window();
+
 	bool should_close = false;
 	glClearColor(0.2f, 0.6f, 0.5f, 1.0f);
 
@@ -160,7 +149,6 @@ int main(int argc, char** argv) {
 	AudioManager* audioManager = init_audio(audioFilePath);
 
 	init_imgui(win);
-	
 
 
 	ImGuiCustomWindow* customWindow = new ImGuiCustomWindow();
