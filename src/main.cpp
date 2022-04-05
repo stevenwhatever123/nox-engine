@@ -23,15 +23,237 @@
 
 #include "AudioManager.h"
 
-
 //#include "Shader.h"
 #include "Renderer.h"
 #include "RenderableComp.h"
 
-
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
 using NoxEngine::PermanentMemAllocator;
+using NoxEngine::AudioManager;
+using NoxEngine::Renderer;
+using NoxEngine::Camera;
+
+struct AudioSource {
+	std::string name;
+	std::string file;
+	glm::vec3 position;
+	f32 sourceVolume;
+};
+
+typedef std::map<std::string, AudioSource> AudioRepo;
+
+struct GameState {
+	AudioRepo audioSources;
+};
+
+
+class GameManager {
+	public: 
+	void init() {
+		Logger::debug("Initing systems");
+		init_window();
+		init_audio();
+		init_camera();
+		init_renderer();
+		init_imgui();
+	}
+
+
+	GameManager(u32 width, u32 height, std::string title) : win_width(width), win_height(height), title(title) {}
+
+
+	void update() {
+
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		update_inputs();
+		update_gui();
+		// update_audio();
+		// update_renderer();
+
+
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)) {
+			should_close = true;
+		}
+
+
+		glfwSwapBuffers(window);
+
+	}
+
+	void addAudioSource(AudioSource audioSource) {
+
+		// TODO(sharo): handle duplicates better
+		game_state.audioSources.emplace(audioSource.name, audioSource);
+		audioManager->LoadSound(audioSource.file);
+
+	}
+
+	inline Renderer* GetRenderer() { return renderer; };
+
+	i8 KeepRunning() { return !should_close; }
+
+	u32 win_height;
+	u32 win_width;
+	i8 should_close;
+
+	private:
+
+	void init_window() {
+
+		Logger::debug("Initializing Window");
+
+		if (!glfwInit()) {
+			std::cout << "Error initializing glfw...exiting.";
+			exit(1);
+		}
+
+
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+		window = glfwCreateWindow(win_width, win_height, title.c_str(), nullptr, nullptr);
+
+		glfwMakeContextCurrent(window);
+
+
+		if (window == nullptr) {
+			std::cout << "Failed to create window" << std::endl;
+			exit(1);
+		}
+
+		glewExperimental = GL_TRUE;
+		if (glewInit() != GLEW_OK) {
+			std::cout << " Error Initializing Glew" << std::endl;
+			exit(1);
+		}
+
+	}
+
+	void init_audio() {
+		// Initialize audio system
+
+		 audioManager = AudioManager::Instance();
+
+		// TODO: Change to singleton
+		audioManager->Init();
+
+		// Set listener. TODO: Move this inside the engine loop
+		audioManager->Set3dListenerAttributes(
+				{ 0.0f, 0.0f, 0.0f },		// Position
+				{ 0.0f, 0.0f, 0.0f },		// velocity (TODO: calculate)
+				{ 0.0f, 0.0f, 1.0f },		// Forward
+				{ 0.0f, 1.0f, 0.0f }		// Up
+				);
+
+	}
+
+	void update_gui() {
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::PushFont(font);
+
+		ImGui::Begin("Audio Sources");
+
+		auto startItr = game_state.audioSources.begin();
+		auto endItr = game_state.audioSources.end();
+
+		static bool show_demo_window = true;
+
+		if(ImGui::TreeNode("Audios")) {
+
+			while(startItr != endItr) {
+				AudioSource *audio_source = &startItr->second;
+				if(ImGui::TreeNode(audio_source->name.c_str())) {
+					ImGui::Text("File Name: %s", audio_source->file.c_str());
+					if(ImGui::TreeNode("Position")) {
+						ImGui::Text("Hello World");
+						ImGui::SliderFloat3("m", &audio_source->position[0], 0.0f, 10.0f);
+
+						ImGui::TreePop();
+					}
+
+					ImGui::SliderFloat("Volume: ", &audio_source->sourceVolume, -20.0f, 2.0f, "Volume (dB) = %.3f");
+
+					ImGui::TreePop();
+				}
+
+				startItr++;
+			}
+
+			ImGui::TreePop();
+		}
+
+
+		
+		ImGui::End();
+
+		if (show_demo_window)
+			ImGui::ShowDemoWindow(&show_demo_window);
+
+		ImGui::PopFont();
+		ImGui::Render();
+
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		
+	}
+
+	void init_camera() {
+		camera = new Camera(glm::vec3(0.0f, 10.0f, 200.0f));
+	}
+
+	void init_renderer() { 
+		// ------------------------------ Set up of the render --------------------------
+		// Create Renderer
+		// renderer = new Renderer(win_width, win_height, camera);
+		// Prep renderers buffers after setting uo objs
+
+	}
+
+	void init_imgui() {
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+
+		ImGuiIO& io = ImGui::GetIO();
+
+		font = io.Fonts->AddFontFromFileTTF("envy.ttf", 24);
+		io.Fonts->Build();
+
+		ImGui::StyleColorsDark();
+
+		ImGui_ImplGlfw_InitForOther(window, true);
+		ImGui_ImplOpenGL3_Init("#version 450");
+	}
+
+	void update_audio() {
+	}
+
+	void update_inputs() {
+		glfwPollEvents();
+	}
+
+	void update_renderer() {
+		renderer->updateBuffers();
+		renderer->setFrameBufferToTexture();
+	}
+
+	// Window
+	GLFWwindow *window;
+	std::string title;
+	u8 keys[256];
+
+	// Audio
+	AudioManager* audioManager;
+	Renderer* renderer;
+	Camera* camera;
+	GameState game_state;
+	ImFont* font;
+
+};
 
 
 void init() {
@@ -50,130 +272,41 @@ void init() {
 	for(i32 i = 0; i < allocation_count; i++) {
 		Logger::debug("Allocation %d: ptr: %p - size: %lld", i, allocations[i].ptr, allocations[i].size);
 	}
-
 }
 
-unsigned int winWidth = 1300 , winHeight = 1000;
-
-GLFWwindow* initialize_window() {
-	if (!glfwInit()) {
-		std::cout << "Error initializing glfw...exiting.";
-		exit(1);
-	}
-	
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	
-	GLFWwindow* win = glfwCreateWindow(winWidth, winHeight, "Nox Engine", nullptr, nullptr);
-
-	glfwMakeContextCurrent(win);
-	
-	if (win == nullptr) {
-		std::cout << "Failed to create window" << std::endl;
-		exit(1);
-	}
-
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		std::cout << " Error Initializing Glew" << std::endl;
-		exit(1);
-	}
-
-	return win;
-}
-
-
-AudioManager* init_audio(std::string audioFilePath) {
-	// Initialize audio system
-	// TODO: Change to singleton
-	AudioManager* audioManager = new AudioManager();
-	audioManager->Init();
-
-	// Set listener. TODO: Move this inside the engine loop
-	audioManager->Set3dListenerAttributes(
-			{ 0.0f, 0.0f, 0.0f },		// Position
-			{ 0.0f, 0.0f, 0.0f },		// velocity (TODO: calculate)
-			{ 0.0f, 0.0f, 1.0f },		// Forward
-			{ 0.0f, 1.0f, 0.0f }		// Up
-			);
-
-	// Load an audio file
-	
-	audioManager->LoadSound(audioFilePath, true);
-
-	return audioManager;
-}
-
-
-void init_imgui(GLFWwindow *win) {
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-
-	ImGuiIO& io = ImGui::GetIO();
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOther(win, true);
-	ImGui_ImplOpenGL3_Init("#version 450");
-}
-
-Renderer* init_renderer(Camera* camera) {
-	// ------------------------------ Set up of the render --------------------------
-	// Create Renderer
-	Renderer* renderer = new Renderer(winWidth, winHeight, camera);
-
-	// Add objects to Renderer
-	//renderer->addObject(obj);
-	//renderer->addObject(obj2);
-	//renderer->addObject(obj3);
-
-	// Prep renderers buffers after setting uo objs
-	//renderer->updateBuffers();
-	renderer->setFrameBufferToTexture();
-
-	return renderer;
-}
 
 int main(int argc, char** argv) {
 	// Initialize GLFW
-	GLFWwindow* win = initialize_window();
 
-	bool should_close = false;
+	GameManager gm(1280, 720, "Nox Engine");
+	gm.init();
+
 	glClearColor(0.2f, 0.6f, 0.5f, 1.0f);
 
-	bool open_demo = true;
-	glewInit();
-	
 	std::string audioFilePath = "assets/bgm.ogg";
-	AudioManager* audioManager = init_audio(audioFilePath);
-
-	init_imgui(win);
-
-
-	ImGuiCustomWindow* customWindow = new ImGuiCustomWindow();
-
-	Mesh* mesh = NULL;
-	bool isAlreadyLoaded = false;
 
 	// Used to detect change in window size
-	int locWidth = winWidth, locHeight = winHeight, prevWidth = winWidth, prevHeight = winHeight;
+	i32 locWidth = gm.win_width;
+	i32 locHeight = gm.win_height;
+	i32 prevWidth = locWidth;
+	i32 prevHeight = locHeight;
 
 	// Create Renderable Objects
 	RenderableComp* obj = new RenderableComp(0.0f, 0.0f, 0.0f, "textures/Solid_white.png");
 	RenderableComp* obj2 = new RenderableComp(3.0f, 0.0f, 2.0f, "textures/Red.png");
 	RenderableComp* obj3 = new RenderableComp(-3.0f, 0.0f, -2.0f, "textures/beije.png");
-	
-	// Create Camera
-	Camera* camera = new Camera(glm::vec3(0.0f, 10.0f, 200.0f));
 
-	Renderer* renderer = init_renderer(camera);
+	gm.addAudioSource(AudioSource{"TestAudio", "./assets/bgm.ogg", glm::vec3(0, 0, 0), 10});
+	gm.addAudioSource(AudioSource{"TestAudio", "./assets/bgm.ogg", glm::vec3(0, 0, 0), 10});
+	gm.addAudioSource(AudioSource{"TestAudio", "./assets/bgm.ogg", glm::vec3(0, 0, 0), 10});
 
-	while (!should_close) {
-		
-		glfwPollEvents();
+	while(gm.KeepRunning()) {
 
-		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(win)) {
+		gm.update();
+
+	}
+
+#if 0
 			should_close = true;
 		}
 
@@ -186,18 +319,10 @@ int main(int argc, char** argv) {
 		audioManager->Update();		// choppy audio sometimes for some reason?
 
 		// GUI
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
+		
 		// Sliders to control the 3D sound position
-		static float soundX = 0.0f, soundY = 0.0f, soundZ = 0.0f;
-		static float soundVolume = 0.0f;
-		ImGui::SliderFloat("Sound X", &soundX, -1.0f, 1.0f, "X = %.3f");
-		ImGui::SliderFloat("Sound Y", &soundY, -1.0f, 1.0f, "Y = %.3f");
-		ImGui::SliderFloat("Sound Z", &soundZ, -1.0f, 1.0f, "Z = %.3f");
-		ImGui::SliderFloat("Sound Volume", &soundVolume, -20.0f, 2.0f, "Volume (dB) = %.3f");
-
+		
+		
 		// Update systems with UI values
 		audioManager->SetChannel3dPosition(0, {soundX, soundY, soundZ});
 		audioManager->SetChannelVolume(0, soundVolume);
@@ -316,5 +441,6 @@ int main(int argc, char** argv) {
 	audioManager->Destroy();
 	delete obj, obj2, obj3, camera, renderer;
 
+#endif
 	return 0;
 }

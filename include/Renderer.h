@@ -15,128 +15,124 @@
 #include "IRenderable.h"
 #include "Camera.h"
 #include "Shader.h"
+#include "Singleton.h"
 
-/*
- * A class that renders 3D using OpenGL
- * */
-class Renderer
-{
-private:
+namespace NoxEngine {
 
-    // The shaders
-    Shader *shader;
-
-    int w, h; // Width and Height of the window/texture to render to
-    glm::mat4 projection; // The matrix used for projection
-    glm::mat4 cam; // The matrix used for camera
-
-    // The cur camera
-    Camera* camera;
+	// The objects to render
+	struct RendObj
+	{
+		IRenderable* objPtr; // A pointer to the object
+		i32 startInd, endInd; // Start and end indixes in the a united element array 
+		GLuint normalTexture, ambientTexture; // Texture handlers
+	};
 
 
+	/*
+	 * A class that renders 3D using OpenGL
+	 * */
+	class Renderer : public Singleton<Renderer> {
 
-    // The objects to render
-    struct RendObj
-    {
-        IRenderable* objPtr; // A pointer to the object
-        int startInd, endInd; // Start and end indixes in the a united element array 
-        GLuint normalTexture, ambientTexture; // Texture handlers
-    };
+		friend class Singleton<Renderer>;
 
-    std::vector<RendObj> objects;
+		private:
+		// The shaders
+		Shader *shader;
 
+		i32 w;
+		i32 h; // Width and Height of the window/texture to render to
+		glm::mat4 projection; // The matrix used for projection
+		glm::mat4 cam; // The matrix used for camera
 
-    
-    // Global buffers of attributes
-    GLuint VBO, NBO, TCBO, VAO, EBO;
-
-    int numberOfVertices, numberOfNormals, numberOfElements,  numOfTexCoords;
-
-    std::vector<GLfloat> vertices;
-    std::vector<GLfloat> normals;
-    std::vector<GLfloat> texCoords;
-    std::vector<GLint> elements;
+		// The cur camera
+		Camera* camera;
+		std::vector<RendObj> objects;
 
 
-    // Buffer and texture to render to.
-    GLuint textureToRenderTo, tex;
-    GLuint FBO;
-    GLuint curFBO = 0;
+		// Global buffers of attributes
+		GLuint VBO;
+		GLuint NBO;
+		GLuint TCBO;
+		GLuint VAO;
+		GLuint EBO;
+
+		int numberOfVertices, numberOfNormals, numberOfElements,  numOfTexCoords;
+
+		std::vector<GLfloat> vertices;
+		std::vector<GLfloat> normals;
+		std::vector<GLfloat> texCoords;
+		std::vector<GLint> elements;
+
+		// Buffer and texture to render to.
+		GLuint textureToRenderTo, tex;
+		GLuint FBO;
+		GLuint curFBO = 0;
+
+		glm::vec3 color;
+
+		// Create Arrays of data
+		void createVertexArray(IRenderable* mesh);
+		void createNormalsArray(IRenderable* mesh);
+		void createTexCoordArray(IRenderable* mesh);
+		void createElementArray(IRenderable* mesh);
+
+		void setUpShader();
+
+		GLuint setTexture(const char* texturePath, const char* uniName, int num);
+
+		public:
+
+		/*
+		 * Constructor.
+		 * param:
+		 *        width - the width of the window to render to
+		 *        height - the height of the window to render to
+		 *        type - the type of promitive this renderer handles.
+		 *        camera - a camera to render from
+		 */
+		Renderer(int width, int height, Camera* camera);
+
+		~Renderer();
+
+		// Add object to renderer to render
+		void addObject(IRenderable *mesh);
+
+		void updateBuffers();
 
 
-    glm::vec3 color;
-
-
-
-    // Create Arrays of data
-    void createVertexArray(IRenderable* mesh);
-    void createNormalsArray(IRenderable* mesh);
-    void createTexCoordArray(IRenderable* mesh);
-
-    void createElementArray(IRenderable* mesh);
-
-
-
-    void setUpShader();
-
-    GLuint setTexture(const char* texturePath, const char* uniName, int num);
-
-
-
-
-
-public:
-
-    /*
-     * Constructor.
-     * param:
-     *        width - the width of the window to render to
-     *        height - the height of the window to render to
-     *        type - the type of promitive this renderer handles.
-     *        camera - a camera to render from
-    */
-    Renderer(int width, int height, Camera* camera);
-
-    ~Renderer();
-
-    // Add object to renderer to render
-    void addObject(IRenderable *mesh);
-
-    void updateBuffers();
-
-
-    // Draw functions
-    void draw();
-    void fillBackground(float r, float g, float b);
+		// Draw functions
+		void draw();
+		void fillBackground(float r, float g, float b);
 
 
 
-    // Get the texture the renderer rendered to
-    GLuint getTexture() { return textureToRenderTo; }
+		// Get the texture the renderer rendered to
+		GLuint getTexture() { return textureToRenderTo; }
 
 
-    // Functions updating parts of the shaders
+		// Functions updating parts of the shaders
 
-    //void updateLocalTransf(int frame_index);
+		//void updateLocalTransf(int frame_index);
 
-    void updateProjection(int w, int h);
+		void updateProjection(int w, int h);
 
-    inline void setFrameBufferToDefault() { curFBO = 0; }
-    inline void setFrameBufferToTexture() { curFBO = FBO; }
-
-
-    glm::mat4 getProjMatr() { return projection; }
-
-    glm::mat4 getCameraMatr() { return camera->getCameraTransf(); }
+		inline void setFrameBufferToDefault() { curFBO = 0; }
+		inline void setFrameBufferToTexture() { curFBO = FBO; }
 
 
+		glm::mat4 getProjMatr() { return projection; }
 
-    // Camera managment
-    // Updates Camera with new camera
-    void updateCamera(Camera* camera);
-
-    // Updates the view transformation using the current camera
-    void updateCamera();
+		glm::mat4 getCameraMatr() { return camera->getCameraTransf(); }
 
 
-};
+
+		// Camera managment
+		// Updates Camera with new camera
+		void updateCamera(Camera* camera);
+
+		// Updates the view transformation using the current camera
+		void updateCamera();
+
+
+	};
+}

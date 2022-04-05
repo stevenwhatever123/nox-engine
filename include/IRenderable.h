@@ -11,6 +11,7 @@
 #pragma once
 
 #include <vector>
+#include <Types.h>
 
 class IRenderable
 {
@@ -18,58 +19,35 @@ public:
 
     // Functions that are taken by the Renderer to render
     // !!! Do not simply return containers. Preps them for renderer
-    virtual int getNumOfVertices() = 0;
-    virtual int getNumOfTexCoord() = 0;
-    virtual int getNumOfNormals() = 0;
+    virtual i32 getNumOfVertices() = 0;
+    virtual i32 getNumOfTexCoord() = 0;
+    virtual i32 getNumOfNormals() = 0;
 
-    virtual float* getArrayOfVertices() = 0;
-    virtual float* getArrayOfTexCoord() = 0;
-    virtual float* getArrayOfNormals() = 0;
+    virtual f32* getArrayOfVertices() = 0;
+    virtual f32* getArrayOfTexCoord() = 0;
+    virtual f32* getArrayOfNormals() = 0;
 
-    virtual int getNumOfElements() = 0;
-    virtual int* getArrayOfElements() = 0;
-
+    virtual i32 getNumOfElements() = 0;
+    virtual i32* getArrayOfElements() = 0;
 
     virtual const char* getNormalTexture() = 0;
     virtual const char* getAmbientTexture() = 0;
 
-
-
-
-    //virtual int getNumOfFacesV() = 0;
-    //virtual int getNumOfFacesT() = 0;
-    //virtual int getNumOfFacesN() = 0;
-
-    //virtual const int* getArrayOfFacesV() = 0;
-    //virtual const int* getArrayOfFacesT() = 0;
-    //virtual const int* getArrayOfFacesN() = 0;
-
-
-
-
-
-
-
-    //virtual float* getAnimationMatrices(int frame_index) = 0; // Probably will be separated into its own animation part
-
-
     // Stores initial attributes without dublicates
-    std::vector<float> verticesPreped;
-    std::vector<float> texCoordPreped;
-    std::vector<float> normalsPreped;
+    std::vector<f32> verticesPreped;
+    std::vector<f32> texCoordPreped;
+    std::vector<f32> normalsPreped;
 
-    std::vector<int> elements;
-    std::vector<int> facesV;
-    std::vector<int> facesT;
-    std::vector<int> facesN;
+    std::vector<i32> elements;
+    std::vector<i32> facesV;
+    std::vector<i32> facesT;
+    std::vector<i32> facesN;
 
-    //std::vector<float> curMatrices; // Animation matrices
-    //std::vector<float> curVertices; // Vertice Positions after Animation Matrices application
-
-
+    //std::vector<f32> curMatrices; // Animation matrices
+    //std::vector<f32> curVertices; // Vertice Positions after Animation Matrices application
 
 
-    float color[3] = { 0.2f, 0.7f, 0.5f }; // Color
+    f32 color[3] = { 0.2f, 0.7f, 0.5f }; // Color
     bool prim_type = 0; // If 0 - triangles, 1 - lines
     bool renderAsDots = 0; // 0 - if not, 1 - if yes
 
