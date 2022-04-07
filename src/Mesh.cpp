@@ -174,30 +174,38 @@ void Mesh::update()
 	}
 }
 
-void Mesh::update(float dt)
+void Mesh::update(time_type dt)
 {
-	timer += dt;
-
 	if (nodeAnimTransformation.size() > 0)
 	{
+		accumulator += dt;
+
 		if (frameIndex < nodeAnimTransformation[animationIndex][0].size() - 1)
 		{
 			// Interpolate time into tick
 			// Because 0 is the idle animation that every object shares
 			// even when it does not have any animation data
-			int tickPerSec = animations[animationIndex + 1]->mTicksPerSecond;
 			int numTicks = animations[animationIndex + 1]
 				->mChannels[0]->mNumPositionKeys;
-			float animationDuration = numTicks
+			time_type animationDuration = numTicks
 				/ animations[animationIndex + 1]->mTicksPerSecond;
 
-			whichTick = ((timer / animationDuration) * numTicks);
-			whichTickFloat = ((timer / animationDuration) * numTicks) >= numTicks?
-				numTicks - 1: ((timer / animationDuration) * numTicks);
-			whichTickFloor = floor(whichTickFloat);
-			whichTickCeil = ceil(whichTickFloat);
+			timeStep = animationDuration / numTicks;
 
-			frameIndex = whichTick >= numTicks ? numTicks - 1 : whichTick;
+			while (accumulator >= timeStep)
+			{
+				if(frameIndex < numTicks - 1)
+					frameIndex++;
+
+				accumulator -= timeStep;
+			}
+
+			// Remaining accumulated time
+			const time_type alpha = accumulator / timeStep;
+			frameIndex = frameIndex * alpha + frameIndex * (1.0 - alpha);
+
+			whichTickFloor = frameIndex;
+			whichTickCeil = frameIndex < numTicks - 1? whichTickFloor + 1: frameIndex;
 		}
 	}
 }
@@ -271,8 +279,7 @@ void Mesh::prepForRenderer()
 						== nodeAnimations[animationIndex][j]->mNodeName.C_Str())
 					{
 						// Interpolate between two keyframe
-						float ratio = whichTickFloat
-							/ (whichTickFloor + whichTickCeil);
+						float ratio = accumulator / timeStep;
 
 						glm::mat4 matrixFloor
 							= nodeAnimTransformation[animationIndex][j][whichTickFloor];

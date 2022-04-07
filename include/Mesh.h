@@ -10,6 +10,7 @@
 #include <assimp/scene.h>
 #undef NOMINMAX
 
+typedef double time_type;
 
 class Mesh : public IRenderable
 {
@@ -29,7 +30,7 @@ public:
 	void printAllMeshNodes();
 
 	void update();
-	void update(float dt);
+	void update(time_type dt);
 
 	void prepForRenderer();
 
@@ -38,9 +39,9 @@ public:
 	unsigned int frameIndex = 0;
 	unsigned int animationIndex = 0;
 
-	float timer = 0;
-	int whichTick = 0;
-	float whichTickFloat = 0;
+	time_type accumulator = 0.0f;
+	time_type timeStep = 0.0f;
+
 	int whichTickFloor = 0;
 	int whichTickCeil = 0;
 

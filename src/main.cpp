@@ -25,6 +25,7 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+typedef double time_type;
 
 unsigned int winWidth = 1300 , winHeight = 1000;
 
@@ -132,9 +133,9 @@ int main(int argc, char** argv) {
 
 	init_imgui(win);
 	
-	float currentFrame = glfwGetTime();
-	float lastFrame = currentFrame;
-	float deltaTime = 0;
+	time_type currentFrame = glfwGetTime();
+	time_type lastFrame = currentFrame;
+	time_type deltaTime = 0;
 
 	ImGuiCustomWindow* customWindow = new ImGuiCustomWindow();
 
@@ -259,13 +260,14 @@ int main(int argc, char** argv) {
 		if (isAlreadyLoaded){
 			// Add mesh to renderer
 			renderer->clearObject();
+			mesh->verticesPreped.clear();
+
 			mesh->prepForRenderer();
 			renderer->addObject(mesh);
 			renderer->updateBuffers();
 			//isAlreadyLoaded = false;
 
 			mesh->update(deltaTime);
-			mesh->verticesPreped.clear();
 		}
 
 
