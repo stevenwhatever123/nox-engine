@@ -216,6 +216,9 @@ void Mesh::prepForRenderer()
 	std::vector<std::vector<glm::vec3>> mVertices;
 	mVertices.resize(vertices.size());
 
+	std::vector<std::vector<glm::vec3>> mNormals;
+	mNormals.resize(normals.size());
+
 	// Apply transformation from nodes
 	//for (unsigned int i = 0; i < allNodes.size(); i++)
 	//{
@@ -247,6 +250,7 @@ void Mesh::prepForRenderer()
 		unsigned int meshIndex = allNodes[i]->meshIndex;
 
 		mVertices[meshIndex].resize(vertices[meshIndex].size());
+		mNormals[meshIndex].resize(normals[meshIndex].size());
 
 		if (animations.size() < 1)
 		{
@@ -257,6 +261,8 @@ void Mesh::prepForRenderer()
 					std::cout << glm::to_string(allNodes[i]->transformation) << "\n";
 					mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
 						glm::vec4(vertices[meshIndex][j], 1.0));
+					mNormals[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+						glm::vec4(normals[meshIndex][j], 1.0));
 				}
 			}
 		}
@@ -301,6 +307,9 @@ void Mesh::prepForRenderer()
 				{
 					mVertices[meshIndex][j] = glm::vec3(transformation *
 						glm::vec4(vertices[meshIndex][j], 1.0));
+
+					mNormals[meshIndex][j] = glm::vec3(transformation *
+						glm::vec4(normals[meshIndex][j], 1.0));
 				}
 			}
 		}
@@ -320,19 +329,31 @@ void Mesh::prepForRenderer()
 		}
 	}
 
-	for (unsigned int i = 0; i < normals[0].size(); i++)
+	for (unsigned int i = 0; i < mNormals.size(); i++)
 	{
-		normalsPreped.push_back(normals[0][i].x); normalsPreped.push_back(normals[0][i].y); normalsPreped.push_back(normals[0][i].z);
+		//normalsPreped.push_back(normals[0][i].x); normalsPreped.push_back(normals[0][i].y); normalsPreped.push_back(normals[0][i].z);
+		for (unsigned int j = 0; j < mNormals[i].size(); j++)
+		{
+			normalsPreped.push_back(mNormals[i][j].x); normalsPreped.push_back(mNormals[i][j].y); normalsPreped.push_back(mNormals[i][j].z);
+		}
 	}
 
-	for (unsigned int i = 0; i < texCoord[0].size(); i++)
+	for (unsigned int i = 0; i < texCoord.size(); i++)
 	{
-		texCoordPreped.push_back(texCoord[0][i].x); texCoordPreped.push_back(texCoord[0][i].y);
+		//texCoordPreped.push_back(texCoord[0][i].x); texCoordPreped.push_back(texCoord[0][i].y);
+		for (unsigned int j = 0; j < texCoord[i].size(); j++)
+		{
+			texCoordPreped.push_back(texCoord[i][j].x); texCoordPreped.push_back(texCoord[i][j].y);
+		}
 	}
 
 
-	for (unsigned int i = 0; i < faceIndices[0].size(); i++)
+	for (unsigned int i = 0; i < faceIndices.size(); i++)
 	{
-		elements.push_back((int)(faceIndices[0][i]));
+		//elements.push_back((int)(faceIndices[0][i]));
+		for (unsigned int j = 0; j < faceIndices[i].size(); j++)
+		{
+			elements.push_back((int)(faceIndices[i][j]));
+		}
 	}
 }
