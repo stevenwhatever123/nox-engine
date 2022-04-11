@@ -270,7 +270,6 @@ int main(int argc, char** argv) {
 			mesh->update(deltaTime);
 		}
 
-
 		//	Render to texture	
 		if (locWidth != prevWidth || locHeight != prevHeight)
 		{

@@ -254,63 +254,119 @@ void Mesh::prepForRenderer()
 
 		if (animations.size() < 1)
 		{
-			if (!allNodes[i]->hasMesh)
+			//if (!allNodes[i]->hasMesh)
+			//{
+			//	for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+			//	{
+			//		std::cout << glm::to_string(allNodes[i]->transformation) << "\n";
+			//		mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+			//			glm::vec4(vertices[meshIndex][j], 1.0));
+			//		mNormals[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+			//			glm::vec4(normals[meshIndex][j], 1.0));
+			//	}
+			//}
+			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
 			{
-				for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
-				{
-					std::cout << glm::to_string(allNodes[i]->transformation) << "\n";
-					mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-						glm::vec4(vertices[meshIndex][j], 1.0));
-					mNormals[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-						glm::vec4(normals[meshIndex][j], 1.0));
-				}
+				//std::cout << glm::to_string(allNodes[i]->transformation) << "\n";
+				mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+					glm::vec4(vertices[meshIndex][j], 1.0));
+				mNormals[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+					glm::vec4(normals[meshIndex][j], 1.0));
 			}
 		}
 		else
 		{
-			if (allNodes[i]->hasMesh)
+			// Some node names are not matching
+			// TODO: FIX IT LATER
+			//if (allNodes[i]->hasMesh)
+			//{
+			//	// Loop node
+			//	glm::mat4 transformation(1);
+			//	for (unsigned int j = 0;
+			//		j < nodeAnimations[animationIndex].size();
+			//		j++)
+			//	{
+			//		if (allNodes[i]->name
+			//			== nodeAnimations[animationIndex][j]->mNodeName.C_Str())
+			//		{
+			//			std::cout << "Name: " << allNodes[i]->name << "\n";
+
+			//			std::cout << nodeAnimations[animationIndex][j]
+			//				->mNodeName.C_Str() << "\n";
+
+			//			// Interpolate between two keyframe
+			//			float ratio = accumulator / timeStep;
+
+			//			glm::mat4 matrixFloor
+			//				= nodeAnimTransformation[animationIndex][j][whichTickFloor];
+
+			//			glm::mat4 matrixCeil
+			//				= nodeAnimTransformation[animationIndex][j][whichTickCeil];
+
+			//			//transformation
+			//				//= nodeAnimTransformation[animationIndex][j][frameIndex];
+
+			//			// Linear interpolation
+			//			transformation
+			//				= (matrixFloor * ratio) + ((1 - ratio) * matrixCeil);
+
+			//			break;
+			//		}
+			//	}
+			//	// Apply Transformation to all vertices of the mesh
+			//	for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+			//	{
+			//		mVertices[meshIndex][j] = glm::vec3(transformation *
+			//			glm::vec4(vertices[meshIndex][j], 1.0));
+
+			//		mNormals[meshIndex][j] = glm::vec3(transformation *
+			//			glm::vec4(normals[meshIndex][j], 1.0));
+			//	}
+			//}
+
+
+			// Loop node
+			glm::mat4 transformation = allNodes[i]->transformation;
+			for (unsigned int j = 0;
+				j < nodeAnimations[animationIndex].size();
+				j++)
 			{
-				// Loop node
-				glm::mat4 transformation(1);
-				for (unsigned int j = 0;
-					j < nodeAnimations[animationIndex].size();
-					j++)
+				if (allNodes[i]->name
+					== nodeAnimations[animationIndex][j]->mNodeName.C_Str())
 				{
 					std::cout << "Name: " << allNodes[i]->name << "\n";
 
 					std::cout << nodeAnimations[animationIndex][j]
 						->mNodeName.C_Str() << "\n";
 
-					if (allNodes[i]->name
-						== nodeAnimations[animationIndex][j]->mNodeName.C_Str())
-					{
-						// Interpolate between two keyframe
-						float ratio = accumulator / timeStep;
+					// Interpolate between two keyframe
+					float ratio = accumulator / timeStep;
 
-						glm::mat4 matrixFloor
-							= nodeAnimTransformation[animationIndex][j][whichTickFloor];
+					glm::mat4 matrixFloor
+						= nodeAnimTransformation[animationIndex][j][whichTickFloor];
 
-						glm::mat4 matrixCeil
-							= nodeAnimTransformation[animationIndex][j][whichTickCeil];
+					glm::mat4 matrixCeil
+						= nodeAnimTransformation[animationIndex][j][whichTickCeil];
 
-						//transformation
-							//= nodeAnimTransformation[animationIndex][j][frameIndex];
+					//transformation
+						//= nodeAnimTransformation[animationIndex][j][frameIndex];
 
-						// Linear interpolation
-						transformation
-							= (matrixFloor * ratio) + ((1 - ratio) * matrixCeil);
-					}
+					// Linear interpolation
+					transformation
+						= (matrixFloor * ratio) + ((1 - ratio) * matrixCeil);
+
+					break;
 				}
+			}
 
-				// Apply Transformation to all vertices of the mesh
-				for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
-				{
-					mVertices[meshIndex][j] = glm::vec3(transformation *
-						glm::vec4(vertices[meshIndex][j], 1.0));
+			// Apply Transformation to all vertices of the mesh
+			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+			{
+				mVertices[meshIndex][j] = glm::vec3(transformation *
+					glm::vec4(vertices[meshIndex][j], 1.0));
 
-					mNormals[meshIndex][j] = glm::vec3(transformation *
-						glm::vec4(normals[meshIndex][j], 1.0));
-				}
+				mNormals[meshIndex][j] = glm::vec3(transformation *
+					glm::vec4(normals[meshIndex][j], 1.0));
 			}
 		}
 	}
