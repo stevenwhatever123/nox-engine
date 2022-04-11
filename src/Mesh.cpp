@@ -334,10 +334,10 @@ void Mesh::prepForRenderer()
 				if (allNodes[i]->name
 					== nodeAnimations[animationIndex][j]->mNodeName.C_Str())
 				{
-					std::cout << "Name: " << allNodes[i]->name << "\n";
+					//std::cout << "Name: " << allNodes[i]->name << "\n";
 
-					std::cout << nodeAnimations[animationIndex][j]
-						->mNodeName.C_Str() << "\n";
+					//std::cout << nodeAnimations[animationIndex][j]
+					//	->mNodeName.C_Str() << "\n";
 
 					// Interpolate between two keyframe
 					float ratio = accumulator / timeStep;
@@ -379,6 +379,7 @@ void Mesh::prepForRenderer()
 
 	for (unsigned int i = 0; i < mVertices.size(); i++)
 	{
+		//verticesPreped.push_back(mVertices[0][i].x); verticesPreped.push_back(mVertices[0][i].y); verticesPreped.push_back(mVertices[0][i].z);
 		for (unsigned int j = 0; j < mVertices[i].size(); j++)
 		{
 			verticesPreped.push_back(mVertices[i][j].x); verticesPreped.push_back(mVertices[i][j].y); verticesPreped.push_back(mVertices[i][j].z);

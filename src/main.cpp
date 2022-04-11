@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
 	RenderableComp* obj3 = new RenderableComp(-3.0f, 0.0f, -2.0f, "textures/beije.png");
 	
 	// Create Camera
-	Camera* camera = new Camera(glm::vec3(0.0f, 10.0f, 200.0f));
+	Camera* camera = new Camera(glm::vec3(0.0f, 30.0f, 200.0f));
 
 	Renderer* renderer = init_renderer(camera);
 
@@ -265,10 +265,11 @@ int main(int argc, char** argv) {
 			mesh->prepForRenderer();
 			renderer->addObject(mesh);
 			renderer->updateBuffers();
-			//isAlreadyLoaded = false;
+			isAlreadyLoaded = false;
 
 			mesh->update(deltaTime);
 		}
+
 
 		//	Render to texture	
 		if (locWidth != prevWidth || locHeight != prevHeight)
