@@ -39,7 +39,9 @@ namespace FBXFileLoader
 				importer.ReadFile(filename,
 					aiProcess_Triangulate |
 					aiProcess_GenSmoothNormals |
-					aiProcess_FlipUVs |
+					//aiProcess_FlipUVs |
+					// Strange that some forums suggest including the above
+					// code when importing models exported from Blender
 					aiProcess_JoinIdenticalVertices | 
 					aiProcess_PreTransformVertices);
 
