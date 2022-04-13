@@ -125,7 +125,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <ExternalIncludePath>3rdParty\headers\;S:\Masters\COMP5530M Group Project\Work\code\NoxEngine\3rdParty\headers\freetype;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>3rdParty\headers\;3rdParty\headers\freetype;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>3rdParty\lib;$(LibraryPath)</LibraryPath>
     <IncludePath>$(ProjectDir)headers\;$(IncludePath)</IncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
