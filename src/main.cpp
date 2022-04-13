@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
 	RenderableComp* obj3 = new RenderableComp(-3.0f, 0.0f, -2.0f, "textures/beije.png");
 	
 	// Create Camera
-	Camera* camera = new Camera(glm::vec3(0.0f, 30.0f, 200.0f));
+	Camera* camera = new Camera(glm::vec3(0.0f, 20.0f, 140.0f));
 
 	Renderer* renderer = init_renderer(camera);
 
@@ -254,20 +254,64 @@ int main(int argc, char** argv) {
 			}
 		}
 
+		if (ImGui::Button("Flip UV"))
+		{
+			if (isAlreadyLoaded)
+			{
+				mesh->flipUV();
+			}
+		}
+
+		if (!playAnimation)
+		{
+			if (ImGui::Button("Play Animation"))
+			{
+				playAnimation = !playAnimation;
+			}
+		}
+		else
+		{
+			if (ImGui::Button("Stop Animation"))
+			{
+				playAnimation = !playAnimation;
+			}
+		}
+
+		if (isAlreadyLoaded)
+		{
+			std::string stringDisplay = "Animation Duration: " +
+				std::to_string((time_type) mesh->animationDuration[mesh->animationIndex]);
+			const char* c_stringDisplay = stringDisplay.c_str();
+			ImGui::Text(c_stringDisplay);
+
+			float sliderDuration = 0.0f;
+			sliderDuration = (float)mesh->animationDuration[mesh->animationIndex];
+
+			ImGui::SliderFloat("Custome Duration",
+				&sliderDuration, 1, 50, "%.3f");
+
+			mesh->animationDuration[mesh->animationIndex] =
+				(time_type)sliderDuration;
+		}
+
 		ImGui::End();
 
 		// If there was a mesh loaded by user
 		if (isAlreadyLoaded){
 			// Add mesh to renderer
+			//mesh->flipUV();
 			renderer->clearObject();
 			mesh->verticesPreped.clear();
 
 			mesh->prepForRenderer();
 			renderer->addObject(mesh);
 			renderer->updateBuffers();
-			isAlreadyLoaded = false;
+			//isAlreadyLoaded = false;
 
-			mesh->update(deltaTime);
+			if (playAnimation)
+			{
+				mesh->update(deltaTime);
+			}
 		}
 
 
