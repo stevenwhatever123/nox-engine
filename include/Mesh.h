@@ -32,6 +32,7 @@ public:
 	void update();
 	void update(time_type dt);
 
+	void flipUV();
 	void prepForRenderer();
 
 public:
@@ -65,6 +66,11 @@ public:
 	std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimRotationMatrices;
 	std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimScalingMatrices;
 
+	// Animation clip -> node -> numTicks
+	std::vector<int> numTicks;
+	// Animation clip -> duration
+	std::vector<time_type> animationDuration;
+
 
 	// Implementation of interface IRenderable
 
@@ -91,7 +97,7 @@ public:
 
 	const char* getAmbientTexture() { return texName;}
 
-	const char* texName = "textures/leaves_normal.jpg";
+	const char* texName = "textures/leaves_normal.png";
 
 private:
 

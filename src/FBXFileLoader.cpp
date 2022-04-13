@@ -39,7 +39,7 @@ namespace FBXFileLoader
 				importer.ReadFile(filename,
 					aiProcess_Triangulate |
 					aiProcess_GenSmoothNormals |
-					//aiProcess_FlipUVs |
+					aiProcess_FlipUVs |
 					// Strange that some forums suggest including the above
 					// code when importing models exported from Blender
 					aiProcess_JoinIdenticalVertices | 
@@ -291,6 +291,16 @@ namespace FBXFileLoader
 					}
 				}
 
+				// pre generate data for numer of ticks
+				mesh->numTicks[i] = pScene->mAnimations[i]->mChannels[0]
+					->mNumPositionKeys;
+
+				// Pre generate for animation duration
+				mesh->animationDuration[i] = mesh->numTicks[i]
+					/ pScene->mAnimations[i]->mTicksPerSecond;
+
+
+
 				// Printing it out just to make sure everything is correct
 				//for (unsigned int j = 0; j < pScene->mAnimations[i]->mNumChannels; j++)
 				//{
@@ -299,7 +309,10 @@ namespace FBXFileLoader
 				//		<< mesh->nodeAnimations[i][j]->mNumPositionKeys << "\n";;
 				//}
 			}
+
 		}
+		
+
 
 		// Node Hierarchy
 		MeshNode* rootNode = new MeshNode;

@@ -29,6 +29,9 @@ void Mesh::resizeNumOfAnimations(unsigned int i)
 	nodeAnimTranslationMatrices.resize(i);
 	nodeAnimRotationMatrices.resize(i);
 	nodeAnimScalingMatrices.resize(i);
+
+	numTicks.resize(i);
+	animationDuration.resize(i);
 }
 
 void Mesh::createNodeHierarchy(aiNode* aiRootnode, MeshNode* rootNode)
@@ -185,27 +188,36 @@ void Mesh::update(time_type dt)
 			// Interpolate time into tick
 			// Because 0 is the idle animation that every object shares
 			// even when it does not have any animation data
-			int numTicks = animations[animationIndex + 1]
-				->mChannels[0]->mNumPositionKeys;
-			time_type animationDuration = numTicks
-				/ animations[animationIndex + 1]->mTicksPerSecond;
+			int numOfTicks = numTicks[animationIndex];
+			time_type duration = animationDuration[animationIndex];
 
-			timeStep = animationDuration / numTicks;
+			timeStep = duration / numOfTicks;
 
 			while (accumulator >= timeStep)
 			{
-				if(frameIndex < numTicks - 1)
+				if(frameIndex < numOfTicks - 1)
 					frameIndex++;
 
 				accumulator -= timeStep;
 			}
 
 			// Remaining accumulated time
-			const time_type alpha = accumulator / timeStep;
-			frameIndex = frameIndex * alpha + frameIndex * (1.0 - alpha);
+			//const time_type alpha = accumulator / timeStep;
+			//frameIndex = frameIndex * alpha + frameIndex * (1.0 - alpha);
 
 			whichTickFloor = frameIndex;
-			whichTickCeil = frameIndex < numTicks - 1? whichTickFloor + 1: frameIndex;
+			whichTickCeil = frameIndex < numOfTicks - 1? whichTickFloor + 1: frameIndex;
+		}
+	}
+}
+
+void Mesh::flipUV()
+{
+	for (unsigned int i = 0; i < texCoord.size(); i++)
+	{
+		for (unsigned int j = 0; j < texCoord[i].size(); j++)
+		{
+			texCoord[i][j].y = 1 - texCoord[i][j].y;
 		}
 	}
 }
@@ -353,7 +365,7 @@ void Mesh::prepForRenderer()
 
 					// Linear interpolation
 					transformation
-						= (matrixFloor * ratio) + ((1 - ratio) * matrixCeil);
+						= (matrixCeil * ratio) + ((1.0f - ratio) * matrixFloor);
 
 					break;
 				}
