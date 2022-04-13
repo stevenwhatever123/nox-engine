@@ -1,11 +1,14 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include"Renderer.h"
+#include <Renderer.h>
+#include <Utils.h>
+using NoxEngineUtils::Logger;
 
 
-//TODO: update uniform submissions to use Shader class
-//TODO: fix drawing to default buffer
-//TODO: get some light going
-//TODO: material class
+// TODO: update uniform submissions to use Shader class
+// TODO: fix drawing to default buffer
+// TODO: get some light going
+// TODO: material class
+// TODO(sharo): debug context and messages
 
 namespace NoxEngine {
 
@@ -26,10 +29,7 @@ namespace NoxEngine {
 		glDeleteFramebuffers(1, &FBO);
 	}
 
-	Renderer::Renderer(int width, int height, Camera* cam) :
-		w(width),
-		h(height),
-		camera(cam) {
+	Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), camera(cam) {
 
 			// Initialise OpenGl
 
@@ -39,12 +39,8 @@ namespace NoxEngine {
 			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_CULL_FACE);
 
-			// Set up shader
-			setUpShader();
-
 			// Create framebuffer  
 			glGenFramebuffers(1, &FBO);
-
 			glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
 			// Gen texture for framebuffer    
@@ -58,6 +54,7 @@ namespace NoxEngine {
 
 			// Attach tex to framebuffer
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
+
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 				printf("Troubles with creating a framebuffer\n");
 			}
@@ -68,7 +65,6 @@ namespace NoxEngine {
 			glGenBuffers(1, &VBO);
 			glGenBuffers(1, &NBO);
 			glGenBuffers(1, &TCBO);
-
 			glGenBuffers(1, &EBO);
 		}
 
@@ -82,37 +78,29 @@ namespace NoxEngine {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, 3 * numberOfVertices * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
-		int positionAtr = shader->getAtrributeLocation("position");
+		int positionAtr = program->getAtrributeLocation("position");
 		glVertexAttribPointer(positionAtr, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 		glEnableVertexArrayAttrib(VAO, positionAtr);
-		std::cout << "VBO " << glGetError() << std::endl; fflush(NULL);
 
 		// Normal positions. At the moment uses textCoord because the normals are submitted with texture
 		glBindBuffer(GL_ARRAY_BUFFER, NBO);
 		glBufferData(GL_ARRAY_BUFFER, 2 * numOfTexCoords * sizeof(GLfloat), texCoords.data(), GL_STATIC_DRAW);
 
-		int normalAtr = shader->getAtrributeLocation("normal");
+		int normalAtr = program->getAtrributeLocation("normal");
 		glVertexAttribPointer(normalAtr, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 		glEnableVertexArrayAttrib(VAO, normalAtr);
-		std::cout << "NBO " << glGetError() << std::endl; fflush(NULL);
-
 
 		// Tex Coords positions
 		glBindBuffer(GL_ARRAY_BUFFER, TCBO);
 		glBufferData(GL_ARRAY_BUFFER, 2 * numOfTexCoords * sizeof(GLfloat), texCoords.data(), GL_STATIC_DRAW);
-		std::cout << glGetError() << std::endl; fflush(NULL);
 
-
-		int texCoordAtr = shader->getAtrributeLocation("texCoord");
+		int texCoordAtr = program->getAtrributeLocation("texCoord");
 		glVertexAttribPointer(texCoordAtr, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 		glEnableVertexArrayAttrib(VAO, texCoordAtr);
-		std::cout << "TCBO " << glGetError() << std::endl; fflush(NULL);
-
 
 		// Elements
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * numberOfElements * sizeof(GLuint), elements.data(), GL_STATIC_DRAW);
-		std::cout << "EBO " << glGetError() << std::endl; fflush(NULL);
 
 		glBindVertexArray(0);
 	}
@@ -178,7 +166,7 @@ namespace NoxEngine {
 		}
 		stbi_image_free(data);
 
-		GLuint textureLoc = shader->getUniformLocation(uniName);
+		GLuint textureLoc = program->getUniformLocation(uniName);
 		glUniform1i(textureLoc, num);
 
 		return tex;
@@ -193,7 +181,7 @@ namespace NoxEngine {
 
 		glClearColor(0.0f, 0.5f, 0.9f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		shader->use();
+		program->use();
 
 		glBindVertexArray(VAO);
 
@@ -219,7 +207,7 @@ namespace NoxEngine {
 	void Renderer::fillBackground(float r, float g, float b) {
 
 		// Set background color
-		shader->use();
+		program->use();
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(r,g,b, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -233,12 +221,12 @@ namespace NoxEngine {
 		w = width;
 		h = height;
 
-		shader->use();
+		program->use();
 
 		glViewport(0, 0, w, h);
 
 		// Set up Projection matrix
-		int toProjectionLoc = shader->getUniformLocation("toProjection");
+		int toProjectionLoc = program->getUniformLocation("toProjection");
 
 		projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 200.0f);
 		glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -319,7 +307,7 @@ namespace NoxEngine {
 
 	void Renderer::updateCamera()
 	{
-		int toCameraLoc = shader->getUniformLocation("toCamera");
+		int toCameraLoc = program->getUniformLocation("toCamera");
 		glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
 	}
 
@@ -327,33 +315,21 @@ namespace NoxEngine {
 	void Renderer::updateCamera(Camera* cam)
 	{
 		camera = cam;
-		int toCameraLoc = shader->getUniformLocation("toCamera");
+		int toCameraLoc = program->getUniformLocation("toCamera");
 		glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
 	}
 
-
-	void Renderer::setUpShader()
+	void Renderer::useProgram()
 	{
-		// Set up Shaders and create a shader program
-		// Create shaders
-		shader = new Shader("shaders/vShader.glsl", "shaders/fShader.glsl");
-
-		shader->use();
-
-
+		program->use();
 		// Set up Projection matrix
-		int toProjectionLoc = shader->getUniformLocation("toProjection");
-
+		int toProjectionLoc = program->getUniformLocation("toProjection");
 		projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 200.0f);
-
 		glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-
 		// Set up Camera
-		updateCamera();
-
+		// updateCamera();
 		// Set up color for mesh
-		glUniform3f(shader->getUniformLocation("Color"), color.x, color.y, color.z);
+		glUniform3f(program->getUniformLocation("Color"), color.x, color.y, color.z);
 
 	}
 }

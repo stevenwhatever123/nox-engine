@@ -8,14 +8,14 @@
 #include <GL/glew.h>
 
 
-#include"stb_image.h"
-#include"stb_image_write.h"
+#include <stb_image.h>
+#include <stb_image_write.h>
 
 
-#include "IRenderable.h"
-#include "Camera.h"
-#include "Shader.h"
-#include "Singleton.h"
+#include <IRenderable.h>
+#include <Camera.h>
+#include <GLProgram.h>
+#include <Singleton.h>
 
 namespace NoxEngine {
 
@@ -28,6 +28,8 @@ namespace NoxEngine {
 	};
 
 
+	
+
 	/*
 	 * A class that renders 3D using OpenGL
 	 * */
@@ -37,7 +39,7 @@ namespace NoxEngine {
 
 		private:
 		// The shaders
-		Shader *shader;
+		GLProgram *program;
 
 		i32 w;
 		i32 h; // Width and Height of the window/texture to render to
@@ -76,7 +78,6 @@ namespace NoxEngine {
 		void createTexCoordArray(IRenderable* mesh);
 		void createElementArray(IRenderable* mesh);
 
-		void setUpShader();
 
 		GLuint setTexture(const char* texturePath, const char* uniName, int num);
 
@@ -96,15 +97,13 @@ namespace NoxEngine {
 
 		// Add object to renderer to render
 		void addObject(IRenderable *mesh);
-
+		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
+		void useProgram();
 		void updateBuffers();
-
 
 		// Draw functions
 		void draw();
 		void fillBackground(float r, float g, float b);
-
-
 
 		// Get the texture the renderer rendered to
 		GLuint getTexture() { return textureToRenderTo; }

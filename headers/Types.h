@@ -14,5 +14,6 @@ typedef int64_t i64;
 
 typedef float  f32;
 typedef double f64;
+typedef uintptr_t uptr;
 
 #endif // ifndef NOX_TYPES_H 

@@ -26,6 +26,7 @@ namespace NoxEngineUtils {
 		struct tm tm_buffer = {0};
 		localtime_s(&tm_buffer, &time);
 		std::cout << "[" <<  std::put_time(&tm_buffer, "%I:%M:%S") << "][DEBUG][" << message_id << "] " << temp_buf << std::endl;
+		fflush(stdout);
 
 	}
 
