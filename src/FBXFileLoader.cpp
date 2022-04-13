@@ -10,299 +10,298 @@
 #include "MeshNode.h"
 #include "Mesh.h"
 
-namespace FBXFileLoader
+using namespace NoxEngine;
+
+const aiScene* NoxEngine::readFBX(const char* filename)
 {
-	const aiScene* readFBX(const char* filename)
+	Assimp::Importer importer;
+
+	importer.ReadFile(filename,
+			aiProcess_Triangulate |
+			aiProcess_GenSmoothNormals|
+			aiProcess_FlipUVs|
+			aiProcess_JoinIdenticalVertices);
+
+	// The code above only returns a pointer to the imported data
+	// It will be destroyed after exiting the block
+	// Therefore, we use GetOrphanedScene to get ownership
+	const aiScene* pScene = importer.GetOrphanedScene();
+
+	if (pScene)
 	{
-		Assimp::Importer importer;
+		printf("Success reading '%s'\n", filename);
 
-		importer.ReadFile(filename,
-						aiProcess_Triangulate |
-						aiProcess_GenSmoothNormals|
-						aiProcess_FlipUVs|
-						aiProcess_JoinIdenticalVertices);
+		//std::cout << pScene->mNumMeshes << "\n";
 
-		// The code above only returns a pointer to the imported data
-		// It will be destroyed after exiting the block
-		// Therefore, we use GetOrphanedScene to get ownership
-		const aiScene* pScene = importer.GetOrphanedScene();
+		return pScene;
+	}
+	else
+	{
+		printf("Error parsing '%s': '%s'\n", filename,
+				importer.GetErrorString());
 
-		if (pScene)
+		return nullptr;
+	}
+}
+
+Mesh* NoxEngine::getMesh(const aiScene* pScene)
+{
+	// ==========================================================
+	// Convert to mesh
+	Mesh * mesh = new Mesh();
+
+	aiMesh** loadedMesh = pScene->mMeshes;
+
+	mesh->resizeNumOfMeshes(pScene->mNumMeshes);
+
+	// Get vertex, normal and textcoord data
+	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i)
+	{
+		const aiMesh* pMesh = loadedMesh[i];
+
+		std::vector<glm::vec3> mVertices;
+		std::vector<glm::vec3> mNormals;
+		std::vector<unsigned int> mIndices;
+		std::vector<glm::vec2> mTexCoord;
+
+		const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
+
+		for (unsigned int j = 0; j < pMesh->mNumVertices; ++j)
 		{
-			printf("Success reading '%s'\n", filename);
+			const aiVector3D* pVertex = &(pMesh->mVertices[j]);
+			const aiVector3D* pNormal = &(pMesh->mNormals[j]);
+			const aiVector3D* pTexCoord = pMesh->HasTextureCoords(0) ?
+				&(pMesh->mTextureCoords[0][j]) : &zero3D;
 
-			//std::cout << pScene->mNumMeshes << "\n";
+			float vx = pVertex->x;
+			float vy = pVertex->y;
+			float vz = pVertex->z;
 
-			return pScene;
+			float nx = pNormal->x;
+			float ny = pNormal->y;
+			float nz = pNormal->z;
+
+			float u = pTexCoord->x;
+			float v = pTexCoord->y;
+
+			glm::vec3 vertex(vx, vy, vz);
+			glm::vec3 normal(nx, ny, nz);
+			glm::vec2 texCoord(u, v);
+
+			mVertices.push_back(vertex);
+			mNormals.push_back(normal);
+			mTexCoord.push_back(texCoord);
 		}
-		else
-		{
-			printf("Error parsing '%s': '%s'\n", filename,
-												 importer.GetErrorString());
 
-			return nullptr;
+		for (unsigned int j = 0; j < pMesh->mNumFaces; ++j)
+		{
+			const aiFace& face = pMesh->mFaces[j];
+
+			if (face.mNumIndices == 3)
+			{
+				mIndices.push_back(face.mIndices[0]);
+				mIndices.push_back(face.mIndices[1]);
+				mIndices.push_back(face.mIndices[2]);
+			}
+			else
+			{
+				printf("Error: number of face indicies is less than 3");
+			}
+		}
+
+		mesh->vertices[i] = mVertices;
+		mesh->normals[i] = mNormals;
+		mesh->texCoord[i] = mTexCoord;
+		mesh->faceIndices[i] = mIndices;
+	}
+
+	// I say we can implement it later
+	// Initialise Materials and textures
+	for (unsigned int i = 0; i < pScene->mNumMaterials; ++i)
+	{
+		const aiMaterial* pMaterial = pScene->mMaterials[i];
+		if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+		{
+			aiString path;
+			if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0,
+						&path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+			{
+				//std::string fullPath = path.data;
+				//std::cout << fullPath << "\n";
+			}
 		}
 	}
 
-	Mesh * getMesh(const aiScene* pScene)
+	// Animation Data
+	if (pScene->mNumAnimations > 0)
 	{
-		// ==========================================================
-		// Convert to mesh
-		Mesh * mesh = new Mesh();
+		unsigned int numAnimation = pScene->mNumAnimations;
+		mesh->resizeNumOfAnimations(numAnimation);
 
-		aiMesh** loadedMesh = pScene->mMeshes;
-
-		mesh->resizeNumOfMeshes(pScene->mNumMeshes);
-
-		// Get vertex, normal and textcoord data
-		for (unsigned int i = 0; i < pScene->mNumMeshes; ++i)
+		// Loop through every animation data/clip
+		for (unsigned int i = 0; i < numAnimation; i++)
 		{
-			const aiMesh* pMesh = loadedMesh[i];
+			mesh->animations.push_back(pScene->mAnimations[i]);
 
-			std::vector<glm::vec3> mVertices;
-			std::vector<glm::vec3> mNormals;
-			std::vector<unsigned int> mIndices;
-			std::vector<glm::vec2> mTexCoord;
-
-			const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
-
-			for (unsigned int j = 0; j < pMesh->mNumVertices; ++j)
+			// Loop through every node
+			for (unsigned int j = 0; j < pScene->mAnimations[i]->mNumChannels; j++)
 			{
-				const aiVector3D* pVertex = &(pMesh->mVertices[j]);
-				const aiVector3D* pNormal = &(pMesh->mNormals[j]);
-				const aiVector3D* pTexCoord = pMesh->HasTextureCoords(0) ?
-					&(pMesh->mTextureCoords[0][j]) : &zero3D;
+				// Channels means the nodes that would be moving
+				// Note that not every nodes would be animated
+				// So the number of channels may be smaller than the number of 
+				// nodes
 
-				float vx = pVertex->x;
-				float vy = pVertex->y;
-				float vz = pVertex->z;
+				// We will pair animation channels with node name
+				// But we're ignore it at this moment
 
-				float nx = pNormal->x;
-				float ny = pNormal->y;
-				float nz = pNormal->z;
-
-				float u = pTexCoord->x;
-				float v = pTexCoord->y;
-
-				glm::vec3 vertex(vx, vy, vz);
-				glm::vec3 normal(nx, ny, nz);
-				glm::vec2 texCoord(u, v);
-
-				mVertices.push_back(vertex);
-				mNormals.push_back(normal);
-				mTexCoord.push_back(texCoord);
-			}
-
-			for (unsigned int j = 0; j < pMesh->mNumFaces; ++j)
-			{
-				const aiFace& face = pMesh->mFaces[j];
-
-				if (face.mNumIndices == 3)
-				{
-					mIndices.push_back(face.mIndices[0]);
-					mIndices.push_back(face.mIndices[1]);
-					mIndices.push_back(face.mIndices[2]);
-				}
-				else
-				{
-					printf("Error: number of face indicies is less than 3");
-				}
-			}
-
-			mesh->vertices[i] = mVertices;
-			mesh->normals[i] = mNormals;
-			mesh->texCoord[i] = mTexCoord;
-			mesh->faceIndices[i] = mIndices;
-		}
-
-		// I say we can implement it later
-		// Initialise Materials and textures
-		for (unsigned int i = 0; i < pScene->mNumMaterials; ++i)
-		{
-			const aiMaterial* pMaterial = pScene->mMaterials[i];
-			if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-			{
-				aiString path;
-				if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0,
-					&path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
-				{
-					//std::string fullPath = path.data;
-					//std::cout << fullPath << "\n";
-				}
-			}
-		}
-
-		// Animation Data
-		if (pScene->mNumAnimations > 0)
-		{
-			unsigned int numAnimation = pScene->mNumAnimations;
-			mesh->resizeNumOfAnimations(numAnimation);
-
-			// Loop through every animation data/clip
-			for (unsigned int i = 0; i < numAnimation; i++)
-			{
-				mesh->animations.push_back(pScene->mAnimations[i]);
-
-				// Loop through every node
-				for (unsigned int j = 0; j < pScene->mAnimations[i]->mNumChannels; j++)
-				{
-					// Channels means the nodes that would be moving
-					// Note that not every nodes would be animated
-					// So the number of channels may be smaller than the number of 
-					// nodes
-
-					// We will pair animation channels with node name
-					// But we're ignore it at this moment
-
-					mesh->nodeAnimations[i].push_back(
+				mesh->nodeAnimations[i].push_back(
 						pScene->mAnimations[i]->mChannels[j]
-					);
+						);
 
-					// Retrieve animation data to transformation matrices
-					for (unsigned int z = 0;
+				// Retrieve animation data to transformation matrices
+				for (unsigned int z = 0;
 						z < pScene->mAnimations[i]->mChannels[j]->mNumPositionKeys;
 						z++)
-					{
+				{
 
-						// Translation matrix
-						glm::mat4 translationMatrix =
-							glm::translate(
+					// Translation matrix
+					glm::mat4 translationMatrix =
+						glm::translate(
 								glm::mat4(),
 								glm::vec3(
 									pScene->mAnimations[i]
-										->mChannels[j]->mPositionKeys[z].mValue.x,
+									->mChannels[j]->mPositionKeys[z].mValue.x,
 									pScene->mAnimations[i]
-										->mChannels[j]->mPositionKeys[z].mValue.y,
+									->mChannels[j]->mPositionKeys[z].mValue.y,
 									pScene->mAnimations[i]
-										->mChannels[j]->mPositionKeys[z].mValue.z
-								)
-							);
+									->mChannels[j]->mPositionKeys[z].mValue.z
+									)
+								);
 
-						// Scaling matrix
-						glm::mat4 scalingMatrix = glm::mat4(1.0f);
-						scalingMatrix =
-							glm::scale(
+					// Scaling matrix
+					glm::mat4 scalingMatrix = glm::mat4(1.0f);
+					scalingMatrix =
+						glm::scale(
 								scalingMatrix,
 								glm::vec3(
 									pScene->mAnimations[i]
-										->mChannels[j]->mScalingKeys[z].mValue.x,
+									->mChannels[j]->mScalingKeys[z].mValue.x,
 									pScene->mAnimations[i]
-										->mChannels[j]->mScalingKeys[z].mValue.y,
+									->mChannels[j]->mScalingKeys[z].mValue.y,
 									pScene->mAnimations[i]
-										->mChannels[j]->mScalingKeys[z].mValue.z
-								)
+									->mChannels[j]->mScalingKeys[z].mValue.z
+									)
+								);
+
+					// Rotation matrix
+					// I think this is how it works, row based
+					glm::mat4 rotationMatrix = glm::mat4(1.0f);
+					rotationMatrix[0][0] = pScene->mAnimations[i]
+						->mChannels[j]->mRotationKeys->mValue.GetMatrix().a1;
+					rotationMatrix[0][1] = pScene->mAnimations[i]
+						->mChannels[j]->mRotationKeys->mValue.GetMatrix().a2;
+					rotationMatrix[0][2] = pScene->mAnimations[i]
+						->mChannels[j]->mRotationKeys->mValue.GetMatrix().a3;
+
+					rotationMatrix[1][0] = pScene->mAnimations[i]
+						->mChannels[j]->mRotationKeys->mValue.GetMatrix().b1;
+					rotationMatrix[1][1] = pScene->mAnimations[i]
+						->mChannels[j]->mRotationKeys->mValue.GetMatrix().b2;
+					rotationMatrix[1][2] = pScene->mAnimations[i]
+						->mChannels[j]->mRotationKeys->mValue.GetMatrix().b3;
+
+					rotationMatrix[2][0] = pScene->mAnimations[i]
+						->mChannels[j]->mRotationKeys->mValue.GetMatrix().c1;
+					rotationMatrix[2][1] = pScene->mAnimations[i]
+						->mChannels[j]->mRotationKeys->mValue.GetMatrix().c2;
+					rotationMatrix[2][2] = pScene->mAnimations[i]
+						->mChannels[j]->mRotationKeys->mValue.GetMatrix().c3;
+
+					// Combine all of them to get the transformation matrix
+					// Notes: I don't think it's a good idea to include translation
+					// inside the animation data 
+					// This would mean everthing the gameobject moves
+					// is tied to the animation clip and is not user defined
+					// 
+					// What we normally want to do is to animate the game
+					// object rotations only and we define how the gameobject
+					// moves via scripts/our tools
+
+					mesh->nodeAnimTranslationMatrices[i].push_back(
+							translationMatrix
 							);
 
-						// Rotation matrix
-						// I think this is how it works, row based
-						glm::mat4 rotationMatrix = glm::mat4(1.0f);
-						rotationMatrix[0][0] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().a1;
-						rotationMatrix[0][1] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().a2;
-						rotationMatrix[0][2] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().a3;
-
-						rotationMatrix[1][0] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().b1;
-						rotationMatrix[1][1] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().b2;
-						rotationMatrix[1][2] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().b3;
-
-						rotationMatrix[2][0] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().c1;
-						rotationMatrix[2][1] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().c2;
-						rotationMatrix[2][2] = pScene->mAnimations[i]
-							->mChannels[j]->mRotationKeys->mValue.GetMatrix().c3;
-
-						// Combine all of them to get the transformation matrix
-						// Notes: I don't think it's a good idea to include translation
-						// inside the animation data 
-						// This would mean everthing the gameobject moves
-						// is tied to the animation clip and is not user defined
-						// 
-						// What we normally want to do is to animate the game
-						// object rotations only and we define how the gameobject
-						// moves via scripts/our tools
-
-						mesh->nodeAnimTranslationMatrices[i].push_back(
-							translationMatrix
-						);
-
-						mesh->nodeAnimRotationMatrices[i].push_back(
+					mesh->nodeAnimRotationMatrices[i].push_back(
 							rotationMatrix
-						);
+							);
 
-						mesh->nodeAnimScalingMatrices[i].push_back(
+					mesh->nodeAnimScalingMatrices[i].push_back(
 							scalingMatrix
-						);
-					}
+							);
 				}
-
-				// Printing it out just to make sure everything is correct
-				//for (unsigned int j = 0; j < pScene->mAnimations[i]->mNumChannels; j++)
-				//{
-				//	std::cout << mesh->nodeAnimations[i][j]->mNodeName.C_Str() << "\n";
-				//	std::cout << "Number of key frames: "
-				//		<< mesh->nodeAnimations[i][j]->mNumPositionKeys << "\n";;
-				//}
 			}
+
+			// Printing it out just to make sure everything is correct
+			//for (unsigned int j = 0; j < pScene->mAnimations[i]->mNumChannels; j++)
+			//{
+			//	std::cout << mesh->nodeAnimations[i][j]->mNodeName.C_Str() << "\n";
+			//	std::cout << "Number of key frames: "
+			//		<< mesh->nodeAnimations[i][j]->mNumPositionKeys << "\n";;
+			//}
 		}
-
-		// Node Hierarchy
-		MeshNode* rootNode = new MeshNode;
-		aiNode* aiRootNode = pScene->mRootNode;
-		mesh->createNodeHierarchy(aiRootNode, rootNode);
-
-		// Apply transformation to all vertices from nodes
-
-
-		// Print out all nodes
-		//mesh.printAllNodes();
-		//std::cout << "Mesh index " << mesh.nodeHierarchy.meshIndex<< "\n";
-
-		//std::cout << rootNode->child[0].child[0].name << "\n";
-		//std::cout << glm::to_string(rootNode->child[0].child[0].transformation) 
-		//	<< "\n";
-
-		// Optional: Print out all the data
-		//unsigned int count = 0;
-		//for (unsigned int i = 0; i < mesh->vertices.size(); i++)
-		//{
-		//	for (unsigned int j = 0; j < mesh->vertices[i].size(); j++)
-		//	{
-		//		std::cout << "Vertex " << count << ": " << mesh->vertices[i][j].x <<
-		//			" " << mesh->vertices[i][j].y << " "
-		//			<< mesh->vertices[i][j].z << "\n";
-		//		count++;
-		//	}
-		//}
-
-		//count = 0;
-		//for (unsigned int i = 0; i < mesh->normals.size(); i++)
-		//{
-		//	for (unsigned int j = 0; j < mesh->normals[i].size(); j++)
-		//	{
-		//		std::cout << "Normal " << count << ": " << mesh->normals[i][j].x <<
-		//			" " << mesh->normals[i][j].y << " "
-		//			<< mesh->normals[i][j].z << "\n";
-		//		count++;
-		//	}
-		//}
-
-		//count = 0;
-		//for (unsigned int i = 0; i < mesh->texCoord.size(); i++)
-		//{
-		//	for (unsigned int j = 0; j < mesh->texCoord[i].size(); j++)
-		//	{
-		//		std::cout << "TexCoord " << count << ": " << mesh->texCoord[i][j].x <<
-		//			" " << mesh->texCoord[i][j].y << "\n";
-		//		count++;
-		//	}
-		//}
-
-		return mesh;
 	}
+
+	// Node Hierarchy
+	MeshNode* rootNode = new MeshNode;
+	aiNode* aiRootNode = pScene->mRootNode;
+	mesh->createNodeHierarchy(aiRootNode, rootNode);
+
+	// Apply transformation to all vertices from nodes
+
+
+	// Print out all nodes
+	//mesh.printAllNodes();
+	//std::cout << "Mesh index " << mesh.nodeHierarchy.meshIndex<< "\n";
+
+	//std::cout << rootNode->child[0].child[0].name << "\n";
+	//std::cout << glm::to_string(rootNode->child[0].child[0].transformation) 
+	//	<< "\n";
+
+	// Optional: Print out all the data
+	//unsigned int count = 0;
+	//for (unsigned int i = 0; i < mesh->vertices.size(); i++)
+	//{
+	//	for (unsigned int j = 0; j < mesh->vertices[i].size(); j++)
+	//	{
+	//		std::cout << "Vertex " << count << ": " << mesh->vertices[i][j].x <<
+	//			" " << mesh->vertices[i][j].y << " "
+	//			<< mesh->vertices[i][j].z << "\n";
+	//		count++;
+	//	}
+	//}
+
+	//count = 0;
+	//for (unsigned int i = 0; i < mesh->normals.size(); i++)
+	//{
+	//	for (unsigned int j = 0; j < mesh->normals[i].size(); j++)
+	//	{
+	//		std::cout << "Normal " << count << ": " << mesh->normals[i][j].x <<
+	//			" " << mesh->normals[i][j].y << " "
+	//			<< mesh->normals[i][j].z << "\n";
+	//		count++;
+	//	}
+	//}
+
+	//count = 0;
+	//for (unsigned int i = 0; i < mesh->texCoord.size(); i++)
+	//{
+	//	for (unsigned int j = 0; j < mesh->texCoord[i].size(); j++)
+	//	{
+	//		std::cout << "TexCoord " << count << ": " << mesh->texCoord[i][j].x <<
+	//			" " << mesh->texCoord[i][j].y << "\n";
+	//		count++;
+	//	}
+	//}
+
+	return mesh;
 }

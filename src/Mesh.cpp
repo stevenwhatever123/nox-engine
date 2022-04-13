@@ -1,17 +1,11 @@
 #include "Mesh.h"
 #include <iostream>
-
 #include <glm/gtx/string_cast.hpp>
 
-Mesh::Mesh()
-{
+using namespace NoxEngine;
 
-}
-
-Mesh::~Mesh()
-{
-
-}
+Mesh::Mesh()  {}
+Mesh::~Mesh() {}
 
 void Mesh::resizeNumOfMeshes(unsigned int i)
 {
