@@ -5,13 +5,13 @@
 
 #include "Mesh.h"
 
-class ImGuiCustomWindow
-{
-public:
-	ImGuiCustomWindow();
-	~ImGuiCustomWindow();
-
-public:
-	void showFBXLoaderMenu(Mesh *curMesh);
-};
-
+namespace NoxEngine {
+	class ImGuiCustomWindow
+	{
+		public:
+			ImGuiCustomWindow();
+			~ImGuiCustomWindow();
+		public:
+			void showFBXLoaderMenu(Mesh *curMesh);
+	};
+}
