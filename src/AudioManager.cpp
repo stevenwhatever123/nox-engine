@@ -62,7 +62,7 @@ void AudioManager::Destroy() {
 void AudioManager::Update() {
 
 	/*   Remove all stopped channels   */
-	vector<ChannelMap::iterator> pStoppedChannels;
+	std::vector<ChannelMap::iterator> pStoppedChannels;
 	for (auto it = mChannels.begin(), itEnd = mChannels.end(); it != itEnd; ++it) {
 
 		bool bIsPlaying = false;
@@ -82,7 +82,7 @@ void AudioManager::Update() {
 }
 
 
-void AudioManager::LoadSound(const string& fileName, bool is3d, bool isLooping, bool isStream) {
+void AudioManager::LoadSound(const std::string& fileName, bool is3d, bool isLooping, bool isStream) {
 
 	// first check that this sound hasn't been loaded into the sound map
 	auto soundItr = this->mSounds.find(fileName);
@@ -129,7 +129,7 @@ void AudioManager::UnLoadSound(const char *strSoundName) {
 }
 
 
-int AudioManager::PlaySounds(const string& strSoundName, const glm::vec3& vPos, float fVolumedB) {
+int AudioManager::PlaySounds(const std::string& strSoundName, const glm::vec3& vPos, float fVolumedB) {
 
 	// Has this sound been loaded?
 	auto sound = mSounds.find(strSoundName);
@@ -236,10 +236,14 @@ void AudioManager::Set3dListenerAttributes(const glm::vec3& vPos, const glm::vec
 	//std::cout << "Position: " << listener.forward.x << "," << listener.forward.y << "," << listener.forward.z << std::endl;
 }
 
-// Global 3D settings
-// @param dopplerScale Exaggerate / diminish doppler effect
-// @param distanceFactor Set units per meter (e.g. if using feet then 3.28). Only affects doppler - does not affect min/max distance
-// @param rolloffScale How fast 3D sounds attenuate using FMOD_3D_LOGROLLOFF
+
+/***
+ * Global 3D settings
+ * 
+ * @param dopplerScale Exaggerate / diminish doppler effect
+ * @param distanceFactor Set units per meter (e.g. if using feet then 3.28). Only affects doppler - does not affect min/max distance
+ * @param rolloffScale How fast 3D sounds attenuate using FMOD_3D_LOGROLLOFF
+ */
 void AudioManager::Set3dSettings(float dopplerScale, float distanceFactor, float rolloffScale) {
 
 	errorCheck(coreSystem->set3DSettings(dopplerScale, distanceFactor, rolloffScale));

@@ -21,8 +21,6 @@
 #include <fmod/studio/fmod_studio.hpp>
 #include <fmod/studio/fmod_studio_common.h>
 
-using namespace std;
-
 
 class AudioManager
 {
@@ -34,16 +32,16 @@ private:
 	int mnNextChannelId;
 	
 	// FMOD Core API
-	typedef map<string, FMOD::Sound*> SoundMap;
-	typedef map<int, FMOD::Channel*> ChannelMap;
-	typedef map<string, int> SoundChannelIdMap;
+	typedef std::map<std::string, FMOD::Sound*> SoundMap;
+	typedef std::map<int, FMOD::Channel*> ChannelMap;
+	typedef std::map<std::string, int> SoundChannelIdMap;
 	SoundMap mSounds;
 	ChannelMap mChannels;
 	SoundChannelIdMap mSoundChannelIds;
 
 	// FMOD Studio API
-	typedef map<string, FMOD::Studio::EventInstance*> EventMap;
-	typedef map<string, FMOD::Studio::Bank*> BankMap;
+	typedef std::map<std::string, FMOD::Studio::EventInstance*> EventMap;
+	typedef std::map<std::string, FMOD::Studio::Bank*> BankMap;
 	BankMap mBanks;
 	EventMap mEvents;
 
@@ -70,10 +68,10 @@ public:
 
 
 	/*   Core API Functions   */
-	void LoadSound(const string& strSoundName, bool is3d = true, bool isLooping = false, bool isStream = false);
-	void UnLoadSound(const string& strSoundName);
+	void LoadSound(const std::string& strSoundName, bool is3d = true, bool isLooping = false, bool isStream = false);
+	void UnLoadSound(const std::string& strSoundName);
 	void UnLoadSound(const char* strSoundName);
-	int PlaySounds(const string& strSoundName, const glm::vec3& vPos = glm::vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
+	int PlaySounds(const std::string& strSoundName, const glm::vec3& vPos = glm::vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
 
 	void SetChannel3dPosition(int nChannelId, const glm::vec3& vPosition);
 	void SetChannelVolume(int nChannelId, float fVolumedB);
@@ -87,17 +85,17 @@ public:
 
 
 	/*   Studio API Functions   */
-	void LoadBank(const string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags);
-	void LoadEvent(const string& strEventName);
-	void PlayEvent(const string& strEventName);
+	void LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags);
+	void LoadEvent(const std::string& strEventName);
+	void PlayEvent(const std::string& strEventName);
 	void StopChannel(int nChannelId);
-	void StopEvent(const string& strEventName, bool bImmediate = false);
-	void GetEventParameter(const string& strEventName, const string& strEventParameter, float* parameter);
-	void SetEventParameter(const string& strEventName, const string& strParameterName, float fValue);
+	void StopEvent(const std::string& strEventName, bool bImmediate = false);
+	void GetEventParameter(const std::string& strEventName, const std::string& strEventParameter, float* parameter);
+	void SetEventParameter(const std::string& strEventName, const std::string& strParameterName, float fValue);
 	void StopAllChannels();
 
 
-	bool IsEventPlaying(const string& strEventName) const;
+	bool IsEventPlaying(const std::string& strEventName) const;
 	
 
 	/*   Helpers   */
