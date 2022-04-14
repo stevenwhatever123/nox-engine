@@ -26,18 +26,26 @@
     <ClCompile Include="3rdParty\headers\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_tables.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_widgets.cpp" />
-	<ClCompile Include="src\FBXFileLoader.cpp" />
-	<ClCompile Include="src\ImGuiCustomWindow.cpp" />
-	<ClCompile Include="src\Mesh.cpp" />
-	<ClCompile Include="src\MeshNode.cpp" />
-	<ClCompile Include="src\Renderer.cpp" />
-	<ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\EngineGUI.cpp" />
+    <ClCompile Include="src\EngineGUI\AnimationPanel.cpp" />
+    <ClCompile Include="src\EngineGUI\AudioPanel.cpp" />
+    <ClCompile Include="src\EngineGUI\ScenePanel.cpp" />
+    <ClCompile Include="src\FBXFileLoader.cpp" />
+    <ClCompile Include="src\ImGuiCustomWindow.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\MeshNode.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\AudioManager.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-	<ClInclude Include="include\AudioManager.h" />
+    <ClInclude Include="include\AudioManager.h" />
     <ClInclude Include="include\Camera.h" />
+    <ClInclude Include="include\EngineGUI.h" />
+    <ClInclude Include="include\EngineGUI\AnimationPanel.h" />
+    <ClInclude Include="include\EngineGUI\AudioPanel.h" />
+    <ClInclude Include="include\EngineGUI\ScenePanel.h" />
     <ClInclude Include="include\FBXFileLoader.h" />
     <ClInclude Include="include\ImGuiCustomWindow.h" />
     <ClInclude Include="include\IRenderable.h" />
@@ -48,7 +56,7 @@
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\stb_image_write.h" />
-	<ClInclude Include="include\ImGuiCustom.h" />
+    <ClInclude Include="include\ImGuiCustom.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
