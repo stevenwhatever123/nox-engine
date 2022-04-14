@@ -268,7 +268,7 @@ void AudioManager::SetChannelVolume(int nChannelId, float fVolumedB) {
 	if (channelItr == mChannels.end()) return;
 
 	// update volume
-	errorCheck(channelItr->second->setVolume(dbToVolume(fVolumedB)));
+	errorCheck(channelItr->second->setVolume(fVolumedB));
 }
 
 

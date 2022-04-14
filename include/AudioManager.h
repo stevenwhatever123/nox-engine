@@ -74,7 +74,7 @@ public:
 	int PlaySounds(const std::string& strSoundName, const glm::vec3& vPos = glm::vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
 
 	void SetChannel3dPosition(int nChannelId, const glm::vec3& vPosition);
-	void SetChannelVolume(int nChannelId, float fVolumedB);
+	void SetChannelVolume(int nChannelId, float normalizedVolume);
 	// Global 3D settings
 	void Set3dSettings(float dopplerScale, float distanceFactor, float rolloffScale);
 	// Listener position and orientation. TODO: Use velocity != 0 to enable doppler
