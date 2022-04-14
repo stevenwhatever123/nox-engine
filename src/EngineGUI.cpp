@@ -11,60 +11,6 @@ namespace NoxEngine {
 
 	namespace EngineGUI {
 
-		// Make a window as big as the viewport and make it a dockspace
-		// This is expected to run ONCE, AFTER an ImGui::NewFrame is created
-		void setupFixedLayout() {
-
-			//ImGuiDockNode* mainNode = nullptr;
-			ImGuiID mainNodeID = ImGui::GetID("MainDockNode");
-
-			ImGui::DockBuilderRemoveNode(mainNodeID);	// remove the node from the saved imgui.ini file from a previous run
-			ImGui::DockBuilderAddNode(mainNodeID, ImGuiDockNodeFlags_None);
-
-			// Make the dock node's size and position to match the viewport
-			ImGui::DockBuilderSetNodeSize(mainNodeID, ImGui::GetMainViewport()->WorkSize);
-			ImGui::DockBuilderSetNodePos(mainNodeID, ImGui::GetMainViewport()->WorkPos);
-
-			// Design the layout here with DockBuilderSplitNode
-			ImGuiID dock_up_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Up, 0.05f, nullptr, &mainNodeID);
-			ImGuiID dock_right_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Right, 0.2f, nullptr, &mainNodeID);
-			ImGuiID dock_left_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Left, 0.2f, nullptr, &mainNodeID);
-			ImGuiID dock_down_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Down, 0.2f, nullptr, &mainNodeID);
-			ImGuiID dock_down_right_id = ImGui::DockBuilderSplitNode(dock_down_id, ImGuiDir_Right, 0.6f, nullptr, &dock_down_id);
-			
-			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Scene].c_str(), mainNodeID);
-			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::FileExplorer].c_str(), dock_up_id);
-			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AudioSource].c_str(), dock_right_id);
-			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Hierarchy].c_str(), dock_left_id);
-			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AnimationSettings].c_str(), dock_down_id);
-			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::PresetObjects].c_str(), dock_down_right_id);
-			
-			// Change node flags here
-#if 0
-			mainNode = ImGui::DockBuilderGetNode(dock_main_id);
-
-			// recursively go up to get the root node
-			while (mainNode->ParentNode != nullptr) {
-				mainNode = mainNode->ParentNode;
-				printf("ID    (%x)\n", mainNode->ID);
-			}
-
-			// TODO-FIX: Main window is still movable!
-			mainNode->LocalFlagsInWindows |= ImGuiWindowFlags_NoMove;
-			mainNode->UpdateMergedFlags();
-
-			// get the implicitly named window, set flags
-			//ImGuiWindow* mainDockWindow = mainNode->HostWindow;
-			//if (mainDockWindow != nullptr) {
-			//	mainDockWindow->Flags |= window_flags;
-			//	std::cout << "Window ID: " << mainNode->VisibleWindow->Name << "\n";
-			//}
-#endif
-
-			ImGui::DockBuilderFinish(mainNodeID);
-
-		}
-
 
 		void init_imgui(GLFWwindow* win) {
 			IMGUI_CHECKVERSION();
@@ -93,17 +39,108 @@ namespace NoxEngine {
 		}
 
 
+		void cleanupImGui() {
+
+			ImGui_ImplOpenGL3_Shutdown();
+			ImGui_ImplGlfw_Shutdown();
+			ImGui::DestroyContext();
+		}
+
+
+		// Make a window as big as the viewport
+		// This is expected to run ONCE, AFTER an ImGui::NewFrame is created
+		void setupFixedLayout() {
+
+			//ImGuiDockNode* mainNode = nullptr;
+			ImGuiID mainNodeID = ImGui::GetID("MainDockNode");
+
+			ImGui::DockBuilderRemoveNode(mainNodeID);	// remove the node from the saved imgui.ini file from a previous run
+			ImGui::DockBuilderAddNode(mainNodeID, ImGuiDockNodeFlags_None);
+
+			// Make the dock node's size and position to match the viewport
+			ImGui::DockBuilderSetNodeSize(mainNodeID, ImGui::GetMainViewport()->WorkSize);
+			ImGui::DockBuilderSetNodePos(mainNodeID, ImGui::GetMainViewport()->WorkPos);
+
+			// Design the layout here with DockBuilderSplitNode
+			ImGuiID dock_right_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Right, 0.2f, nullptr, &mainNodeID);
+			ImGuiID dock_left_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Left, 0.2f, nullptr, &mainNodeID);
+			ImGuiID dock_down_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Down, 0.2f, nullptr, &mainNodeID);
+			ImGuiID dock_down_right_id	= ImGui::DockBuilderSplitNode(dock_down_id, ImGuiDir_Right, 0.6f, nullptr, &dock_down_id);
+			ImGuiID dock_down_down_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Up, 0.05f, nullptr, &mainNodeID);
+
+			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Scene].c_str(), mainNodeID);
+			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::PresetObjects].c_str(), dock_right_id);
+			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Hierarchy].c_str(), dock_left_id);
+			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AnimationSettings].c_str(), dock_down_id);
+			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AudioSource].c_str(), dock_down_right_id);
+			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::FileExplorer].c_str(), dock_down_down_id);
+			
+			// Change node flags here
+#if 0
+			mainNode = ImGui::DockBuilderGetNode(dock_main_id);
+
+			// recursively go up to get the root node
+			while (mainNode->ParentNode != nullptr) {
+				mainNode = mainNode->ParentNode;
+				printf("ID    (%x)\n", mainNode->ID);
+			}
+
+			// TODO-FIX: Main window is still movable!
+			mainNode->LocalFlagsInWindows |= ImGuiWindowFlags_NoMove;
+			mainNode->UpdateMergedFlags();
+
+			// get the implicitly named window, set flags
+			//ImGuiWindow* mainDockWindow = mainNode->HostWindow;
+			//if (mainDockWindow != nullptr) {
+			//	mainDockWindow->Flags |= window_flags;
+			//	std::cout << "Window ID: " << mainNode->VisibleWindow->Name << "\n";
+			//}
+#endif
+
+			ImGui::DockBuilderFinish(mainNodeID);
+
+		}
+
+
+		void updateMenu() {
+
+			// Create menu bar
+			if (ImGui::BeginMenuBar()) {
+
+				if (ImGui::BeginMenu("File")) {
+
+					if (ImGui::MenuItem("Close", NULL, false, p_open != NULL)) *p_open = false;
+
+					ImGui::EndMenu();
+				}
+
+				if (ImGui::BeginMenu("Edit")) {
+
+					ImGui::EndMenu();
+				}
+
+				if (ImGui::BeginMenu("Preferences")) {
+					if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
+					if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
+					if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
+					if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
+					if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
+					ImGui::Separator();
+
+					ImGui::EndMenu();
+				}
+
+				ImGui::EndMenuBar();
+			}
+		}
+
+
 		void updateGUI(GUIParams *params) {
 			
 			// New frame must be created before any ImGui submission
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
-
-#if 1
-			bool* p_open = nullptr;
-
-			static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
 			// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 			// because it would be confusing to have two docking targets within each others.
@@ -129,55 +166,32 @@ namespace NoxEngine {
 			// all active windows docked into it will lose their parent and become undocked.
 			// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
 			// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-			ImGui::Begin("Invisible Dockspace Window", p_open, window_flags);
+			ImGui::Begin("Invisible Window", p_open, window_flags);
 			ImGui::PopStyleVar(2);
 
-# if 0
-			// Create menu bar
-			/* if (ImGui::BeginMenuBar()) {
-				if (ImGui::BeginMenu("Options"))
-				{
-					// Disabling fullscreen would allow the window to be moved to the front of other windows,
-					// which we can't undo at the moment without finer window depth/z control.
-					ImGui::MenuItem("Padding", NULL, &opt_padding);
-					ImGui::Separator();
-
-					if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
-					if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
-					if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
-					if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
-					if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
-					ImGui::Separator();
-
-					if (ImGui::MenuItem("Close", NULL, false, p_open != NULL))
-						*p_open = false;
-					ImGui::EndMenu();
-				}
-
-				ImGui::EndMenuBar();
-			} */
-#endif
+			// Menu bar
+			updateMenu();
 
 			// Setup dockspace only once
 			if (params->firstLoop) setupFixedLayout();
 
 			// Submit the DockSpace
-			// TODO: Is this needed?
-			//ImGuiIO& io = ImGui::GetIO();
-			//if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-			//	ImGuiID dockspace_id = ImGui::GetID("DockSpace");
-			//	ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-			//}
+			// Note: Uncomment this to allow the entire viewport to be dockable
+			//       e.g. you can maximize a window
+			ImGuiIO& io = ImGui::GetIO();
+			if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+				ImGuiID dockspace_id = ImGui::GetID("MainDockNode");
+				ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+			}
 
-			ImGui::End();	// End to dockspace ("Invisible Dockspace Window")
+			ImGui::End();	// End to "Invisible Window"
 
-
-#endif
 #if 0
 			// Another failed attempt to make the main node unmovable
 			//ImGui::Begin("##DockNode_8CB0105", NULL, ImGuiWindowFlags_NoMove);
 			//ImGui::End();
 #endif
+
 
 			// Process & update all GUIs
 			NoxEngine::EngineGUI::updateAudioPanel(params);

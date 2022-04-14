@@ -78,9 +78,15 @@ namespace NoxEngine {
 			{ PanelName::AudioSource,	"Audio Source" }
 		};
 
-		void setupFixedLayout();
-		void init_imgui(GLFWwindow* win);
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+		static bool* p_open = nullptr;
 
+
+		void init_imgui(GLFWwindow* win);
+		void cleanupImGui();
+
+		void setupFixedLayout();
+		void updateMenu();
 		void updateGUI(GUIParams*);
 
 		// Functions that contain the logic for each sub-window ("tool")

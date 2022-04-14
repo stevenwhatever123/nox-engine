@@ -151,9 +151,7 @@ int main(int argc, char** argv) {
 
 
 	// Clean up
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+	NoxEngine::EngineGUI::cleanupImGui();
 
 	glfwDestroyWindow(win);
 	glfwTerminate();
