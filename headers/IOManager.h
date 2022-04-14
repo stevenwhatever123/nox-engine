@@ -30,7 +30,7 @@ namespace NoxEngine {
 		public:
 			PermResourceData ReadEntireFilePerm(std::string filename);
 			TempResourceData ReadEntireFileTemp(std::string filename);
-			std::string  PickFile(std::string extension_filters = "");
+			std::string PickFile(const char* extension_filters = "");
 
 		protected:
 			 IOManager(){};

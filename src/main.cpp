@@ -28,9 +28,11 @@
 #include <fmod/core/fmod_errors.h>
 #include <AudioManager.h>
 
-#include "GLProgram.h"
-#include "Renderer.h"
-#include "RenderableComp.h"
+#include <GLProgram.h>
+#include <Renderer.h>
+#include <RenderableComp.h>
+#include <Mesh.h>
+
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -41,6 +43,7 @@ using NoxEngine::Camera;
 using NoxEngine::IOManager;
 using NoxEngine::GLProgram;
 using NoxEngine::ShaderFile;
+using NoxEngine::Mesh;
 
 struct AudioSource {
 	std::string name;
@@ -49,10 +52,18 @@ struct AudioSource {
 	f32 sourceVolume;
 };
 
+// struct MeshSource {
+// 	std::string name;
+// 	std::string file;
+// 	Mesh m;
+// };
+
 typedef std::map<std::string, AudioSource> AudioRepo;
+typedef std::map<std::string, Mesh> MeshRepo;
 
 struct GameState {
 	AudioRepo audioSources;
+	MeshRepo meshes;
 };
 
 
@@ -94,6 +105,8 @@ class GameManager {
 			audioManager->LoadSound(audioSource.file);
 
 		}
+
+		// void addMesh(Mesh)
 
 		inline Renderer* GetRenderer() { return renderer; };
 
@@ -154,7 +167,8 @@ class GameManager {
 		}
 
 		void init_camera() {
-			camera = new Camera(glm::vec3(0.0f, 10.0f, 200.0f));
+			camera = new Camera(glm::vec3(0.0f, 260.0f, 0.0f));
+			camera->turnVerBy(90.0f);
 		}
 
 		void init_shaders() {
@@ -168,10 +182,16 @@ class GameManager {
 
 		void init_renderer() { 
 			// ------------------------------ Set up of the render --------------------------
-			// Create Renderer
+			// // Create Renderer
 			renderer = new Renderer(win_width, win_height, camera);
 			renderer->setProgram(current_program);
 			renderer->useProgram();
+
+			const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
+			Mesh *mesh = new Mesh(pScene);
+			mesh->prepForRenderer();
+			renderer->addObject(mesh);
+			delete mesh;
 		}
 
 		void init_imgui() {
@@ -192,9 +212,6 @@ class GameManager {
 
 		}
 
-
-
-
 		void asset_ui() {
 
 			ImGui::Begin("Audio Sources");
@@ -203,6 +220,10 @@ class GameManager {
 			auto endItr = game_state.audioSources.end();
 
 			static bool show_demo_window = true;
+			if(ImGui::Button("load")) {
+				std::string file_name = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
+				Logger::debug("name %s", file_name.c_str());
+			}
 
 			if(ImGui::TreeNode("Audios")) {
 
@@ -270,19 +291,16 @@ class GameManager {
 		}
 
 
-		void update_audio() {
-
-		}
+		void update_audio() { }
 
 		void update_inputs() {
 			glfwPollEvents();
-
 		}
 
 		void update_renderer() {
+			renderer->updateLightPos(1, 1, 1);
 			renderer->updateBuffers();
-			renderer->setFrameBufferToTexture();
-			renderer->fillBackground(0.3f, 0.3f, 0.3f);
+			renderer->fillBackground(0.1, 0.2, 0.5);
 			renderer->draw();
 		}
 
@@ -303,31 +321,7 @@ class GameManager {
 };
 
 
-void init() {
-	auto *perm_mem_alloc = PermanentMemAllocator::Instance();
-	auto *perm_mem_alloc2 = PermanentMemAllocator::Instance();
-
-	Logger::debug("%p == %p", perm_mem_alloc, perm_mem_alloc2);
-
-	void* mem = perm_mem_alloc->allocate(1024);
-	void* mem1 = perm_mem_alloc->allocate(1024);
-
-	auto* allocations = perm_mem_alloc->getAllocations();
-	const i64 allocation_count = perm_mem_alloc->getAllocationsCount();
-
-	Logger::debug("allocated: %d", allocation_count);
-	for(i32 i = 0; i < allocation_count; i++) {
-		Logger::debug("Allocation %d: ptr: %p - size: %lld", i, allocations[i].ptr, allocations[i].size);
-	}
-}
-
-
 int main(int argc, char** argv) {
-	// Initialize GLFW
-
-	// char buf[1024];
-	// GetCurrentDirectoryA(1024, buf);
-
 
 	GameManager gm(1280, 720, "Nox Engine");
 	gm.init();
@@ -337,122 +331,7 @@ int main(int argc, char** argv) {
 		gm.update();
 	}
 
-	// GUI
-	// Sliders to control the 3D sound position
+	return 0;
 
-
-	// Update systems with UI values
-	// audioManager->SetChannel3dPosition(0, {soundX, soundY, soundZ});
-	// audioManager->SetChannelVolume(0, soundVolume);
-	//customWindow->showFBXLoaderMenu(mesh);
-
-#if 0
-
-	ImGui::Begin("Settings");
-
-	if (ImGui::Button("Load FBX File"))
-	{
-		OPENFILENAME ofn;
-
-		wchar_t szFile[256];
-
-		ZeroMemory(&ofn, sizeof(ofn));
-		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = NULL;
-		ofn.lpstrFile = szFile;
-		ofn.lpstrFile[0] = '\0';
-		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = L"Filmbox File (*.fbx)\0*.fbx\0All (*.*)\0*.*\0";
-		ofn.nFilterIndex = 1;
-		ofn.lpstrFileTitle = NULL;
-		ofn.nMaxFileTitle = 0;
-		ofn.lpstrInitialDir = NULL;
-		ofn.lpstrTitle = L"Select FBX file";
-		ofn.lpstrDefExt = L"fbx";
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-		bool readSuccess = GetOpenFileName(&ofn);
-
-		// LPWSTR is different from char
-		// Therefore we're converting it
-		char filenameBuffer[256];
-		wcstombs_s(nullptr, filenameBuffer, sizeof(filenameBuffer), szFile, sizeof(szFile));
-
-		if (readSuccess)
-		{
-			printf("Read Success\n");
-
-			const aiScene* pScene = FBXFileLoader::readFBX(filenameBuffer);
-
-			// Converting the scene to mesh data
-			if (pScene != nullptr)
-			{
-				mesh = FBXFileLoader::getMesh(pScene);
-				isAlreadyLoaded = true;
-				//curMesh = mesh;
-			}
-			else
-			{
-				printf("Error: converting sence to mesh data");
-			}
-		}
-		else
-		{
-			printf("Error: reading fbx file");
-		}
-	}
-
-	ImGui::End();
-
-
-	// If there was a mesh loaded by user
-	if (isAlreadyLoaded){
-		// Add mesh to renderer
-		mesh->prepForRenderer();
-		renderer->addObject(mesh);
-		renderer->updateBuffers();
-		isAlreadyLoaded = false;
-
-	}
-
-
-	//	Render to texture	
-	if (locWidth != prevWidth || locHeight != prevHeight)
-	{
-		renderer->updateProjection(locWidth, locHeight);
-		prevWidth = locWidth;
-		prevHeight = locHeight;
-	}
-
-	//Render background of the app
-	renderer->fillBackground(1.0f, 0.5f, 0.9f);
-	renderer->draw();
-
-	// Use IMGUI to show rendered to framebuffer 
-	ImGui::Begin("Demo window"); {
-
-		// Get the size of the child (i.e. the whole draw size of the windows).
-
-	} ImGui::End();
-
-	// One more window just cause
-	ImGui::Begin("One more window");
-	ImGui::Button("Hello!");
-
-	ImGui::End();
-
-	// Finally show UI
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-	glfwSwapBuffers(win);
 }
 
-
-// Clean up
-audioManager->Destroy();
-delete obj, obj2, obj3, camera, renderer;
-
-#endif
-return 0;
-}

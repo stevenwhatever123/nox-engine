@@ -10,17 +10,11 @@
 #include "MeshNode.h"
 #include "Mesh.h"
 
-using namespace NoxEngine;
-
 const aiScene* NoxEngine::readFBX(const char* filename)
 {
 	Assimp::Importer importer;
 
-	importer.ReadFile(filename,
-			aiProcess_Triangulate |
-			aiProcess_GenSmoothNormals|
-			aiProcess_FlipUVs|
-			aiProcess_JoinIdenticalVertices);
+	importer.ReadFile(filename, aiProcessPreset_TargetRealtime_Fast);
 
 	// The code above only returns a pointer to the imported data
 	// It will be destroyed after exiting the block
@@ -44,7 +38,7 @@ const aiScene* NoxEngine::readFBX(const char* filename)
 	}
 }
 
-Mesh* NoxEngine::getMesh(const aiScene* pScene)
+NoxEngine::Mesh* NoxEngine::getMesh(const aiScene* pScene)
 {
 	// ==========================================================
 	// Convert to mesh
@@ -54,12 +48,10 @@ Mesh* NoxEngine::getMesh(const aiScene* pScene)
 
 	mesh->resizeNumOfMeshes(pScene->mNumMeshes);
 
-
-	Mesh * getMesh(const aiScene* pScene, i32 index)
+	// Get vertex, normal and textcoord data
+	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i)
 	{
-		// ==========================================================
-		// Convert to mesh
-		Mesh* mesh = new Mesh(pScene);
+		const aiMesh* pMesh = loadedMesh[i];
 
 		std::vector<glm::vec3> mVertices;
 		std::vector<glm::vec3> mNormals;

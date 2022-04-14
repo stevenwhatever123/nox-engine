@@ -17,6 +17,7 @@ namespace NoxEngine {
 	class Mesh : public IRenderable {
 		public:
 
+			Mesh(const aiScene *mesh);
 			Mesh();
 			~Mesh();
 
@@ -32,20 +33,19 @@ namespace NoxEngine {
 
 			void prepForRenderer();
 
-			i32 getNumOfVertices() { return i32( verticesPreped.size() / 3 ); }
-			i32 getNumOfTexCoord() { return i32( texCoordPreped.size() / 2 ); }
-			i32 getNumOfNormals()  { return i32( normalsPreped.size()  / 3 ); }
+			inline i32 getNumOfVertices() { return (i32)(verticesPreped.size() / 3); }
+			inline i32 getNumOfTexCoord() { return (i32)(texCoordPreped.size() / 2); }
+			inline i32 getNumOfNormals()  { return (i32)(normalsPreped.size()  / 3); }
+			inline i32 getNumOfElements() { return (i32)(faceIndices[0].size() / 3); }
 
-			f32* getArrayOfVertices() { return verticesPreped.data(); }
-			f32* getArrayOfTexCoord() { return texCoordPreped.data(); }
-			f32* getArrayOfNormals()  { return normalsPreped.data(); }
-			i32  getNumOfElements()   { return i32( elements.size() / 3 ); }
-			i32* getArrayOfElements() { return elements.data(); }
-
+			void getArrayOfVertices(std::vector<f32>* v);
+			void getArrayOfTexCoord(std::vector<f32>* tC);
+			void getArrayOfNormals(std::vector<f32>* n);
+			void getArrayOfElements(std::vector<i32>* el);
 
 			const char* getNormalTexture()  { return texName; }
 			const char* getAmbientTexture() { return texName;}
-			const char* texName = "textures/leaves_normal.jpg";
+			const char* texName = "assets/meshes/textures/leaves_normal.jpg";
 
 		public:
 			MeshNode nodeHierarchy;

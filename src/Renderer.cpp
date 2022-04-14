@@ -17,7 +17,6 @@ Renderer::~Renderer() {
 	normals.clear();
 	texCoords.clear();
 
-	elements.clear();
 	glDeleteVertexArrays(1, &(VAO));
 	glDeleteBuffers(1, &(VBO));
 	glDeleteBuffers(1, &(NBO));
@@ -32,9 +31,6 @@ Renderer::~Renderer() {
 Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), camera(cam) {
 
 	// Initialise OpenGl
-
-	// Note(sharo): we already initialize glew when we create a window
-	// glewInit();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -56,16 +52,18 @@ Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), ca
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		printf("Troubles with creating a framebuffer\n");
+		Logger::debug("Troubles with creating a framebuffer");
 	}
 
 	// Generate buffer handlers
 	glGenVertexArrays(1, &VAO);
-
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &NBO);
 	glGenBuffers(1, &TCBO);
+    glGenBuffers(1, &TANBO);
 	glGenBuffers(1, &EBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::updateBuffers() {
@@ -82,9 +80,9 @@ void Renderer::updateBuffers() {
 	glVertexAttribPointer(positionAtr, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexArrayAttrib(VAO, positionAtr);
 
-	// Normal positions. At the moment uses textCoord because the normals are submitted with texture
-	glBindBuffer(GL_ARRAY_BUFFER, NBO);
-	glBufferData(GL_ARRAY_BUFFER, 2 * numOfTexCoords * sizeof(GLfloat), texCoords.data(), GL_STATIC_DRAW);
+	// Normal positions
+    glBindBuffer(GL_ARRAY_BUFFER, NBO);
+    glBufferData(GL_ARRAY_BUFFER, 3 * numOfTexCoords * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
 
 	int normalAtr = program->getAtrributeLocation("normal");
 	glVertexAttribPointer(normalAtr, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -106,15 +104,13 @@ void Renderer::updateBuffers() {
     glBindBuffer(GL_ARRAY_BUFFER, TANBO);
     glBufferData(GL_ARRAY_BUFFER, 3 * numOfTangents* sizeof(GLfloat), tangents.data(), GL_STATIC_DRAW);
 
-    int tangentAtr = shader->getAtrributeLocation("tangent");
+    int tangentAtr = program->getAtrributeLocation("tangent");
     glVertexAttribPointer(tangentAtr, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexArrayAttrib(VAO, tangentAtr);
-    std::cout << "TANBO " << glGetError() << std::endl; fflush(NULL);
 
     // Elements
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * numberOfElements * sizeof(GLuint), elements.data(), GL_STATIC_DRAW);
-    std::cout << "EBO " << glGetError() << std::endl; fflush(NULL);
 
     glBindVertexArray(0);
 }
@@ -130,7 +126,6 @@ void Renderer::addObject(IRenderable *mesh) {
 	// Generate textures for the object
 	newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
 	newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
-	std::cout << "Texture " << glGetError() << std::endl; fflush(NULL);
 
 	// Generate the arrays
 	createVertexArray(mesh);
@@ -193,18 +188,10 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 void Renderer::draw() {
 
 	// Render
-	glBindFramebuffer(GL_FRAMEBUFFER, curFBO);
-
-	glClearColor(0.0f, 0.5f, 0.9f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
 	program->use();
+	setFrameBufferToTexture();	
 
-
-    for (unsigned int i = 0; i < objects.size(); i++)
-    {
-        // Activate and bind textures of the object
-        glActiveTexture(GL_TEXTURE0 + 1);
-        glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
+	glBindVertexArray(VAO);
 
 	for (unsigned int i = 0; i < objects.size(); i++)
 	{
@@ -212,26 +199,44 @@ void Renderer::draw() {
 		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
 
-		glActiveTexture(GL_TEXTURE0 + 2);
-		glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
+		for (u32 i = 0; i < objects.size(); i++)
+		{
+			// Activate and bind textures of the object
+			glActiveTexture(GL_TEXTURE0 + 1);
+			glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
 
-		// Draw the object
-		glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
+			glActiveTexture(GL_TEXTURE0 + 2);
+			glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
+
+			// Draw the object
+			glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
+		}
 
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glBindVertexArray(0);
-
+	setFrameBufferToDefault();
 }
 
-void Renderer::fillBackground(float r, float g, float b) {
+void Renderer::fillBackground(f32 r, f32 g, f32 b) {
 
 	// Set background color
+	
 	program->use();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	f32 current_clear_color[4];
+	glGetFloatv(GL_COLOR_CLEAR_VALUE, current_clear_color);
+
+	setFrameBufferToTexture();
 	glClearColor(r,g,b, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
+	setFrameBufferToDefault();
+
+	glClearColor(
+			current_clear_color[0],
+			current_clear_color[1],
+			current_clear_color[2],
+			current_clear_color[3] );
 
 }
 
@@ -284,14 +289,12 @@ void Renderer::createVertexArray(IRenderable* mesh)
 {
 	numberOfVertices += mesh->getNumOfVertices();
 
-    std::vector<float>* v = new std::vector<float>;
-    mesh->getArrayOfVertices(v);
+	std::vector<f32> v;
 
-    copy(&v->data()[0],
-        &v->data()[3 * mesh->getNumOfVertices()],
-        back_inserter(vertices));
+    mesh->getArrayOfVertices(&v);
 
-    delete v;
+    copy(&v.data()[0], &v.data()[3 * mesh->getNumOfVertices()], back_inserter(vertices));
+
 }
 
 
@@ -356,47 +359,46 @@ void Renderer::createElementArray(IRenderable* mesh)
 
 void Renderer::createTangents(IRenderable* mesh)
 {
-    std::vector<float>* v = new std::vector<float>;
-    mesh->getArrayOfVertices(v);
+    std::vector<float> v;
+    mesh->getArrayOfVertices(&v);
 
-    std::vector<float>* tc = new std::vector<float>;
-    mesh->getArrayOfTexCoord(tc);
+    std::vector<float> tc;
+    mesh->getArrayOfTexCoord(&tc);
 
-    std::vector<float>* n = new std::vector<float>;
-    mesh->getArrayOfNormals(n);
+    std::vector<float> n;
+    mesh->getArrayOfNormals(&n);
 
-    std::vector<int>* elem = new std::vector<int>;
-    mesh->getArrayOfElements(elem);
+    std::vector<int> elem; 
+    mesh->getArrayOfElements(&elem);
 
-    int i = v->at(elem->at(0));
-
-
-
+    i32 i = (i32)v.at(elem.at(0));
 
     std::vector<float> newTangents;
     newTangents.resize(mesh->getNumOfVertices()*3);
-    for (auto itr = newTangents.begin(); itr != newTangents.end(); ++itr) *itr = 0.0f;
 
+    for (auto itr = newTangents.begin(); itr != newTangents.end(); ++itr) {
+		*itr = 0.0f;
+	}
 
     // For each triangle in the mesh
-    for (int i = 0; i < elem->size(); i+=3)
+    for (int i = 0; i < elem.size(); i+=3)
     {
         // Get the positions of the vertices, their tex coordinates and the normal coordinates
 
         // Positions
-        int el_ind1 = elem->at(i);
-        int el_ind2 = elem->at(i + 1);
-        int el_ind3 = elem->at(i + 2);
+        int el_ind1 = elem.at(i);
+        int el_ind2 = elem.at(i + 1);
+        int el_ind3 = elem.at(i + 2);
 
 
-        glm::vec3 pos1(v->at(el_ind1 * 3), v->at(el_ind1 * 3 + 1), v->at(el_ind1 * 3 + 2));
-        glm::vec3 pos2(v->at(el_ind2 * 3), v->at(el_ind2 * 3 + 1), v->at(el_ind2 * 3 + 2));
-        glm::vec3 pos3(v->at(el_ind3 * 3), v->at(el_ind3 * 3 + 1), v->at(el_ind3 * 3 + 2));
+        glm::vec3 pos1(v.at(el_ind1 * 3), v.at(el_ind1 * 3 + 1), v.at(el_ind1 * 3 + 2));
+        glm::vec3 pos2(v.at(el_ind2 * 3), v.at(el_ind2 * 3 + 1), v.at(el_ind2 * 3 + 2));
+        glm::vec3 pos3(v.at(el_ind3 * 3), v.at(el_ind3 * 3 + 1), v.at(el_ind3 * 3 + 2));
 
         // Texture coordinates
-        glm::vec2 uv1(tc->at(el_ind1 * 2), tc->at(el_ind1 * 2 + 1));
-        glm::vec2 uv2(tc->at(el_ind2 * 2), tc->at(el_ind2 * 2 + 1));
-        glm::vec2 uv3(tc->at(el_ind3 * 2), tc->at(el_ind3 * 2 + 1));
+        glm::vec2 uv1(tc[el_ind1 * 2], tc[el_ind1 * 2 + 1]);
+        glm::vec2 uv2(tc[el_ind2 * 2], tc[el_ind2 * 2 + 1]);
+        glm::vec2 uv3(tc[el_ind3 * 2], tc[el_ind3 * 2 + 1]);
 
         glm::vec3 edge1 = pos2 - pos1;
         glm::vec3 edge2 = pos3 - pos1;
@@ -405,7 +407,6 @@ void Renderer::createTangents(IRenderable* mesh)
 
 
         glm::vec3 tangent;
-
 
         float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 
@@ -416,9 +417,17 @@ void Renderer::createTangents(IRenderable* mesh)
 
 
         // Save the tangents to each vertice of the triangle
-        newTangents[el_ind1 * 3] += tangent.x; newTangents[el_ind1 * 3 + 1] += tangent.y; newTangents[el_ind1 * 3 + 2] += tangent.z;
-        newTangents[el_ind2 * 3] += tangent.x; newTangents[el_ind2 * 3 + 1] += tangent.y; newTangents[el_ind2 * 3 + 2] += tangent.z;
-        newTangents[el_ind3 * 3] += tangent.x; newTangents[el_ind3 * 3 + 1] += tangent.y; newTangents[el_ind3 * 3 + 2] += tangent.z;
+        newTangents[el_ind1 * 3] += tangent.x;
+		newTangents[el_ind1 * 3 + 1] += tangent.y;
+		newTangents[el_ind1 * 3 + 2] += tangent.z;
+
+        newTangents[el_ind2 * 3] += tangent.x;
+		newTangents[el_ind2 * 3 + 1] += tangent.y;
+		newTangents[el_ind2 * 3 + 2] += tangent.z;
+
+        newTangents[el_ind3 * 3] += tangent.x;
+		newTangents[el_ind3 * 3 + 1] += tangent.y;
+		newTangents[el_ind3 * 3 + 2] += tangent.z;
     }
 
 
@@ -428,9 +437,9 @@ void Renderer::createTangents(IRenderable* mesh)
     verticeTrianglesCount.resize(mesh->getNumOfVertices());
     for (auto itr = verticeTrianglesCount.begin(); itr != verticeTrianglesCount.end(); ++itr) *itr = 0;
 
-    for (int i = 0; i < elem->size(); i++)
+    for (int i = 0; i < elem.size(); i++)
     {
-        verticeTrianglesCount[elem->at(i)]++;
+        verticeTrianglesCount[elem[i]]++;
     }
 
     for (int i = 0; i < newTangents.size() / 3; i++)
@@ -440,16 +449,9 @@ void Renderer::createTangents(IRenderable* mesh)
         newTangents[i * 3 + 2] = newTangents[i * 3 + 2] / verticeTrianglesCount[i];
     }
 
-
     // Add calculated tangents to the container
-    copy(&newTangents.data()[0],
-        &newTangents.data()[newTangents.size()],
-        back_inserter(tangents));
-
-    delete v, tc, n, elem;
-
-    numOfTangents = tangents.size()/3.0f;
-
+    copy(&newTangents.data()[0], &newTangents.data()[newTangents.size()], back_inserter(tangents));
+    numOfTangents = (i32)tangents.size()/3;
 }
 
 
@@ -466,8 +468,7 @@ void Renderer::updateCamera()
 {
     //int toCameraLoc = shader->getUniformLocation("toCamera");
     //glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
-
-    shader->set4Matrix("toCamera", camera->getCameraTransf());
+    program->set4Matrix("toCamera", camera->getCameraTransf());
 	int toCameraLoc = program->getUniformLocation("toCamera");
 	glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
 }
@@ -479,7 +480,7 @@ void Renderer::updateCamera(Camera* cam)
     //int toCameraLoc = shader->getUniformLocation("toCamera");
     //glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
 
-    shader->set4Matrix("toCamera", camera->getCameraTransf());
+    program->set4Matrix("toCamera", camera->getCameraTransf());
 }
 
 void Renderer::useProgram()
@@ -496,57 +497,15 @@ void Renderer::useProgram()
 
 
     // Set up camera position
-    shader->set3Float("cameraPosition", camera->currCamPos.x, camera->currCamPos.y, camera->currCamPos.z);
+    program->set3Float("cameraPosition", camera->currCamPos.x, camera->currCamPos.y, camera->currCamPos.z);
 
     // Set up light position
-    shader->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
-
-
+    program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
     
 }
-
-
-void Renderer::setUpShader()
-{
-    // Set up Shaders and create a shader program
-    // Create shaders
-    shader = new Shader("shaders/vShader.glsl", "shaders/fShader.glsl");
-
-    shader->use();
-
-
-    // Set up Projection matrix
-    projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
-
-    //int toProjectionLoc = shader->getUniformLocation("toProjection");
-
-
-
-    //glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    shader->set4Matrix("toProjection", projection);
-
-
-    // Set up Camera
-    updateCamera();
-
-    // Set up color for mesh
-    //glUniform3f(shader->getUniformLocation("Color"), color.x, color.y, color.z);
-
-
-    // Set up camera position
-    shader->set3Float("cameraPosition", camera->currCamPos.x, camera->currCamPos.y, camera->currCamPos.z);
-
-    // Set up light position
-    shader->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
-
-
-    
-}
-
 
 void Renderer::updateLightPos(float x, float y, float z) 
 {
-    shader->use();
-    shader->set3Float("lightPosition",x, y, z);
+    program->use();
+    program->set3Float("lightPosition",x, y, z);
 }

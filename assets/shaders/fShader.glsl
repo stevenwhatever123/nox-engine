@@ -3,12 +3,11 @@
 // From the vertex shader
 in Vertex {
     	vec3 thePosition;
-    	vec2 theTexCoord;
-	vec3 theNormal;
-
-    	vec3 tangentLightPos;
-    	vec3 tangentCamPos;
-    	vec3 tangentPos;
+		vec2 theTexCoord;
+		vec3 theNormal;
+		vec3 tangentLightPos;
+		vec3 tangentCamPos;
+		vec3 tangentPos;
 } v;
 
 
@@ -44,7 +43,6 @@ void main(void)
   	// ambient
   	vec3 ambientComp = texture(AmbTexture, v.theTexCoord).xyz * lightSource_ambient;
 
-
   	// diffuse color
   	vec3 diffuseComp = material_diffuse * max(dot(normal, lightToFragment), 0.0) * lightSource_diffuse;
 
@@ -57,6 +55,6 @@ void main(void)
 
   	vec3 result = ambientComp + diffuseComp + specComp;
 
-	FragmentColor = vec4(result, 1.0);
+	FragmentColor = vec4(1, 0.5, 0.1, 1.0);
 
 };

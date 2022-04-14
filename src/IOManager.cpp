@@ -101,7 +101,7 @@ TempResourceData IOManager::ReadEntireFileTemp(std::string filename) {
 
 	DWORD readBytes = 0;
 
-	u8 *data = StackMemAllocator::Instance()->allocate(size.QuadPart + 1);
+	u8 *data = StackMemAllocator::Instance()->allocate(i32(size.LowPart + 1));
 	data[size.QuadPart] = '\0';
 
 	ReadFile(file, (LPVOID)data, (DWORD)size.QuadPart, &readBytes, NULL);
@@ -110,7 +110,7 @@ TempResourceData IOManager::ReadEntireFileTemp(std::string filename) {
 	return TempResourceData{data, (i32)readBytes};
 }
 
-std::string IOManager::PickFile(std::string filters) {
+std::string IOManager::PickFile(const char* filters) {
 
 	std::string picked = "";
 
@@ -125,7 +125,7 @@ std::string IOManager::PickFile(std::string filters) {
 	HINSTANCE instance = GetModuleHandle(NULL);
 	OPENFILENAMEA open_file = {
 		.lStructSize = sizeof(OPENFILENAMEA),
-		.lpstrFilter = filters.c_str(),
+		.lpstrFilter = filters,
 		.lpstrCustomFilter = NULL,
 		.nMaxCustFilter = 0,
 		.nFilterIndex = 1,
@@ -136,12 +136,10 @@ std::string IOManager::PickFile(std::string filters) {
 		.Flags = OFN_DONTADDTORECENT|OFN_ENABLESIZING|OFN_HIDEREADONLY|OFN_NONETWORKBUTTON,
 	};
 
-	if(GetOpenFileNameA(&open_file)) {
-		printf("big f");
-	} else {
-		Logger::debug("double F %x", CommDlgExtendedError() );
+	if(!GetOpenFileNameA(&open_file)) {
+		Logger::debug("Failed to Open File Dialog: %x", CommDlgExtendedError() );
 	}
 
-	return picked;
+	return std::string((char*)file_name);
 }
 
