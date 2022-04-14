@@ -1,8 +1,8 @@
 #include "Mesh.h"
 #include <iostream>
-
 #include <glm/gtx/string_cast.hpp>
 
+using namespace NoxEngine;
 
 Mesh::Mesh(aiScene *scene) {
 	aiMesh** loadedMesh = pScene->mMeshes;
@@ -70,7 +70,8 @@ Mesh::Mesh()
 Mesh::~Mesh()
 {
 
-}
+Mesh::Mesh()  {}
+Mesh::~Mesh() {}
 
 void Mesh::resizeNumOfMeshes(unsigned int i) {
 	vertices.resize(i);

@@ -11,35 +11,33 @@ class RenderableComp : public IRenderable
 {
 public:
 
-	RenderableComp(float trX, float trY, float trZ, const char * texName)
+	RenderableComp(f32 trX, f32 trY, f32 trZ, const char * texName)
 	{
 
 		ambTexName = texName;
 
 		// Init data
 		verticesPreped = {
-			1.000000, -1.000000, -1.000000,
-			1.000000, -1.000000, 1.000000,
-			-1.000000, -1.000000, 1.000000,
-			-1.000000, -1.000000, -1.000000,
-			1.000000, 1.000000, -0.999999,
-			0.999999, 1.000000, 1.000001,
-			-1.000000, 1.000000, 1.000000,
-			-1.000000, 1.000000,-1.000000
+			 1.00f, -1.00f, -1.00f,
+			 1.00f, -1.00f,  1.00f,
+			-1.00f, -1.00f,  1.00f,
+			-1.00f, -1.00f, -1.00f,
+			 1.00f,  1.00f, -0.99f,
+			 0.99f,  1.00f,  1.00f,
+			-1.00f,  1.00f,  1.00f,
+			-1.00f,  1.00f, -1.00f
 		};
 
 		normalsPreped = {
-			0.000000, - 1.000000, 0.000000,
-			0.000000, 1.000000, 0.000000,
-			1.000000, 0.000000, 0.000000,
-			- 0.000000, 0.000000, 1.000000,
-			- 1.000000, - 0.000000, - 0.000000,
-			0.000000, 0.000000, - 1.000000
+			 0.00f, -1.00f,  0.00f,
+			 0.00f,  1.00f,  0.00f,
+			 1.00f,  0.00f,  0.00f,
+			-0.00f,  0.00f,  1.00f,
+			-1.00f, -0.00f, -0.00f,
+			 0.00f,  0.00f, -1.00f
 		};
 
-
 		//texCoord = {
-
 		//	1.000000, 0.333333, //0
 		//	1.000000, 0.666667,
 		//	0.666667, 0.666667,
@@ -59,25 +57,21 @@ public:
 
 
 		texCoordPreped = {
-
-			1.000000, 0.333333, //0
-			1.000000, 0.666667,
-			0.666667, 0.666667,
-			0.666667, 0.333333,
-			0.666667, 0.000000, //4
-			0.000000, 0.333333,
-			0.000000, 0.000000,
-			0.333333, 0.000000,
-			0.333333, 1.000000,
-			0.000000, 1.000000,
-			0.000000, 0.666667,
-			0.333333, 0.333333,
-			0.333333, 0.666667,
-			1.000000, 0.000000
-
+			1.000000f, 0.333333f, //0
+			1.000000f, 0.666667f,
+			0.666667f, 0.666667f,
+			0.666667f, 0.333333f,
+			0.666667f, 0.000000f, //4
+			0.000000f, 0.333333f,
+			0.000000f, 0.000000f,
+			0.333333f, 0.000000f,
+			0.333333f, 1.000000f,
+			0.000000f, 1.000000f,
+			0.000000f, 0.666667f,
+			0.333333f, 0.333333f,
+			0.333333f, 0.666667f,
+			1.000000f, 0.000000f
 		};
-
-
 
 
 		facesV = {
@@ -188,62 +182,40 @@ public:
 				normalsFin.push_back(theN.x); normalsFin.push_back(theN.y); normalsFin.push_back(theN.z);
 
 				// and add new index to the elements 
-				elements.push_back(verticesFin.size() / 3 - 1);
+				elements.push_back(i32(verticesFin.size() / 3 - 1));
 			}
-
-		
 		}
 
 		int k = 0;
 	}
 
 
-	int getNumOfVertices() { return verticesFin.size() / 3; }
+	i32 getNumOfVertices() { return i32( verticesFin.size() / 3 ); }
+	i32 getNumOfTexCoord() { return i32( texCoordFin.size() / 2 ); }
+	i32 getNumOfNormals()  { return i32( normalsFin.size() / 3 ); }
 
-	int getNumOfTexCoord() { return texCoordFin.size() / 2; }
+	f32* getArrayOfVertices() { return verticesFin.data(); }
+	f32* getArrayOfTexCoord() { return texCoordFin.data(); }
+	f32* getArrayOfNormals()  { return normalsFin.data(); }
+	i32 getNumOfElements()    { return i32( elements.size() / 3 ); }
+	i32* getArrayOfElements() { return elements.data(); }
 
-	int getNumOfNormals() { return normalsFin.size() / 3; }
-
-
-	//float* getArrayOfVertices() { return verticesFin.data(); }
-
-	//float* getArrayOfTexCoord() { return texCoordFin.data(); }
-
-	//float* getArrayOfNormals() { return normalsFin.data(); }
+	const char* getNormalTexture() { return "textures/leaves_normal.jpg"; }
+	const char* getAmbientTexture() { return ambTexName; }
 
 
 	int getNumOfElements() { return elements.size() / 3; }
 
-	//void getArrayOfElements(std::vector<int> *el) {  }
+	void getArrayOfVertices(std::vector<f32>* v) { *v = verticesFin; }
+	void getArrayOfTexCoord(std::vector<f32>* tC) { *tC = texCoordFin; }
+	void getArrayOfNormals(std::vector<f32>* n) { *n = normalsFin; }
 
+	void getArrayOfElements(std::vector<i32>* el) { *el = elements; }
 
-
-	void getArrayOfVertices(std::vector<float>* v) { *v = verticesFin; }
-	void getArrayOfTexCoord(std::vector<float>* tC) { *tC = texCoordFin; }
-	void getArrayOfNormals(std::vector<float>* n) { *n = normalsFin; }
-
-	//int getNumOfElements() = 0;
-	void getArrayOfElements(std::vector<int>* el) { *el = elements; }
-
-
-
-
-	virtual const char* getNormalTexture() { return "textures/leaves_normal.jpg"; }
-
-	virtual const char* getAmbientTexture() { return ambTexName; }
-
-
-	std::vector<float> verticesFin;
-	std::vector<float> texCoordFin;
-	std::vector<float> normalsFin;
-
-
-	std::vector<int> elements;
-
+	std::vector<f32> verticesFin;
+	std::vector<f32> texCoordFin;
+	std::vector<f32> normalsFin;
+	std::vector<i32> elements;
 	const char* ambTexName;
-
-
-
-
 
 };
