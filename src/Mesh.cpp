@@ -179,15 +179,13 @@ void Mesh::update()
 
 void Mesh::update(time_type dt)
 {
-	if (nodeAnimTransformation.size() > 0)
+	if (getNumOfAnimations() > 0)
 	{
 		accumulator += dt;
 
 		if (frameIndex < nodeAnimTransformation[animationIndex][0].size() - 1)
 		{
 			// Interpolate time into tick
-			// Because 0 is the idle animation that every object shares
-			// even when it does not have any animation data
 			int numOfTicks = numTicks[animationIndex];
 			time_type duration = animationDuration[animationIndex];
 
@@ -220,6 +218,11 @@ void Mesh::flipUV()
 			texCoord[i][j].y = 1 - texCoord[i][j].y;
 		}
 	}
+}
+
+void Mesh::resetFrameIndex()
+{
+	frameIndex = 0;
 }
 
 
@@ -264,7 +267,7 @@ void Mesh::prepForRenderer()
 		mVertices[meshIndex].resize(vertices[meshIndex].size());
 		mNormals[meshIndex].resize(normals[meshIndex].size());
 
-		if (animations.size() < 1)
+		if (getNumOfAnimations() < 1)
 		{
 			//if (!allNodes[i]->hasMesh)
 			//{
@@ -425,4 +428,9 @@ void Mesh::prepForRenderer()
 			elements.push_back((int)(faceIndices[i][j]));
 		}
 	}
+}
+
+unsigned int Mesh::getNumOfAnimations()
+{
+	return animations.size() / 2;
 }

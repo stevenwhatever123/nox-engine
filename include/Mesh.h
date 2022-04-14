@@ -33,7 +33,10 @@ public:
 	void update(time_type dt);
 
 	void flipUV();
+	void resetFrameIndex();
 	void prepForRenderer();
+
+	unsigned int getNumOfAnimations();
 
 public:
 

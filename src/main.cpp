@@ -258,7 +258,7 @@ int main(int argc, char** argv) {
 		{
 			if (isAlreadyLoaded)
 			{
-				mesh->flipUV();
+				//mesh->flipUV();
 			}
 		}
 
@@ -279,19 +279,50 @@ int main(int argc, char** argv) {
 
 		if (isAlreadyLoaded)
 		{
-			std::string stringDisplay = "Animation Duration: " +
-				std::to_string((time_type) mesh->animationDuration[mesh->animationIndex]);
-			const char* c_stringDisplay = stringDisplay.c_str();
-			ImGui::Text(c_stringDisplay);
+			if (mesh->getNumOfAnimations() > 0)
+			{
+				std::string stringDisplay = "Animation Duration: " +
+					std::to_string((time_type)mesh->animationDuration[mesh->animationIndex]);
+				const char* c_stringDisplay = stringDisplay.c_str();
+				ImGui::Text(c_stringDisplay);
 
-			float sliderDuration = 0.0f;
-			sliderDuration = (float)mesh->animationDuration[mesh->animationIndex];
+				std::string stringDisplay2 = "Number of animation: " +
+					std::to_string(mesh->getNumOfAnimations());
+				const char* c_stringDisplay2 = stringDisplay2.c_str();
+				ImGui::Text(c_stringDisplay2);
 
-			ImGui::SliderFloat("Custome Duration",
-				&sliderDuration, 1, 50, "%.3f");
+				if (ImGui::Button("Increase animation index"))
+				{
+					mesh->animationIndex =
+						mesh->animationIndex >= (mesh->animations.size() / 2) - 1 ?
+						mesh->animationIndex : mesh->animationIndex + 1;
+				}
+				if (ImGui::Button("Decrease animation index"))
+				{
+					mesh->animationIndex =
+						mesh->animationIndex <= 0 ?
+						0 : mesh->animationIndex - 1;
+				}
 
-			mesh->animationDuration[mesh->animationIndex] =
-				(time_type)sliderDuration;
+				std::string stringDisplay3 = "Current animation index: " +
+					std::to_string(mesh->animationIndex);
+				const char* c_stringDisplay3 = stringDisplay3.c_str();
+				ImGui::Text(c_stringDisplay3);
+
+				float sliderDuration = 0.0f;
+				sliderDuration = (float)mesh->animationDuration[mesh->animationIndex];
+
+				ImGui::SliderFloat("Custome Duration",
+					&sliderDuration, 1, 50, "%.3f");
+
+				mesh->animationDuration[mesh->animationIndex] =
+					(time_type)sliderDuration;
+			}
+
+			if (ImGui::Button("Refresh"))
+			{
+				mesh->resetFrameIndex();
+			}
 		}
 
 		ImGui::End();
@@ -299,7 +330,6 @@ int main(int argc, char** argv) {
 		// If there was a mesh loaded by user
 		if (isAlreadyLoaded){
 			// Add mesh to renderer
-			//mesh->flipUV();
 			renderer->clearObject();
 			mesh->verticesPreped.clear();
 
