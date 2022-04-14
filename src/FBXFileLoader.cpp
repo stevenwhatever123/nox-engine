@@ -44,11 +44,12 @@ namespace FBXFileLoader
 		}
 	}
 
-	Mesh * getMesh(const aiScene* pScene)
+
+	Mesh * getMesh(const aiScene* pScene, i32 index)
 	{
 		// ==========================================================
 		// Convert to mesh
-		Mesh * mesh = new Mesh();
+		Mesh* mesh = new Mesh(pScene);
 
 		aiMesh** loadedMesh = pScene->mMeshes;
 

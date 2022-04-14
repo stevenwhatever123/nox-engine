@@ -16,6 +16,7 @@ class Mesh : public IRenderable
 public:
 
 	Mesh();
+	Mesh(aiScene *scene);
 	~Mesh();
 
 	void resizeNumOfMeshes(unsigned int i);
@@ -53,19 +54,16 @@ public:
 
 
 	// Implementation of interface IRenderable
-
 	inline int getNumOfVertices() { return vertices[0].size(); }
 	inline int getNumOfTexCoord() { return texCoord[0].size(); }
 	inline int getNumOfNormals() { return normals[0].size(); }
 	inline int getNumOfElements() { return faceIndices[0].size() / 3; }
-
 
 	void getArrayOfVertices(std::vector<float>* v);
 	void getArrayOfTexCoord(std::vector<float>* tC);
 	void getArrayOfNormals(std::vector<float>* n);
 
 	void getArrayOfElements(std::vector<int>* el);
-
 
 	const char* getNormalTexture() { return normTexName; }
 	const char* getAmbientTexture() { return ambTexName;}
@@ -74,7 +72,6 @@ public:
 	const char* normTexName = "textures/Terracotta_Tiles_002_Normal.jpg";
 
 private:
-
 	void copyNodesWithMeshes(aiNode* node, MeshNode* targetParent);
 	void loopAllNodes(MeshNode node, std::vector<MeshNode>& list);
 };

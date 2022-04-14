@@ -155,7 +155,7 @@ void Renderer::addObject(IRenderable *mesh)
     
     // Generate textures for the object
     newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
-    newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
+    newObj.normalTexture =  setTexture(mesh->getNormalTexture(), "NormTexture", 2);
     std::cout << "Texture " << glGetError() << std::endl; fflush(NULL);
 
 

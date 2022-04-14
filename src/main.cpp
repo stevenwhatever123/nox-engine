@@ -91,14 +91,9 @@ void init_imgui(GLFWwindow *win) {
 
 Renderer* init_renderer(Camera* camera) {
 	// ------------------------------ Set up of the render --------------------------
-	
-	
-	
 
 	// Create Renderer
 	Renderer* renderer = new Renderer(winWidth, winHeight, camera);
-
-
 
 	// Add objects to Renderer
 	//renderer->addObject(obj);
@@ -113,10 +108,6 @@ Renderer* init_renderer(Camera* camera) {
 }
 
 int main(int argc, char** argv) {
-	
-	
-
-
 	// Initialize GLFW
 	GLFWwindow* win = initialize_window();
 	bool should_close = false;
@@ -158,6 +149,20 @@ int main(int argc, char** argv) {
 
 	static float f1 = 0.0f;
 
+	const aiScene* pScene = FBXFileLoader::readFBX("assets/meshes/card.fbx");
+
+	// Converting the scene to mesh data
+	if (pScene != nullptr)
+	{
+		mesh = FBXFileLoader::getMesh(pScene);
+		renderer->addObject(mesh);
+		mesh->prepForRenderer();
+		renderer->updateBuffers();
+	} else {
+		printf("Error: converting sence to mesh data");
+	}
+
+
 	while (!should_close) {
 		
 		glfwPollEvents();
@@ -166,113 +171,19 @@ int main(int argc, char** argv) {
 			should_close = true;
 		}
 
-		if (glfwGetKey(win, GLFW_KEY_P) == GLFW_PRESS) {
-			audioManager->PlaySounds(audioFilePath);
-		}
-
-		// Audio
-		//future<void> fut = async(audioUpdate, audioManager);   // doesn't work?
-		audioManager->Update();		// choppy audio sometimes for some reason?
-
 		// GUI
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
-		// Sliders to control the 3D sound position
-		static float soundX = 0.0f, soundY = 0.0f, soundZ = 0.0f;
-		static float soundVolume = 0.0f;
-		ImGui::SliderFloat("Sound X", &soundX, -1.0f, 1.0f, "X = %.3f");
-		ImGui::SliderFloat("Sound Y", &soundY, -1.0f, 1.0f, "Y = %.3f");
-		ImGui::SliderFloat("Sound Z", &soundZ, -1.0f, 1.0f, "Z = %.3f");
-		ImGui::SliderFloat("Sound Volume", &soundVolume, -20.0f, 2.0f, "Volume (dB) = %.3f");
-
-		// Update systems with UI values
-		audioManager->SetChannel3dPosition(0, {soundX, soundY, soundZ});
-		audioManager->SetChannelVolume(0, soundVolume);
-		//customWindow->showFBXLoaderMenu(mesh);
-
-
-
-
-		ImGui::Begin("Settings");
-
-		if (ImGui::Button("Load FBX File"))
-		{
-			OPENFILENAME ofn;
-
-			wchar_t szFile[256];
-
-			ZeroMemory(&ofn, sizeof(ofn));
-			ofn.lStructSize = sizeof(ofn);
-			ofn.hwndOwner = NULL;
-			ofn.lpstrFile = szFile;
-			ofn.lpstrFile[0] = '\0';
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = L"Filmbox File (*.fbx)\0*.fbx\0All (*.*)\0*.*\0";
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = NULL;
-			ofn.lpstrTitle = L"Select FBX file";
-			ofn.lpstrDefExt = L"fbx";
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-			bool readSuccess = GetOpenFileName(&ofn);
-
-			// LPWSTR is different from char
-			// Therefore we're converting it
-			char filenameBuffer[256];
-			wcstombs_s(nullptr, filenameBuffer, sizeof(filenameBuffer), szFile, sizeof(szFile));
-
-			if (readSuccess)
-			{
-				printf("Read Success\n");
-
-				const aiScene* pScene = FBXFileLoader::readFBX(filenameBuffer);
-
-				// Converting the scene to mesh data
-				if (pScene != nullptr)
-				{
-					mesh = FBXFileLoader::getMesh(pScene);
-					isAlreadyLoaded = true;
-					//curMesh = mesh;
-				}
-				else
-				{
-					printf("Error: converting sence to mesh data");
-				}
-			}
-			else
-			{
-				printf("Error: reading fbx file");
-			}
-		}
-
-		ImGui::End();
-
-
+		
 		// One more window just cause
 		ImGui::Begin("Light Position");
-
 
 		ImGui::SliderFloat("slider x", &light.x, -100.0f, 100.0f, " %.3f");
 		ImGui::SliderFloat("slider y", &light.y, -100.0f, 100.0f, " %.3f");
 		ImGui::SliderFloat("slider z", &light.z, -100.0f, 100.0f, " %.3f");
 
 		ImGui::End();
-
-
-		// If there was a mesh loaded by user
-		if (isAlreadyLoaded){
-			// Add mesh to renderer
-			mesh->prepForRenderer();
-			renderer->addObject(mesh);
-			renderer->updateBuffers();
-			isAlreadyLoaded = false;
-
-		}
-
 
 		//	Render to texture	
 		if (locWidth != prevWidth || locHeight != prevHeight)
@@ -284,8 +195,9 @@ int main(int argc, char** argv) {
 
 		//Render background of the app
 		renderer->fillBackground(1.0f, 0.5f, 0.9f);
-		
+
 		renderer->updateLightPos(light.x, light.y, light.z);
+
 		renderer->draw();
 
 		// Use IMGUI to show rendered to framebuffer 
@@ -296,16 +208,10 @@ int main(int argc, char** argv) {
 			locWidth = wsize.x;
 			locHeight = wsize.y;
 
-
 			// Pass texture rendered to to ImGUI
 			ImGui::Image((ImTextureID)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 		} ImGui::End();
-
-
-
-
-
 
 
 		// Finally show UI
@@ -315,10 +221,6 @@ int main(int argc, char** argv) {
 		glfwSwapBuffers(win);
 	}
 
-
-	// Clean up
-	audioManager->Destroy();
-	delete obj, obj2, obj3, camera, renderer;
 
 	return 0;
 }

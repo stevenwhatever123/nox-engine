@@ -7,13 +7,12 @@ in vec3 tangent;
 
 
 out Vertex {
-    	vec3 thePosition;
-    	vec2 theTexCoord;
+	vec3 thePosition;
+	vec2 theTexCoord;
 	vec3 theNormal;
-
-    	vec3 tangentLightPos;
-    	vec3 tangentCamPos;
-    	vec3 tangentPos;
+	vec3 tangentLightPos;
+	vec3 tangentCamPos;
+	vec3 tangentPos;
 } v;
 
 
@@ -25,8 +24,8 @@ uniform vec3 cameraPosition;
 uniform mat4 toCamera;
 uniform mat4 toProjection;
 
-void main(void)
-{	
+void main() {	
+
 	gl_Position = toProjection * toCamera * vec4(position, 1.0f);
 
 	v.theNormal = normal;
@@ -36,15 +35,12 @@ void main(void)
 
 	// For normal mapping
 	vec3 T = normalize(tangent);
-   	vec3 N = normalize(normal);
+	vec3 N = normalize(normal);
 	vec3 B = cross(N, T);
 
-   	mat3 TBN = transpose(mat3(T, B, N));
-
+	mat3 TBN = transpose(mat3(T, B, N));
 
 	v.tangentLightPos = TBN * lightPosition;
-    	v.tangentCamPos  = TBN * cameraPosition;
-    	v.tangentPos  = TBN * position;
-
+	v.tangentCamPos   = TBN * cameraPosition;
+	v.tangentPos      = TBN * position;
 };  
-

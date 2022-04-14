@@ -3,6 +3,65 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+
+Mesh::Mesh(aiScene *scene) {
+	aiMesh** loadedMesh = pScene->mMeshes;
+
+	vertices.resize(pScene->mNumMeshes);
+	normals.resize(pScene->mNumMeshes);
+	faceIndices.resize(pScene->mNumMeshes);
+	texCoord.resize(pScene->mNumMeshes);
+
+	
+	// Get vertex, normal and textcoord data
+	for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
+
+		const aiMesh* pMesh = loadedMesh[i];
+
+		vertices[i].resize(pMesh->mNumVertices);
+		normals[i].resize(pMesh->mNumVertices);
+		texCoord[i].resize(pMesh->mNumVertices);
+		faceIndices[i].resize(pMesh->mNumFaces);
+		
+		const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
+
+		const aiVector3D* pVertex = pMesh->mVertices;
+		const aiVector3D* pNormal = &(pMesh->mNormals;
+		const aiVector3D* pTexCoord = pMesh->HasTextureCoords(0) ?  &(pMesh->mTextureCoords[0][j]) : &zero3D;
+
+		const bool has_texture = pMesh->HasTextureCoords(0);
+
+		for (u32 j = 0; j < pMesh->mNumVertices; ++j) {
+			verteices[i].push_back(glm::vec3{pVertex->x, pVertex->y, pVertex->z});
+			normals[i].push_back  (glm::vec3{pNormal->x, pNormal->y, pNormal->z});
+			texCoord[i].push_back (glm::vec2{pVertex->x, pVertex->y});
+
+			pVertex++;
+			pNormal++;
+			if(has_texture) {
+				pTexCoord++;
+			}
+		}
+
+		const aiFace* face = pMesh->mFaces;
+		for (unsigned int j = 0; j < pMesh->mNumFaces; ++j)
+		{
+
+			if (face->mNumIndices == 3)
+			{
+				faceIndices[i].push_back(face->mIndices[0]);
+				faceIndices[i].push_back(face->mIndices[1]);
+				faceIndices[i].push_back(face->mIndices[2]);
+			}
+			else
+			{
+				printf("Error: number of face indicies is less than 3");
+			}
+		}
+	}
+
+}
+
 Mesh::Mesh()
 {
 
@@ -13,8 +72,7 @@ Mesh::~Mesh()
 
 }
 
-void Mesh::resizeNumOfMeshes(unsigned int i)
-{
+void Mesh::resizeNumOfMeshes(unsigned int i) {
 	vertices.resize(i);
 	normals.resize(i);
 	faceIndices.resize(i);
@@ -77,7 +135,7 @@ void Mesh::copyNodesWithMeshes(aiNode* node, MeshNode* targetParent)
 
 		child->name = node->mChildren[i]->mName.C_Str();
 		child->parent = targetParent;
-		
+
 		if (node->mChildren[i]->mNumMeshes > 0)
 		{
 			child->hasMesh = true;
@@ -183,7 +241,7 @@ void Mesh::prepForRenderer()
 			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
 			{
 				mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-					glm::vec4(vertices[meshIndex][j], 1.0));
+						glm::vec4(vertices[meshIndex][j], 1.0));
 			}
 
 			//for (unsigned int j = 0; j < mVertices[meshIndex].size(); j++)
@@ -238,7 +296,7 @@ void Mesh::getArrayOfVertices(std::vector<float>* v)
 			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
 			{
 				mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-					glm::vec4(vertices[meshIndex][j], 1.0));
+						glm::vec4(vertices[meshIndex][j], 1.0));
 			}
 
 			//for (unsigned int j = 0; j < mVertices[meshIndex].size(); j++)
