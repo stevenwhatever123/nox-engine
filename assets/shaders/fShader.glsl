@@ -55,6 +55,6 @@ void main(void)
 
   	vec3 result = ambientComp + diffuseComp + specComp;
 
-	FragmentColor = vec4(1, 0.5, 0.1, 1.0);
+	FragmentColor = vec4(result, 1.0);
 
 };

@@ -14,7 +14,11 @@ const aiScene* NoxEngine::readFBX(const char* filename)
 {
 	Assimp::Importer importer;
 
-	importer.ReadFile(filename, aiProcessPreset_TargetRealtime_Fast);
+	importer.ReadFile(filename,
+			aiProcess_Triangulate |
+			aiProcess_GenSmoothNormals|
+			aiProcess_FlipUVs|
+			aiProcess_JoinIdenticalVertices);
 
 	// The code above only returns a pointer to the imported data
 	// It will be destroyed after exiting the block

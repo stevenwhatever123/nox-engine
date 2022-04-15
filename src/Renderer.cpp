@@ -131,10 +131,9 @@ void Renderer::addObject(IRenderable *mesh) {
 	createVertexArray(mesh);
 	createTexCoordArray(mesh);
 	createNormalsArray(mesh);
-
     createTangents(mesh);
-
 	createElementArray(mesh);
+
 	newObj.endInd = i32(elements.size());
 
 	objects.push_back(newObj);

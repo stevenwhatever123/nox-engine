@@ -167,8 +167,7 @@ class GameManager {
 		}
 
 		void init_camera() {
-			camera = new Camera(glm::vec3(0.0f, 260.0f, 0.0f));
-			camera->turnVerBy(90.0f);
+			camera = new Camera(glm::vec3(10.0f, 10.0f, 10.0f));
 		}
 
 		void init_shaders() {
@@ -187,10 +186,13 @@ class GameManager {
 			renderer->setProgram(current_program);
 			renderer->useProgram();
 
-			const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
-			Mesh *mesh = new Mesh(pScene);
+			const aiScene* pScene = NoxEngine::readFBX("assets/meshes/triangle.fbx");
+			Mesh *mesh = NoxEngine::getMesh(pScene);
+
 			mesh->prepForRenderer();
+
 			renderer->addObject(mesh);
+			renderer->updateBuffers();
 			delete mesh;
 		}
 
@@ -299,7 +301,6 @@ class GameManager {
 
 		void update_renderer() {
 			renderer->updateLightPos(1, 1, 1);
-			renderer->updateBuffers();
 			renderer->fillBackground(0.1, 0.2, 0.5);
 			renderer->draw();
 		}
