@@ -21,7 +21,7 @@ namespace NoxEngine {
 				for (auto itr : PRESET_OBJECT_CATEGORY_NAMES) {
 
 					// change selected category on button press
-					if ( ImGui::Button(itr.second.c_str()) ) {
+					if ( ImGui::Button(itr.second.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 50)) ) {
 						selectedCategory = itr.first;
 					}
 				}
@@ -42,7 +42,7 @@ namespace NoxEngine {
 
 						// Summon a new object in the select on click
 						// TODO: support drag & drop
-						if (ImGui::Button(name.c_str())) {
+						if (ImGui::Button(name.c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 50))) {
 							std::cout << name << "\n";
 						}
 					}

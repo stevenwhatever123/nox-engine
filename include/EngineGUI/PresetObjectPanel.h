@@ -24,7 +24,7 @@ namespace NoxEngine {
 			{ Lights,	"Lights" },
 			{ Audio,	"Audio" },
 			{ UI,		"UI" },
-			{ All,		"All Categories" }
+			{ All,		"All\nCategories" }
 		};
 
 		static std::map< PresetObjectCategory, std::vector<std::string> > PRESET_OBJECTS {
