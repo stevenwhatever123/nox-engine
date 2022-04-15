@@ -89,6 +89,11 @@ void GLProgram::setFloat(const std::string& name, float value) const
 	glUniform1f(glGetUniformLocation(_id, name.c_str()), value);
 }
 
+void GLProgram::set3Float(const std::string& name, float x, float y, float z) const
+{
+    glUniform3f(glGetUniformLocation(_id, name.c_str()), x, y, z);
+}
+
 void GLProgram::set4Float(const std::string& name, float x, float y, float z, float w) const
 {
 	glUniform4f(glGetUniformLocation(_id, name.c_str()), x, y, z, w);
@@ -104,3 +109,7 @@ int GLProgram::getAtrributeLocation(const std::string& name)
 	return glGetAttribLocation(_id, name.c_str());
 }
 
+void GLProgram::set4Matrix(const std::string &name, glm::mat4 mat) const
+{
+  glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+}

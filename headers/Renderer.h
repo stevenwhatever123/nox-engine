@@ -24,10 +24,9 @@ namespace NoxEngine {
 	{
 		IRenderable* objPtr; // A pointer to the object
 		i32 startInd, endInd; // Start and end indixes in the a united element array 
-		GLuint normalTexture, ambientTexture; // Texture handlers
+		GLuint normalTexture;
+		GLuint ambientTexture; // Texture handlers
 	};
-
-
 	
 
 	/*
@@ -57,16 +56,23 @@ namespace NoxEngine {
 		GLuint TCBO;
 		GLuint VAO;
 		GLuint EBO;
+		GLuint TANBO;
 
-		int numberOfVertices, numberOfNormals, numberOfElements,  numOfTexCoords;
+		i32 numberOfVertices;
+		i32 numberOfNormals;
+		i32 numberOfElements;
+		i32 numOfTexCoords;
+		i32 numOfTangents;
 
 		std::vector<GLfloat> vertices;
 		std::vector<GLfloat> normals;
 		std::vector<GLfloat> texCoords;
+		std::vector<GLfloat> tangents;
 		std::vector<GLint> elements;
 
 		// Buffer and texture to render to.
-		GLuint textureToRenderTo, tex;
+		GLuint textureToRenderTo;
+		GLuint tex;
 		GLuint FBO;
 		GLuint curFBO = 0;
 
@@ -79,7 +85,17 @@ namespace NoxEngine {
 		void createElementArray(IRenderable* mesh);
 
 
+
+		// This atribute is needed for Normal Mapping. 
+		// Basically, need to transform the normals in the map into tangent space (space of the primitive (triangle))
+		// To do so:
+		//              - callculate tangents to vertices and submit them in the shader
+		//              - in shader create transformation matrices using them. 
+		// More in detail in the report section on Normal Mapping
+		void createTangents(IRenderable* mesh); 
+
 		GLuint setTexture(const char* texturePath, const char* uniName, int num);
+
 
 		public:
 
@@ -103,7 +119,7 @@ namespace NoxEngine {
 
 		// Draw functions
 		void draw();
-		void fillBackground(float r, float g, float b);
+		void fillBackground(f32 r, f32 g, f32 b);
 
 		// Get the texture the renderer rendered to
 		GLuint getTexture() { return textureToRenderTo; }
@@ -115,15 +131,15 @@ namespace NoxEngine {
 
 		void updateProjection(int w, int h);
 
-		inline void setFrameBufferToDefault() { curFBO = 0; }
-		inline void setFrameBufferToTexture() { curFBO = FBO; }
+
+		inline void setFrameBufferToDefault() { curFBO = 0; setRenderTarget(); }
+		inline void setFrameBufferToTexture() { curFBO = FBO; setRenderTarget(); }
+		inline void setRenderTarget() { glBindFramebuffer(GL_FRAMEBUFFER, curFBO); }
 
 
 		glm::mat4 getProjMatr() { return projection; }
 
 		glm::mat4 getCameraMatr() { return camera->getCameraTransf(); }
-
-
 
 		// Camera managment
 		// Updates Camera with new camera
@@ -132,6 +148,7 @@ namespace NoxEngine {
 		// Updates the view transformation using the current camera
 		void updateCamera();
 
+		void updateLightPos(float x, float y, float z);
 
 	};
 }

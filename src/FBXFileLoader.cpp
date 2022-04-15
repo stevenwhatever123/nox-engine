@@ -10,8 +10,6 @@
 #include "MeshNode.h"
 #include "Mesh.h"
 
-using namespace NoxEngine;
-
 const aiScene* NoxEngine::readFBX(const char* filename)
 {
 	Assimp::Importer importer;
@@ -44,7 +42,7 @@ const aiScene* NoxEngine::readFBX(const char* filename)
 	}
 }
 
-Mesh* NoxEngine::getMesh(const aiScene* pScene)
+NoxEngine::Mesh* NoxEngine::getMesh(const aiScene* pScene)
 {
 	// ==========================================================
 	// Convert to mesh

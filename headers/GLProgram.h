@@ -7,10 +7,14 @@
 #define GLEW_STATIC
 
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 #include <string>
 #include <Types.h>
 #include <vector>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 namespace NoxEngine {
@@ -41,7 +45,9 @@ namespace NoxEngine {
 			void setBool(const std::string& name, bool value) const;
 			void setInt(const std::string& name, int value) const;
 			void setFloat(const std::string& name, float value) const;
+			void set3Float(const std::string& name, float x, float y, float z) const;
 			void set4Float(const std::string& name, float x, float y, float z, float w) const;
+			void set4Matrix(const std::string& name, glm::mat4 mat) const;
 
 			// Getters
 			int getUniformLocation(const std::string& name);

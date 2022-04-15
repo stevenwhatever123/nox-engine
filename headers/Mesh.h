@@ -17,6 +17,7 @@ namespace NoxEngine {
 	class Mesh : public IRenderable {
 		public:
 
+			Mesh(const aiScene *mesh);
 			Mesh();
 			~Mesh();
 
@@ -32,28 +33,23 @@ namespace NoxEngine {
 
 			void prepForRenderer();
 
-			i32 getNumOfVertices() { return i32( verticesPreped.size() / 3 ); }
-			i32 getNumOfTexCoord() { return i32( texCoordPreped.size() / 2 ); }
-			i32 getNumOfNormals()  { return i32( normalsPreped.size()  / 3 ); }
+			inline i32 getNumOfVertices() { return (i32)vertices[0].size(); }
+			inline i32 getNumOfTexCoord() { return (i32)texCoord[0].size(); }
+			inline i32 getNumOfNormals()  { return (i32)normals[0].size(); }
+			inline i32 getNumOfElements() { return (i32)faceIndices[0].size() / 3; }
 
-			f32* getArrayOfVertices() { return verticesPreped.data(); }
-			f32* getArrayOfTexCoord() { return texCoordPreped.data(); }
-			f32* getArrayOfNormals()  { return normalsPreped.data(); }
-			i32  getNumOfElements()   { return i32( elements.size() / 3 ); }
-			i32* getArrayOfElements() { return elements.data(); }
+			void getArrayOfVertices(std::vector<f32>* v);
+			void getArrayOfTexCoord(std::vector<f32>* tC);
+			void getArrayOfNormals(std::vector<f32>* n);
+			void getArrayOfElements(std::vector<i32>* el);
 
 
-			const char* getNormalTexture()  { return texName; }
-			const char* getAmbientTexture() { return texName;}
-			const char* texName = "textures/leaves_normal.jpg";
-
-		public:
 			MeshNode nodeHierarchy;
 			std::vector<MeshNode*> allNodes;
 
 			std::vector<std::vector<glm::vec3>> vertices;
 			std::vector<std::vector<glm::vec3>> normals;
-			std::vector<std::vector<unsigned int>> faceIndices;
+			std::vector<std::vector<u32>> faceIndices;
 			std::vector<std::vector<glm::vec2>> texCoord;
 
 			std::vector<std::vector<aiMaterial>> materials;
@@ -67,6 +63,16 @@ namespace NoxEngine {
 			std::vector<std::vector<glm::mat4>> nodeAnimRotationMatrices;
 			std::vector<std::vector<glm::mat4>> nodeAnimScalingMatrices;
 
+			const char* getNormalTexture() { return normTexName; }
+			const char* getAmbientTexture() { return ambTexName;}
+
+			const char* ambTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
+			const char* normTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg";
+
+
+
+			
+			
 		private:
 			void copyNodesWithMeshes(aiNode* node, MeshNode* targetParent);
 			void loopAllNodes(MeshNode node, std::vector<MeshNode>& list);
