@@ -215,10 +215,14 @@ void AudioManager::Set3dListenerAttributes(const glm::vec3& vPos, const glm::vec
 	//std::cout << "Position: " << listener.forward.x << "," << listener.forward.y << "," << listener.forward.z << std::endl;
 }
 
-// Global 3D settings
-// @param dopplerScale Exaggerate / diminish doppler effect
-// @param distanceFactor Set units per meter (e.g. if using feet then 3.28). Only affects doppler - does not affect min/max distance
-// @param rolloffScale How fast 3D sounds attenuate using FMOD_3D_LOGROLLOFF
+
+/***
+ * Global 3D settings
+ * 
+ * @param dopplerScale Exaggerate / diminish doppler effect
+ * @param distanceFactor Set units per meter (e.g. if using feet then 3.28). Only affects doppler - does not affect min/max distance
+ * @param rolloffScale How fast 3D sounds attenuate using FMOD_3D_LOGROLLOFF
+ */
 void AudioManager::Set3dSettings(float dopplerScale, float distanceFactor, float rolloffScale) {
 
 	errorCheck(coreSystem->set3DSettings(dopplerScale, distanceFactor, rolloffScale));

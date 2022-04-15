@@ -40,6 +40,10 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MemAllocator.cpp" />
     <ClCompile Include="src\Utils.cpp" />
+    <ClCompile Include="src\EngineGUI.cpp" />
+    <ClCompile Include="src\EngineGUI\AnimationPanel.cpp" />
+    <ClCompile Include="src\EngineGUI\AudioPanel.cpp" />
+    <ClCompile Include="src\EngineGUI\ScenePanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h" />
