@@ -12,39 +12,37 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
-
-
 #include <assimp/Importer.hpp>
 #include <fmod/core/fmod.hpp>
 #include <fmod/core/fmod_errors.h>
-
 
 // Engine Include
 #include <AudioManager.h>
 #include <Types.h>
 #include <Renderer.h>
 #include <IOManager.h>
+#include <GameState.h>
+#include <Utils.h>
+#include <FBXFileLoader.h>
+
+#include <EngineGUI/EngineGUI.h>
+#include <EngineGUI/AudioPanel.h>
+#include <EngineGUI/AnimationPanel.h>
+#include <EngineGUI/ScenePanel.h>
+
 
 namespace NoxEngine {
-
-	struct AudioSource {
-		std::string name;
-		std::string file;
-		glm::vec3 position;
-		f32 sourceVolume;
-	};
-
-	typedef std::map<std::string, AudioSource> AudioRepo;
-
-	struct GameState {
-		AudioRepo audioSources;
-	};
+	
+	using NoxEngineGUI::GUIParams;
+	using NoxEngine::GameState;
+	using NoxEngine::AudioSource;
 
 	class GameManager {
 		public: 
 			GameManager(u32 width, u32 height, std::string title);
 			void init();
 			void update();
+
 			void addAudioSource(AudioSource audioSource);
 			inline Renderer* GetRenderer() { return renderer; };
 			i8 KeepRunning() { return !should_close; }
@@ -82,8 +80,8 @@ namespace NoxEngine {
 			GameState game_state;
 			ImFont* font;
 			std::vector<GLProgram> programs;
-			f32 light[3];
 			GLProgram *current_program;
+			GUIParams ui_params;
 
 	};
 

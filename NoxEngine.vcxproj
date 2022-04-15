@@ -49,9 +49,14 @@
     <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h" />
     <ClInclude Include="headers\AudioManager.h" />
     <ClInclude Include="headers\Camera.h" />
+    <ClInclude Include="headers\EngineGUI\AnimationPanel.h" />
+    <ClInclude Include="headers\EngineGUI\AudioPanel.h" />
+    <ClInclude Include="headers\EngineGUI\EngineGUI.h" />
+    <ClInclude Include="headers\EngineGUI\ScenePanel.h" />
     <ClInclude Include="headers\EventManager.h" />
     <ClInclude Include="headers\FBXFileLoader.h" />
     <ClInclude Include="headers\GameManager.h" />
+    <ClInclude Include="headers\GameState.h" />
     <ClInclude Include="headers\ImGuiCustomWindow.h" />
     <ClInclude Include="headers\IOManager.h" />
     <ClInclude Include="headers\IRenderable.h" />

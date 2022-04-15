@@ -1,12 +1,10 @@
 #include <GameManager.h>
-#include <Utils.h>
-#include <FBXFileLoader.h>
 
 using NoxEngineUtils::Logger;
 using namespace NoxEngine;
+using namespace NoxEngineGUI;
 
 GameManager::GameManager(u32 width, u32 height, std::string title) : win_width(width), win_height(height), title(title) {
-
 }
 
 void GameManager::init() {
@@ -112,72 +110,26 @@ void GameManager::init_renderer() {
 	renderer->setProgram(current_program);
 	renderer->useProgram();
 
-	const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
-	Mesh *mesh = NoxEngine::getMesh(pScene);
+	game_state.renderer = renderer;
 
-	mesh->prepForRenderer();
+	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
+	// Mesh *mesh = NoxEngine::getMesh(pScene);
 
-	renderer->addObject(mesh);
-	renderer->updateBuffers();
-	delete mesh;
+	// mesh->prepForRenderer();
+
+	// renderer->addObject(mesh);
+	// renderer->updateBuffers();
+	// delete mesh;
 }
 
 void GameManager::init_imgui() {
 
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-
+	NoxEngineGUI::init_imgui(window);
+	
 	ImGuiIO& io = ImGui::GetIO();
-
 	font = io.Fonts->AddFontFromFileTTF("envy.ttf", 18);
 	io.Fonts->Build();
 
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOther(window, true);
-	ImGui_ImplOpenGL3_Init("#version 450");
-
-}
-
-void GameManager::asset_ui() {
-
-	ImGui::Begin("Audio Sources");
-
-	auto startItr = game_state.audioSources.begin();
-	auto endItr = game_state.audioSources.end();
-
-	ImGui::DragFloat3("Light", light);
-
-	static bool show_demo_window = true;
-	if(ImGui::Button("load")) {
-		std::string file_name = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
-		Logger::debug("name %s", file_name.c_str());
-	}
-
-	if(ImGui::TreeNode("Audios")) {
-
-		while(startItr != endItr) {
-			AudioSource *audio_source = &startItr->second;
-			if(ImGui::TreeNode(audio_source->name.c_str())) {
-				ImGui::Text("File Name: %s", audio_source->file.c_str());
-				if(ImGui::TreeNode("Position")) {
-					ImGui::DragFloat3("Position", &audio_source->position[0]);
-					ImGui::TreePop();
-				}
-
-				ImGui::SliderFloat("Volume: ", &audio_source->sourceVolume, -20.0f, 2.0f, "Volume (dB) = %.3f");
-
-				ImGui::TreePop();
-			}
-
-			startItr++;
-		}
-
-		ImGui::TreePop();
-	}
-
-	ImGui::End();
 
 }
 
@@ -211,8 +163,18 @@ void GameManager::update_gui() {
 	ImGui::NewFrame();
 	ImGui::PushFont(font);
 
-	asset_ui();
-	main_contex_ui();
+	NoxEngineGUI::updateGUI(&ui_params);
+	NoxEngineGUI::updateAudioPanel(&game_state);
+	NoxEngineGUI::updateAnimationPanel(&game_state);
+	NoxEngineGUI::updateScenePanel(&game_state);
+
+	ImGui::Begin("Light Settings");
+
+	ImGui::DragFloat3("Position", game_state.light);
+
+	ImGui::End();
+
+	// main_contex_ui();
 
 	ImGui::PopFont();
 	ImGui::Render();
@@ -221,14 +183,16 @@ void GameManager::update_gui() {
 }
 
 
-void GameManager::update_audio() { }
+void GameManager::update_audio() {
+	audioManager->Update();
+}
 
 void GameManager::update_inputs() {
 	glfwPollEvents();
 }
 
 void GameManager::update_renderer() {
-	renderer->updateLightPos(light[0], light[1], light[2]);
+	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(0.1, 0.2, 0.5);
 	renderer->draw();
 }
