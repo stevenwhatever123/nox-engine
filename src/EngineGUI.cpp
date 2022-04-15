@@ -5,6 +5,7 @@
 #include "EngineGUI/AnimationPanel.h"
 #include "EngineGUI/AudioPanel.h"
 #include "EngineGUI/ScenePanel.h"
+#include "EngineGUI/ImGuizmoTool.h"
 
 
 namespace NoxEngine {
@@ -170,6 +171,7 @@ namespace NoxEngine {
 			ImGui::PopStyleVar(2);
 
 			// Menu bar
+			// Note: This has to be in between the Begin & End for the "Invisible Window"
 			updateMenu();
 
 			// Setup dockspace only once
@@ -198,12 +200,15 @@ namespace NoxEngine {
 			NoxEngine::EngineGUI::updateAnimationPanel(params);
 			NoxEngine::EngineGUI::updateScenePanel(params);
 
+			// ImGuizmo
+			updateImGuizmoDemo(params);
+
 
 			// Placeholder / debug windows
 			ImGui::Begin(PANEL_NAME_MAP[PanelName::FileExplorer].c_str());    ImGui::End();
 			ImGui::Begin(PANEL_NAME_MAP[PanelName::PresetObjects].c_str());   ImGui::End();
 			ImGui::Begin(PANEL_NAME_MAP[PanelName::Hierarchy].c_str());		  ImGui::End();
-			//ImGui::ShowDemoWindow();
+			ImGui::ShowDemoWindow();
 			ImGui::ShowMetricsWindow();
 
 			// Finally show UI

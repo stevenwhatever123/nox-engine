@@ -19,6 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="3rdParty\headers\imguizmo\GraphEditor.cpp" />
+    <ClCompile Include="3rdParty\headers\imguizmo\ImCurveEdit.cpp" />
+    <ClCompile Include="3rdParty\headers\imguizmo\ImGradient.cpp" />
+    <ClCompile Include="3rdParty\headers\imguizmo\ImGuizmo.cpp" />
+    <ClCompile Include="3rdParty\headers\imguizmo\ImSequencer.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_demo.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_draw.cpp" />
@@ -29,6 +34,7 @@
     <ClCompile Include="src\EngineGUI.cpp" />
     <ClCompile Include="src\EngineGUI\AnimationPanel.cpp" />
     <ClCompile Include="src\EngineGUI\AudioPanel.cpp" />
+    <ClCompile Include="src\EngineGUI\ImGuizmoTool.cpp" />
     <ClCompile Include="src\EngineGUI\ScenePanel.cpp" />
     <ClCompile Include="src\FBXFileLoader.cpp" />
     <ClCompile Include="src\ImGuiCustomWindow.cpp" />
@@ -45,6 +51,7 @@
     <ClInclude Include="include\EngineGUI.h" />
     <ClInclude Include="include\EngineGUI\AnimationPanel.h" />
     <ClInclude Include="include\EngineGUI\AudioPanel.h" />
+    <ClInclude Include="include\EngineGUI\ImGuizmoTool.h" />
     <ClInclude Include="include\EngineGUI\ScenePanel.h" />
     <ClInclude Include="include\FBXFileLoader.h" />
     <ClInclude Include="include\ImGuiCustomWindow.h" />

@@ -8,7 +8,6 @@
 #include <glm/glm.hpp>
 
 #include "EngineGUI.h"
-#include "EngineGUI/ScenePanel.h"
 
 //#include "../ImGuiCustomWindow.h"
 #include <fmod/core/fmod.hpp>
@@ -127,6 +126,8 @@ int main(int argc, char** argv) {
 		.renderer = renderer
 	};
 
+
+	// Main loop
 	while (!should_close) {
 		
 		glfwPollEvents();
@@ -144,6 +145,7 @@ int main(int argc, char** argv) {
 
 		// GUI
 		NoxEngine::EngineGUI::updateGUI(&aGUIParams);
+
 
 		// Next slide please
 		glfwSwapBuffers(win);
