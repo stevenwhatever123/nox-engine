@@ -3,17 +3,35 @@
 #include <vector>
 
 #include "IRenderable.h"
+#include "IComponent.h"
+
 /*
 * A mock up class for Renderer to render a cube
 */
-class RenderableComp : public IRenderable
+class RenderableComp : public IRenderable, public IComponent
 
 {
 public:
 
+	// const int castIDIRenderable = 1;
+	// const int castIDIComponent = 2;
+
+	void* CastType(const int castID)
+	{
+		switch (castID)
+		{
+			case 2:
+				return static_cast<IRenderable*>(this); break;
+			case 1:
+				return static_cast<IComponent*>(this); break;
+			default:
+				return nullptr;
+		}
+	}
+
 	RenderableComp(float trX, float trY, float trZ, const char * texName)
 	{
-
+		ID = 2;
 		ambTexName = texName;
 
 		// Init data
@@ -228,7 +246,7 @@ public:
 
 
 
-	virtual const char* getNormalTexture() { return "textures/leaves_normal.jpg"; }
+	virtual const char* getNormalTexture() { return "assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg"; }
 
 	virtual const char* getAmbientTexture() { return ambTexName; }
 
@@ -241,6 +259,15 @@ public:
 	std::vector<int> elements;
 
 	const char* ambTexName;
+
+
+	std::vector<float> verticesPreped;
+	std::vector<float> texCoordPreped;
+	std::vector<float> normalsPreped;
+
+	std::vector<int> facesV;
+	std::vector<int> facesT;
+	std::vector<int> facesN;
 
 
 

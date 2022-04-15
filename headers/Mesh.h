@@ -28,7 +28,7 @@ public:
 	void printAllNodes();
 	void printAllMeshNodes();
 
-	void prepForRenderer();
+	//void prepForRenderer();
 
 public:
 

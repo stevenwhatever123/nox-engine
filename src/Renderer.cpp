@@ -144,13 +144,16 @@ void Renderer::updateBuffers()
 }
 
 
-void Renderer::addObject(IRenderable *mesh)
+void Renderer::addObject(IRenderable *mesh, IPosition *pos)
 {
 
     // Add a mesh to the container
     RendObj newObj;
     newObj.objPtr = mesh;
     newObj.startInd = elements.size();
+
+
+    newObj.pos = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
     
     
     // Generate textures for the object
@@ -234,6 +237,11 @@ void Renderer::draw()
 
     for (unsigned int i = 0; i < objects.size(); i++)
     {
+        // Set position of the objects
+
+        
+        shader->set4Matrix("toWorld", objects[i].pos);
+
         // Activate and bind textures of the object
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
@@ -512,7 +520,7 @@ void Renderer::setUpShader()
 {
     // Set up Shaders and create a shader program
     // Create shaders
-    shader = new Shader("shaders/vShader.glsl", "shaders/fShader.glsl");
+    shader = new Shader("assets/shaders/vShader.glsl", "assets/shaders/fShader.glsl");
 
     shader->use();
 
@@ -541,6 +549,9 @@ void Renderer::setUpShader()
 
     // Set up light position
     shader->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
+
+    // Set up to world transformation
+    shader->set4Matrix("toWorld", glm::mat4(1.0f));
 
 
     

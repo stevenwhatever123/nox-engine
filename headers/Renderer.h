@@ -13,6 +13,7 @@
 
 
 #include "IRenderable.h"
+#include "IPosition.h"
 #include "Camera.h"
 #include "Shader.h"
 
@@ -41,6 +42,7 @@ private:
         IRenderable* objPtr; // A pointer to the object
         int startInd, endInd; // Start and end indixes in the a united element array 
         GLuint normalTexture, ambientTexture; // Texture handlers
+        glm::mat4 pos;
     };
 
     std::vector<RendObj> objects;
@@ -104,12 +106,13 @@ public:
      *        height - the height of the window to render to
      *        camera - a camera to render from
     */
+    Renderer();
     Renderer(int width, int height, Camera* camera);
 
     ~Renderer();
 
     // Add object to renderer to render
-    void addObject(IRenderable *mesh);
+    void addObject(IRenderable *mesh, IPosition *pos);
 
     void updateBuffers();
 

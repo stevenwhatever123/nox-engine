@@ -47,6 +47,8 @@ public:
     glm::vec3 startCamPos;
     glm::vec3 currCamPos;
 
+    Camera();
+
     Camera(glm::vec3 stPos) :
         startCamPos(stPos),
         currCamPos(stPos),
