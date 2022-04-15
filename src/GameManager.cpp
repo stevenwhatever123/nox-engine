@@ -21,7 +21,7 @@ void GameManager::update() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	update_inputs();
-	// update_audio();
+	update_audio();
 	update_renderer();
 	update_gui();
 
@@ -184,6 +184,15 @@ void GameManager::update_gui() {
 
 
 void GameManager::update_audio() {
+
+	// Sync audio manager with the game state's audio repo
+	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
+	//       set the pos/volume in the appropriate ChannelGroup / ChannelControl
+	for (auto itr : game_state.audioSources) {
+		audioManager->SetChannel3dPosition(0, itr.second.position);
+		audioManager->SetChannelVolume(0, itr.second.sourceVolume);
+	}
+
 	audioManager->Update();
 }
 

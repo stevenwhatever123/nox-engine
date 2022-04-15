@@ -240,14 +240,14 @@ void AudioManager::SetChannel3dPosition(int nChannelId, const glm::vec3& vPositi
 }
 
 
-void AudioManager::SetChannelVolume(int nChannelId, float fVolumedB) {
+void AudioManager::SetChannelVolume(int nChannelId, float fNormalizedVolume) {
 
 	// find the specified channel
 	auto channelItr = mChannels.find(nChannelId);
 	if (channelItr == mChannels.end()) return;
 
 	// update volume
-	errorCheck(channelItr->second->setVolume(dbToVolume(fVolumedB)));
+	errorCheck(channelItr->second->setVolume(fNormalizedVolume));
 }
 
 
