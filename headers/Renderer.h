@@ -85,7 +85,6 @@ namespace NoxEngine {
 		void createElementArray(IRenderable* mesh);
 
 
-		GLuint setTexture(const char* texturePath, const char* uniName, int num);
 
 		// This atribute is needed for Normal Mapping. 
 		// Basically, need to transform the normals in the map into tangent space (space of the primitive (triangle))
@@ -94,6 +93,8 @@ namespace NoxEngine {
 		//              - in shader create transformation matrices using them. 
 		// More in detail in the report section on Normal Mapping
 		void createTangents(IRenderable* mesh); 
+
+		GLuint setTexture(const char* texturePath, const char* uniName, int num);
 
 
 		public:

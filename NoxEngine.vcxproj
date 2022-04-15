@@ -29,6 +29,7 @@
     <ClCompile Include="3rdParty\headers\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\EventManager.cpp" />
     <ClCompile Include="src\FBXFileLoader.cpp" />
+    <ClCompile Include="src\GameManager.cpp" />
     <ClCompile Include="src\ImGuiCustomWindow.cpp" />
     <ClCompile Include="src\IOManager.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
@@ -46,6 +47,7 @@
     <ClInclude Include="headers\Camera.h" />
     <ClInclude Include="headers\EventManager.h" />
     <ClInclude Include="headers\FBXFileLoader.h" />
+    <ClInclude Include="headers\GameManager.h" />
     <ClInclude Include="headers\ImGuiCustomWindow.h" />
     <ClInclude Include="headers\IOManager.h" />
     <ClInclude Include="headers\IRenderable.h" />

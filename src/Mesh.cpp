@@ -170,10 +170,18 @@ Mesh::Mesh(const aiScene *scene) {
 
 }
 
-Mesh::Mesh()  {}
-Mesh::~Mesh() {}
+Mesh::Mesh()
+{
 
-void Mesh::resizeNumOfMeshes(unsigned int i) {
+}
+
+Mesh::~Mesh()
+{
+
+}
+
+void Mesh::resizeNumOfMeshes(unsigned int i)
+{
 	vertices.resize(i);
 	normals.resize(i);
 	faceIndices.resize(i);
@@ -236,7 +244,7 @@ void Mesh::copyNodesWithMeshes(aiNode* node, MeshNode* targetParent)
 
 		child->name = node->mChildren[i]->mName.C_Str();
 		child->parent = targetParent;
-
+		
 		if (node->mChildren[i]->mNumMeshes > 0)
 		{
 			child->hasMesh = true;
@@ -342,7 +350,7 @@ void Mesh::prepForRenderer()
 			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
 			{
 				mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-						glm::vec4(vertices[meshIndex][j], 1.0));
+					glm::vec4(vertices[meshIndex][j], 1.0));
 			}
 
 			//for (unsigned int j = 0; j < mVertices[meshIndex].size(); j++)
@@ -384,7 +392,7 @@ void Mesh::getArrayOfVertices(std::vector<float>* v)
 	mVertices.resize(vertices.size());
 
 	// Apply transformation from nodes
-	for (u32 i = 0; i < allNodes.size(); i++)
+	for (unsigned int i = 0; i < allNodes.size(); i++)
 	{
 		if (!allNodes[i]->hasMesh)
 		{
@@ -397,7 +405,7 @@ void Mesh::getArrayOfVertices(std::vector<float>* v)
 			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
 			{
 				mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-						glm::vec4(vertices[meshIndex][j], 1.0));
+					glm::vec4(vertices[meshIndex][j], 1.0));
 			}
 
 			//for (unsigned int j = 0; j < mVertices[meshIndex].size(); j++)
@@ -410,9 +418,7 @@ void Mesh::getArrayOfVertices(std::vector<float>* v)
 	for (unsigned int i = 0; i < vertices[0].size(); i++)
 	{
 		//verticesPreped.push_back(vertices[0][i].x); verticesPreped.push_back(vertices[0][i].y); verticesPreped.push_back(vertices[0][i].z);
-		v->push_back(mVertices[0][i].x);
-		v->push_back(mVertices[0][i].y);
-		v->push_back(mVertices[0][i].z);
+		v->push_back(mVertices[0][i].x); v->push_back(mVertices[0][i].y); v->push_back(mVertices[0][i].z);
 	}
 }
 

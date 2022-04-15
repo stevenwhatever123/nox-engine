@@ -12,20 +12,22 @@
 using NoxEngineUtils::Logger;
 using namespace NoxEngine;
 
-Renderer::~Renderer() {
-	vertices.clear();
-	normals.clear();
-	texCoords.clear();
+Renderer::~Renderer()
+{
+    vertices.clear();
+    normals.clear();
+    texCoords.clear();
+    elements.clear();
 
-	glDeleteVertexArrays(1, &(VAO));
-	glDeleteBuffers(1, &(VBO));
-	glDeleteBuffers(1, &(NBO));
-	glDeleteBuffers(1, &(TCBO));
-	glDeleteBuffers(1, &(EBO));
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &NBO);
+    glDeleteBuffers(1, &TCBO);
+    glDeleteBuffers(1, &EBO);
 
-	// Remove shader
-	// Remove framebuffer
-	glDeleteFramebuffers(1, &FBO);
+    // Remove shader
+    // Remove framebuffer
+    glDeleteFramebuffers(1, &FBO);
 }
 
 Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), camera(cam) {
@@ -39,31 +41,33 @@ Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), ca
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-	// Gen texture for framebuffer    
-	glGenTextures(1, &textureToRenderTo);
-	glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
+    // Gen texture for framebuffer    
+    glGenTextures(1, &textureToRenderTo);
+    glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	// Attach tex to framebuffer
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		Logger::debug("Troubles with creating a framebuffer");
-	}
+    // Attach tex to framebuffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        printf("Troubles with creating a framebuffer\n");
+    }
 
-	// Generate buffer handlers
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &NBO);
-	glGenBuffers(1, &TCBO);
+
+    // Generate buffer handlers
+    glGenVertexArrays(1, &VAO);
+
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &NBO);
+    glGenBuffers(1, &TCBO);
     glGenBuffers(1, &TANBO);
-	glGenBuffers(1, &EBO);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glGenBuffers(1, &EBO);
 }
 
 void Renderer::updateBuffers() {
@@ -85,7 +89,7 @@ void Renderer::updateBuffers() {
     glBufferData(GL_ARRAY_BUFFER, 3 * numOfTexCoords * sizeof(GLfloat), normals.data(), GL_STATIC_DRAW);
 
 	int normalAtr = program->getAtrributeLocation("normal");
-	glVertexAttribPointer(normalAtr, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glVertexAttribPointer(normalAtr, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexArrayAttrib(VAO, normalAtr);
 
 	// Tex Coords positions
@@ -486,18 +490,17 @@ void Renderer::useProgram()
 {
 	program->use();
 	// Set up Projection matrix
-	int toProjectionLoc = program->getUniformLocation("toProjection");
+	// int toProjectionLoc = program->getUniformLocation("toProjection");
 	projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 200.0f);
-	glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-	// Set up Camera
-	// updateCamera();
-	// Set up color for mesh
-	glUniform3f(program->getUniformLocation("Color"), color.x, color.y, color.z);
 
+	program->set4Matrix("toProjection", projection);
+
+	updateCamera();
+	// Set up color for mesh
+	// glUniform3f(program->getUniformLocation("Color"), color.x, color.y, color.z);
 
     // Set up camera position
     program->set3Float("cameraPosition", camera->currCamPos.x, camera->currCamPos.y, camera->currCamPos.z);
-
     // Set up light position
     program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
     
