@@ -209,6 +209,42 @@ void Mesh::update(time_type dt)
 	}
 }
 
+void Mesh::calculateCenterPosition()
+{
+	glm::vec3 temp(0,0,0);
+	unsigned int count = 0;
+
+	for (unsigned int i = 0; i < vertices.size(); i++)
+	{
+		for (unsigned int j = 0; j < vertices[i].size(); j++)
+		{
+			temp = temp + vertices[i][j];
+			count++;
+		}
+	}
+
+	centerPosition = temp * (float) (1 / count);
+}
+
+void Mesh::generateAnimation(glm::vec3 targetPosition)
+{
+	unsigned int ticksIWant = 300;
+	time_type durationIWant = 10.0f;
+
+	numTicks.push_back(ticksIWant);
+	animationDuration.push_back(durationIWant);
+
+	//unsigned int numAnimation = getNumOfAnimations();
+	// Create all keyframes
+	for (unsigned int i = 0; i < allNodes.size(); i++)
+	{
+		for (unsigned int j = 0; j < ticksIWant; j++)
+		{
+			// Yeah I'll implement it later
+		}
+	}
+}
+
 void Mesh::flipUV()
 {
 	for (unsigned int i = 0; i < texCoord.size(); i++)

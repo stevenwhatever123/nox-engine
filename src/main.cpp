@@ -142,6 +142,7 @@ int main(int argc, char** argv) {
 	Mesh* mesh = NULL;
 	bool isAlreadyLoaded = false;
 	bool playAnimation = false;
+	glm::vec3 targetPosition(0, 0, -10);
 
 	// Used to detect change in window size
 	int locWidth = winWidth, locHeight = winHeight, prevWidth = winWidth, prevHeight = winHeight;
@@ -258,7 +259,7 @@ int main(int argc, char** argv) {
 		{
 			if (isAlreadyLoaded)
 			{
-				//mesh->flipUV();
+				mesh->flipUV();
 			}
 		}
 
@@ -318,6 +319,13 @@ int main(int argc, char** argv) {
 				mesh->animationDuration[mesh->animationIndex] =
 					(time_type)sliderDuration;
 			}
+			else
+			{
+				if (ImGui::Button("Generate animation"))
+				{
+
+				}
+			}
 
 			if (ImGui::Button("Refresh"))
 			{
@@ -337,6 +345,13 @@ int main(int argc, char** argv) {
 			renderer->addObject(mesh);
 			renderer->updateBuffers();
 			//isAlreadyLoaded = false;
+
+			mesh->calculateCenterPosition();
+			//std::cout << "Center position: ";
+			//std::cout << glm::to_string(mesh->centerPosition) << "\n";
+
+			//std::cout << "Target position: ";
+			//std::cout << glm::to_string(targetPosition) << "\n";
 
 			if (playAnimation)
 			{

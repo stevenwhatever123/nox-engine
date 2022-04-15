@@ -32,6 +32,9 @@ public:
 	void update();
 	void update(time_type dt);
 
+	void calculateCenterPosition();
+	void generateAnimation(glm::vec3 targetPosition);
+
 	void flipUV();
 	void resetFrameIndex();
 	void prepForRenderer();
@@ -39,6 +42,8 @@ public:
 	unsigned int getNumOfAnimations();
 
 public:
+
+	glm::vec3 centerPosition;
 
 	unsigned int frameIndex = 0;
 	unsigned int animationIndex = 0;
@@ -70,7 +75,7 @@ public:
 	std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimScalingMatrices;
 
 	// Animation clip -> node -> numTicks
-	std::vector<int> numTicks;
+	std::vector<unsigned int> numTicks;
 	// Animation clip -> duration
 	std::vector<time_type> animationDuration;
 
