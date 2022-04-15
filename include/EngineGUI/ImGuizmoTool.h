@@ -11,6 +11,12 @@ namespace NoxEngine {
 
 	namespace EngineGUI {
 
+		struct GuizmoParams {
+
+		};
+
+		static GuizmoParams guizmoParams;
+
 		// TODO: clean up the static mess
 		static bool useWindow = true;
 		static int gizmoCount = 1;
@@ -47,12 +53,6 @@ namespace NoxEngine {
 		  0.f, 0.f, 2.f, 1.f }
 		};
 
-		static const float identityMatrix[16] =
-		{ 1.f, 0.f, 0.f, 0.f,
-			0.f, 1.f, 0.f, 0.f,
-			0.f, 0.f, 1.f, 0.f,
-			0.f, 0.f, 0.f, 1.f };
-
 		static float cameraView[16] =
 		{ 1.f, 0.f, 0.f, 0.f,
 		  0.f, 1.f, 0.f, 0.f,
@@ -66,8 +66,9 @@ namespace NoxEngine {
 
 		// Camera projection
 		static bool isPerspective = true;
-		static float fov = 27.f;
+		static float fov = 27.f;	// TODO: reuse in glm::perspective (Renderer)
 		static float viewWidth = 10.f; // for orthographic
+		// TODO: ignore, use the existing values in glm::lookAt (camera)
 		static float camYAngle = 165.f / 180.f * 3.14159f;
 		static float camXAngle = 32.f / 180.f * 3.14159f;
 

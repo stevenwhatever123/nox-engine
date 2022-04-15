@@ -97,6 +97,7 @@ namespace NoxEngine {
 		//void updateFileExplorerPanel();
 		//void updateHierarchyPanel();
 		//void updatePresetObjectsPanel();
+		//void updateConsoleLogPanel();
 
 	}
 

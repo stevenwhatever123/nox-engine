@@ -35,6 +35,7 @@
     <ClCompile Include="src\EngineGUI\AnimationPanel.cpp" />
     <ClCompile Include="src\EngineGUI\AudioPanel.cpp" />
     <ClCompile Include="src\EngineGUI\ImGuizmoTool.cpp" />
+    <ClCompile Include="src\EngineGUI\PresetObjectPanel.cpp" />
     <ClCompile Include="src\EngineGUI\ScenePanel.cpp" />
     <ClCompile Include="src\FBXFileLoader.cpp" />
     <ClCompile Include="src\ImGuiCustomWindow.cpp" />
@@ -52,6 +53,7 @@
     <ClInclude Include="include\EngineGUI\AnimationPanel.h" />
     <ClInclude Include="include\EngineGUI\AudioPanel.h" />
     <ClInclude Include="include\EngineGUI\ImGuizmoTool.h" />
+    <ClInclude Include="include\EngineGUI\PresetObjectPanel.h" />
     <ClInclude Include="include\EngineGUI\ScenePanel.h" />
     <ClInclude Include="include\FBXFileLoader.h" />
     <ClInclude Include="include\ImGuiCustomWindow.h" />

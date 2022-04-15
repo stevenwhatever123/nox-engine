@@ -5,6 +5,7 @@
 #include "EngineGUI/AnimationPanel.h"
 #include "EngineGUI/AudioPanel.h"
 #include "EngineGUI/ScenePanel.h"
+#include "EngineGUI/PresetObjectPanel.h"
 #include "EngineGUI/ImGuizmoTool.h"
 
 
@@ -70,8 +71,8 @@ namespace NoxEngine {
 			ImGuiID dock_down_down_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Up, 0.05f, nullptr, &mainNodeID);
 
 			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Scene].c_str(), mainNodeID);
-			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::PresetObjects].c_str(), dock_right_id);
-			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Hierarchy].c_str(), dock_left_id);
+			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Hierarchy].c_str(), dock_right_id);
+			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::PresetObjects].c_str(), dock_left_id);
 			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AnimationSettings].c_str(), dock_down_id);
 			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AudioSource].c_str(), dock_down_right_id);
 			ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::FileExplorer].c_str(), dock_down_down_id);
@@ -199,6 +200,7 @@ namespace NoxEngine {
 			NoxEngine::EngineGUI::updateAudioPanel(params);
 			NoxEngine::EngineGUI::updateAnimationPanel(params);
 			NoxEngine::EngineGUI::updateScenePanel(params);
+			NoxEngine::EngineGUI::updatePresetObjectPanel(params);
 
 			// ImGuizmo
 			updateImGuizmoDemo(params);
@@ -206,7 +208,6 @@ namespace NoxEngine {
 
 			// Placeholder / debug windows
 			ImGui::Begin(PANEL_NAME_MAP[PanelName::FileExplorer].c_str());    ImGui::End();
-			ImGui::Begin(PANEL_NAME_MAP[PanelName::PresetObjects].c_str());   ImGui::End();
 			ImGui::Begin(PANEL_NAME_MAP[PanelName::Hierarchy].c_str());		  ImGui::End();
 			ImGui::ShowDemoWindow();
 			ImGui::ShowMetricsWindow();

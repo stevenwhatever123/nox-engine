@@ -226,7 +226,7 @@ namespace NoxEngine {
 				ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 			}
 
-			ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
+			ImGuizmo::DrawGrid(cameraView, cameraProjection, &glm::mat4(1.0)[0][0], 100.f);
 			ImGuizmo::DrawCubes(cameraView, cameraProjection, &objectMatrix[0][0], gizmoCount);
 			ImGuizmo::Manipulate(cameraView, cameraProjection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
 
