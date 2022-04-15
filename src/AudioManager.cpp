@@ -1,32 +1,12 @@
-/***************************************
-*
-* Audio engine
-* Base code was developed by Cody Claborn
-* (https://www.codyclaborn.me/tutorials/making-a-basic-fmod-audio-engine-in-c/)
-*
-***************************************/
-
 #include <AudioManager.h>
 
 
-//////////////////////////////////
-//   CONSTRUCTOR / DESTRUCTOR   //
-//////////////////////////////////
-
-AudioManager::AudioManager() {
-
-}
-AudioManager::~AudioManager() {
-
-}
-
-
+using namespace NoxEngine;
 //////////////
 //   CORE   //
 //////////////
 
 void AudioManager::Init() {
-
 	// Initialize FMOD Core API
 	coreSystem = NULL;
 
@@ -76,7 +56,6 @@ void AudioManager::Update() {
 		mChannels.erase(it);
 	}
 
-
 	// fmod needs to be updated at once once per game tick
 	AudioManager::errorCheck(coreSystem->update());
 }
@@ -92,7 +71,7 @@ void AudioManager::LoadSound(const std::string& fileName, bool is3d, bool isLoop
 	FMOD_MODE eMode = FMOD_DEFAULT;
 	eMode |= is3d		? FMOD_3D : FMOD_2D;								// 2D / 3D sound
 	eMode |= isLooping	? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;					// Loop or not
-	
+
 	// Stream: To account for slow media that might cause buffer underrun 
 	// (skipping / stuttering / repeating blocks of audio) with sounds 
 	// created with FMOD_CREATESTREAM, use System::setStreamBufferSize to 
@@ -150,7 +129,7 @@ int AudioManager::PlaySounds(const std::string& strSoundName, const glm::vec3& v
 	// Look up which channel this sound resides in.
 	auto channelIdItr = mSoundChannelIds.find(strSoundName);
 	int channelId = -1;
-	
+
 	// If the sound hasn't been allocated a channel, do so 
 	if (channelIdItr == mSoundChannelIds.end()) {
 
@@ -185,8 +164,8 @@ int AudioManager::PlaySounds(const std::string& strSoundName, const glm::vec3& v
 	}
 
 	// Otherwise (sound has channel), the channel is already playing, so don't do anything.
-	
-	
+
+
 	// return channel id at the end
 	return channelId;
 }
@@ -226,12 +205,12 @@ void AudioManager::Set3dListenerAttributes(const glm::vec3& vPos, const glm::vec
 	//listener.velocity = vel;
 
 	errorCheck(coreSystem->set3DListenerAttributes(
-		0,			// Listener ID. For singleplayer this is always 0
-		&pos,
-		&vel,
-		&forward,
-		&up
-	));		// Core API
+				0,			// Listener ID. For singleplayer this is always 0
+				&pos,
+				&vel,
+				&forward,
+				&up
+				));		// Core API
 	//errorCheck(studioSystem->setListenerAttributes(0, &listener));		// studio API
 	//std::cout << "Position: " << listener.forward.x << "," << listener.forward.y << "," << listener.forward.z << std::endl;
 }
@@ -261,14 +240,14 @@ void AudioManager::SetChannel3dPosition(int nChannelId, const glm::vec3& vPositi
 }
 
 
-void AudioManager::SetChannelVolume(int nChannelId, float fVolumedB) {
+void AudioManager::SetChannelVolume(int nChannelId, float fNormalizedVolume) {
 
 	// find the specified channel
 	auto channelItr = mChannels.find(nChannelId);
 	if (channelItr == mChannels.end()) return;
 
 	// update volume
-	errorCheck(channelItr->second->setVolume(dbToVolume(fVolumedB)));
+	errorCheck(channelItr->second->setVolume(fNormalizedVolume));
 }
 
 
