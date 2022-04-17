@@ -120,16 +120,23 @@ void Renderer::updateBuffers() {
 }
 
 
-void Renderer::addObject(IRenderable *mesh) {
+void Renderer::addObject(IRenderable *mesh, IPosition *pos)
+{
 
-	// Add a mesh to the container
-	RendObj newObj;
-	newObj.objPtr = mesh;
-	newObj.startInd = i32(elements.size());
+    // Add a mesh to the container
+    RendObj newObj;
+    newObj.objPtr = mesh;
+    newObj.startInd = elements.size();
 
-	// Generate textures for the object
-	newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
-	newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
+
+    newObj.pos = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+    
+    
+    // Generate textures for the object
+    newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
+    newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
+    std::cout << "Texture " << glGetError() << std::endl; fflush(NULL);
+
 
 	// Generate the arrays
 	createVertexArray(mesh);
@@ -209,6 +216,7 @@ void Renderer::draw() {
 
 		for (u32 i = 0; i < objects.size(); i++)
 		{
+			program->set4Matrix("toWorld", objects[i].pos);
 			// Activate and bind textures of the object
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
