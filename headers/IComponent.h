@@ -7,13 +7,15 @@
 */
 #pragma once
 
-#include <vector>
+#include <Types.h>
 
-class IComponent
-{
-public:
+namespace NoxEngine {
 
-	int ID;
-	// This function is implemented to be able to downcast classes stored as IComponent to their respective actual classes
-	virtual void* CastType(const int castID) = 0;
-};
+	class IComponent
+	{
+		public:
+			i32 id;
+			// This function is implemented to be able to downcast classes stored as IComponent to their respective actual classes
+			virtual void* CastType(const i32 castID) = 0;
+	};
+}

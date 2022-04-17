@@ -2,7 +2,6 @@
 #include <Renderer.h>
 #include <Utils.h>
 
-
 // TODO: update uniform submissions to use Shader class
 // TODO: fix drawing to default buffer
 // TODO: get some light going
@@ -30,7 +29,7 @@ Renderer::~Renderer()
     glDeleteFramebuffers(1, &FBO);
 }
 
-Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), camera(cam) {
+Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), camera(cam), elements(0) {
 
 	// Initialise OpenGl
 
@@ -126,16 +125,13 @@ void Renderer::addObject(IRenderable *mesh, IPosition *pos)
     // Add a mesh to the container
     RendObj newObj;
     newObj.objPtr = mesh;
-    newObj.startInd = elements.size();
-
+    newObj.startInd = (i32)elements.size();
 
     newObj.pos = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
-    
     
     // Generate textures for the object
     newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
     newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
-    std::cout << "Texture " << glGetError() << std::endl; fflush(NULL);
 
 
 	// Generate the arrays
@@ -155,21 +151,15 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 
 	GLuint tex;
 	glGenTextures(1, &tex);
-	std::cout << "1 " << glGetError() << std::endl; fflush(NULL);
-
 	glActiveTexture(GL_TEXTURE0 + num);
-	std::cout << "2 " << glGetError() << std::endl; fflush(NULL);
 	glBindTexture(GL_TEXTURE_2D, tex);
-	std::cout << "3" << glGetError() << std::endl; fflush(NULL);
-	// Set the texture wrapping parameters
+	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	std::cout << "4 " << glGetError() << std::endl; fflush(NULL);
-	// Set texture filtering parameters
+	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	std::cout << "5 " << glGetError() << std::endl; fflush(NULL);
-	// Load image, create texture and generate mipmaps
+	
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true); // flip loaded texture's on the y-axis.
 
@@ -183,7 +173,7 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 	}
 	else
 	{
-		std::cout << "Failed to load texture" << stbi_failure_reason() << std::endl;
+		Logger::debug("Failed to load file %s ", texturePath);
 	}
 	stbi_image_free(data);
 
@@ -208,7 +198,7 @@ void Renderer::draw() {
 
 	glBindVertexArray(VAO);
 
-	for (unsigned int i = 0; i < objects.size(); i++)
+	for (u32 i = 0; i < objects.size(); i++)
 	{
 		// Activate and bind textures of the object
 		glActiveTexture(GL_TEXTURE0 + 1);
@@ -225,7 +215,8 @@ void Renderer::draw() {
 			glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
 
 			// Draw the object
-			glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
+			// glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
+			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
 		}
 
 	}

@@ -27,11 +27,18 @@
 #include <Utils.h>
 #include <FBXFileLoader.h>
 #include <EventManager.h>
+#include <EventNames.h>
 
 #include <EngineGUI/EngineGUI.h>
 #include <EngineGUI/AudioPanel.h>
 #include <EngineGUI/AnimationPanel.h>
 #include <EngineGUI/ScenePanel.h>
+
+#include <Scene.h>
+#include <Entity.h>
+
+#include <RenderableComponent.h>
+#include <PositionComponent.h>
 
 
 namespace NoxEngine {
@@ -39,10 +46,11 @@ namespace NoxEngine {
 	using NoxEngineGUI::GUIParams;
 	using NoxEngine::GameState;
 	using NoxEngine::AudioSource;
+	using NoxEngine::Scene;
 
 	class GameManager {
 		public: 
-			GameManager(u32 width, u32 height, std::string title);
+			GameManager(u32 width, u32 height, String title);
 			void init();
 			void update();
 
@@ -61,6 +69,7 @@ namespace NoxEngine {
 		private:
 
 			void init_window();
+			void init_events();
 			void init_audio();
 			void init_camera();
 			void init_shaders();
@@ -79,7 +88,7 @@ namespace NoxEngine {
 
 			// Window
 			GLFWwindow *window;
-			std::string title;
+			String title;
 			u8 keys[256];
 
 			// Audio
@@ -88,9 +97,10 @@ namespace NoxEngine {
 			Camera* camera;
 			GameState game_state;
 			ImFont* font;
-			std::vector<GLProgram> programs;
+			Array<GLProgram> programs;
 			GLProgram *current_program;
 			GUIParams ui_params;
+			Scene scene;
 
 	};
 

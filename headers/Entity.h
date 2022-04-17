@@ -9,62 +9,34 @@
  *				  4 - Audio component (contains audio of the entity. Used by Audio) - bitmask 0000 0000 0000 1000 2^3
 */
 #pragma once
+
+// System/std includes
 #include <iostream>
+#include <cassert>
 
-#include "IComponent.h"
+// Engine Includes
+#include <IComponent.h>
+#include <Types.h>
+#include <Utils.h>
 
-class Entity
-{
-public:
+namespace NoxEngine {
 
-	int ID; // The ID of the sp entity. Used to distiguish between them
-	std::vector<IComponent*> components; // The components that make the entity
-	uint16_t hasComp = 0; // defines what components does this entity have 
-
-	Entity() {}
-
-	// Gotta be careful. When comp are destroyed the subsystem have to know
-	~Entity() {}
-
-	// Add a component to the entity
-	void addComp(IComponent *comp)
+	class Entity
 	{
+		public:
 
+			i32 id; // The ID of the sp entity. Used to distiguish between them
+			Array<IComponent*> components; // The components that make the entity
+			HasCompBitMask hasComp;
 
-		assert(comp->ID != 0);
+			Entity();
+			// Gotta be careful. When comp are destroyed the subsystem have to know
+			~Entity();
+			
+			// Add a component to the entity
+			void addComp(IComponent *comp);
+			// Gets the component with the ID provided. If no such comp -> through error and return
+			IComponent * getComp(i32 id);
 
-		// Check that there is no comp with the same ID 
-		for (auto c : components)
-		{
-			if (c->ID == comp->ID)
-			{
-				// If yes -> through error and do nothing
-				std::cout << "The component " << comp->ID << " already exists in Entity " << ID << std::endl;
-				return;
-			}
-		}
-
-		// If no -> add
-		components.push_back(comp);
-		
-		// And add to hasCom
-		hasComp |= (1 << (comp->ID - 1));
-	}
-
-
-	// Gets the component with the ID provided. If no such comp -> through error and return
-	IComponent * getComp(int askedID)
-	{
-		for (auto c : components)
-		{
-			if (c->ID == askedID)
-			{
-				return c;
-			}
-		}
-
-		std::cout << "The component " << askedID << " does not exist in Entity " << ID << std::endl;
-		return nullptr;
-	}
-
-};
+	};
+}

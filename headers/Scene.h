@@ -1,34 +1,18 @@
 /*
  * A collection of entities in one scene
 */
-
 #pragma once
 
-#include <cstdio>
-#include <string>
-#include <vector>
-
 #include "Entity.h"
+#include <Types.h>
 
-class Scene
-{
-private:
-
-	
-
-public:
-
-	std::vector<Entity*> entities;
-
-	Scene()
+namespace NoxEngine {
+	class Scene
 	{
-		entities = std::vector<Entity*>();
-	}
-
-
-	void addEntity(Entity* ent)
-	{
-		entities.push_back(ent);
-	}
-
-};
+		private:
+		public:
+			Array<Entity*> entities;
+			Scene();
+			void addEntity(Entity* ent);
+	};
+}

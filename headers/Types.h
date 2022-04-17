@@ -1,7 +1,8 @@
-#ifndef NOX_TYPES_H
-#define NOX_TYPES_H
+#pragma once
+
 #include <cstdint>
 #include <string>
+#include <vector>
 
 // base typedefs
 typedef uint8_t u8;
@@ -22,6 +23,11 @@ typedef uintptr_t uptr;
 // animation typedef
 typedef double time_type;
 
+// Rename std libs for if we want to remove them
 using String = std::string;
 
-#endif // ifndef NOX_TYPES_H 
+template<class T>
+using Array = std::vector<T>;
+
+
+typedef u16 HasCompBitMask;

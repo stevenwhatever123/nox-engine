@@ -2,16 +2,18 @@
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
+using NoxEngine::Entity;
 
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title) {
+GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title), scene() {
 }
 
 void GameManager::init() {
 	Logger::debug("Initing systems");
 	init_window();
+	init_events();
 	init_audio();
 	init_camera();
 	init_shaders();
@@ -48,9 +50,9 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 
 void GameManager::addMesh(String name, Mesh m) {
 
-	m.prepForRenderer();
-	renderer->addObject(&m);
-	renderer->updateBuffers();
+	// m.prepForRenderer();
+	// renderer->addObject(&m);
+	// renderer->updateBuffers();
 
 	// game_state.addMesh().emplace(name, )
 
@@ -89,6 +91,38 @@ void GameManager::init_window() {
 
 }
 
+
+void GameManager::init_events() {
+	
+
+	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
+		
+		String file_name = va_arg(args, String);
+		// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
+		// this->game_state.meshes.emplace(file_name, pScene);
+
+		Entity *ent = new Entity();
+
+		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+		PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+
+
+		ent->addComp(comp);
+		ent->addComp(pos);
+
+		this->scene.addEntity(ent);
+
+		renderer->addObject(
+			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+		);
+
+
+	});
+
+
+}
+
 void GameManager::init_audio() {
 	// Initialize audio system
 
@@ -114,34 +148,24 @@ void GameManager::init_camera() {
 }
 
 void GameManager::init_shaders() {
-	programs.emplace_back(std::vector<ShaderFile>{
-			{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
-			{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
-			});
+	programs.emplace_back(Array<ShaderFile>{
+		{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
+		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
+	});
 
 	current_program = &programs.back();
 }
 
 void GameManager::init_animation() {
 
-	EventManager::Instance()->addListener("mesh_added", [this](va_list args){
-
-		String file_name = va_arg(args, std::string);
-		Mesh* mesh = va_arg(args, Mesh*);
-
-		this->renderer->addObject(mesh);
-		this->renderer->updateBuffers();
-
-		Logger::debug("Yes but also no %s", file_name.c_str());
-
-	});
-
+	
 	currentTime = glfwGetTime();
 	deltaTime = 0;
 	lastTime = currentTime;
 }
 
 void GameManager::init_renderer() { 
+
 	// ------------------------------ Set up of the render --------------------------
 	// // Create Renderer
 	renderer = new Renderer(win_width, win_height, camera);
@@ -149,6 +173,25 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 
 	game_state.renderer = renderer;
+
+	Entity *ent = new Entity();
+
+	RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+	PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+
+
+	ent->addComp(comp);
+	ent->addComp(pos);
+
+	scene.addEntity(ent);
+
+	renderer->addObject(
+			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+			);
+
+
+
 
 	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
 	// Mesh *mesh = NoxEngine::getMesh(pScene);
