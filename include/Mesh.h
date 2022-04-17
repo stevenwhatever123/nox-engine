@@ -54,7 +54,9 @@ public:
 	int whichTickFloor = 0;
 	int whichTickCeil = 0;
 
+	// The root node of the hierarchy, it contains all the child nodes
 	MeshNode nodeHierarchy;
+	// A reference to all the nodes so we don't have to traversal the tree every time
 	std::vector<MeshNode*> allNodes;
 
 	std::vector<std::vector<glm::vec3>> vertices;
