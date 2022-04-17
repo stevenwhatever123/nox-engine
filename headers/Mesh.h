@@ -56,7 +56,10 @@ namespace NoxEngine {
 			bool hasBones;
 			glm::vec3 centerPosition;
 
+
+			// The root node of the hierarchy, it contains all the child nodes
 			MeshNode nodeHierarchy;
+			// A reference to all the nodes so we don't have to traversal the tree every time
 			std::vector<MeshNode*> allNodes;
 
 			std::vector<std::vector<glm::vec3>> vertices;
