@@ -172,7 +172,7 @@ void NoxEngineGUI::updateGUI(GUIParams *params) {
 	// Placeholder / debug windows
 	ImGui::Begin(PANEL_NAME_MAP[PanelName::FileExplorer].c_str());    ImGui::End();
 	ImGui::Begin(PANEL_NAME_MAP[PanelName::Hierarchy].c_str());		  ImGui::End();
-	//ImGui::ShowDemoWindow();
+	ImGui::ShowDemoWindow();
 	//ImGui::ShowMetricsWindow();
 
 

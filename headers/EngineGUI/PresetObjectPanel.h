@@ -14,32 +14,48 @@ namespace NoxEngineGUI {
 	//struct PresetObjectParams {
 	//};
 
-	enum PresetObjectCategory {
+	enum PresetCategory {
 		Geometry, Cards, Lights, Audio, UI, All
 	};
 
-	static std::map< PresetObjectCategory, std::string > PRESET_OBJECT_CATEGORY_NAMES {
-		{ Geometry, "Geometry" },
-		{ Cards,	"Cards" },
-		{ Lights,	"Lights" },
-		{ Audio,	"Audio" },
-		{ UI,		"UI" },
-		{ All,		"All\nCategories" }
+	enum PresetObject {
+		// Geometry
+		EmptyGameObject, 
+		Transform,
+		Cube, 
+		Sphere,
+
+		// Cards
+		RectangleCard,
+		Hand,
+		Deck,
+
+		// Lights
+		PointLight, 
+		AreaLight,
+
+		// Audio
+		AudioSourceComponent,
+
+		// UI
+		Text2D, Text3D, 
+		Button
 	};
 
-	static std::map< PresetObjectCategory, std::vector<std::string> > PRESET_OBJECTS {
-		{ Geometry, { "Empty Game Object", "Cube", "Sphere" }},
-		{ Cards,	{ "Rectangle Card" }},
-		{ Lights,	{ "Light Source" }},
-		{ Audio,	{ "Audio Source" }},
-		{ UI,		{} }
-		// "All" is just the values in the map, so we don't define them
-	};
+	static std::map< PresetCategory, std::string > PRESET_CATEGORY_NAMES_MAP;
+	static std::map< PresetObject,   std::string > PRESET_OBJECT_NAMES_MAP;
+	static std::vector< std::string > PRESET_CATEGORY_NAMES_LIST;
+	static std::vector< std::string > PRESET_OBJECT_NAMES_LIST;
 
-	static PresetObjectCategory selectedCategory = Geometry;
+	// Objects contained in a category
+	static std::map< PresetCategory, std::vector<PresetObject> > PRESET_OBJECTS;
+
+	// Selected category in the combo box / dropdown list
+	static PresetCategory selectedCategory = PresetCategory::Geometry;
 
 		
 
+	void initPresetObjectPanel();
 	void updatePresetObjectPanel(NoxEngine::GameState* params);
 
 }

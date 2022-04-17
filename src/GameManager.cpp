@@ -130,6 +130,8 @@ void GameManager::init_imgui() {
 	font = io.Fonts->AddFontFromFileTTF("envy.ttf", 18);
 	io.Fonts->Build();
 
+	// Initialize panel variables
+	NoxEngineGUI::initPresetObjectPanel();
 
 }
 
