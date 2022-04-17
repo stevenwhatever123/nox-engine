@@ -2,185 +2,35 @@
 #include <iostream>
 #include <glm/gtx/string_cast.hpp>
 
+
 using namespace NoxEngine;
+using NoxEngineUtils::Logger;
 
-Mesh::Mesh(const aiScene *scene) {
-	aiMesh** loadedMesh = scene->mMeshes;
+Mesh::Mesh() { }
+Mesh::~Mesh() { }
 
-	vertices.resize(scene->mNumMeshes);
-	normals.resize(scene->mNumMeshes);
-	faceIndices.resize(scene->mNumMeshes);
-	texCoord.resize(scene->mNumMeshes);
 
-	const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
-	
-	// Get vertex, normal and textcoord data
-	for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+Mesh::Mesh(const aiScene *scene)
+{
 
-		const aiMesh* pMesh = loadedMesh[i];
+	extractGeometricInfo(scene);
 
-		vertices[i].resize(pMesh->mNumVertices);
-		normals[i].resize(pMesh->mNumVertices);
-		texCoord[i].resize(pMesh->mNumVertices);
-		faceIndices[i].resize(pMesh->mNumFaces*3);
-		
-
-		const aiVector3D* pVertex = pMesh->mVertices;
-		const aiVector3D* pNormal = pMesh->mNormals;
-		const aiVector3D* pTexCoord = pMesh->HasTextureCoords(0) ?  pMesh->mTextureCoords[0] : &zero3D;
-
-		const bool has_texture = pMesh->HasTextureCoords(0);
-
-		for (u32 j = 0; j < pMesh->mNumVertices; ++j) {
-			vertices[i].push_back(glm::vec3{pVertex->x, pVertex->y, pVertex->z});
-			normals[i].push_back  (glm::vec3{pNormal->x, pNormal->y, pNormal->z});
-			texCoord[i].push_back (glm::vec2{pVertex->x, pVertex->y});
-
-			pVertex++;
-			pNormal++;
-			if(has_texture) {
-				pTexCoord++;
-			}
-		}
-
-		const aiFace* face = pMesh->mFaces;
-		for (unsigned int j = 0; j < pMesh->mNumFaces; ++j)
-		{
-
-			if (face->mNumIndices == 3)
-			{
-				faceIndices[i].push_back(face->mIndices[0]);
-				faceIndices[i].push_back(face->mIndices[1]);
-				faceIndices[i].push_back(face->mIndices[2]);
-			}
-			else
-			{
-				printf("Error: number of face indicies is less than 3");
-			}
-
-			face++;
-		}
-	}
-
-	// I say we can implement it later
-	// Initialise Materials and textures
-	for (u32 i = 0; i < scene->mNumMaterials; ++i)
-	{
-		const aiMaterial* pMaterial = scene->mMaterials[i];
-		if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-		{
-			aiString path;
-			if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0,
-						&path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
-			{
-				//std::string fullPath = path.data;
-				//std::cout << fullPath << "\n";
-			}
-		}
-	}
+	// extractTextureInfo(scene);
 
 	// Animation Data
 	if (scene->mNumAnimations > 0)
 	{
-		u32 numAnimation = scene->mNumAnimations;
-		resizeNumOfAnimations(numAnimation);
-
-		// Loop through every animation data/clip
-		for (u32 i = 0; i < numAnimation; i++)
-		{
-			animations.push_back(scene->mAnimations[i]);
-
-			// Loop through every node
-			for (u32 j = 0; j < scene->mAnimations[i]->mNumChannels; j++)
-			{
-				// Channels means the nodes that would be moving
-				// Note that not every nodes would be animated
-				// So the number of channels may be smaller than the number of 
-				// nodes
-
-				// We will pair animation channels with node name
-				// But we're ignore it at this moment
-
-				nodeAnimations[i].push_back( scene->mAnimations[i]->mChannels[j]);
-
-				// Retrieve animation data to transformation matrices
-				for (u32 z = 0; z < scene->mAnimations[i]->mChannels[j]->mNumPositionKeys; z++) {
-
-					// Translation matrix
-					glm::mat4 translationMatrix =
-						glm::translate(
-								glm::mat4(),
-								glm::vec3(
-									scene->mAnimations[i]->mChannels[j]->mPositionKeys[z].mValue.x,
-									scene->mAnimations[i]->mChannels[j]->mPositionKeys[z].mValue.y,
-									scene->mAnimations[i]->mChannels[j]->mPositionKeys[z].mValue.z
-									)
-								);
-
-					// Scaling matrix
-					glm::mat4 scalingMatrix = glm::mat4(1.0f);
-					scalingMatrix =
-						glm::scale(
-								scalingMatrix,
-								glm::vec3(
-									scene->mAnimations[i]->mChannels[j]->mScalingKeys[z].mValue.x,
-									scene->mAnimations[i]->mChannels[j]->mScalingKeys[z].mValue.y,
-									scene->mAnimations[i]->mChannels[j]->mScalingKeys[z].mValue.z
-									)
-								);
-
-					// Rotation matrix
-					// I think this is how it works, row based
-					// Note(sharo): you think? 
-					glm::mat4 rotationMatrix = glm::mat4(1.0f);
-					rotationMatrix[0][0] = scene->mAnimations[i]->mChannels[j]->mRotationKeys->mValue.GetMatrix().a1;
-					rotationMatrix[0][1] = scene->mAnimations[i]->mChannels[j]->mRotationKeys->mValue.GetMatrix().a2;
-					rotationMatrix[0][2] = scene->mAnimations[i]->mChannels[j]->mRotationKeys->mValue.GetMatrix().a3;
-
-					rotationMatrix[1][0] = scene->mAnimations[i]->mChannels[j]->mRotationKeys->mValue.GetMatrix().b1;
-					rotationMatrix[1][1] = scene->mAnimations[i]->mChannels[j]->mRotationKeys->mValue.GetMatrix().b2;
-					rotationMatrix[1][2] = scene->mAnimations[i]->mChannels[j]->mRotationKeys->mValue.GetMatrix().b3;
-
-					rotationMatrix[2][0] = scene->mAnimations[i]->mChannels[j]->mRotationKeys->mValue.GetMatrix().c1;
-					rotationMatrix[2][1] = scene->mAnimations[i]->mChannels[j]->mRotationKeys->mValue.GetMatrix().c2;
-					rotationMatrix[2][2] = scene->mAnimations[i]->mChannels[j]->mRotationKeys->mValue.GetMatrix().c3;
-
-					// Combine all of them to get the transformation matrix
-					// Notes: I don't think it's a good idea to include translation
-					// inside the animation data 
-					// This would mean everthing the gameobject moves
-					// is tied to the animation clip and is not user defined
-					// 
-					// What we normally want to do is to animate the game
-					// object rotations only and we define how the gameobject
-					// moves via scripts/our tools
-
-					nodeAnimTranslationMatrices[i].push_back( translationMatrix);
-					nodeAnimRotationMatrices[i].push_back( rotationMatrix);
-					nodeAnimScalingMatrices[i].push_back( scalingMatrix);
-				}
-			}
-		}
+		extractAnimationInfo(scene);
 	}
 
 	// Node Hierarchy
 	MeshNode* rootNode = new MeshNode;
 	aiNode* aiRootNode = scene->mRootNode;
+
 	createNodeHierarchy(aiRootNode, rootNode);
-
 }
 
-Mesh::Mesh()
-{
-
-}
-
-Mesh::~Mesh()
-{
-
-}
-
-void Mesh::resizeNumOfMeshes(unsigned int i)
+void Mesh::resizeNumOfMeshes(u32 i)
 {
 	vertices.resize(i);
 	normals.resize(i);
@@ -188,7 +38,7 @@ void Mesh::resizeNumOfMeshes(unsigned int i)
 	texCoord.resize(i);
 }
 
-void Mesh::resizeNumOfAnimations(unsigned int i)
+void Mesh::resizeNumOfAnimations(u32 i)
 {
 	animations.resize(i);
 	nodeAnimations.resize(i);
@@ -352,9 +202,9 @@ void Mesh::update(time_type dt)
 		if (frameIndex < nodeAnimTransformation[animationIndex][0].size() - 1)
 		{
 			// Interpolate time into tick
-			int numOfTicks = numTicks[animationIndex];
-			time_type duration = animationDuration[animationIndex];
+			u32 numOfTicks = numTicks[animationIndex];
 
+			time_type duration = animationDuration[animationIndex];
 			timeStep = duration / numOfTicks;
 
 			while (accumulator >= timeStep)
@@ -461,9 +311,9 @@ void Mesh::prepForRenderer()
 	mNormals.resize(normals.size());
 
 	// Apply transformation from nodes
-	for (unsigned int i = 0; i < allNodes.size(); i++)
+	for (u32 i = 0; i < allNodes.size(); i++)
 	{
-		unsigned int meshIndex = allNodes[i]->meshIndex;
+		u32 meshIndex = allNodes[i]->meshIndex;
 
 		mVertices[meshIndex].resize(vertices[meshIndex].size());
 		mNormals[meshIndex].resize(normals[meshIndex].size());
@@ -472,12 +322,10 @@ void Mesh::prepForRenderer()
 		{
 			glm::mat4 transformation = getGlobalTransformation(*allNodes[i]);
 
-			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+			for (u32 j = 0; j < vertices[meshIndex].size(); j++)
 			{
-				mVertices[meshIndex][j] = glm::vec3(transformation *
-					glm::vec4(vertices[meshIndex][j], 1.0));
-				mNormals[meshIndex][j] = glm::vec3(transformation *
-					glm::vec4(normals[meshIndex][j], 1.0));
+				mVertices[meshIndex][j] = glm::vec3(transformation * glm::vec4(vertices[meshIndex][j], 1.0));
+				mNormals[meshIndex][j] = glm::vec3(transformation * glm::vec4(normals[meshIndex][j], 1.0));
 			}
 		}
 		else
@@ -485,80 +333,66 @@ void Mesh::prepForRenderer()
 			// Loop node
 			// Notes: This may not 100% work on skeletal meshes
 			glm::mat4 transformation = allNodes[i]->transformation;
-			for (unsigned int j = 0;
-				j < nodeAnimations[animationIndex].size();
-				j++)
+			for (u32 j = 0; j < nodeAnimations[animationIndex].size(); j++)
 			{
-				if (allNodes[i]->name
-					== nodeAnimations[animationIndex][j]->mNodeName.C_Str())
+				if (allNodes[i]->name == nodeAnimations[animationIndex][j]->mNodeName.C_Str())
 				{
-					//std::cout << "Name: " << allNodes[i]->name << "\n";
-
-					//std::cout << nodeAnimations[animationIndex][j]
-					//	->mNodeName.C_Str() << "\n";
-
+					
 					// Interpolate between two keyframe
-					float ratio = accumulator / timeStep;
+					f32 ratio = (f32)(accumulator/timeStep);
 
-					glm::mat4 matrixFloor
-						= nodeAnimTransformation[animationIndex][j][whichTickFloor];
-
-					glm::mat4 matrixCeil
-						= nodeAnimTransformation[animationIndex][j][whichTickCeil];
-
+					glm::mat4 matrixFloor = nodeAnimTransformation[animationIndex][j][whichTickFloor];
+					glm::mat4 matrixCeil = nodeAnimTransformation[animationIndex][j][whichTickCeil];
 					// Framebased way to update transformation
 					//transformation
-						//= nodeAnimTransformation[animationIndex][j][frameIndex];
+					//= nodeAnimTransformation[animationIndex][j][frameIndex];
 
 					// Linear interpolation
-					transformation
-						= (matrixCeil * ratio) + ((1.0f - ratio) * matrixFloor);
-
+					transformation = (matrixCeil * (float)ratio) + ((1.0f - (float)ratio) * matrixFloor);
 					break;
 				}
 			}
 
 			// Apply Transformation to all vertices of the mesh
-			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+			for (u32 j = 0; j < vertices[meshIndex].size(); j++)
 			{
-				mVertices[meshIndex][j] = glm::vec3(transformation *
-					glm::vec4(vertices[meshIndex][j], 1.0));
-
-				mNormals[meshIndex][j] = glm::vec3(transformation *
-					glm::vec4(normals[meshIndex][j], 1.0));
+				mVertices[meshIndex][j] = glm::vec3(transformation * glm::vec4(vertices[meshIndex][j], 1.0));
+				mNormals[meshIndex][j] = glm::vec3(transformation * glm::vec4(normals[meshIndex][j], 1.0));
 			}
 		}
 	}
 
-	for (unsigned int i = 0; i < mVertices.size(); i++)
+	for (u32 i = 0; i < mVertices.size(); i++)
 	{
-		//verticesPreped.push_back(mVertices[0][i].x); verticesPreped.push_back(mVertices[0][i].y); verticesPreped.push_back(mVertices[0][i].z);
-		for (unsigned int j = 0; j < mVertices[i].size(); j++)
+		for (u32 j = 0; j < mVertices[i].size(); j++)
 		{
-			verticesPreped.push_back(mVertices[i][j].x); verticesPreped.push_back(mVertices[i][j].y); verticesPreped.push_back(mVertices[i][j].z);
+			verticesPreped.push_back(mVertices[i][j].x);
+			verticesPreped.push_back(mVertices[i][j].y);
+			verticesPreped.push_back(mVertices[i][j].z);
 		}
 	}
 
-	for (unsigned int i = 0; i < mNormals.size(); i++)
+	for (u32 i = 0; i < mNormals.size(); i++)
 	{
-		//normalsPreped.push_back(normals[0][i].x); normalsPreped.push_back(normals[0][i].y); normalsPreped.push_back(normals[0][i].z);
-		for (unsigned int j = 0; j < mNormals[i].size(); j++)
+		for (u32 j = 0; j < mNormals[i].size(); j++)
 		{
-			normalsPreped.push_back(mNormals[i][j].x); normalsPreped.push_back(mNormals[i][j].y); normalsPreped.push_back(mNormals[i][j].z);
+			normalsPreped.push_back(mNormals[i][j].x);
+			normalsPreped.push_back(mNormals[i][j].y);
+			normalsPreped.push_back(mNormals[i][j].z);
 		}
 	}
 
-	for (unsigned int i = 0; i < texCoord.size(); i++)
+	for (u32 i = 0; i < texCoord.size(); i++)
 	{
-		//texCoordPreped.push_back(texCoord[0][i].x); texCoordPreped.push_back(texCoord[0][i].y);
-		for (unsigned int j = 0; j < texCoord[i].size(); j++)
+		for (u32 j = 0; j < texCoord[i].size(); j++)
 		{
-			texCoordPreped.push_back(texCoord[i][j].x); texCoordPreped.push_back(texCoord[i][j].y);
+			texCoordPreped.push_back(texCoord[i][j].x);
+			texCoordPreped.push_back(texCoord[i][j].y);
 		}
 	}
 
 
-	for (unsigned int i = 0; i < faceIndices.size(); i++)
+	for (u32 i = 0; i < faceIndices.size(); i++)
 	{
 		//elements.push_back((int)(faceIndices[0][i]));
 		for (unsigned int j = 0; j < faceIndices[i].size(); j++)
@@ -568,9 +402,9 @@ void Mesh::prepForRenderer()
 	}
 }
 
-unsigned int Mesh::getNumOfAnimations()
+u32 Mesh::getNumOfAnimations()
 {
-	return animations.size() / 2;
+	return (u32)animations.size() / 2;
 }
 
 // ========================   IRenderable ======================
@@ -637,4 +471,207 @@ void Mesh::getArrayOfElements(std::vector<int>* el)
 	{
 		el->push_back((int)(faceIndices[0][i]));
 	}
+}
+
+
+void Mesh::extractGeometricInfo(const aiScene *scene) {
+
+	aiMesh** loadedMesh = scene->mMeshes;
+
+	vertices.resize(scene->mNumMeshes);
+	normals.resize(scene->mNumMeshes);
+	faceIndices.resize(scene->mNumMeshes);
+	texCoord.resize(scene->mNumMeshes);
+
+	const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
+
+	// Get vertex, normal and textcoord data
+	for (u32 i = 0; i < scene->mNumMeshes; ++i) {
+
+		const aiMesh* pMesh = loadedMesh[i];
+
+		hasBones = pMesh->HasBones();
+
+		vertices[i].resize(pMesh->mNumVertices);
+		normals[i].resize(pMesh->mNumVertices);
+		texCoord[i].resize(pMesh->mNumVertices);
+		faceIndices[i].resize(pMesh->mNumFaces*3);
+
+		const bool has_texture = pMesh->HasTextureCoords(0);
+
+		const aiVector3D* pVertex = pMesh->mVertices;
+		const aiVector3D* pNormal = pMesh->mNormals;
+		const aiVector3D* pTexCoord = has_texture ? pMesh->mTextureCoords[0] : &zero3D;
+
+		for (u32 j = 0; j < pMesh->mNumVertices; ++j) {
+
+			vertices[i][j].x = pVertex->x;
+			vertices[i][j].y = pVertex->y;
+			vertices[i][j].z = pVertex->z;
+
+			normals[i][j].x = pNormal->x;
+			normals[i][j].y = pNormal->y;
+			normals[i][j].z = pNormal->z;
+
+			texCoord[i][j].x = pTexCoord->x;
+			texCoord[i][j].y = pTexCoord->y;
+
+			pVertex++;
+			pNormal++;
+			if(has_texture) {
+				pTexCoord++;
+			}
+		}
+
+		const aiFace* face = pMesh->mFaces;
+		for (u32 j = 0; j < pMesh->mNumFaces; ++j)
+		{
+
+			if (face->mNumIndices == 3)
+			{
+				faceIndices[i].push_back(face->mIndices[0]);
+				faceIndices[i].push_back(face->mIndices[1]);
+				faceIndices[i].push_back(face->mIndices[2]);
+			} else {
+				Logger::debug("Error: number of face indicies is less than 3");
+			}
+
+			face++;
+		}
+	}
+
+}
+
+
+void Mesh::extractTextureInfo(const aiScene* scene) {
+	// I say we can implement it later
+	// Initialise Materials and textures
+	for (u32 i = 0; i < scene->mNumMaterials; ++i)
+	{
+		const aiMaterial* pMaterial = scene->mMaterials[i];
+		if (pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+		{
+			aiString path;
+			if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+			{
+				//std::string fullPath = path.data;
+				//std::cout << fullPath << "\n";
+			}
+		}
+	}
+
+}
+
+void Mesh::extractAnimationInfo(const aiScene* scene) {
+
+	// Animation Data
+	u32 numAnimation = scene->mNumAnimations;
+
+	animations.resize(numAnimation);
+	nodeAnimations.resize(numAnimation);
+	nodeAnimTransformation.resize(numAnimation);
+	nodeAnimTranslationMatrices.resize(numAnimation);
+	nodeAnimRotationMatrices.resize(numAnimation);
+	nodeAnimScalingMatrices.resize(numAnimation);
+
+	numTicks.resize(numAnimation);
+	animationDuration.resize(numAnimation);
+
+	// Loop through every animation data/clip
+	for (u32 i = 0; i < numAnimation; i++)
+	{
+		//NOTE(sharo): we are keeping pointers to the insides of the scene around
+		//but not the scene itself
+
+		animations[i] = scene->mAnimations[i];
+
+		u32 numChannels = scene->mAnimations[i]->mNumChannels;
+		
+		nodeAnimTranslationMatrices[i].resize(numChannels);
+		nodeAnimTransformation[i].resize(numChannels);
+		nodeAnimTranslationMatrices[i].resize(numChannels);
+		nodeAnimRotationMatrices[i].resize(numChannels);
+		nodeAnimScalingMatrices[i].resize(numChannels);
+
+		aiAnimation* scene_animation = scene->mAnimations[i];
+
+		// Loop through every node
+		for (u32 j = 0; j < numChannels; j++)
+		{
+			// Channels means the nodes that would be moving
+			// Note that not every nodes would be animated
+			// So the number of channels may be smaller than the number of 
+			// nodes
+
+			// We will pair animation channels with node name
+			// But we're ignore it at this moment
+
+			aiNodeAnim* animation_chl = scene_animation->mChannels[j];
+
+			nodeAnimations[i].push_back(animation_chl);
+
+			
+			// Retrieve transformation matrices from keyframes in ascending
+			// order
+			for (u32 z = 0; z < animation_chl->mNumPositionKeys; z++)
+			{
+				// Translation matrix
+				glm::mat4 translationMatrix =
+					glm::translate(
+							glm::mat4(1),
+							glm::vec3(
+								animation_chl->mPositionKeys[z].mValue.x,
+								animation_chl->mPositionKeys[z].mValue.y,
+								animation_chl->mPositionKeys[z].mValue.z
+								)
+							);
+
+				// Scaling matrix
+				glm::mat4 scalingMatrix = glm::mat4(1.0f);
+				scalingMatrix =
+					glm::scale(
+							scalingMatrix,
+							glm::vec3(
+								animation_chl->mScalingKeys[z].mValue.x,
+								animation_chl->mScalingKeys[z].mValue.y,
+								animation_chl->mScalingKeys[z].mValue.z
+								)
+							);
+
+				// Rotation matrix
+				// I think this is how it works, row based
+				glm::mat4 rotationMatrix = glm::mat4(1.0f);
+				rotationMatrix[0][0] = animation_chl->mRotationKeys[z].mValue.GetMatrix().a1;
+				rotationMatrix[0][1] = animation_chl->mRotationKeys[z].mValue.GetMatrix().b1;
+				rotationMatrix[0][2] = animation_chl->mRotationKeys[z].mValue.GetMatrix().c1;
+
+				rotationMatrix[1][0] = animation_chl->mRotationKeys[z].mValue.GetMatrix().a2;
+				rotationMatrix[1][1] = animation_chl->mRotationKeys[z].mValue.GetMatrix().b2;
+				rotationMatrix[1][2] = animation_chl->mRotationKeys[z].mValue.GetMatrix().c2;
+
+				rotationMatrix[2][0] = animation_chl->mRotationKeys[z].mValue.GetMatrix().a3;
+				rotationMatrix[2][1] = animation_chl->mRotationKeys[z].mValue.GetMatrix().b3;
+				rotationMatrix[2][2] = animation_chl->mRotationKeys[z].mValue.GetMatrix().c3;
+
+				// Combine all of them to get the transformation matrix
+				// Notes: I don't think it's a good idea to include translation
+				// inside the animation data 
+				// This would mean everthing the gameobject moves
+				// is tied to the animation clip and may cause various 
+				// problems based on my previous experience
+
+				nodeAnimTranslationMatrices[i][j].push_back( translationMatrix);
+				nodeAnimRotationMatrices[i][j].push_back( rotationMatrix);
+				nodeAnimScalingMatrices[i][j].push_back( scalingMatrix);
+				nodeAnimTransformation[i][j].push_back( translationMatrix * rotationMatrix * scalingMatrix );
+
+			} // z loop - transformations
+		} // j loop - channels
+
+		// pre generate data for numer of ticks
+		numTicks[i] = scene_animation->mChannels[0]->mNumPositionKeys;
+		// Pre generate for animation duration
+		animationDuration[i] = numTicks[i]/scene_animation->mTicksPerSecond;
+	}
+
 }

@@ -188,7 +188,7 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 
 void Renderer::clearObject()
 {
-    objects.clear();
+	objects.clear();
 }
 
 

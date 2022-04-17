@@ -17,13 +17,16 @@
 #include <fmod/core/fmod_errors.h>
 
 // Engine Include
+#include <Singleton.h>
 #include <AudioManager.h>
+#include <Mesh.h>
 #include <Types.h>
 #include <Renderer.h>
 #include <IOManager.h>
 #include <GameState.h>
 #include <Utils.h>
 #include <FBXFileLoader.h>
+#include <EventManager.h>
 
 #include <EngineGUI/EngineGUI.h>
 #include <EngineGUI/AudioPanel.h>
@@ -44,11 +47,16 @@ namespace NoxEngine {
 			void update();
 
 			void addAudioSource(AudioSource audioSource);
+			void addMesh(String str, Mesh m);
 			inline Renderer* GetRenderer() { return renderer; };
 			i8 KeepRunning() { return !should_close; }
 			u32 win_height;
 			u32 win_width;
 			i8 should_close;
+
+			time_type currentTime;
+			time_type deltaTime;
+			time_type lastTime;
 
 		private:
 
@@ -56,6 +64,7 @@ namespace NoxEngine {
 			void init_audio();
 			void init_camera();
 			void init_shaders();
+			void init_animation();
 			void init_renderer();
 			void init_imgui();
 
@@ -65,7 +74,7 @@ namespace NoxEngine {
 			void update_gui();
 			void update_audio();
 			void update_inputs();
-
+			void update_animation();
 			void update_renderer();
 
 			// Window
