@@ -113,6 +113,8 @@ namespace NoxEngine {
 
 		// Add object to renderer to render
 		void addObject(IRenderable *mesh);
+		void clearObject();
+		
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
 		void useProgram();
 		void updateBuffers();
@@ -136,9 +138,7 @@ namespace NoxEngine {
 		inline void setFrameBufferToTexture() { curFBO = FBO; setRenderTarget(); }
 		inline void setRenderTarget() { glBindFramebuffer(GL_FRAMEBUFFER, curFBO); }
 
-
 		glm::mat4 getProjMatr() { return projection; }
-
 		glm::mat4 getCameraMatr() { return camera->getCameraTransf(); }
 
 		// Camera managment
@@ -147,7 +147,6 @@ namespace NoxEngine {
 
 		// Updates the view transformation using the current camera
 		void updateCamera();
-
 		void updateLightPos(float x, float y, float z);
 
 	};

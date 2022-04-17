@@ -186,6 +186,11 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 	return tex;
 }
 
+void Renderer::clearObject()
+{
+	objects.clear();
+}
+
 
 
 void Renderer::draw() {

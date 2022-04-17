@@ -1,10 +1,12 @@
 #include <GameManager.h>
 
 using NoxEngineUtils::Logger;
+using NoxEngine::EventManager;
+
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, std::string title) : win_width(width), win_height(height), title(title) {
+GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title) {
 }
 
 void GameManager::init() {
@@ -14,6 +16,7 @@ void GameManager::init() {
 	init_camera();
 	init_shaders();
 	init_imgui();
+	init_animation();
 	init_renderer();
 }
 
@@ -25,12 +28,14 @@ void GameManager::update() {
 	update_renderer();
 	update_gui();
 
+	update_animation();
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)) {
 		should_close = true;
 	}
 
-	glfwSwapBuffers(window);
 
+	glfwSwapBuffers(window);
 }
 
 void GameManager::addAudioSource(AudioSource audioSource) {
@@ -40,6 +45,19 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 	audioManager->LoadSound(audioSource.file);
 
 }
+
+void GameManager::addMesh(String name, Mesh m) {
+
+	m.prepForRenderer();
+	renderer->addObject(&m);
+	renderer->updateBuffers();
+
+	// game_state.addMesh().emplace(name, )
+
+	// game_state.audioSources.emplace(audioSource.name, audioSource);
+	// audioManager->LoadSound(audioSource.file);
+}
+
 
 void GameManager::init_window() {
 
@@ -90,8 +108,9 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(glm::vec3(10.0f, 200.0f, 0.0f));
-	camera->turnVerBy(90.0f);
+	camera = new Camera(glm::vec3(0.0f, 1.0f, 4.0f));
+
+	// camera->turnVerBy(90.0f);
 }
 
 void GameManager::init_shaders() {
@@ -101,6 +120,25 @@ void GameManager::init_shaders() {
 			});
 
 	current_program = &programs.back();
+}
+
+void GameManager::init_animation() {
+
+	EventManager::Instance()->addListener("mesh_added", [this](va_list args){
+
+		String file_name = va_arg(args, std::string);
+		Mesh* mesh = va_arg(args, Mesh*);
+
+		this->renderer->addObject(mesh);
+		this->renderer->updateBuffers();
+
+		Logger::debug("Yes but also no %s", file_name.c_str());
+
+	});
+
+	currentTime = glfwGetTime();
+	deltaTime = 0;
+	lastTime = currentTime;
 }
 
 void GameManager::init_renderer() { 
@@ -191,9 +229,24 @@ void GameManager::update_inputs() {
 	glfwPollEvents();
 }
 
+void GameManager::update_animation() {
+
+	currentTime = glfwGetTime();
+	deltaTime = currentTime - lastTime;
+	lastTime = currentTime;
+
+	auto meshStart = game_state.meshes.begin();
+	auto meshEnd = game_state.meshes.end();
+
+	for(;meshStart != meshEnd; meshStart++) {
+		meshStart->second.update(deltaTime);
+	}
+
+}
+
 void GameManager::update_renderer() {
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-	renderer->fillBackground(0.1, 0.2, 0.5);
+	renderer->fillBackground(0.1f, 0.2f, 0.5f);
 	renderer->draw();
 }
 

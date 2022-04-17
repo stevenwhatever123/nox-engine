@@ -5,10 +5,11 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace NoxEngine {
 
-	typedef void (*ListenFunc)(void);
+	typedef std::function<void(va_list)> ListenFunc;
 	typedef std::map<std::string, std::vector<ListenFunc>> EventEntry;
 	typedef std::map<std::string, std::vector<ListenFunc>>::iterator EventEntryIt;
 	typedef std::map<std::string, std::vector<ListenFunc>>::reference EventEntryRef;
@@ -18,7 +19,7 @@ namespace NoxEngine {
 		friend class Singleton<EventManager>;
 		public:
 		void addListener(std::string eventName, ListenFunc func);
-		void signal(std::string eventName) ;
+		void signal(std::string eventName, ...) ;
 		protected:
 			EventManager(){}
 			~EventManager(){}
