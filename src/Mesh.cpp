@@ -302,6 +302,42 @@ glm::mat4 Mesh::getGlobalTransformation(MeshNode currentNode)
 	return transformation;
 }
 
+glm::mat4 Mesh::getCurrentFrameNodeTransformation(MeshNode *node)
+{
+	// Get the transformation from the selected node
+	u32 meshIndex = node->meshIndex;
+
+	glm::mat4 defaultTransformation(1);
+
+	if (getNumOfAnimations() < 1)
+	{
+		return getGlobalTransformation(*node);
+	}
+	else
+	{
+		// We match node by its name. Hence the loop
+		for (u32 i = 0; i < nodeAnimations[animationIndex].size(); i++)
+		{
+			if (node->name == nodeAnimations[animationIndex][i]->mNodeName.C_Str())
+			{
+				// Interpolate between two keyframe
+				f32 ratio = (f32)(accumulator / timeStep);
+
+				glm::mat4 matrixFloor = nodeAnimTransformation[animationIndex][i][whichTickFloor];
+				glm::mat4 matrixCeil = nodeAnimTransformation[animationIndex][i][whichTickCeil];
+
+				// Framebased way to update transformation
+				//return nodeAnimTransformation[animationIndex][i][frameIndex];
+
+				// Linear interpolation
+				return (matrixCeil * (float)ratio) + ((1.0f - (float)ratio) * matrixFloor);
+			}
+		}
+	}
+
+	return defaultTransformation;
+}
+
 void Mesh::resetFrameIndex()
 {
 	frameIndex = 0;

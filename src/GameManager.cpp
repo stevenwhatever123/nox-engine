@@ -48,7 +48,7 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 
 void GameManager::addMesh(String name, Mesh m) {
 
-	m.prepForRenderer();
+	//m.prepForRenderer();
 	renderer->addObject(&m);
 	renderer->updateBuffers();
 
@@ -241,7 +241,6 @@ void GameManager::update_animation() {
 	for(;meshStart != meshEnd; meshStart++) {
 		meshStart->second.update(deltaTime);
 	}
-
 }
 
 void GameManager::update_renderer() {
