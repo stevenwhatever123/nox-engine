@@ -10,7 +10,13 @@ Mesh::Mesh() { }
 Mesh::~Mesh() { }
 
 
-Mesh::Mesh(const aiScene *scene)
+Mesh::Mesh(const aiScene *scene) :
+	frameIndex(0),
+	animationIndex(0),
+	accumulator(0),
+	timeStep(0),
+	whichTickFloor(0),
+	whichTickCeil(0)
 {
 
 	extractGeometricInfo(scene);
@@ -404,7 +410,7 @@ void Mesh::prepForRenderer()
 
 u32 Mesh::getNumOfAnimations()
 {
-	return (u32)animations.size() / 2;
+	return (u32)animations.size();
 }
 
 // ========================   IRenderable ======================

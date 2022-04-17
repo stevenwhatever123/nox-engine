@@ -29,7 +29,8 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 		{
 			const aiScene* pScene = NoxEngine::readFBX(picked_file.c_str());
 			if (pScene != nullptr) {
-				game_state->meshes.emplace(picked_file, Mesh{pScene});
+				game_state->meshes.emplace(picked_file, pScene);
+				
 				// game_state->renderer->addObject(mesh);
 				// game_state->renderer->updateBuffers();
 				EventManager::Instance()->signal("mesh_added", picked_file, game_state->meshes.rbegin()->second);

@@ -230,6 +230,7 @@ void GameManager::update_inputs() {
 }
 
 void GameManager::update_animation() {
+
 	currentTime = glfwGetTime();
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
