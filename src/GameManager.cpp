@@ -160,16 +160,24 @@ void GameManager::main_contex_ui() {
 
 void GameManager::update_gui() {
 
+	ImGuiIO& io = ImGui::GetIO();
+	
+	// Show FPS
+	char windowTitle[64];
+	snprintf(windowTitle, 64, "%s - FPS %.3f", title.c_str(), io.Framerate);
+	glfwSetWindowTitle(window, windowTitle);
+
+	// Draw window content
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	ImGui::PushFont(font);
-
+	
 	NoxEngineGUI::updateGUI(&ui_params);
 	NoxEngineGUI::updateAudioPanel(&game_state);
 	NoxEngineGUI::updateAnimationPanel(&game_state);
-	NoxEngineGUI::updateScenePanel(&game_state);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
+	NoxEngineGUI::updateScenePanel(&game_state);
 	NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::Begin("Light Settings");
