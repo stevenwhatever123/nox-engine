@@ -9,6 +9,8 @@
 #include <FBXFileLoader.h>
 #include <EventManager.h>
 
+#include <glm/gtx/string_cast.hpp>
+
 using namespace NoxEngine;
 
 void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
@@ -44,6 +46,46 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 		{
 			printf("Error: reading fbx file");
 		}
+	}
+
+	auto startItr = game_state->meshes.begin();
+	auto endItr = game_state->meshes.end();
+
+	while (startItr != endItr)
+	{
+		if (startItr->second.getNumOfAnimations() == 0)
+		{
+			ImGui::Text(startItr->second.nodeHierarchy.name.c_str());
+			startItr++;
+			continue;
+		}
+
+		if (ImGui::TreeNode(startItr->second.nodeHierarchy.name.c_str()))
+		{
+			if (ImGui::BeginTable("Animation 0 data: Node 0", 2, 
+				ImGuiTableFlags_Borders|ImGuiTableFlags_Resizable))
+			{
+				for (i32 row = 0; row <
+					startItr->second.nodeAnimTransformation[0][0].size(); row++)
+				{
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					ImGui::Text("Frame %d", row);
+					ImGui::TableNextColumn();
+
+					std::string someString
+						= glm::to_string(startItr->second.nodeAnimTransformation[0][0][row]);
+
+					const char* displayText = someString.c_str();
+
+					ImGui::Text(displayText);
+				}
+				ImGui::EndTable();
+			}
+			ImGui::TreePop();
+		}
+		
+		startItr++;
 	}
 
 
