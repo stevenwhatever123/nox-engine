@@ -27,13 +27,14 @@
 
 //#include "Shader.h"
 //#include "Renderer.h"
-#include "RenderableComp.h"
-#include "PositionComp.h"
+// #include "RenderableComp.h"
+// #include "PositionComp.h"
 
 
 class UI {
 
-	unsigned int winWidth = 1900, winHeight = 1000;
+	unsigned int winWidth = 1900;
+	unsigned int winHeight = 1000;
 
 	GLFWwindow* win;
 
@@ -93,9 +94,6 @@ public:
 
 		// Set UI state
 		curState = st;
-
-
-
 	}
 
 	void getInput()
@@ -114,10 +112,6 @@ public:
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		//if (glfwGetKey(win, GLFW_KEY_P) == GLFW_PRESS) {
-		//	audioManager->PlaySounds(audioFilePath);
-		//}
-
 		// One more window just cause
 		ImGui::Begin("Light Position");
 
@@ -127,9 +121,6 @@ public:
 		ImGui::SliderFloat("slider z", &curState->lightZ, -100.0f, 100.0f, " %.3f");
 
 		ImGui::End();
-
-
-
 
 		// Use IMGUI to show rendered to framebuffer 
 		ImGui::Begin("Demo window"); {

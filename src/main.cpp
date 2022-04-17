@@ -17,19 +17,18 @@
 #include <fmod/core/fmod_errors.h>
 
 #include "AudioManager.h"
-#include"Entity.h"
+#include "Entity.h"
 
-#include"UIState.h"
+#include "UIState.h"
 #include "Manager.h"
 
 
-//#include "Shader.h"
-//#include "Renderer.h"
 #include "RenderableComp.h"
 #include "PositionComp.h"
 
 
-unsigned int winWidth = 1900 , winHeight = 1000;
+unsigned int winWidth = 1900;
+unsigned int winHeight = 1000;
 
 GLFWwindow* initialize_window() {
 	if (!glfwInit()) {
@@ -63,37 +62,18 @@ GLFWwindow* initialize_window() {
 
 int main(int argc, char** argv) {
 
-	// Initialize GLFW
-	GLFWwindow* win = initialize_window();
-
-	// Used to detect change in window size
-	int locWidth = winWidth, locHeight = winHeight, prevWidth = winWidth, prevHeight = winHeight;
-
-
-
-	// Create UIState - model in control-model-view
-	UIState state = UIState();
-	state.winHeight = winHeight;
-	state.winWidth = winWidth;
-	state.isRunning = true;
-
-	// Create Manager - core of the engine
-	Manager manager = Manager(&state, win);
-	
-
 	// Create a game obj
 	Entity gameobj = Entity();
 
 	// Create a mesh for it
 	RenderableComp* geom = new RenderableComp(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-
+	
 	// Create its position
 	PositionComp* pos = new PositionComp(0.0, 2.0, 0.0);
-
+	
 	// Add components to the entity
 	gameobj.addComp(geom);
 	gameobj.addComp(pos);
-
 
 	// Add obj to the scene
 	Scene* curScene = new Scene();
@@ -102,12 +82,45 @@ int main(int argc, char** argv) {
 	// Add scene to manager
 	manager.activateScene(curScene);
 
-	
+	void activateScene(Scene *scene) 
+	{
+		curScene = scene;
+
+		// For all entities in the scene, submit their respective comp to sybsystems
+		for (u32 i = 0; i < curScene->entities.size(); i++)
+		{
+			// Add components to respective systems
+			addCompToSubSys(i);
+		}
+
+		// Prep renderers buffers after setting uo objs
+		// renderer->updateBuffers();
+	}
+
+	void addCompToSubSys(int ind)
+	{
+		Entity* gameObj = curScene->entities[ind];
+
+		// Check what comp the entity has (bitmask)
+		// Renderer
+		if (gameObj->hasComp & 2)
+			renderer->addObject(
+					reinterpret_cast<IRenderable*>(gameObj->getComp(2)->CastType(2)),
+					reinterpret_cast<IPosition*>(gameObj->getComp(1)->CastType(2))
+					);
+		// Light
+		//if (gameObj->hasComp & 4)
+
+		// Audio
+		//if (gameObj->hasComp & 8)
+
+	}
+
+
 	// Game loop
 	while (state.isRunning) {
-
 		manager.getInput();
-		manager.update();
+		// manager.update();
 	}
 
 

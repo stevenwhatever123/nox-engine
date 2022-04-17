@@ -12,8 +12,6 @@
 #include <iostream>
 
 #include "IComponent.h"
-//#include "RenderableComp.h"
-
 
 class Entity
 {
@@ -31,6 +29,10 @@ public:
 	// Add a component to the entity
 	void addComp(IComponent *comp)
 	{
+
+
+		assert(comp->ID != 0);
+
 		// Check that there is no comp with the same ID 
 		for (auto c : components)
 		{
@@ -44,9 +46,9 @@ public:
 
 		// If no -> add
 		components.push_back(comp);
-		// And add to hasComp
-		hasComp += pow(2, (comp->ID - 1));
 		
+		// And add to hasCom
+		hasComp |= (1 << (comp->ID - 1));
 	}
 
 
@@ -64,37 +66,5 @@ public:
 		std::cout << "The component " << askedID << " does not exist in Entity " << ID << std::endl;
 		return nullptr;
 	}
-
-	//IRenderable * getRendComp()
-	//{
-	//	for (auto c : components)
-	//	{
-	//		if (c->ID == 2)
-	//		{
-	//			return (IRenderable*)c;
-	//		}
-	//	}
-
-	//	std::cout << "The component " << 2 << " does not exist in Entity " << ID << std::endl;
-	//}
-
-	//// Replace an existing component with new one.
-	//// If there is no comp with the same id -> add
-	//void replaceComp(IComponent comp)
-	//{
-	//	// Check if same-Id comp exists
-	//	for (auto c : components)
-	//	{
-	//		if (c.ID == comp.ID)
-	//		{
-	//			// If yes -> through error and do nothing
-	//			std::cout << "The component " << comp.ID << " already exists in Entity " << ID << std::endl;
-	//			return;
-	//		}
-	//	}
-
-	//	// If no -> add
-	//	components.push_back(comp);
-	//}
 
 };

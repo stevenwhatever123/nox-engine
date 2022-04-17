@@ -9,7 +9,6 @@
 * A mock up class for Renderer to render a cube
 */
 class RenderableComp : public IRenderable, public IComponent
-
 {
 public:
 
@@ -20,12 +19,8 @@ public:
 	{
 		switch (castID)
 		{
-			case 2:
-				return static_cast<IRenderable*>(this); break;
-			case 1:
-				return static_cast<IComponent*>(this); break;
-			default:
-				return nullptr;
+			case 1: case 2: return this;
+			default: return nullptr;
 		}
 	}
 
@@ -56,26 +51,6 @@ public:
 		};
 
 
-		//texCoord = {
-
-		//	1.000000, 0.333333, //0
-		//	1.000000, 0.666667,
-		//	0.666667, 0.666667,
-		//	0.666667, 0.333333,
-		//	0.666667, 0.000000, //4
-		//	0.000000, 0.333333,
-		//	0.000000, 0.000000,
-		//	0.333333, 0.000000,
-		//	0.333333, 1.000000,
-		//	0.000000, 1.000000,
-		//	0.000000, 0.666667,
-		//	0.333333, 0.333333,
-		//	0.333333, 0.666667,
-		//	1.000000, 0.000000
-		//
-		//};
-
-
 		texCoordPreped = {
 
 			1.000000, 0.333333, //0
@@ -96,8 +71,6 @@ public:
 		};
 
 
-
-
 		facesV = {
 			1,2,3,
 			7,6,5,
@@ -112,8 +85,6 @@ public:
 			3,2,7,
 			4,0,7
 		};
-
-
 
 		facesN = {
 			0,0,0,
@@ -223,17 +194,7 @@ public:
 	int getNumOfNormals() { return normalsFin.size() / 3; }
 
 
-	//float* getArrayOfVertices() { return verticesFin.data(); }
-
-	//float* getArrayOfTexCoord() { return texCoordFin.data(); }
-
-	//float* getArrayOfNormals() { return normalsFin.data(); }
-
-
 	int getNumOfElements() { return elements.size() / 3; }
-
-	//void getArrayOfElements(std::vector<int> *el) {  }
-
 
 
 	void getArrayOfVertices(std::vector<float>* v) { *v = verticesFin; }

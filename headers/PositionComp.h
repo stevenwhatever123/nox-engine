@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "IPosition.h"
 #include "IComponent.h"
 
@@ -16,12 +14,12 @@ public:
 	{
 		switch (castID)
 		{
-		case 2:
-			return static_cast<IPosition*>(this); break;
-		case 1:
-			return static_cast<IComponent*>(this); break;
-		default:
-			return nullptr;
+			case 1:
+				return static_cast<IComponent*>(this); break;
+			case 2:
+				return static_cast<IPosition*>(this); break;
+			default:
+				return nullptr;
 		}
 	}
 
@@ -29,7 +27,9 @@ public:
 	PositionComp(float newx, float newy, float newz)
 	{
 		ID = 1;
-		x = newx; y = newy; x = newx;
+		x = newx;
+		y = newy;
+		x = newx;
 	}
 
 };

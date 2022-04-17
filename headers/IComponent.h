@@ -14,7 +14,6 @@ class IComponent
 public:
 
 	int ID;
-
 	// This function is implemented to be able to downcast classes stored as IComponent to their respective actual classes
 	virtual void* CastType(const int castID) = 0;
 };
