@@ -9,17 +9,10 @@
 #include <assimp/scene.h>
 #undef NOMINMAX
 
+using namespace NoxEngine;
 
-ImGuiCustomWindow::ImGuiCustomWindow()
-{
-
-}
-
-ImGuiCustomWindow::~ImGuiCustomWindow()
-{
-
-}
-
+ImGuiCustomWindow::ImGuiCustomWindow()  { }
+ImGuiCustomWindow::~ImGuiCustomWindow() { }
 
 void ImGuiCustomWindow::showFBXLoaderMenu(Mesh * curMesh)
 {
@@ -57,12 +50,12 @@ void ImGuiCustomWindow::showFBXLoaderMenu(Mesh * curMesh)
 		{
 			printf("Read Success\n");
 
-			const aiScene* pScene =  FBXFileLoader::readFBX(filenameBuffer);
+			const aiScene* pScene =  readFBX(filenameBuffer);
 
 			// Converting the scene to mesh data
 			if (pScene != nullptr)
 			{
-				curMesh = FBXFileLoader::getMesh(pScene);
+				curMesh = getMesh(pScene);
 				//curMesh = mesh;
 			}
 			else

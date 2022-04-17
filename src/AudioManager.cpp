@@ -1,32 +1,12 @@
-/***************************************
-*
-* Audio engine
-* Base code was developed by Cody Claborn
-* (https://www.codyclaborn.me/tutorials/making-a-basic-fmod-audio-engine-in-c/)
-*
-***************************************/
-
 #include <AudioManager.h>
 
 
-//////////////////////////////////
-//   CONSTRUCTOR / DESTRUCTOR   //
-//////////////////////////////////
-
-AudioManager::AudioManager() {
-
-}
-AudioManager::~AudioManager() {
-
-}
-
-
+using namespace NoxEngine;
 //////////////
 //   CORE   //
 //////////////
 
 void AudioManager::Init() {
-
 	// Initialize FMOD Core API
 	coreSystem = NULL;
 
@@ -62,7 +42,7 @@ void AudioManager::Destroy() {
 void AudioManager::Update() {
 
 	/*   Remove all stopped channels   */
-	vector<ChannelMap::iterator> pStoppedChannels;
+	std::vector<ChannelMap::iterator> pStoppedChannels;
 	for (auto it = mChannels.begin(), itEnd = mChannels.end(); it != itEnd; ++it) {
 
 		bool bIsPlaying = false;
@@ -76,13 +56,12 @@ void AudioManager::Update() {
 		mChannels.erase(it);
 	}
 
-
 	// fmod needs to be updated at once once per game tick
 	AudioManager::errorCheck(coreSystem->update());
 }
 
 
-void AudioManager::LoadSound(const string& fileName, bool is3d, bool isLooping, bool isStream) {
+void AudioManager::LoadSound(const std::string& fileName, bool is3d, bool isLooping, bool isStream) {
 
 	// first check that this sound hasn't been loaded into the sound map
 	auto soundItr = this->mSounds.find(fileName);
@@ -92,7 +71,7 @@ void AudioManager::LoadSound(const string& fileName, bool is3d, bool isLooping, 
 	FMOD_MODE eMode = FMOD_DEFAULT;
 	eMode |= is3d		? FMOD_3D : FMOD_2D;								// 2D / 3D sound
 	eMode |= isLooping	? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;					// Loop or not
-	
+
 	// Stream: To account for slow media that might cause buffer underrun 
 	// (skipping / stuttering / repeating blocks of audio) with sounds 
 	// created with FMOD_CREATESTREAM, use System::setStreamBufferSize to 
@@ -129,7 +108,7 @@ void AudioManager::UnLoadSound(const char *strSoundName) {
 }
 
 
-int AudioManager::PlaySounds(const string& strSoundName, const glm::vec3& vPos, float fVolumedB) {
+int AudioManager::PlaySounds(const std::string& strSoundName, const glm::vec3& vPos, float fVolumedB) {
 
 	// Has this sound been loaded?
 	auto sound = mSounds.find(strSoundName);
@@ -150,7 +129,7 @@ int AudioManager::PlaySounds(const string& strSoundName, const glm::vec3& vPos, 
 	// Look up which channel this sound resides in.
 	auto channelIdItr = mSoundChannelIds.find(strSoundName);
 	int channelId = -1;
-	
+
 	// If the sound hasn't been allocated a channel, do so 
 	if (channelIdItr == mSoundChannelIds.end()) {
 
@@ -185,8 +164,8 @@ int AudioManager::PlaySounds(const string& strSoundName, const glm::vec3& vPos, 
 	}
 
 	// Otherwise (sound has channel), the channel is already playing, so don't do anything.
-	
-	
+
+
 	// return channel id at the end
 	return channelId;
 }
@@ -226,20 +205,24 @@ void AudioManager::Set3dListenerAttributes(const glm::vec3& vPos, const glm::vec
 	//listener.velocity = vel;
 
 	errorCheck(coreSystem->set3DListenerAttributes(
-		0,			// Listener ID. For singleplayer this is always 0
-		&pos,
-		&vel,
-		&forward,
-		&up
-	));		// Core API
+				0,			// Listener ID. For singleplayer this is always 0
+				&pos,
+				&vel,
+				&forward,
+				&up
+				));		// Core API
 	//errorCheck(studioSystem->setListenerAttributes(0, &listener));		// studio API
 	//std::cout << "Position: " << listener.forward.x << "," << listener.forward.y << "," << listener.forward.z << std::endl;
 }
 
-// Global 3D settings
-// @param dopplerScale Exaggerate / diminish doppler effect
-// @param distanceFactor Set units per meter (e.g. if using feet then 3.28). Only affects doppler - does not affect min/max distance
-// @param rolloffScale How fast 3D sounds attenuate using FMOD_3D_LOGROLLOFF
+
+/***
+ * Global 3D settings
+ * 
+ * @param dopplerScale Exaggerate / diminish doppler effect
+ * @param distanceFactor Set units per meter (e.g. if using feet then 3.28). Only affects doppler - does not affect min/max distance
+ * @param rolloffScale How fast 3D sounds attenuate using FMOD_3D_LOGROLLOFF
+ */
 void AudioManager::Set3dSettings(float dopplerScale, float distanceFactor, float rolloffScale) {
 
 	errorCheck(coreSystem->set3DSettings(dopplerScale, distanceFactor, rolloffScale));
