@@ -68,11 +68,11 @@ void Mesh::createNodeHierarchy(aiNode* aiRootnode, MeshNode* rootNode)
 	
 	allNodes.push_back(rootNode);
 
-	copyNodesWithMeshes(aiRootnode, rootNode);
+	traverseTreeStructure(aiRootnode, rootNode);
 	nodeHierarchy = *rootNode;
 }
 
-void Mesh::copyNodesWithMeshes(aiNode* node, MeshNode* targetParent)
+void Mesh::traverseTreeStructure(aiNode* node, MeshNode* targetParent)
 {
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)
 	{
@@ -116,16 +116,12 @@ void Mesh::copyNodesWithMeshes(aiNode* node, MeshNode* targetParent)
 
 		allNodes.push_back(child);
 
-		copyNodesWithMeshes(node->mChildren[i], child);
+		traverseTreeStructure(node->mChildren[i], child);
 		targetParent->child.push_back(*child);
 	}
 }
 
-void Mesh::importAnimationData(aiScene* scene)
-{
-
-}
-
+// Some function to print out data just to make sure we're getting data correctly
 void Mesh::printAllNodes()
 {
 	std::vector<MeshNode> list;
@@ -138,6 +134,7 @@ void Mesh::printAllNodes()
 	}
 }
 
+// Some function to print out data just to make sure we're getting data correctly
 void Mesh::printAllMeshNodes()
 {
 	std::vector<MeshNode> list;
@@ -166,6 +163,7 @@ void Mesh::loopAllNodes(MeshNode node, std::vector<MeshNode>& list)
 	}
 }
 
+// Frame based update function
 void Mesh::update()
 {
 	if (nodeAnimTransformation.size() > 0)
@@ -177,6 +175,7 @@ void Mesh::update()
 	}
 }
 
+// Semi-fixed time based update function
 void Mesh::update(time_type dt)
 {
 	if (getNumOfAnimations() > 0)
@@ -226,6 +225,7 @@ void Mesh::calculateCenterPosition()
 	centerPosition = temp * (float) (1 / count);
 }
 
+// Just some testing function
 void Mesh::generateAnimation(glm::vec3 targetPosition)
 {
 	unsigned int ticksIWant = 300;
@@ -244,7 +244,8 @@ void Mesh::generateAnimation(glm::vec3 targetPosition)
 		}
 	}
 }
-
+// Some modelling software handle UV coordinates differently
+// Flip it if necessary
 void Mesh::flipUV()
 {
 	for (unsigned int i = 0; i < texCoord.size(); i++)
@@ -254,6 +255,28 @@ void Mesh::flipUV()
 			texCoord[i][j].y = 1 - texCoord[i][j].y;
 		}
 	}
+}
+
+// This function loop through the current node to parent node
+// and get the global transformation by suming up all the transformation
+glm::mat4 Mesh::getGlobalTransformation(MeshNode currentNode)
+{
+	glm::mat4 transformation(1);
+	bool isRoot = false;
+	while (!isRoot)
+	{
+		transformation = currentNode.transformation * transformation;
+
+		if (currentNode.parent == nullptr)
+		{
+			isRoot = true;
+			break;
+		}
+
+		currentNode = *currentNode.parent;
+	}
+
+	return transformation;
 }
 
 void Mesh::resetFrameIndex()
@@ -271,31 +294,6 @@ void Mesh::prepForRenderer()
 	mNormals.resize(normals.size());
 
 	// Apply transformation from nodes
-	//for (unsigned int i = 0; i < allNodes.size(); i++)
-	//{
-	//	//std::cout << glm::to_string(allNodes[i]->transformation) << "\n";
-	//	if (!allNodes[i]->hasMesh)
-	//	{
-	//		// Get which mesh to transform
-	//		unsigned int meshIndex = allNodes[i]->meshIndex;
-
-	//		mVertices[meshIndex].resize(vertices[meshIndex].size());
-
-	//		// Apply Transformation to all vertices of the mesh
-	//		for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
-	//		{
-	//			//mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-	//				//glm::vec4(vertices[meshIndex][j], 1.0));
-	//		}
-
-	//		//for (unsigned int j = 0; j < mVertices[meshIndex].size(); j++)
-	//		//{
-	//		//	std::cout << glm::to_string(mVertices[meshIndex][j]) << "\n";
-	//		//}
-	//	}
-	//}
-
-	// Apply transformation from nodes
 	for (unsigned int i = 0; i < allNodes.size(); i++)
 	{
 		unsigned int meshIndex = allNodes[i]->meshIndex;
@@ -305,78 +303,20 @@ void Mesh::prepForRenderer()
 
 		if (getNumOfAnimations() < 1)
 		{
-			//if (!allNodes[i]->hasMesh)
-			//{
-			//	for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
-			//	{
-			//		std::cout << glm::to_string(allNodes[i]->transformation) << "\n";
-			//		mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-			//			glm::vec4(vertices[meshIndex][j], 1.0));
-			//		mNormals[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-			//			glm::vec4(normals[meshIndex][j], 1.0));
-			//	}
-			//}
+			glm::mat4 transformation = getGlobalTransformation(*allNodes[i]);
+
 			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
 			{
-				//std::cout << glm::to_string(allNodes[i]->transformation) << "\n";
-				mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+				mVertices[meshIndex][j] = glm::vec3(transformation *
 					glm::vec4(vertices[meshIndex][j], 1.0));
-				mNormals[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+				mNormals[meshIndex][j] = glm::vec3(transformation *
 					glm::vec4(normals[meshIndex][j], 1.0));
 			}
 		}
 		else
 		{
-			// Some node names are not matching
-			// TODO: FIX IT LATER
-			//if (allNodes[i]->hasMesh)
-			//{
-			//	// Loop node
-			//	glm::mat4 transformation(1);
-			//	for (unsigned int j = 0;
-			//		j < nodeAnimations[animationIndex].size();
-			//		j++)
-			//	{
-			//		if (allNodes[i]->name
-			//			== nodeAnimations[animationIndex][j]->mNodeName.C_Str())
-			//		{
-			//			std::cout << "Name: " << allNodes[i]->name << "\n";
-
-			//			std::cout << nodeAnimations[animationIndex][j]
-			//				->mNodeName.C_Str() << "\n";
-
-			//			// Interpolate between two keyframe
-			//			float ratio = accumulator / timeStep;
-
-			//			glm::mat4 matrixFloor
-			//				= nodeAnimTransformation[animationIndex][j][whichTickFloor];
-
-			//			glm::mat4 matrixCeil
-			//				= nodeAnimTransformation[animationIndex][j][whichTickCeil];
-
-			//			//transformation
-			//				//= nodeAnimTransformation[animationIndex][j][frameIndex];
-
-			//			// Linear interpolation
-			//			transformation
-			//				= (matrixFloor * ratio) + ((1 - ratio) * matrixCeil);
-
-			//			break;
-			//		}
-			//	}
-			//	// Apply Transformation to all vertices of the mesh
-			//	for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
-			//	{
-			//		mVertices[meshIndex][j] = glm::vec3(transformation *
-			//			glm::vec4(vertices[meshIndex][j], 1.0));
-
-			//		mNormals[meshIndex][j] = glm::vec3(transformation *
-			//			glm::vec4(normals[meshIndex][j], 1.0));
-			//	}
-			//}
-
-
 			// Loop node
+			// Notes: This may not 100% work on skeletal meshes
 			glm::mat4 transformation = allNodes[i]->transformation;
 			for (unsigned int j = 0;
 				j < nodeAnimations[animationIndex].size();
@@ -399,6 +339,7 @@ void Mesh::prepForRenderer()
 					glm::mat4 matrixCeil
 						= nodeAnimTransformation[animationIndex][j][whichTickCeil];
 
+					// Framebased way to update transformation
 					//transformation
 						//= nodeAnimTransformation[animationIndex][j][frameIndex];
 
@@ -421,12 +362,6 @@ void Mesh::prepForRenderer()
 			}
 		}
 	}
-
-	//for (unsigned int i = 0; i < vertices[0].size(); i++)
-	//{
-	//	verticesPreped.push_back(vertices[0][i].x); verticesPreped.push_back(vertices[0][i].y); verticesPreped.push_back(vertices[0][i].z);
-	//	verticesPreped.push_back(mVertices[0][i].x); verticesPreped.push_back(mVertices[0][i].y); verticesPreped.push_back(mVertices[0][i].z);
-	//}
 
 	for (unsigned int i = 0; i < mVertices.size(); i++)
 	{

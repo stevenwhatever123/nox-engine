@@ -40,8 +40,6 @@ namespace FBXFileLoader
 					aiProcess_Triangulate |
 					aiProcess_GenSmoothNormals |
 					aiProcess_FlipUVs |
-					// Strange that some forums suggest including the above
-					// code when importing models exported from Blender
 					aiProcess_JoinIdenticalVertices | 
 					aiProcess_PreTransformVertices);
 
@@ -77,6 +75,8 @@ namespace FBXFileLoader
 		for (unsigned int i = 0; i < pScene->mNumMeshes; ++i)
 		{
 			const aiMesh* pMesh = loadedMesh[i];
+
+			mesh->hasBones = pMesh->HasBones();
 
 			std::vector<glm::vec3> mVertices;
 			std::vector<glm::vec3> mNormals;
@@ -260,11 +260,8 @@ namespace FBXFileLoader
 						// Notes: I don't think it's a good idea to include translation
 						// inside the animation data 
 						// This would mean everthing the gameobject moves
-						// is tied to the animation clip and is not user defined
-						// 
-						// What we normally want to do is to animate the game
-						// object rotations only and we define how the gameobject
-						// moves via scripts/our tools
+						// is tied to the animation clip and may cause various 
+						// problems based on my previous experience
 
 						//mesh->nodeAnimTranslationMatrices[i].push_back(
 						//	translationMatrix

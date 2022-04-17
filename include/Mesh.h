@@ -22,9 +22,6 @@ public:
 	void resizeNumOfMeshes(unsigned int i);
 	void resizeNumOfAnimations(unsigned int i);
 	void createNodeHierarchy(aiNode* aiRootnode, MeshNode* rootNode);
-	void importAnimationData(aiScene* scene);
-
-	void getAllNodesReferences();
 
 	void printAllNodes();
 	void printAllMeshNodes();
@@ -35,6 +32,8 @@ public:
 	void calculateCenterPosition();
 	void generateAnimation(glm::vec3 targetPosition);
 
+	glm::mat4 getGlobalTransformation(MeshNode currentNode);
+
 	void flipUV();
 	void resetFrameIndex();
 	void prepForRenderer();
@@ -43,6 +42,7 @@ public:
 
 public:
 
+	bool hasBones;
 	glm::vec3 centerPosition;
 
 	unsigned int frameIndex = 0;
@@ -109,7 +109,7 @@ public:
 
 private:
 
-	void copyNodesWithMeshes(aiNode* node, MeshNode* targetParent);
+	void traverseTreeStructure(aiNode* node, MeshNode* targetParent);
 	void loopAllNodes(MeshNode node, std::vector<MeshNode>& list);
 };
 

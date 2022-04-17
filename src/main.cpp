@@ -278,6 +278,7 @@ int main(int argc, char** argv) {
 			}
 		}
 
+		// You can ignore this for now, just testing stuff
 		if (isAlreadyLoaded)
 		{
 			if (mesh->getNumOfAnimations() > 0)
@@ -347,11 +348,6 @@ int main(int argc, char** argv) {
 			//isAlreadyLoaded = false;
 
 			mesh->calculateCenterPosition();
-			//std::cout << "Center position: ";
-			//std::cout << glm::to_string(mesh->centerPosition) << "\n";
-
-			//std::cout << "Target position: ";
-			//std::cout << glm::to_string(targetPosition) << "\n";
 
 			if (playAnimation)
 			{
