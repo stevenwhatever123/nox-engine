@@ -49,8 +49,8 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 void GameManager::addMesh(String name, Mesh m) {
 
 	//m.prepForRenderer();
-	renderer->addObject(&m);
-	renderer->updateBuffers();
+	//renderer->addObject(&m);
+	//renderer->updateBuffers();
 
 	// game_state.addMesh().emplace(name, )
 
@@ -108,7 +108,7 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(glm::vec3(0.0f, 1.0f, 4.0f));
+	camera = new Camera(glm::vec3(0.0f, 20.0f, 100.0f));
 
 	// camera->turnVerBy(90.0f);
 }
@@ -127,7 +127,8 @@ void GameManager::init_animation() {
 	EventManager::Instance()->addListener("mesh_added", [this](va_list args){
 
 		String file_name = va_arg(args, std::string);
-		Mesh* mesh = va_arg(args, Mesh*);
+		//Mesh* mesh = va_arg(args, Mesh*);
+		Mesh* mesh = &game_state.meshes.rbegin()->second;
 
 		this->renderer->addObject(mesh);
 		this->renderer->updateBuffers();
@@ -237,6 +238,19 @@ void GameManager::update_animation() {
 
 	auto meshStart = game_state.meshes.begin();
 	auto meshEnd = game_state.meshes.end();
+
+	for (; meshStart != meshEnd; meshStart++)
+	{
+		Mesh* currentMesh = &meshStart->second;
+		if (currentMesh->getNumOfAnimations() > 0)
+		{
+			renderer->applyTransformation(
+				currentMesh->nodeAnimTransformation[currentMesh->animationIndex][0][currentMesh->frameIndex],
+				currentMesh);
+		}
+	}
+
+	meshStart = game_state.meshes.begin();
 
 	for(;meshStart != meshEnd; meshStart++) {
 		if (meshStart->second.getNumOfAnimations() > 0)

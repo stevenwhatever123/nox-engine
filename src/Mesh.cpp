@@ -494,7 +494,8 @@ void Mesh::getArrayOfVertices(std::vector<float>* v)
 	for (unsigned int i = 0; i < vertices[0].size(); i++)
 	{
 		//verticesPreped.push_back(vertices[0][i].x); verticesPreped.push_back(vertices[0][i].y); verticesPreped.push_back(vertices[0][i].z);
-		v->push_back(mVertices[0][i].x); v->push_back(mVertices[0][i].y); v->push_back(mVertices[0][i].z);
+		//v->push_back(mVertices[0][i].x); v->push_back(mVertices[0][i].y); v->push_back(mVertices[0][i].z);
+		v->push_back(vertices[0][i].x); v->push_back(vertices[0][i].y); v->push_back(vertices[0][i].z);
 	}
 }
 
