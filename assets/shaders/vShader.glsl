@@ -21,12 +21,13 @@ out Vertex {
 uniform vec3 lightPosition;
 uniform vec3 cameraPosition;
 
+uniform mat4 modelTransform;
 uniform mat4 toCamera;
 uniform mat4 toProjection;
 
 void main() {	
 
-	gl_Position = toProjection * toCamera * vec4(position, 1.0f);
+	gl_Position = toProjection * toCamera * modelTransform * vec4(position, 1.0f);
 
 	v.theNormal = normal;
 	v.theTexCoord = texCoord;
