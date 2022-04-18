@@ -41,6 +41,8 @@ namespace NoxEngine {
 			void flipUV();
 			void prepForRenderer();
 
+			void setAnimationIndex(u32 num);
+
 			u32 getNumOfAnimations();
 			glm::mat4 getGlobalTransformation(MeshNode currentNode);
 			glm::mat4 getCurrentFrameNodeTransformation(MeshNode *node);

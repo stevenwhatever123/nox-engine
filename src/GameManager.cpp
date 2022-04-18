@@ -239,6 +239,14 @@ void GameManager::update_animation() {
 	auto meshEnd = game_state.meshes.end();
 
 	for(;meshStart != meshEnd; meshStart++) {
+		if (meshStart->second.getNumOfAnimations() > 0)
+		{
+			if (meshStart->second.frameIndex ==
+				meshStart->second.numTicks[meshStart->second.animationIndex] - 1)
+			{
+				meshStart->second.resetFrameIndex();
+			}
+		}
 		meshStart->second.update(deltaTime);
 	}
 }

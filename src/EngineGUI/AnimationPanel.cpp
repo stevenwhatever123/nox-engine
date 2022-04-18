@@ -62,26 +62,61 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 
 		if (ImGui::TreeNode(startItr->second.nodeHierarchy.name.c_str()))
 		{
-			if (ImGui::BeginTable("Animation 0 data: Node 0", 2, 
-				ImGuiTableFlags_Borders|ImGuiTableFlags_Resizable))
+			ImGui::Text("Number of Animation: %i", startItr->second.getNumOfAnimations());
+			ImGui::Text("Current Animation: %i", startItr->second.animationIndex);
+			ImGui::SameLine();
+			if (ImGui::Button("+"))
 			{
-				for (i32 row = 0; row <
-					startItr->second.nodeAnimTransformation[0][0].size(); row++)
-				{
-					ImGui::TableNextRow();
-					ImGui::TableNextColumn();
-					ImGui::Text("Frame %d", row);
-					ImGui::TableNextColumn();
-
-					std::string someString
-						= glm::to_string(startItr->second.nodeAnimTransformation[0][0][row]);
-
-					const char* displayText = someString.c_str();
-
-					ImGui::Text(displayText);
-				}
-				ImGui::EndTable();
+				startItr->second.setAnimationIndex(startItr->second.animationIndex + 1);
+				startItr->second.resetFrameIndex();
 			}
+			ImGui::SameLine();
+			if (ImGui::Button("-"))
+			{
+				startItr->second.setAnimationIndex(startItr->second.animationIndex - 1);
+				startItr->second.resetFrameIndex();
+			}
+			ImGui::Text("Name: %s", startItr->second.animations[startItr->second.animationIndex]->mName.C_Str());
+
+			ImGui::Text("Frame index: %i", startItr->second.frameIndex);
+			ImGui::Text("Number of ticks: %i", startItr->second.numTicks[startItr->second.animationIndex] - 1);
+			
+			ImGui::Text("Duration: %.6f",
+				startItr->second.animationDuration[startItr->second.animationIndex]);
+
+			ImGui::Text("Progress Bar");
+			ImGui::SameLine();
+			// Progress has to be between 0 and 1
+			f32 progress = 0.0f;
+			progress = (float)startItr->second.frameIndex /
+				(startItr->second.numTicks[startItr->second.animationIndex] - 1);
+			ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
+
+			std::string someString = "Animation " 
+				+ std::to_string(startItr->second.animationIndex) + " data: Node 0";
+
+			if (ImGui::TreeNode(someString.c_str()))
+			{
+				if (ImGui::BeginTable("Table", 2,
+					ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable
+					| ImGuiSelectableFlags_SpanAllColumns))
+				{
+					for (i32 row = 0; row <
+						startItr->second.nodeAnimTransformation[startItr->second.animationIndex][0].size(); row++)
+					{
+						ImGui::TableNextRow();
+						ImGui::TableNextColumn();
+						ImGui::Text("Frame %d", row);
+						ImGui::TableNextColumn();
+
+						ImGui::Text(glm::to_string(
+							startItr->second.nodeAnimTransformation[startItr->second.animationIndex][0][row]).c_str());
+					}
+					ImGui::EndTable();
+				}
+				ImGui::TreePop();
+			}
+
 			ImGui::TreePop();
 		}
 		

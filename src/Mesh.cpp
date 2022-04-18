@@ -444,6 +444,17 @@ void Mesh::prepForRenderer()
 	}
 }
 
+void Mesh::setAnimationIndex(u32 num)
+{
+	if (num < 0)
+		return;
+
+	if (num > getNumOfAnimations() - 1)
+		return;
+
+	animationIndex = num;
+}
+
 u32 Mesh::getNumOfAnimations()
 {
 	return (u32)animations.size();
