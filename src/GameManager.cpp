@@ -26,7 +26,7 @@ void GameManager::update() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	update_inputs();
-	// update_audio();
+	update_audio();
 	update_renderer();
 	update_gui();
 
@@ -193,6 +193,8 @@ void GameManager::init_imgui() {
 	font = io.Fonts->AddFontFromFileTTF("envy.ttf", 18);
 	io.Fonts->Build();
 
+	// Initialize panel variables
+	NoxEngineGUI::initPresetObjectPanel();
 
 }
 
@@ -221,15 +223,25 @@ void GameManager::main_contex_ui() {
 
 void GameManager::update_gui() {
 
+	ImGuiIO& io = ImGui::GetIO();
+	
+	// Show FPS
+	char windowTitle[64];
+	snprintf(windowTitle, 64, "%s - FPS %.3f", title.c_str(), io.Framerate);
+	glfwSetWindowTitle(window, windowTitle);
+
+	// Draw window content
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	ImGui::PushFont(font);
-
+	
 	NoxEngineGUI::updateGUI(&ui_params);
 	NoxEngineGUI::updateAudioPanel(&game_state);
 	NoxEngineGUI::updateAnimationPanel(&game_state);
+	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
+	NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::Begin("Light Settings");
 
@@ -247,6 +259,15 @@ void GameManager::update_gui() {
 
 
 void GameManager::update_audio() {
+
+	// Sync audio manager with the game state's audio repo
+	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
+	//       set the pos/volume in the appropriate ChannelGroup / ChannelControl
+	for (auto itr : game_state.audioSources) {
+		audioManager->SetChannel3dPosition(0, itr.second.position);
+		audioManager->SetChannelVolume(0, itr.second.sourceVolume);
+	}
+
 	audioManager->Update();
 }
 

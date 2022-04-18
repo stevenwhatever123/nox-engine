@@ -75,9 +75,10 @@ namespace NoxEngineGUI {
 
 
 	void init_imgui(GLFWwindow* win);
+	void loadTextures();
+	void setupFixedLayout();
 	void cleanupImGui();
 
-	void setupFixedLayout();
 	void updateMenu();
 	void updateGUI(GUIParams*);
 
@@ -85,10 +86,9 @@ namespace NoxEngineGUI {
 	// should belong in a separate header file.
 	// TODO: Remove the following - these are only here to show what 
 	//       other panels we could have
-	//void updateScriptingPanel();
 	//void updateFileExplorerPanel();
 	//void updateHierarchyPanel();
-	//void updatePresetObjectsPanel();
+	//void updateConsolePanel();
 
 }
 

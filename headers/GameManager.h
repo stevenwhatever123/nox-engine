@@ -33,6 +33,8 @@
 #include <EngineGUI/AudioPanel.h>
 #include <EngineGUI/AnimationPanel.h>
 #include <EngineGUI/ScenePanel.h>
+#include <EngineGUI/PresetObjectPanel.h>
+#include <EngineGUI/ImGuizmoTool.h>
 
 #include <Scene.h>
 #include <Entity.h>

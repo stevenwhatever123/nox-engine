@@ -62,14 +62,29 @@
     <ClCompile Include="src\MeshNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\EngineGUI.cpp">
+    <ClCompile Include="src\EngineGUI\AudioPanel.cpp">
+      <Filter>Source Files\EngineGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\AnimationPanel.cpp">
+      <Filter>Source Files\EngineGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\EngineGUI.cpp">
+      <Filter>Source Files\EngineGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\ImGuizmoTool.cpp">
+      <Filter>Source Files\EngineGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\PresetObject.cpp">
+      <Filter>Source Files\EngineGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\PresetObjectPanel.cpp">
+      <Filter>Source Files\EngineGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\ScenePanel.cpp">
       <Filter>Source Files\EngineGUI</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene.cpp">
       <Filter>Source Files\ECS</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\ScenePanel.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
     </ClCompile>
     <ClCompile Include="3rdParty\headers\imgui\imgui_widgets.cpp">
       <Filter>Source Files\3rdParty\imgui</Filter>
@@ -101,14 +116,8 @@
     <ClCompile Include="src\Entity.cpp">
       <Filter>Source Files\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="src\ImGuiCustomWindow.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\AudioPanel.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\AnimationPanel.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
+    <ClCompile Include="src\Mesh.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\AudioManager.cpp">
       <Filter>Source Files\Managers</Filter>
@@ -134,8 +143,21 @@
     <ClCompile Include="src\PositionComponent.cpp">
       <Filter>Source Files\ECS</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
+    <ClCompile Include="3rdParty\headers\imguizmo\GraphEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\headers\imguizmo\ImCurveEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\headers\imguizmo\ImGradient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\headers\imguizmo\ImGuizmo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\headers\imguizmo\ImSequencer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\GLProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -159,7 +181,9 @@
     <ClInclude Include="headers\GLProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\ImGuiCustom.h">
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\GameState.h">
@@ -177,6 +201,9 @@
     <ClInclude Include="headers\RenderableComponent.h">
       <Filter>Header Files\ECS</Filter>
     </ClInclude>
+    <ClInclude Include="headers\IRenderable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="headers\PositionComponent.h">
       <Filter>Header Files\ECS</Filter>
     </ClInclude>
@@ -189,17 +216,8 @@
     <ClInclude Include="headers\stb_image.h">
       <Filter>Header Files\3rdParty\stb</Filter>
     </ClInclude>
-    <ClInclude Include="headers\EngineGUI\AnimationPanel.h">
-      <Filter>Header Files\EngineGUI</Filter>
-    </ClInclude>
     <ClInclude Include="headers\AudioManager.h">
-      <Filter>Header Files\EngineGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\EngineGUI\AudioPanel.h">
-      <Filter>Header Files\EngineGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\EngineGUI\EngineGUI.h">
-      <Filter>Header Files\EngineGUI</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\IRenderable.h">
       <Filter>Header Files\ECS</Filter>
@@ -208,9 +226,6 @@
       <Filter>Header Files\3rdParty\imgui</Filter>
     </ClInclude>
     <ClInclude Include="headers\ImGuiCustomWindow.h">
-      <Filter>Header Files\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\EngineGUI\ScenePanel.h">
       <Filter>Header Files\ECS</Filter>
     </ClInclude>
     <ClInclude Include="headers\EventManager.h">
@@ -239,6 +254,27 @@
     </ClInclude>
     <ClInclude Include="headers\MemAllocator.h">
       <Filter>Header Files\UtilityClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\AudioPanel.h">
+      <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\AnimationPanel.h">
+      <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\EngineGUI.h">
+      <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\ImGuizmoTool.h">
+      <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\PresetObject.h">
+      <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\PresetObjectPanel.h">
+      <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\ScenePanel.h">
+      <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
