@@ -17,13 +17,17 @@
 #include <fmod/core/fmod_errors.h>
 
 // Engine Include
+#include <Singleton.h>
 #include <AudioManager.h>
+#include <Mesh.h>
 #include <Types.h>
 #include <Renderer.h>
 #include <IOManager.h>
 #include <GameState.h>
 #include <Utils.h>
 #include <FBXFileLoader.h>
+#include <EventManager.h>
+#include <EventNames.h>
 
 #include <EngineGUI/EngineGUI.h>
 #include <EngineGUI/AudioPanel.h>
@@ -32,32 +36,46 @@
 #include <EngineGUI/PresetObjectPanel.h>
 #include <EngineGUI/ImGuizmoTool.h>
 
+#include <Scene.h>
+#include <Entity.h>
+
+#include <RenderableComponent.h>
+#include <PositionComponent.h>
+
 
 namespace NoxEngine {
 	
 	using NoxEngineGUI::GUIParams;
 	using NoxEngine::GameState;
 	using NoxEngine::AudioSource;
+	using NoxEngine::Scene;
 
 	class GameManager {
 		public: 
-			GameManager(u32 width, u32 height, std::string title);
+			GameManager(u32 width, u32 height, String title);
 			void init();
 			void update();
 
 			void addAudioSource(AudioSource audioSource);
+			void addMesh(String str, Mesh m);
 			inline Renderer* GetRenderer() { return renderer; };
 			i8 KeepRunning() { return !should_close; }
 			u32 win_height;
 			u32 win_width;
 			i8 should_close;
 
+			time_type currentTime;
+			time_type deltaTime;
+			time_type lastTime;
+
 		private:
 
 			void init_window();
+			void init_events();
 			void init_audio();
 			void init_camera();
 			void init_shaders();
+			void init_animation();
 			void init_renderer();
 			void init_imgui();
 
@@ -67,12 +85,12 @@ namespace NoxEngine {
 			void update_gui();
 			void update_audio();
 			void update_inputs();
-
+			void update_animation();
 			void update_renderer();
 
 			// Window
 			GLFWwindow *window;
-			std::string title;
+			String title;
 			u8 keys[256];
 
 			// Audio
@@ -81,9 +99,10 @@ namespace NoxEngine {
 			Camera* camera;
 			GameState game_state;
 			ImFont* font;
-			std::vector<GLProgram> programs;
+			Array<GLProgram> programs;
 			GLProgram *current_program;
 			GUIParams ui_params;
+			Scene scene;
 
 	};
 

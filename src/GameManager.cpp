@@ -1,19 +1,24 @@
 #include <GameManager.h>
 
 using NoxEngineUtils::Logger;
+using NoxEngine::EventManager;
+using NoxEngine::Entity;
+
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, std::string title) : win_width(width), win_height(height), title(title) {
+GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title), scene() {
 }
 
 void GameManager::init() {
 	Logger::debug("Initing systems");
 	init_window();
+	init_events();
 	init_audio();
 	init_camera();
 	init_shaders();
 	init_imgui();
+	init_animation();
 	init_renderer();
 }
 
@@ -25,12 +30,14 @@ void GameManager::update() {
 	update_renderer();
 	update_gui();
 
+	update_animation();
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)) {
 		should_close = true;
 	}
 
-	glfwSwapBuffers(window);
 
+	glfwSwapBuffers(window);
 }
 
 void GameManager::addAudioSource(AudioSource audioSource) {
@@ -40,6 +47,19 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 	audioManager->LoadSound(audioSource.file);
 
 }
+
+void GameManager::addMesh(String name, Mesh m) {
+
+	// m.prepForRenderer();
+	// renderer->addObject(&m);
+	// renderer->updateBuffers();
+
+	// game_state.addMesh().emplace(name, )
+
+	// game_state.audioSources.emplace(audioSource.name, audioSource);
+	// audioManager->LoadSound(audioSource.file);
+}
+
 
 void GameManager::init_window() {
 
@@ -71,6 +91,39 @@ void GameManager::init_window() {
 
 }
 
+
+void GameManager::init_events() {
+	
+
+	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
+		
+		String file_name = va_arg(args, String);
+		// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
+		// this->game_state.meshes.emplace(file_name, pScene);
+
+		Entity *ent = new Entity();
+
+		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+		PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+
+
+		ent->addComp(comp);
+		ent->addComp(pos);
+
+		this->scene.addEntity(ent);
+
+		this->renderer->addObject(
+			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+		);
+
+		this->renderer->updateBuffers();
+
+	});
+
+
+}
+
 void GameManager::init_audio() {
 	// Initialize audio system
 
@@ -90,20 +143,29 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(glm::vec3(10.0f, 200.0f, 0.0f));
-	camera->turnVerBy(90.0f);
+	camera = new Camera(glm::vec3(0.0f, 7.0f, 10.0f));
+	camera->turnVerBy(20.0f);
 }
 
 void GameManager::init_shaders() {
-	programs.emplace_back(std::vector<ShaderFile>{
-			{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
-			{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
-			});
+	programs.emplace_back(Array<ShaderFile>{
+		{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
+		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
+	});
 
 	current_program = &programs.back();
 }
 
+void GameManager::init_animation() {
+
+	
+	currentTime = glfwGetTime();
+	deltaTime = 0;
+	lastTime = currentTime;
+}
+
 void GameManager::init_renderer() { 
+
 	// ------------------------------ Set up of the render --------------------------
 	// // Create Renderer
 	renderer = new Renderer(win_width, win_height, camera);
@@ -111,6 +173,7 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 
 	game_state.renderer = renderer;
+	renderer->setFrameBufferToTexture();
 
 	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
 	// Mesh *mesh = NoxEngine::getMesh(pScene);
@@ -212,9 +275,24 @@ void GameManager::update_inputs() {
 	glfwPollEvents();
 }
 
+void GameManager::update_animation() {
+
+	currentTime = glfwGetTime();
+	deltaTime = currentTime - lastTime;
+	lastTime = currentTime;
+
+	auto meshStart = game_state.meshes.begin();
+	auto meshEnd = game_state.meshes.end();
+
+	for(;meshStart != meshEnd; meshStart++) {
+		meshStart->second.update(deltaTime);
+	}
+
+}
+
 void GameManager::update_renderer() {
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-	renderer->fillBackground(0.1, 0.2, 0.5);
+	renderer->fillBackground(0.1f, 0.2f, 0.5f);
 	renderer->draw();
 }
 

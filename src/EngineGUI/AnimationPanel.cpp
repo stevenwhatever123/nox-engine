@@ -7,6 +7,8 @@
 
 #include <Windows.h>
 #include <FBXFileLoader.h>
+#include <EventManager.h>
+#include <EventNames.h>
 
 using namespace NoxEngine;
 
@@ -14,7 +16,6 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 
 	// Variables
 	std::string name = PANEL_NAME_MAP[ PanelName::AnimationSettings ];
-	Mesh* mesh = nullptr;
 	bool isAlreadyLoaded = false;
 
 	// Window Begin
@@ -22,25 +23,10 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 
 
 	if (ImGui::Button("Load FBX File")) {
-
-		std::string picked_file = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
-
+		String picked_file = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
 		if (picked_file.length() > 0)
 		{
-			const aiScene* pScene = NoxEngine::readFBX(picked_file.c_str());
-			if (pScene != nullptr) {
-				mesh = NoxEngine::getMesh(pScene);
-				isAlreadyLoaded = true;
-				//curMesh = mesh;
-			}
-			else
-			{
-				printf("Error: converting sence to mesh data");
-			}
-		}
-		else
-		{
-			printf("Error: reading fbx file");
+			SIGNAL_EVENT(EventNames::meshAdded, picked_file);
 		}
 	}
 
@@ -48,12 +34,12 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 	// If there was a mesh loaded by user
 	// TODO: Might be a good idea to move this to ScenePanel?
 	//       Have a queue of loaded meshes then add/update in ScenePanel if it's not empty
-	if (isAlreadyLoaded) {
-		mesh->prepForRenderer();
-		game_state->renderer->addObject(mesh);
-		game_state->renderer->updateBuffers();
-		delete mesh;
-	}
+	// if (isAlreadyLoaded) {
+	// 	mesh->prepForRenderer();
+	// 	game_state->renderer->addObject(mesh);
+	// 	game_state->renderer->updateBuffers();
+	// 	delete mesh;
+	// }
 
 
 	// Window End

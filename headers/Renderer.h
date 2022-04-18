@@ -1,21 +1,22 @@
 #pragma once
 
+//System std lib include
 #include <iostream>
 
+// 3rd Party Include
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
-
-
 #include <stb_image.h>
 #include <stb_image_write.h>
 
-
+// Engine Include
 #include <IRenderable.h>
 #include <Camera.h>
 #include <GLProgram.h>
 #include <Singleton.h>
+#include <IPosition.h>
 
 namespace NoxEngine {
 
@@ -23,9 +24,11 @@ namespace NoxEngine {
 	struct RendObj
 	{
 		IRenderable* objPtr; // A pointer to the object
-		i32 startInd, endInd; // Start and end indixes in the a united element array 
+		i32 startInd;
+		i32 endInd; // Start and end indixes in the a united element array 
 		GLuint normalTexture;
 		GLuint ambientTexture; // Texture handlers
+		glm::mat4 pos;
 	};
 	
 
@@ -112,7 +115,9 @@ namespace NoxEngine {
 		~Renderer();
 
 		// Add object to renderer to render
-		void addObject(IRenderable *mesh);
+		void addObject(IRenderable *mesh, IPosition *pos);
+		void clearObject();
+		
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
 		void useProgram();
 		void updateBuffers();
@@ -136,9 +141,7 @@ namespace NoxEngine {
 		inline void setFrameBufferToTexture() { curFBO = FBO; setRenderTarget(); }
 		inline void setRenderTarget() { glBindFramebuffer(GL_FRAMEBUFFER, curFBO); }
 
-
 		glm::mat4 getProjMatr() { return projection; }
-
 		glm::mat4 getCameraMatr() { return camera->getCameraTransf(); }
 
 		// Camera managment
@@ -147,7 +150,6 @@ namespace NoxEngine {
 
 		// Updates the view transformation using the current camera
 		void updateCamera();
-
 		void updateLightPos(float x, float y, float z);
 
 	};

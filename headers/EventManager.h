@@ -1,14 +1,18 @@
-#ifndef NOX_EVENT_MANAGER_H
-#define NOX_EVENT_MANAGER_H
+#pragma once
 
-#include "Singleton.h"
+#include <Singleton.h>
+#include <Types.h>
+
 #include <map>
 #include <string>
 #include <vector>
+#include <functional>
+
+#define SIGNAL_EVENT(name, ...) EventManager::Instance()->signal(name, __VA_ARGS__)
 
 namespace NoxEngine {
 
-	typedef void (*ListenFunc)(void);
+	typedef std::function<void(va_list)> ListenFunc;
 	typedef std::map<std::string, std::vector<ListenFunc>> EventEntry;
 	typedef std::map<std::string, std::vector<ListenFunc>>::iterator EventEntryIt;
 	typedef std::map<std::string, std::vector<ListenFunc>>::reference EventEntryRef;
@@ -16,10 +20,14 @@ namespace NoxEngine {
 
 	class EventManager: public Singleton<EventManager> {
 		friend class Singleton<EventManager>;
+
 		public:
-		void addListener(std::string eventName, ListenFunc func);
-		void signal(std::string eventName) ;
+
+		void addListener(String eventName, ListenFunc func);
+		void signal(String eventName, ...) ;
+
 		protected:
+
 			EventManager(){}
 			~EventManager(){}
 
@@ -28,4 +36,3 @@ namespace NoxEngine {
 	};
 
 }
-#endif NOX_EVENT_MANAGER_H

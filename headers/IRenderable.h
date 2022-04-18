@@ -21,34 +21,31 @@ namespace NoxEngine {
 			virtual i32 getNumOfVertices() = 0;
 			virtual i32 getNumOfTexCoord() = 0;
 			virtual i32 getNumOfNormals() = 0;
+			virtual i32 getNumOfElements() = 0;
 
-			virtual void getArrayOfVertices(std::vector<f32>* v) = 0;
-			virtual void getArrayOfTexCoord(std::vector<f32>* tC) = 0;
-			virtual void getArrayOfNormals(std::vector<f32>* n) = 0;
-			virtual int getNumOfElements() = 0;
+			virtual void getArrayOfVertices(Array<f32>* v) = 0;
+			virtual void getArrayOfTexCoord(Array<f32>* tC) = 0;
+			virtual void getArrayOfNormals (Array<f32>* n) = 0;
+			virtual void getArrayOfElements(Array<i32> * el) = 0;
 
-			virtual void getArrayOfElements(std::vector<int> * el) = 0;
 			virtual const char* getNormalTexture() = 0;
 			virtual const char* getAmbientTexture() = 0;
 
 			// Stores initial attributes without dublicates
-			std::vector<f32> verticesPreped;
-			std::vector<f32> texCoordPreped;
-			std::vector<f32> normalsPreped;
+			Array<f32> verticesPreped;
+			Array<f32> texCoordPreped;
+			Array<f32> normalsPreped;
 
-			std::vector<i32> elements;
-			std::vector<i32> facesV;
-			std::vector<i32> facesT;
-			std::vector<i32> facesN;
+			Array<i32> elements;
+			Array<i32> facesV;
+			Array<i32> facesT;
+			Array<i32> facesN;
 
 			//std::vector<f32> curMatrices; // Animation matrices
 			//std::vector<f32> curVertices; // Vertice Positions after Animation Matrices application
 
-
 			f32 color[3] = { 0.2f, 0.7f, 0.5f }; // Color
 			bool prim_type = 0; // If 0 - triangles, 1 - lines
 			bool renderAsDots = 0; // 0 - if not, 1 - if yes
-
-
 	};
 }

@@ -2,7 +2,6 @@
 #include <Renderer.h>
 #include <Utils.h>
 
-
 // TODO: update uniform submissions to use Shader class
 // TODO: fix drawing to default buffer
 // TODO: get some light going
@@ -30,7 +29,7 @@ Renderer::~Renderer()
     glDeleteFramebuffers(1, &FBO);
 }
 
-Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), camera(cam) {
+Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), camera(cam), elements(0) {
 
 	// Initialise OpenGl
 
@@ -120,16 +119,20 @@ void Renderer::updateBuffers() {
 }
 
 
-void Renderer::addObject(IRenderable *mesh) {
+void Renderer::addObject(IRenderable *mesh, IPosition *pos)
+{
 
-	// Add a mesh to the container
-	RendObj newObj;
-	newObj.objPtr = mesh;
-	newObj.startInd = i32(elements.size());
+    // Add a mesh to the container
+    RendObj newObj;
+    newObj.objPtr = mesh;
+    newObj.startInd = (i32)elements.size();
 
-	// Generate textures for the object
-	newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
-	newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
+    newObj.pos = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+    
+    // Generate textures for the object
+    newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
+    newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
+
 
 	// Generate the arrays
 	createVertexArray(mesh);
@@ -148,21 +151,15 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 
 	GLuint tex;
 	glGenTextures(1, &tex);
-	std::cout << "1 " << glGetError() << std::endl; fflush(NULL);
-
 	glActiveTexture(GL_TEXTURE0 + num);
-	std::cout << "2 " << glGetError() << std::endl; fflush(NULL);
 	glBindTexture(GL_TEXTURE_2D, tex);
-	std::cout << "3" << glGetError() << std::endl; fflush(NULL);
-	// Set the texture wrapping parameters
+	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	std::cout << "4 " << glGetError() << std::endl; fflush(NULL);
-	// Set texture filtering parameters
+	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	std::cout << "5 " << glGetError() << std::endl; fflush(NULL);
-	// Load image, create texture and generate mipmaps
+	
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true); // flip loaded texture's on the y-axis.
 
@@ -176,7 +173,7 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 	}
 	else
 	{
-		std::cout << "Failed to load texture" << stbi_failure_reason() << std::endl;
+		Logger::debug("Failed to load file %s ", texturePath);
 	}
 	stbi_image_free(data);
 
@@ -184,6 +181,11 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 	glUniform1i(textureLoc, num);
 
 	return tex;
+}
+
+void Renderer::clearObject()
+{
+	objects.clear();
 }
 
 
@@ -196,7 +198,7 @@ void Renderer::draw() {
 
 	glBindVertexArray(VAO);
 
-	for (unsigned int i = 0; i < objects.size(); i++)
+	for (u32 i = 0; i < objects.size(); i++)
 	{
 		// Activate and bind textures of the object
 		glActiveTexture(GL_TEXTURE0 + 1);
@@ -204,6 +206,7 @@ void Renderer::draw() {
 
 		for (u32 i = 0; i < objects.size(); i++)
 		{
+			program->set4Matrix("toWorld", objects[i].pos);
 			// Activate and bind textures of the object
 			glActiveTexture(GL_TEXTURE0 + 1);
 			glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
@@ -472,8 +475,6 @@ void Renderer::updateCamera()
     //int toCameraLoc = shader->getUniformLocation("toCamera");
     //glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
     program->set4Matrix("toCamera", camera->getCameraTransf());
-	int toCameraLoc = program->getUniformLocation("toCamera");
-	glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
 }
 
 
@@ -491,7 +492,7 @@ void Renderer::useProgram()
 	program->use();
 	// Set up Projection matrix
 	// int toProjectionLoc = program->getUniformLocation("toProjection");
-	projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 200.0f);
+    projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
 
 	program->set4Matrix("toProjection", projection);
 
@@ -503,6 +504,8 @@ void Renderer::useProgram()
     program->set3Float("cameraPosition", camera->currCamPos.x, camera->currCamPos.y, camera->currCamPos.z);
     // Set up light position
     program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
+
+    program->set4Matrix("toWorld", glm::mat4(1.0f));
     
 }
 
