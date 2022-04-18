@@ -51,6 +51,7 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 	auto startItr = game_state->meshes.begin();
 	auto endItr = game_state->meshes.end();
 
+	u32 meshID = 0;
 	while (startItr != endItr)
 	{
 		if (startItr->second.getNumOfAnimations() == 0)
@@ -65,16 +66,19 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 			ImGui::Text("Number of Animation: %i", startItr->second.getNumOfAnimations());
 			ImGui::Text("Current Animation: %i", startItr->second.animationIndex);
 			ImGui::SameLine();
+			ImGui::PushID(meshID);
 			if (ImGui::Button("+"))
 			{
 				startItr->second.setAnimationIndex(startItr->second.animationIndex + 1);
 				startItr->second.resetFrameIndex();
+				std::cout << "+" << "\n";
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("-"))
 			{
 				startItr->second.setAnimationIndex(startItr->second.animationIndex - 1);
 				startItr->second.resetFrameIndex();
+				std::cout << "-" << "\n";
 			}
 			ImGui::Text("Name: %s", startItr->second.animations[startItr->second.animationIndex]->mName.C_Str());
 
@@ -116,9 +120,11 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 				}
 				ImGui::TreePop();
 			}
+			ImGui::PopID();
 
 			ImGui::TreePop();
 		}
+		meshID++;
 		
 		startItr++;
 	}
