@@ -37,12 +37,50 @@ void NoxEngineGUI::init_imgui(GLFWwindow* win) {
 }
 
 
-void NoxEngineGUI::cleanupImGui() {
+// Load the icons / images to be used on the GUI
+#if 0
+void NoxEngineGUI::loadTextures() {
 
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+	GLuint tex;
+	glGenTextures(1, &tex);
+	std::cout << "1 " << glGetError() << std::endl; fflush(NULL);
+
+	glActiveTexture(GL_TEXTURE0 + num);
+	std::cout << "2 " << glGetError() << std::endl; fflush(NULL);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	std::cout << "3" << glGetError() << std::endl; fflush(NULL);
+	// Set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	std::cout << "4 " << glGetError() << std::endl; fflush(NULL);
+	// Set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	std::cout << "5 " << glGetError() << std::endl; fflush(NULL);
+	// Load image, create texture and generate mipmaps
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true); // flip loaded texture's on the y-axis.
+
+	unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
+
+	if (data)
+	{
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << stbi_failure_reason() << std::endl;
+	}
+	stbi_image_free(data);
+
+	GLuint textureLoc = program->getUniformLocation(uniName);
+	glUniform1i(textureLoc, num);
+
+	return tex;
 }
+#endif
 
 
 // Make a window as big as the viewport
@@ -86,6 +124,14 @@ void NoxEngineGUI::setupFixedLayout() {
 
 	ImGui::DockBuilderFinish(mainNodeID);
 
+}
+
+
+void NoxEngineGUI::cleanupImGui() {
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 
