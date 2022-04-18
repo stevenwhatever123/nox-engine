@@ -112,11 +112,12 @@ void GameManager::init_events() {
 
 		this->scene.addEntity(ent);
 
-		renderer->addObject(
+		this->renderer->addObject(
 			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
 			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
 		);
 
+		this->renderer->updateBuffers();
 
 	});
 
@@ -142,9 +143,8 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(glm::vec3(0.0f, 1.0f, 4.0f));
-
-	// camera->turnVerBy(90.0f);
+	camera = new Camera(glm::vec3(0.0f, 7.0f, 10.0f));
+	camera->turnVerBy(20.0f);
 }
 
 void GameManager::init_shaders() {
@@ -173,25 +173,7 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 
 	game_state.renderer = renderer;
-
-	Entity *ent = new Entity();
-
-	RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-	PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
-
-
-	ent->addComp(comp);
-	ent->addComp(pos);
-
-	scene.addEntity(ent);
-
-	renderer->addObject(
-			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-			);
-
-
-
+	renderer->setFrameBufferToTexture();
 
 	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
 	// Mesh *mesh = NoxEngine::getMesh(pScene);

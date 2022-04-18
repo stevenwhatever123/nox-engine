@@ -215,8 +215,7 @@ void Renderer::draw() {
 			glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
 
 			// Draw the object
-			// glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (void*)0); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
+			glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
 		}
 
 	}
@@ -476,8 +475,6 @@ void Renderer::updateCamera()
     //int toCameraLoc = shader->getUniformLocation("toCamera");
     //glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
     program->set4Matrix("toCamera", camera->getCameraTransf());
-	int toCameraLoc = program->getUniformLocation("toCamera");
-	glUniformMatrix4fv(toCameraLoc, 1, GL_FALSE, glm::value_ptr(camera->getCameraTransf()));
 }
 
 
@@ -495,7 +492,7 @@ void Renderer::useProgram()
 	program->use();
 	// Set up Projection matrix
 	// int toProjectionLoc = program->getUniformLocation("toProjection");
-	projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 200.0f);
+    projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
 
 	program->set4Matrix("toProjection", projection);
 
@@ -507,6 +504,8 @@ void Renderer::useProgram()
     program->set3Float("cameraPosition", camera->currCamPos.x, camera->currCamPos.y, camera->currCamPos.z);
     // Set up light position
     program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
+
+    program->set4Matrix("toWorld", glm::mat4(1.0f));
     
 }
 

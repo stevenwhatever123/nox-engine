@@ -23,7 +23,7 @@ void Entity::addComp(IComponent *comp)
 	}
 
 	components.push_back(comp);
-	hasComp |= (1 << (comp->id - 1));
+	hasComp += pow(2, (comp->id - 1));
 }
 
 

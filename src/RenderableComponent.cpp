@@ -159,8 +159,11 @@ void* RenderableComponent::CastType(const int castID)
 {
 	switch (castID)
 	{
-		case 1: case 2:
-			return this;
-		default: return nullptr;
+	case 2:
+		return static_cast<IRenderable*>(this); break;
+	case 1:
+		return static_cast<IComponent*>(this); break;
+	default:
+		return nullptr;
 	}
 }

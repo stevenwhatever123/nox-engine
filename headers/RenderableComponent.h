@@ -42,5 +42,13 @@ namespace NoxEngine {
 			Array<i32> elements;
 			const char* ambTexName;
 
+			std::vector<float> verticesPreped;
+			std::vector<float> texCoordPreped;
+			std::vector<float> normalsPreped;
+
+			std::vector<int> facesV;
+			std::vector<int> facesT;
+			std::vector<int> facesN;
+
 	};
 }

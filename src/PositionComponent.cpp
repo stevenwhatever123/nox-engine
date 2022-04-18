@@ -13,8 +13,11 @@ void* PositionComponent::CastType(const i32 castID)
 {
 	switch (castID)
 	{
-		case 1: case 2:
-			return this;
-		default: return nullptr;
+	case 2:
+		return static_cast<IPosition*>(this); break;
+	case 1:
+		return static_cast<IComponent*>(this); break;
+	default:
+		return nullptr;
 	}
 }
