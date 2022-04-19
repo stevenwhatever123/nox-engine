@@ -344,105 +344,57 @@ void Mesh::resetFrameIndex()
 }
 
 
-void Mesh::prepForRenderer()
-{
-	std::vector<std::vector<glm::vec3>> mVertices;
-	mVertices.resize(vertices.size());
-
-	std::vector<std::vector<glm::vec3>> mNormals;
-	mNormals.resize(normals.size());
-
-	// Apply transformation from nodes
-	for (u32 i = 0; i < allNodes.size(); i++)
-	{
-		u32 meshIndex = allNodes[i]->meshIndex;
-
-		mVertices[meshIndex].resize(vertices[meshIndex].size());
-		mNormals[meshIndex].resize(normals[meshIndex].size());
-
-		if (getNumOfAnimations() < 1)
-		{
-			glm::mat4 transformation = getGlobalTransformation(*allNodes[i]);
-
-			for (u32 j = 0; j < vertices[meshIndex].size(); j++)
-			{
-				mVertices[meshIndex][j] = glm::vec3(transformation * glm::vec4(vertices[meshIndex][j], 1.0));
-				mNormals[meshIndex][j] = glm::vec3(transformation * glm::vec4(normals[meshIndex][j], 1.0));
-			}
-		}
-		else
-		{
-			// Loop node
-			// Notes: This may not 100% work on skeletal meshes
-			glm::mat4 transformation = allNodes[i]->transformation;
-			for (u32 j = 0; j < nodeAnimations[animationIndex].size(); j++)
-			{
-				if (allNodes[i]->name == nodeAnimations[animationIndex][j]->mNodeName.C_Str())
-				{
-					
-					// Interpolate between two keyframe
-					f32 ratio = (f32)(accumulator/timeStep);
-
-					glm::mat4 matrixFloor = nodeAnimTransformation[animationIndex][j][whichTickFloor];
-					glm::mat4 matrixCeil = nodeAnimTransformation[animationIndex][j][whichTickCeil];
-					// Framebased way to update transformation
-					//transformation
-					//= nodeAnimTransformation[animationIndex][j][frameIndex];
-
-					// Linear interpolation
-					transformation = (matrixCeil * (float)ratio) + ((1.0f - (float)ratio) * matrixFloor);
-					break;
-				}
-			}
-
-			// Apply Transformation to all vertices of the mesh
-			for (u32 j = 0; j < vertices[meshIndex].size(); j++)
-			{
-				mVertices[meshIndex][j] = glm::vec3(transformation * glm::vec4(vertices[meshIndex][j], 1.0));
-				mNormals[meshIndex][j] = glm::vec3(transformation * glm::vec4(normals[meshIndex][j], 1.0));
-			}
-		}
-	}
-
-	for (u32 i = 0; i < mVertices.size(); i++)
-	{
-		for (u32 j = 0; j < mVertices[i].size(); j++)
-		{
-			verticesPreped.push_back(mVertices[i][j].x);
-			verticesPreped.push_back(mVertices[i][j].y);
-			verticesPreped.push_back(mVertices[i][j].z);
-		}
-	}
-
-	for (u32 i = 0; i < mNormals.size(); i++)
-	{
-		for (u32 j = 0; j < mNormals[i].size(); j++)
-		{
-			normalsPreped.push_back(mNormals[i][j].x);
-			normalsPreped.push_back(mNormals[i][j].y);
-			normalsPreped.push_back(mNormals[i][j].z);
-		}
-	}
-
-	for (u32 i = 0; i < texCoord.size(); i++)
-	{
-		for (u32 j = 0; j < texCoord[i].size(); j++)
-		{
-			texCoordPreped.push_back(texCoord[i][j].x);
-			texCoordPreped.push_back(texCoord[i][j].y);
-		}
-	}
-
-
-	for (u32 i = 0; i < faceIndices.size(); i++)
-	{
-		//elements.push_back((int)(faceIndices[0][i]));
-		for (unsigned int j = 0; j < faceIndices[i].size(); j++)
-		{
-			elements.push_back((int)(faceIndices[i][j]));
-		}
-	}
-}
+//void Mesh::prepForRenderer()
+//{
+//	std::vector<std::vector<glm::vec3>> mVertices;
+//	mVertices.resize(vertices.size());
+//
+//	// Apply transformation from nodes
+//	for (unsigned int i = 0; i < allNodes.size(); i++)
+//	{
+//		if (!allNodes[i]->hasMesh)
+//		{
+//			// Get which mesh to transform
+//			unsigned int meshIndex = allNodes[i]->meshIndex;
+//
+//			mVertices[meshIndex].resize(vertices[meshIndex].size());
+//
+//			// Apply Transformation to all vertices of the mesh
+//			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
+//			{
+//				mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
+//					glm::vec4(vertices[meshIndex][j], 1.0));
+//			}
+//
+//			//for (unsigned int j = 0; j < mVertices[meshIndex].size(); j++)
+//			//{
+//			//	std::cout << glm::to_string(mVertices[meshIndex][j]) << "\n";
+//			//}
+//		}
+//	}
+//
+//	for (unsigned int i = 0; i < vertices[0].size(); i++)
+//	{
+//		//verticesPreped.push_back(vertices[0][i].x); verticesPreped.push_back(vertices[0][i].y); verticesPreped.push_back(vertices[0][i].z);
+//		verticesPreped.push_back(mVertices[0][i].x); verticesPreped.push_back(mVertices[0][i].y); verticesPreped.push_back(mVertices[0][i].z);
+//	}
+//
+//	for (unsigned int i = 0; i < normals[0].size(); i++)
+//	{
+//		normalsPreped.push_back(normals[0][i].x); normalsPreped.push_back(normals[0][i].y); normalsPreped.push_back(normals[0][i].z);
+//	}
+//
+//	for (unsigned int i = 0; i < texCoord[0].size(); i++)
+//	{
+//		texCoordPreped.push_back(texCoord[0][i].x); texCoordPreped.push_back(texCoord[0][i].y);
+//	}
+//
+//
+//	for (unsigned int i = 0; i < faceIndices[0].size(); i++)
+//	{
+//		elements.push_back((int)(faceIndices[0][i]));
+//	}
+//}
 
 void Mesh::setAnimationIndex(u32 num)
 {

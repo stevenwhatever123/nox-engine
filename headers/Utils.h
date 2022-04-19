@@ -1,5 +1,4 @@
-#ifndef NOX_UTILS_H
-#define NOX_UTILS_H
+#pragma once
 
 #include <Types.h>
 #include <string>
@@ -28,8 +27,3 @@ namespace NoxEngineUtils {
 	};
 
 }
-
-
-
-#endif // NOX_UTILS_H
-

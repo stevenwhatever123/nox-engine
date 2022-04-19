@@ -8,6 +8,7 @@
 #include <Windows.h>
 #include <FBXFileLoader.h>
 #include <EventManager.h>
+#include <EventNames.h>
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -24,27 +25,10 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 
 
 	if (ImGui::Button("Load FBX File")) {
-
 		String picked_file = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
-
 		if (picked_file.length() > 0)
 		{
-			const aiScene* pScene = NoxEngine::readFBX(picked_file.c_str());
-			if (pScene != nullptr) {
-				game_state->meshes.emplace(picked_file, pScene);
-				
-				// game_state->renderer->addObject(mesh);
-				// game_state->renderer->updateBuffers();
-				EventManager::Instance()->signal("mesh_added", picked_file, game_state->meshes.rbegin()->second);
-			}
-			else
-			{
-				printf("Error: converting sence to mesh data");
-			}
-		}
-		else
-		{
-			printf("Error: reading fbx file");
+			SIGNAL_EVENT(EventNames::meshAdded, picked_file);
 		}
 	}
 

@@ -19,6 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="3rdParty\headers\imguizmo\GraphEditor.cpp" />
+    <ClCompile Include="3rdParty\headers\imguizmo\ImCurveEdit.cpp" />
+    <ClCompile Include="3rdParty\headers\imguizmo\ImGradient.cpp" />
+    <ClCompile Include="3rdParty\headers\imguizmo\ImGuizmo.cpp" />
+    <ClCompile Include="3rdParty\headers\imguizmo\ImSequencer.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_demo.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_draw.cpp" />
@@ -27,23 +32,30 @@
     <ClCompile Include="3rdParty\headers\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_tables.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\EngineGUI\EngineGUI.cpp" />
+    <ClCompile Include="src\EngineGUI\AnimationPanel.cpp" />
+    <ClCompile Include="src\EngineGUI\AudioPanel.cpp" />
+    <ClCompile Include="src\EngineGUI\ImGuizmoTool.cpp" />
+    <ClCompile Include="src\EngineGUI\PresetObject.cpp" />
+    <ClCompile Include="src\EngineGUI\PresetObjectPanel.cpp" />
+    <ClCompile Include="src\EngineGUI\ScenePanel.cpp" />
+    <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\EventManager.cpp" />
     <ClCompile Include="src\FBXFileLoader.cpp" />
     <ClCompile Include="src\GameManager.cpp" />
-    <ClCompile Include="src\ImGuiCustomWindow.cpp" />
     <ClCompile Include="src\IOManager.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\MeshNode.cpp" />
+    <ClCompile Include="src\PositionComponent.cpp" />
+    <ClCompile Include="src\RenderableComponent.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\GLProgram.cpp" />
     <ClCompile Include="src\AudioManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MemAllocator.cpp" />
+    <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\script.cpp" />
     <ClCompile Include="src\Utils.cpp" />
-    <ClCompile Include="src\EngineGUI.cpp" />
-    <ClCompile Include="src\EngineGUI\AnimationPanel.cpp" />
-    <ClCompile Include="src\EngineGUI\AudioPanel.cpp" />
-    <ClCompile Include="src\EngineGUI\ScenePanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h" />
@@ -52,28 +64,34 @@
     <ClInclude Include="headers\EngineGUI\AnimationPanel.h" />
     <ClInclude Include="headers\EngineGUI\AudioPanel.h" />
     <ClInclude Include="headers\EngineGUI\EngineGUI.h" />
+    <ClInclude Include="headers\EngineGUI\ImGuizmoTool.h" />
+    <ClInclude Include="headers\EngineGUI\PresetObject.h" />
+    <ClInclude Include="headers\EngineGUI\PresetObjectPanel.h" />
     <ClInclude Include="headers\EngineGUI\ScenePanel.h" />
+    <ClInclude Include="headers\Entity.h" />
     <ClInclude Include="headers\EventManager.h" />
+    <ClInclude Include="headers\EventNames.h" />
     <ClInclude Include="headers\FBXFileLoader.h" />
     <ClInclude Include="headers\GameManager.h" />
     <ClInclude Include="headers\GameState.h" />
-    <ClInclude Include="headers\ImGuiCustomWindow.h" />
+    <ClInclude Include="headers\IComponent.h" />
     <ClInclude Include="headers\IOManager.h" />
+    <ClInclude Include="headers\IPosition.h" />
     <ClInclude Include="headers\IRenderable.h" />
     <ClInclude Include="headers\MemAllocator.h" />
     <ClInclude Include="headers\Mesh.h" />
     <ClInclude Include="headers\MeshNode.h" />
-    <ClInclude Include="headers\RenderableComp.h" />
+    <ClInclude Include="headers\PositionComponent.h" />
+    <ClInclude Include="headers\RenderableComponent.h" />
     <ClInclude Include="headers\Renderer.h" />
     <ClInclude Include="headers\GLProgram.h" />
+    <ClInclude Include="headers\Scene.h" />
+    <ClInclude Include="headers\script.h" />
     <ClInclude Include="headers\Singleton.h" />
     <ClInclude Include="headers\stb_image.h" />
     <ClInclude Include="headers\stb_image_write.h" />
     <ClInclude Include="headers\Types.h" />
     <ClInclude Include="headers\Utils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\ImGuiCustom.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -137,8 +155,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <ExternalIncludePath>3rdParty\headers\;3rdParty\headers\freetype;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>3rdParty\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(ProjectDir)headers\;$(IncludePath)</IncludePath>
+    <LibraryPath>3rdParty\lib;C:\Program Files (x86)\Windows Kits\10\lib\10.0.19041.0\ucrt\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)headers\;C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt;$(IncludePath)</IncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -182,7 +200,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)3rdParty\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)headers;$(SolutionDir)3rdParty\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

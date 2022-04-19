@@ -1,6 +1,4 @@
-#ifndef NOX_SINGLETON_H
-#define NOX_SINGLETON_H
-
+#pragma once
 
 template <typename Type>
 class Singleton {
@@ -15,5 +13,3 @@ class Singleton {
 	private:
 		Singleton(const Singleton &other);
 };
-
-#endif// NOX_SINGLETON
