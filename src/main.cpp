@@ -6,6 +6,7 @@
 
 // Engine Include
 #include <GameManager.h>
+#include "script.h"
 using NoxEngine::GameManager;
 
 int main(int argc, char** argv) {
@@ -66,7 +67,7 @@ int main(int argc, char** argv) {
 
 	bool playAnimation = false;
 	glm::vec3 targetPosition(0, 0, -10);
-#endif
+
 
 	GameManager gm(1280, 720, "Nox Engine");
 	gm.init();
@@ -77,7 +78,8 @@ int main(int argc, char** argv) {
 		gm.update();
 
 	}
-
+#endif
+	lua();
 	return 0;
 }
 

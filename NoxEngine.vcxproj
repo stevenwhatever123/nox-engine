@@ -54,13 +54,13 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MemAllocator.cpp" />
     <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\script.cpp" />
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h" />
     <ClInclude Include="headers\AudioManager.h" />
     <ClInclude Include="headers\Camera.h" />
-    <ClInclude Include="headers\EngineGUI\EngineGUI.h" />
     <ClInclude Include="headers\EngineGUI\AnimationPanel.h" />
     <ClInclude Include="headers\EngineGUI\AudioPanel.h" />
     <ClInclude Include="headers\EngineGUI\EngineGUI.h" />
@@ -86,6 +86,7 @@
     <ClInclude Include="headers\Renderer.h" />
     <ClInclude Include="headers\GLProgram.h" />
     <ClInclude Include="headers\Scene.h" />
+    <ClInclude Include="headers\script.h" />
     <ClInclude Include="headers\Singleton.h" />
     <ClInclude Include="headers\stb_image.h" />
     <ClInclude Include="headers\stb_image_write.h" />
