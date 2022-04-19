@@ -164,6 +164,9 @@
     <ClCompile Include="src\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\script.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Camera.h">
@@ -179,6 +182,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\GLProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\EngineGUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\script.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -224,9 +233,6 @@
     </ClInclude>
     <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h">
       <Filter>Header Files\3rdParty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\ImGuiCustomWindow.h">
-      <Filter>Header Files\ECS</Filter>
     </ClInclude>
     <ClInclude Include="headers\EventManager.h">
       <Filter>Header Files\Managers</Filter>

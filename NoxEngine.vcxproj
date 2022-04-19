@@ -54,6 +54,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MemAllocator.cpp" />
     <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\script.cpp" />
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +87,7 @@
     <ClInclude Include="headers\Renderer.h" />
     <ClInclude Include="headers\GLProgram.h" />
     <ClInclude Include="headers\Scene.h" />
+    <ClInclude Include="headers\script.h" />
     <ClInclude Include="headers\Singleton.h" />
     <ClInclude Include="headers\stb_image.h" />
     <ClInclude Include="headers\stb_image_write.h" />
