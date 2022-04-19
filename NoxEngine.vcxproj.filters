@@ -9,9 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Source Files\EngineGUI">
-      <UniqueIdentifier>{02a78c18-4d28-412f-8d05-b75d268585c5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\ECS">
       <UniqueIdentifier>{194783f9-2bd4-40a6-8d4c-31e09aba62f3}</UniqueIdentifier>
     </Filter>
@@ -38,7 +35,7 @@
     </Filter>
     <Filter Include="Header Files\EngineGUI">
       <UniqueIdentifier>{fe148aed-d997-43af-923a-a871ede80940}</UniqueIdentifier>
-    </Filter>
+	</Filter>
     <Filter Include="Header Files\Managers">
       <UniqueIdentifier>{eda1e24c-a50f-413e-8577-886a03b2a413}</UniqueIdentifier>
     </Filter>
@@ -265,9 +262,6 @@
       <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
     <ClInclude Include="headers\EngineGUI\AnimationPanel.h">
-      <Filter>Header Files\EngineGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\EngineGUI\EngineGUI.h">
       <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
     <ClInclude Include="headers\EngineGUI\ImGuizmoTool.h">

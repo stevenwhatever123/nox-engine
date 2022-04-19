@@ -61,7 +61,6 @@
     <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h" />
     <ClInclude Include="headers\AudioManager.h" />
     <ClInclude Include="headers\Camera.h" />
-    <ClInclude Include="headers\EngineGUI\EngineGUI.h" />
     <ClInclude Include="headers\EngineGUI\AnimationPanel.h" />
     <ClInclude Include="headers\EngineGUI\AudioPanel.h" />
     <ClInclude Include="headers\EngineGUI\EngineGUI.h" />

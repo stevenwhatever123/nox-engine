@@ -65,7 +65,7 @@ int lua() {
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     getGlobalNamespace(L).addFunction("printMessage", printMessage);
-    luaL_dofile(L, "script.lua");
+    luaL_dofile(L, "assets/scripts/script.lua");
     lua_pcall(L, 0, 0, 0);
     LuaRef sumNumbers = getGlobal(L, "sumNumbers");
     int result = sumNumbers(5, 4);
