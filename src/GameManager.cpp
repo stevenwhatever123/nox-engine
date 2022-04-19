@@ -101,6 +101,9 @@ void GameManager::init_events() {
 		// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
 		// this->game_state.meshes.emplace(file_name, pScene);
 
+		// Steven: That's how I would do it
+		this->game_state.meshes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+
 		Entity *ent = new Entity();
 
 		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
@@ -284,10 +287,30 @@ void GameManager::update_animation() {
 	auto meshStart = game_state.meshes.begin();
 	auto meshEnd = game_state.meshes.end();
 
-	for(;meshStart != meshEnd; meshStart++) {
-		meshStart->second.update(deltaTime);
+	for (; meshStart != meshEnd; meshStart++)
+	{
+		Mesh* currentMesh = &meshStart->second;
+		if (currentMesh->getNumOfAnimations() > 0)
+		{
+			renderer->applyTransformation(
+				currentMesh->nodeAnimTransformation[currentMesh->animationIndex][0][currentMesh->frameIndex],
+				currentMesh);
+		}
 	}
 
+	meshStart = game_state.meshes.begin();
+
+	for(;meshStart != meshEnd; meshStart++) {
+		if (meshStart->second.getNumOfAnimations() > 0)
+		{
+			if (meshStart->second.frameIndex ==
+				meshStart->second.numTicks[meshStart->second.animationIndex] - 1)
+			{
+				meshStart->second.resetFrameIndex();
+			}
+		}
+		meshStart->second.update(deltaTime);
+	}
 }
 
 void GameManager::update_renderer() {

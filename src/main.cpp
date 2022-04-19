@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 
 	bool playAnimation = false;
 	glm::vec3 targetPosition(0, 0, -10);
-
+#endif
 
 	GameManager gm(1280, 720, "Nox Engine");
 	gm.init();
@@ -78,8 +78,8 @@ int main(int argc, char** argv) {
 		gm.update();
 
 	}
-#endif
-	lua();
+
+	//lua();
 	return 0;
 }
 
