@@ -37,29 +37,27 @@ MeshScene::MeshScene(const aiScene* scene) :
 // Some function to print out data just to make sure we're getting data correctly
 void MeshScene::printAllNodes()
 {
-	std::vector<MeshNode> list;
-
-	loopAllNodes(nodeHierarchy, list);
-
-	for (MeshNode node : list)
+	for (MeshNode2 *node : allNodes)
 	{
-		std::cout << node.name << "\n";
+		std::cout << node->name << "\n";
 	}
 }
 
 // Some function to print out data just to make sure we're getting data correctly
 void MeshScene::printAllMeshNodes()
 {
-	std::vector<MeshNode2> list;
-
-	loopAllNodes(nodeHierarchy, list);
-
-	for (MeshNode2 node : list)
+	for (MeshNode2 *node : allNodes)
 	{
-		if (node.meshIndex.size() > 0)
+		if (node->meshIndex.size() > 0)
 		{
-			std::cout << node.name << ": " << "\n";
-			std::cout << glm::to_string(node.transformation) << "\n";
+			std::cout << "Name: " << node->name << ": " << "\n";
+			std::cout << "Associated meshIndex: ";
+			for (u32 meshIndex : node->meshIndex)
+			{
+				std::cout << meshIndex << " ";
+			}
+			std::cout << "\n";
+			std::cout << glm::to_string(node->transformation) << "\n";
 			std::cout << "====================================================" << "\n";
 		}
 	}
@@ -79,7 +77,7 @@ void MeshScene::loopAllNodes(MeshNode2 node, std::vector<MeshNode2>& list)
 // Frame based update function
 void MeshScene::update()
 {
-	if (getNumOfAnimations() > 0)
+	if (hasAnimations())
 	{
 		u32 numOfTicks = numTicks[animationIndex];
 		if (frameIndex < numOfTicks - 1)
@@ -92,7 +90,7 @@ void MeshScene::update()
 // Semi-fixed time based update function
 void MeshScene::update(time_type dt)
 {
-	if (getNumOfAnimations() > 0)
+	if (hasAnimations())
 	{
 		accumulator += dt;
 
@@ -134,9 +132,31 @@ void MeshScene::flipUV()
 	}
 }
 
+void MeshScene::setAnimationIndex(u32 num)
+{
+	if (num > getNumOfAnimations() - 1)
+		return;
+
+	animationIndex = num;
+}
+
+void MeshScene::resetAnimation()
+{
+	frameIndex = 0;
+	accumulator = 0;
+	timeStep = 0;
+	whichTickCeil = 0;
+	whichTickFloor = 0;
+}
+
 u32 MeshScene::getNumOfAnimations()
 {
 	return (u32)animations.size();
+}
+
+bool MeshScene::hasAnimations()
+{
+	return getNumOfAnimations() > 0;
 }
 
 void MeshScene::createNodeHierarchy(aiNode* aiRootnode, MeshNode2* rootNode)
@@ -364,15 +384,10 @@ void MeshScene::extractAnimationInfo(const aiScene* scene) {
 
 			for (MeshNode2* node : allNodes)
 			{
-				//std::cout << node->name.c_str() << "\n";
-				//std::cout << animation_chl->mNodeName.C_Str() << "\n";
-				//std::cout << "Same?: " << (strcmp(node->name.c_str(), animation_chl->mNodeName.C_Str()) == 0) << "\n";
-
 				// Pair the channel with node
 				// We need to use strcmp if we're comparing const char*
 				if (strcmp(node->name.c_str(), animation_chl->mNodeName.C_Str()) == 0)
 				{
-					std::cout << "Hello" << "\n";
 					node->nodeAnimations.push_back(animation_chl);
 					// Resizing and reserving spaces
 					node->nodeAnimTransformation.resize(numAnimation);

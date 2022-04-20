@@ -29,8 +29,13 @@ namespace NoxEngine {
 		void update(time_type dt);
 
 		void flipUV();
+		void setAnimationIndex(u32 num);
+
+		// Reset the play time
+		void resetAnimation();
 
 		u32 getNumOfAnimations();
+		bool hasAnimations();
 
 		// This is the root of the node nodeHierarchy
 		// It contains all the child nodes

@@ -21,12 +21,21 @@ public:
 
 	// The idle transformation
 	glm::mat4 getTransformation();
-
+	// Frame based transformation
 	glm::mat4 getTransformation(u32 frameIndex, u32 animationIndex);
+	// Linear interpolated transformation
 	glm::mat4 getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, f32 timeStep,
 		i32 whichTickFloor, i32 whichTickCeil);
 
+	// Global transformation by traversing all parent node and adding them up
+	glm::mat4 getGlobalTransformation();
+	glm::mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex);
+	glm::mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, f32 timeStep,
+		i32 whichTickFloor, i32 whichTickCeil);
+
 	u32 getNumOfAnimations();
+	bool hasAnimations();
+	bool hasMesh();
 
 public:
 
