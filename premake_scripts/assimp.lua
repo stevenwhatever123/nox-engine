@@ -16,7 +16,7 @@ externalproject "Assimp"
   language "C++"
 
 
-  config_file = io.readfile("../libs/assimp/include/assimp/config.h"):gsub("cmakedefine", "define")
+  config_file = io.readfile("../libs/assimp/include/assimp/config.h.in"):gsub("cmakedefine", "define")
   io.writefile("../libs/assimp/include/assimp/config.h", config_file)
 
   targetdir "../libs/compiled_libs/assimp"
