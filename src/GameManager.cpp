@@ -104,7 +104,8 @@ void GameManager::init_events() {
 
 		//Mesh* mesh = new Mesh(NoxEngine::readFBX(file_name.c_str()));
 		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
-		MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
+		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
+		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
 
 		Entity *ent = new Entity();
 
@@ -286,11 +287,21 @@ void GameManager::update_animation() {
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
 
-	auto meshStart = game_state.meshes.begin();
-	auto meshEnd = game_state.meshes.end();
+	//auto meshStart = game_state.meshes.begin();
+	//auto meshEnd = game_state.meshes.end();
+	auto meshSceneStart = game_state.meshScenes.begin();
+	auto meshSceneEnd = game_state.meshScenes.end();
 
-	for(;meshStart != meshEnd; meshStart++) {
-		meshStart->second.update(deltaTime);
+	for(; meshSceneStart != meshSceneEnd; meshSceneStart++) {
+		if (meshSceneStart->second.hasAnimations())
+		{
+			if (meshSceneStart->second.frameIndex
+				== meshSceneStart->second.numTicks[meshSceneStart->second.animationIndex] - 1)
+			{
+				meshSceneStart->second.resetAnimation();
+			}
+		}
+		meshSceneStart->second.update(deltaTime);
 	}
 
 }
