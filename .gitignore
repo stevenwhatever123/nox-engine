@@ -350,3 +350,4 @@ libs/build*
 *.sln
 *.vcxproj
 *.filters
+libs/compiled_libs/
