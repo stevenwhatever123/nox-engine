@@ -45,7 +45,10 @@
     <ClCompile Include="src\GameManager.cpp" />
     <ClCompile Include="src\IOManager.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\Mesh2.cpp" />
     <ClCompile Include="src\MeshNode.cpp" />
+    <ClCompile Include="src\MeshNode2.cpp" />
+    <ClCompile Include="src\MeshScene.cpp" />
     <ClCompile Include="src\PositionComponent.cpp" />
     <ClCompile Include="src\RenderableComponent.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
@@ -80,7 +83,10 @@
     <ClInclude Include="headers\IRenderable.h" />
     <ClInclude Include="headers\MemAllocator.h" />
     <ClInclude Include="headers\Mesh.h" />
+    <ClInclude Include="headers\Mesh2.h" />
     <ClInclude Include="headers\MeshNode.h" />
+    <ClInclude Include="headers\MeshNode2.h" />
+    <ClInclude Include="headers\MeshScene.h" />
     <ClInclude Include="headers\PositionComponent.h" />
     <ClInclude Include="headers\RenderableComponent.h" />
     <ClInclude Include="headers\Renderer.h" />

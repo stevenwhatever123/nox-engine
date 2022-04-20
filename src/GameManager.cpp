@@ -1,4 +1,5 @@
 #include <GameManager.h>
+#include <glm/gtx/string_cast.hpp>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -100,6 +101,10 @@ void GameManager::init_events() {
 		String file_name = va_arg(args, String);
 		// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
 		// this->game_state.meshes.emplace(file_name, pScene);
+
+		//Mesh* mesh = new Mesh(NoxEngine::readFBX(file_name.c_str()));
+		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
+		MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
 
 		Entity *ent = new Entity();
 
