@@ -7,6 +7,7 @@
 #include <cassert>
 
 
+// TODO: Move this to ECS
 namespace NoxEngineGUI {
 
 	enum PresetCategory {

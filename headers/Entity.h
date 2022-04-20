@@ -15,28 +15,44 @@
 #include <cassert>
 
 // Engine Includes
-#include <IComponent.h>
 #include <Types.h>
 #include <Utils.h>
 
 namespace NoxEngine {
 
+	// Forward declares
+	class IComponent;
+
 	class Entity
 	{
 		public:
+			
+			// The ID of the sp entity. Used to distiguish between them
+			i32 id; 
 
-			i32 id; // The ID of the sp entity. Used to distiguish between them
-			Array<IComponent*> components; // The components that make the entity
+			// The components that make the entity
+			Array<IComponent*> components; 
+			
+			// TODO (Vincent): potential flaw - what if an entity needs more than 1 of the same type of components (e.g. multiple audio sources)
 			HasCompBitMask hasComp;
 
-			Entity();
+			// A human-readable identifier - not necessarily unique
+			String name; 
+
+			// TODO (Vincent): Can an entity not contain another entity?
+			//Entity* parent;
+			//Array<Entity*> children;
+
+	public:
+			Entity(i32 _id);
+			Entity(i32 _id, String _name);
 			// Gotta be careful. When comp are destroyed the subsystem have to know
+			// TODO (Vincent): delete the components array and let the specialized component destroyer remove the reference in the subsystem?
 			~Entity();
 			
 			// Add a component to the entity
 			void addComp(IComponent *comp);
 			// Gets the component with the ID provided. If no such comp -> through error and return
 			IComponent * getComp(i32 id);
-
 	};
 }

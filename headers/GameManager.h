@@ -34,6 +34,7 @@
 #include <EngineGUI/AnimationPanel.h>
 #include <EngineGUI/ScenePanel.h>
 #include <EngineGUI/PresetObjectPanel.h>
+#include <EngineGUI/HierarchyPanel.h>
 #include <EngineGUI/ImGuizmoTool.h>
 
 #include <Scene.h>
@@ -50,6 +51,7 @@ namespace NoxEngine {
 	using NoxEngine::AudioSource;
 	using NoxEngine::Scene;
 
+	// TOOD: Shouldn't GameManager be a singleton?
 	class GameManager {
 		public: 
 			GameManager(u32 width, u32 height, String title);
@@ -78,6 +80,7 @@ namespace NoxEngine {
 			void init_animation();
 			void init_renderer();
 			void init_imgui();
+			void init_scene();
 
 			void asset_ui();
 			void main_contex_ui();
@@ -94,7 +97,7 @@ namespace NoxEngine {
 			u8 keys[256];
 
 			// Audio
-			AudioManager* audioManager;
+			AudioManager* audioManager;		// TODO: Why do we store this? Isn't the point of making singletons being able to retrieve the only instance (like EventManager)?
 			Renderer* renderer;
 			Camera* camera;
 			GameState game_state;
@@ -102,7 +105,7 @@ namespace NoxEngine {
 			Array<GLProgram> programs;
 			GLProgram *current_program;
 			GUIParams ui_params;
-			Scene scene;
+			//Scene scene;	// moved to game_state
 
 	};
 

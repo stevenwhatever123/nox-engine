@@ -1,9 +1,18 @@
 #include <Entity.h>
+#include <GameState.h>
+#include <IComponent.h>
 
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
 
-Entity::Entity() : id(0), components(0), hasComp(0) {}
+
+Entity::Entity(i32 _id) : id(_id), components(0), hasComp(0), name("") {
+
+}
+
+Entity::Entity(i32 _id, String _name) : id(_id), components(0), hasComp(0), name(_name) {
+
+}
 
 Entity::~Entity() {
 	// Gotta be careful. When comp are destroyed the subsystem have to know

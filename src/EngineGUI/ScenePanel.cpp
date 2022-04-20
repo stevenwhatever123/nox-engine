@@ -1,7 +1,12 @@
 #include "EngineGUI/ScenePanel.h"
 
+// move to header
+#include "Entity.h"
 
-void NoxEngineGUI::updateScenePanel(GameState* params) {
+using namespace NoxEngine;
+
+
+void NoxEngineGUI::updateScenePanel(GameState* state) {
 
 	// Variables
 	std::string name = PANEL_NAME_MAP[ PanelName::Scene ];
@@ -24,6 +29,14 @@ void NoxEngineGUI::updateScenePanel(GameState* params) {
 
 			// TODO: Logic for translating 2D cursor position to 3D world coordinates
 
+
+			// Add an entity to the active scene
+			state->activeScene->addEntity(payloadObject);
+
+			// Check what preset object this is, then create all components that it should have
+			// TODO: make this nicer
+
+
 		}
 		ImGui::EndDragDropTarget();
 	}
@@ -36,8 +49,8 @@ void NoxEngineGUI::updateScenePanel(GameState* params) {
 	// }
 
 	// Render background of the app
-	params->renderer->fillBackground(1.0f, 0.5f, 0.9f);
-	params->renderer->draw();
+	state->renderer->fillBackground(1.0f, 0.5f, 0.9f);
+	state->renderer->draw();
 
 	// Use IMGUI to show rendered to framebuffer 
 
@@ -53,7 +66,7 @@ void NoxEngineGUI::updateScenePanel(GameState* params) {
 	// }
 
 	// Pass texture rendered to to ImGUI
-	ImGui::Image((ImTextureID)params->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)state->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 
 	// Window end

@@ -7,12 +7,13 @@ using NoxEngine::Entity;
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title), scene() {
+GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title) {
 }
 
 void GameManager::init() {
 	Logger::debug("Initing systems");
 	init_window();
+	init_scene();
 	init_events();
 	init_audio();
 	init_camera();
@@ -93,7 +94,6 @@ void GameManager::init_window() {
 
 
 void GameManager::init_events() {
-	
 
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
 		
@@ -101,16 +101,19 @@ void GameManager::init_events() {
 		// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
 		// this->game_state.meshes.emplace(file_name, pScene);
 
-		Entity *ent = new Entity();
 
+
+		
+		Entity *ent = new Entity(0, "Placeholder entity");
+
+		// TODO: load and sent mesh data to renderable component
 		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
 		PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
-
 
 		ent->addComp(comp);
 		ent->addComp(pos);
 
-		this->scene.addEntity(ent);
+		game_state.activeScene->addEntity(ent);
 
 		this->renderer->addObject(
 			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
@@ -198,6 +201,15 @@ void GameManager::init_imgui() {
 
 }
 
+void GameManager::init_scene() {
+
+	// Create a new empty scene
+	game_state.scenes.push_back(new Scene());
+	
+	// make this scene the active scene
+	game_state.activeScene = game_state.scenes[0];
+}
+
 void GameManager::main_contex_ui() {
 
 	ImGuiWindowFlags flags =
@@ -241,6 +253,7 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateAnimationPanel(&game_state);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
+	NoxEngineGUI::updateHierarchyPanel(&game_state);
 	NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::Begin("Light Settings");
