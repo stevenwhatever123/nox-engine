@@ -100,8 +100,8 @@ namespace NoxEngine {
 			const char* getNormalTexture() { return normTexName; }
 			const char* getAmbientTexture() { return ambTexName;}
 
-			const char* ambTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
-			const char* normTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg";
+			const char* ambTexName = "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
+			const char* normTexName = "assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg";
 
 		private:
 			void extractGeometricInfo(const aiScene* scene);

@@ -22,7 +22,7 @@ GLuint GLProgram::compileShader(std::string& filename, GLenum shaderType) {
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &infoLogLength);
 		char *temp_buf = (char*)StackMemAllocator::Instance()->allocate(infoLogLength);
 		glGetShaderInfoLog(id, infoLogLength, NULL, temp_buf);
-		Logger::debug("Error Compiling Shader: \n%s", temp_buf);
+		LOG_DEBUG("Error Compiling Shader: \n%s", temp_buf);
 		StackMemAllocator::Instance()->free((u8*)temp_buf);
 	}
 
@@ -47,7 +47,7 @@ GLuint GLProgram::makeProgram(std::vector<ShaderFile> shaders) {
 		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
 		char *buffer = (char*)StackMemAllocator::Instance()->allocate(length);
 		glGetProgramInfoLog(id, length, NULL, buffer);
-		Logger::debug("Error Linking program: \n%s", buffer);
+		LOG_DEBUG("Error Linking program: \n%s", buffer);
 		StackMemAllocator::Instance()->free((u8*)buffer);
 	}
 

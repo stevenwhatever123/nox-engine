@@ -151,7 +151,7 @@ NoxEngine::Mesh* NoxEngine::getMesh(const aiScene* pScene)
 		}
 	}
 
-	Logger::debug("Number of animations: %d", pScene->mNumAnimations);
+	LOG_DEBUG("Number of animations: %d", pScene->mNumAnimations);
 
 	// Animation Data
 	if (pScene->mNumAnimations > 0)

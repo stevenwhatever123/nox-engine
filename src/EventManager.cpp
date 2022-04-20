@@ -36,7 +36,7 @@ void EventManager::signal(String eventName, ...) {
 			va_end(var_arg);
 		}
 	} else {
-		Logger::debug("%s event doesn't exist, can't signal.", eventName.c_str());
+		LOG_DEBUG("%s event doesn't exist, can't signal.", eventName.c_str());
 	}
 }
 

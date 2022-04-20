@@ -5,6 +5,7 @@
 #include <vector>
 
 // 3rd Party Include
+#include <Windows.h>
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 #include <glm/glm.hpp>

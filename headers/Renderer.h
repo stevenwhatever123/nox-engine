@@ -60,6 +60,7 @@ namespace NoxEngine {
 		GLuint VAO;
 		GLuint EBO;
 		GLuint TANBO;
+		GLuint FBO;
 
 		i32 numberOfVertices;
 		i32 numberOfNormals;
@@ -76,8 +77,7 @@ namespace NoxEngine {
 		// Buffer and texture to render to.
 		GLuint textureToRenderTo;
 		GLuint tex;
-		GLuint FBO;
-		GLuint curFBO = 0;
+		GLuint curFBO;
 
 		glm::vec3 color;
 
@@ -86,8 +86,6 @@ namespace NoxEngine {
 		void createNormalsArray(IRenderable* mesh);
 		void createTexCoordArray(IRenderable* mesh);
 		void createElementArray(IRenderable* mesh);
-
-
 
 		// This atribute is needed for Normal Mapping. 
 		// Basically, need to transform the normals in the map into tangent space (space of the primitive (triangle))
@@ -133,9 +131,7 @@ namespace NoxEngine {
 		// Functions updating parts of the shaders
 
 		//void updateLocalTransf(int frame_index);
-
 		void updateProjection(int w, int h);
-
 
 		inline void setFrameBufferToDefault() { curFBO = 0; setRenderTarget(); }
 		inline void setFrameBufferToTexture() { curFBO = FBO; setRenderTarget(); }

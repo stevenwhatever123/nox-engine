@@ -351,3 +351,4 @@ libs/build*
 *.vcxproj
 *.filters
 libs/compiled_libs/
+build
