@@ -7,7 +7,7 @@ using NoxEngine::Entity;
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title), scene() {
+GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title), scene(), should_close(false) {
 }
 
 void GameManager::init() {
@@ -83,11 +83,11 @@ void GameManager::init_window() {
 		exit(1);
 	}
 
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		std::cout << " Error Initializing Glew" << std::endl;
-		exit(1);
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize OpenGL context" << std::endl;
 	}
+
 
 }
 
@@ -190,7 +190,7 @@ void GameManager::init_imgui() {
 	NoxEngineGUI::init_imgui(window);
 	
 	ImGuiIO& io = ImGui::GetIO();
-	font = io.Fonts->AddFontFromFileTTF("envy.ttf", 18);
+	font = io.Fonts->AddFontFromFileTTF("assets/font/envy.ttf", 18);
 	io.Fonts->Build();
 
 	// Initialize panel variables

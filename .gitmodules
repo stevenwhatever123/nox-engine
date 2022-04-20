@@ -1,0 +1,25 @@
+[submodule "libs/glm"]
+	path = libs/glm
+	url = git@github.com:g-truc/glm.git
+[submodule "libs/glfw"]
+	path = libs/glfw
+	url = git@github.com:glfw/glfw.git
+[submodule "libs/assimp"]
+	path = libs/assimp
+	url = git@github.com:assimp/assimp.git
+[submodule "libs/imgui"]
+	path = libs/imgui
+	url = git@github.com:ocornut/imgui.git
+	branch = docking
+[submodule "libs/freetype"]
+	path = libs/freetype
+	url = git@github.com:freetype/freetype.git
+[submodule "libs/imguizmo"]
+	path = libs/imguizmo
+	url = git@github.com:CedricGuillemet/ImGuizmo.git
+[submodule "libs/luabridge"]
+	path = libs/luabridge
+	url = git@github.com:vinniefalco/LuaBridge.git
+[submodule "libs/lua"]
+	path = libs/lua
+	url = git@github.com:lua/lua.git

@@ -342,3 +342,9 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+# Custom STuff
+
+**/imgui.ini
+
+libs/build*
