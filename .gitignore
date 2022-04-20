@@ -348,3 +348,6 @@ ASALocalRun/
 **/imgui.ini
 imgui.ini
 libs/build*
+*.sln
+*.vcxproj
+*.filters
