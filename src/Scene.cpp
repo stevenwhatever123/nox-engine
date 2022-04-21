@@ -23,13 +23,8 @@ void Scene::addEntity(Entity* ent) {
 
 void Scene::addEntity(PresetObject obj) {
 
-	// Form the placeholder name
-	char entName[32];
-	snprintf(entName, 32, "Game Object %i", nEntitiesAdded+1);
-
-	// Create an empty entity. We will fill components in it
-	Entity* ent = new Entity(nEntitiesAdded, entName);
-
+	Entity* ent = new Entity(this);
+	
 	// Empty components created before the switch/case, allocate memory with `new` inside
 	PositionComponent* pos;
 	RenderableComponent* rend;
@@ -44,7 +39,7 @@ void Scene::addEntity(PresetObject obj) {
 		break;
 
 	// No need to add any component
-	case EmptyGameObject:
+	case EmptyEntity:
 	default:
 		break;
 

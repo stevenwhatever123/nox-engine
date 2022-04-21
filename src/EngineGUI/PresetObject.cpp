@@ -26,7 +26,7 @@ void NoxEngineGUI::initPresetObjectVars() {
 
 	// Give objects names
 	PRESET_OBJECT_NAMES_MAP = {
-		{ PresetObject::EmptyGameObject,	"Empty Game Object" },
+		{ PresetObject::EmptyEntity,		"Empty Entity" },
 		{ PresetObject::Transform,			"Transform Component" },
 		{ PresetObject::Cube,				"Cube" },
 		{ PresetObject::Sphere,				"Sphere" },
@@ -52,7 +52,7 @@ void NoxEngineGUI::initPresetObjectVars() {
 	// Form relationship between category and preset objects
 	PRESET_OBJECTS = {
 		{ PresetCategory::Geometry, {
-			PresetObject::EmptyGameObject,
+			PresetObject::EmptyEntity,
 			PresetObject::Transform,
 			PresetObject::Cube,
 			PresetObject::Sphere }

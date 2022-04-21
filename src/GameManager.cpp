@@ -104,7 +104,7 @@ void GameManager::init_events() {
 
 
 		
-		Entity *ent = new Entity(0, "Placeholder entity");
+		Entity *ent = new Entity(game_state.activeScene);
 
 		// TODO: load and sent mesh data to renderable component
 		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
