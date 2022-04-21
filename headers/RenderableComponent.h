@@ -14,7 +14,6 @@ namespace NoxEngine {
 	class RenderableComponent : public IRenderable, public IComponent {
 		public:
 
-			void* CastType(const i32 castID);
 			RenderableComponent(f32 trX, f32 trY, f32 trZ, const char * texName);
 			void prepTheData();
 

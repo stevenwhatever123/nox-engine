@@ -1,5 +1,6 @@
 #include <Scene.h>
 
+#include <GameManager.h>
 #include "PositionComponent.h"
 #include "RenderableComponent.h"
 #include <Entity.h>
@@ -7,15 +8,35 @@
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-Scene::Scene(): entities(0), nEntitiesAdded(0), name("") {
+Scene::Scene(String _name) : entities(0), nEntitiesAdded(0), name(_name), gm(GameManager::Instance()) {
 }
 
 
-Scene::Scene(String _name) : entities(0), nEntitiesAdded(0), name(_name) {
+Scene::~Scene() {
+	
+	// TODO (Vincent): Delete entities
 }
 
 
 void Scene::addEntity(Entity* ent) {
+
+	assert(ent->id <= nEntitiesAdded);	// soft check on unique entity ID
+
+	/*   Register to the appropriate subsystem based on the components it has   */ 
+	if ((ent->hasComp & 0b11) == 0b11) {
+
+		IRenderable* irend = ent->getComp(ComponentType::RenderableType)->CastType<IRenderable>();
+		IPosition* ipos = ent->getComp(ComponentType::PositionType)->CastType<IPosition>();
+
+		gm->GetRenderer()->addObject(
+			irend,
+			ipos
+		);
+
+		gm->GetRenderer()->updateBuffers();
+	}
+
+	// Add to entities list
 	entities.push_back(ent);
 	nEntitiesAdded++;
 }

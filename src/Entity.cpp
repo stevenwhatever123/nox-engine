@@ -5,20 +5,34 @@
 #include <Entity.h>
 #include <GameState.h>
 #include <IComponent.h>
+#include <ComponentType.h>
 
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
 
 
-Entity::Entity(i32 _id) : id(_id), components(0), hasComp(0), name("") {
+Entity::Entity(i32 _id) 
+	: 
+	id(_id), 
+	components(0), 
+	hasComp(0), 
+	name("") {
 
 }
 
-Entity::Entity(i32 _id, String _name) : id(_id), components(0), hasComp(0), name(_name) {
+Entity::Entity(i32 _id, String _name) 
+	: 
+	id(_id), 
+	components(0), 
+	hasComp(0), 
+	name(_name) {
 
 }
 
-Entity::Entity(Scene* scene, String _name) : components(0), hasComp(0) {
+Entity::Entity(Scene* scene, String _name)
+	:
+	components(0),
+	hasComp(0) {
 
 	assert(scene != nullptr);
 
@@ -42,24 +56,24 @@ Entity::~Entity() {
 
 void Entity::addComp(IComponent *comp)
 {
-	assert(comp->id != 0);
+	assert(comp->id != ComponentType::AbstractType);
 
-	for (auto c : components)
-	{
-		if (c->id == comp->id)
-		{
+	for (auto c : components) {
+
+		if (c->id == comp->id) {
 			Logger::debug("Component (ID: %d) already exists in Entity ", comp->id);
 			return;
 		}
 	}
 
 	components.push_back(comp);
-	hasComp += pow(2, (comp->id - 1));
+	hasComp |= ( 1 << (comp->id-1) );
 }
 
 
-IComponent * Entity::getComp(i32 compId)
+IComponent * Entity::getComp(ComponentType compId)
 {
+	// TODO (vincent): optimize
 	for (auto c : components)
 	{
 		if (c->id == compId)

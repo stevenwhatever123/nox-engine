@@ -13,6 +13,7 @@
 // Engine Includes
 #include <Types.h>
 #include <Utils.h>
+#include <ComponentType.h>
 
 namespace NoxEngine {
 
@@ -22,41 +23,55 @@ namespace NoxEngine {
 
 	class Entity
 	{
-		public:
-			
-			i32 id; 
-
-			// The components that make the entity
-			// TODO: change to array of arrays
-			Array<IComponent*> components; 
-			
-			// TODO (Vincent): potential flaw - what if an entity needs more than 1 of the same type of components (e.g. multiple audio sources)
-			HasCompBitMask hasComp;
-
-			// A human-readable identifier - not necessarily unique
-			String name; 
-
-			// TODO (Vincent): Can an entity not contain another entity?
-			//Entity* parent;
+		// make Scene a friend so that Entities can only be created in Scene
+		friend class Scene;
 
 	public:
-			Entity(i32 _id);
-			Entity(i32 _id, String _name);
+		// A human-readable identifier - not necessarily unique
+		String name;
 
-			// Automatically give a unique ID and a placeholder name to an entity
-			// TODO: Change GameManager to Singleton, so it doesn't need a param
-			Entity(Scene *scene, String _name = "");
 
-			// Move constructor
-			Entity(Entity&& other);
+	private:
+		// unique entity id
+		i32 id; 
 
-			// Gotta be careful. When comp are destroyed the subsystem have to know
-			// TODO (Vincent): delete the components array and let the specialized component destroyer remove the reference in the subsystem?
-			~Entity();
+		// The components that make the entity
+		// Note (Vincent): An entity can only contain one component of each type.
+		//                 In the case where multiple of the same components is desired (e.g. multiple BoneComponents),
+		//                 create a container component (e.g. SkeletonComponent) and attach it
+		// https://stackoverflow.com/questions/20720360/ecs-can-an-entity-have-more-than-one-component-of-given-type
+		// TODO (Vincent): Change to std::map<ComponentType,IComponent*> for log(N) search
+		Array<IComponent*> components; 
 			
-			// Add a component to the entity
-			void addComp(IComponent *comp);
-			// Gets the component with the ID provided. If no such comp -> through error and return
-			IComponent * getComp(i32 id);
+		// Whether this entity has a component type
+		HasCompBitMask hasComp;
+
+		// TODO (Vincent): Can an entity not contain another entity?
+		//Entity* parent;
+
+
+	protected:
+		// Constructors usable by Scene
+		Entity(i32 _id);
+		Entity(i32 _id, String _name);
+
+
+	public:
+		// Automatically give a unique ID and a placeholder name to an entity
+		// TODO: Change GameManager to Singleton, so it doesn't need a param
+		Entity(Scene *scene, String _name = "");
+
+		// Move constructor
+		Entity(Entity&& other);
+
+		// Gotta be careful. When comp are destroyed the subsystem have to know
+		// TODO (Vincent): delete the components array and let the specialized component destroyer remove the reference in the subsystem?
+		~Entity();
+			
+		// Add a component to the entity
+		void addComp(IComponent *comp);
+
+		// Gets the component with the type provided. If no such comp -> through error and return
+		IComponent * getComp(ComponentType id);
 	};
 }

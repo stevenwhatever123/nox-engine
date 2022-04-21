@@ -51,6 +51,9 @@
     <Filter Include="Source Files\UtilityClasses">
       <UniqueIdentifier>{bca78652-ffbc-4c43-b728-a708aeb6d489}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ECS\Components">
+      <UniqueIdentifier>{70d1bdbb-1ccb-443c-b592-e7741dcdb5d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -140,9 +143,6 @@
     <ClCompile Include="src\Utils.cpp">
       <Filter>Source Files\UtilityClasses</Filter>
     </ClCompile>
-    <ClCompile Include="src\PositionComponent.cpp">
-      <Filter>Source Files\ECS</Filter>
-    </ClCompile>
     <ClCompile Include="3rdParty\headers\imguizmo\GraphEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -170,6 +170,12 @@
     <ClCompile Include="src\EngineGUI\InspectorPanel.cpp">
       <Filter>Source Files\EngineGUI</Filter>
     </ClCompile>
+    <ClCompile Include="src\PositionComponent.cpp">
+      <Filter>Source Files\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="headers\EngineGUI\ComponentType.cpp">
+      <Filter>Source Files\ECS\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Camera.h">
@@ -196,6 +202,21 @@
     <ClInclude Include="headers\EngineGUI\InspectorPanel.h">
       <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
+    <ClInclude Include="headers\IComponent.h">
+      <Filter>Header Files\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\PositionComponent.h">
+      <Filter>Header Files\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\RenderableComponent.h">
+      <Filter>Header Files\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\ComponentType.h">
+      <Filter>Header Files\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\AudioManager.h">
+      <Filter>Header Files\Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h">
@@ -207,20 +228,11 @@
     <ClInclude Include="headers\Entity.h">
       <Filter>Header Files\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="headers\IComponent.h">
-      <Filter>Header Files\ECS</Filter>
-    </ClInclude>
     <ClInclude Include="headers\IPosition.h">
-      <Filter>Header Files\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\RenderableComponent.h">
       <Filter>Header Files\ECS</Filter>
     </ClInclude>
     <ClInclude Include="headers\IRenderable.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\PositionComponent.h">
-      <Filter>Header Files\ECS</Filter>
     </ClInclude>
     <ClInclude Include="headers\Scene.h">
       <Filter>Header Files\ECS</Filter>
@@ -230,9 +242,6 @@
     </ClInclude>
     <ClInclude Include="headers\stb_image.h">
       <Filter>Header Files\3rdParty\stb</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\AudioManager.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\IRenderable.h">
       <Filter>Header Files\ECS</Filter>

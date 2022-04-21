@@ -13,7 +13,7 @@ namespace NoxEngine {
 	class PositionComponent : public IPosition, public IComponent
 	{
 		public:
-			void* CastType(const i32 castID);
+
 			PositionComponent(f32 newx, f32 newy, f32 newz);
 	};
 }
