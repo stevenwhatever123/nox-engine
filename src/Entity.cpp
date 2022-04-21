@@ -46,7 +46,14 @@ IComponent * Entity::getComp(i32 compId)
 		}
 	}
 
-	Logger::debug("The component (ID: %d) does not exist in Entity (ID: %d)", compId, id);
+	//Logger::debug("The component (ID: %d) does not exist in Entity (ID: %d)", compId, id);
 	return nullptr;
+}
+
+
+template <typename T>
+T* Entity::getComponent() {
+
+
 }
 

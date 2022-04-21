@@ -32,11 +32,6 @@ void NoxEngineGUI::updateScenePanel(GameState* state) {
 
 			// Add an entity to the active scene
 			state->activeScene->addEntity(payloadObject);
-
-			// Check what preset object this is, then create all components that it should have
-			// TODO: make this nicer
-
-
 		}
 		ImGui::EndDragDropTarget();
 	}
