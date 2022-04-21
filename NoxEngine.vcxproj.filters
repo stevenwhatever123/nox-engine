@@ -173,6 +173,9 @@
     <ClCompile Include="src\MeshScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\EngineGUI\AnimationSequencer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Camera.h">
@@ -204,6 +207,12 @@
     </ClInclude>
     <ClInclude Include="headers\MeshScene.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\AnimationSequencer.h">
+      <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\TestingSequencer.h">
+      <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -13,6 +13,9 @@
 
 #include <MeshScene.h>
 
+#include <EngineGUI/AnimationSequencer.h>
+#include <EngineGUI/TestingSequencer.h>
+
 using namespace NoxEngine;
 
 void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
@@ -125,8 +128,41 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 							}
 							ImGui::TreePop();
 						}
+						// Let try putting the sequencer here
+						if (ImGui::CollapsingHeader("Sequencer"))
+						{
+							TestSequencer mySequence;
+							mySequence.mFrameMin = 0;
+							mySequence.mFrameMax = 100;
+							//mySequence.myItems.push_back(MySequenceItem{0, 10, 30, false});
+
+							// Let's create the sequencer
+							static int selectedEntry = -1;
+							static int firstFrame = 0;
+							static bool expanded = true;
+							static int currentFrame = 0;
+
+							ImGui::PushItemWidth(130);
+							ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
+							ImGui::SameLine();
+							ImGui::InputInt("Frame ", &currentFrame);
+							ImGui::SameLine();
+							ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
+							ImGui::PopItemWidth();
+							Sequencer(&mySequence, &currentFrame, &expanded, &selectedEntry, 
+								&firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND 
+								| ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL 
+								| ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
+							//add a UI to edit that particular item
+							//if (selectedEntry != -1)
+							//{
+							//	const MySequenceItem& item = mySequence.myItems[selectedEntry];
+							//	ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
+							//}
+						}
+
 					}
-					ImGui::Dummy(ImVec2(0.0f, 20.0f));
+					//ImGui::Dummy(ImVec2(0.0f, 20.0f));
 				}
 				ImGui::TreePop();
 			}
