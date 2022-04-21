@@ -352,3 +352,5 @@ libs/build*
 *.filters
 libs/compiled_libs/
 build
+
+premake5.exe
