@@ -30,4 +30,3 @@ void Logger::debug(std::string fmt_str, ...) {
 	fflush(stdout);
 
 }
-

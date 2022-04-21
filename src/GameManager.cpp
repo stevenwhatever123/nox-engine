@@ -1,5 +1,7 @@
 #include <GameManager.h>
 
+#include <filesystem>
+
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
 using NoxEngine::Entity;
@@ -18,7 +20,7 @@ void GameManager::init() {
 	init_audio();
 	init_camera();
 	init_shaders();
-	init_imgui();
+	init_gui();
 	init_animation();
 	init_renderer();
 }
@@ -102,9 +104,11 @@ void GameManager::init_events() {
 		// this->game_state.meshes.emplace(file_name, pScene);
 
 
+		// TODO (vincent): replace
+		//Entity *ent = game_state.activeScene->createEntity(...);
 
 		
-		Entity *ent = new Entity(game_state.activeScene);
+		Entity *ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string());
 
 		// TODO: load and sent mesh data to renderable component
 		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
@@ -115,6 +119,8 @@ void GameManager::init_events() {
 
 		game_state.activeScene->addEntity(ent);
 
+		// TODO (Vincent): Maybe have a bunch of conditional checks in `addEntity`
+		//                 e.g. if an entity has a RenderableComponent and a PositionComponent, add it to the renderer
 		this->renderer->addObject(
 			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
 			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
@@ -188,7 +194,7 @@ void GameManager::init_renderer() {
 	// delete mesh;
 }
 
-void GameManager::init_imgui() {
+void GameManager::init_gui() {
 
 	NoxEngineGUI::init_imgui(window);
 	
@@ -198,6 +204,9 @@ void GameManager::init_imgui() {
 
 	// Initialize panel variables
 	NoxEngineGUI::initPresetObjectPanel();
+
+	// Initialize gui params
+	ui_params.selectedEntity = -1;
 
 }
 
@@ -253,7 +262,8 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateAnimationPanel(&game_state);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
-	NoxEngineGUI::updateHierarchyPanel(&game_state);
+	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
+	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
 	NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::Begin("Light Settings");

@@ -35,6 +35,9 @@ namespace NoxEngineGUI {
 		u32 locHeight;
 		u32 prevWidth;
 		u32 prevHeight;
+
+		// Variables to communicate between windows
+		i32 selectedEntity;		// the array index of the selected entity in the hierarchy window
 	};
 
 	// Each panel should have an enum associated with it
@@ -49,6 +52,7 @@ namespace NoxEngineGUI {
 		// Scene object manipulation
 		PresetObjects,
 		Hierarchy,
+		Inspector,
 
 		// Animation
 		AnimationSettings,
@@ -63,11 +67,12 @@ namespace NoxEngineGUI {
 	// TODO: Make this const?
 	static std::map< PanelName, std::string > PANEL_NAME_MAP {
 		{ PanelName::FileExplorer,	"File Explorer" },
-			{ PanelName::Scene,			"Scene" },
-			{ PanelName::PresetObjects, "Preset Objects" },
-			{ PanelName::Hierarchy,		"Hierarchy" },
-			{ PanelName::AnimationSettings,		"Animation Settings" },
-			{ PanelName::AudioSource,	"Audio Source" }
+		{ PanelName::Scene,			"Scene" },
+		{ PanelName::PresetObjects, "Preset Objects" },
+		{ PanelName::Hierarchy,		"Hierarchy" },
+		{ PanelName::Inspector,		"Inspector" },
+		{ PanelName::AnimationSettings,		"Animation Settings" },
+		{ PanelName::AudioSource,	"Audio Source" }
 	};
 
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;

@@ -35,7 +35,9 @@
     <ClCompile Include="src\EngineGUI\EngineGUI.cpp" />
     <ClCompile Include="src\EngineGUI\AnimationPanel.cpp" />
     <ClCompile Include="src\EngineGUI\AudioPanel.cpp" />
+    <ClCompile Include="src\EngineGUI\HierarchyPanel.cpp" />
     <ClCompile Include="src\EngineGUI\ImGuizmoTool.cpp" />
+    <ClCompile Include="src\EngineGUI\InspectorPanel.cpp" />
     <ClCompile Include="src\EngineGUI\PresetObject.cpp" />
     <ClCompile Include="src\EngineGUI\PresetObjectPanel.cpp" />
     <ClCompile Include="src\EngineGUI\ScenePanel.cpp" />
@@ -64,7 +66,9 @@
     <ClInclude Include="headers\EngineGUI\AnimationPanel.h" />
     <ClInclude Include="headers\EngineGUI\AudioPanel.h" />
     <ClInclude Include="headers\EngineGUI\EngineGUI.h" />
+    <ClInclude Include="headers\EngineGUI\HierarchyPanel.h" />
     <ClInclude Include="headers\EngineGUI\ImGuizmoTool.h" />
+    <ClInclude Include="headers\EngineGUI\InspectorPanel.h" />
     <ClInclude Include="headers\EngineGUI\PresetObject.h" />
     <ClInclude Include="headers\EngineGUI\PresetObjectPanel.h" />
     <ClInclude Include="headers\EngineGUI\ScenePanel.h" />

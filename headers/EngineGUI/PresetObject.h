@@ -16,7 +16,7 @@ namespace NoxEngineGUI {
 
 	enum PresetObject {
 		// Geometry
-		EmptyGameObject,
+		EmptyEntity,
 		Transform,
 		Cube,
 		Sphere,

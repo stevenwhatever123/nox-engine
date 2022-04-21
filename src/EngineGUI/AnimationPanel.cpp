@@ -31,17 +31,6 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 	}
 
 
-	// If there was a mesh loaded by user
-	// TODO: Might be a good idea to move this to ScenePanel?
-	//       Have a queue of loaded meshes then add/update in ScenePanel if it's not empty
-	// if (isAlreadyLoaded) {
-	// 	mesh->prepForRenderer();
-	// 	game_state->renderer->addObject(mesh);
-	// 	game_state->renderer->updateBuffers();
-	// 	delete mesh;
-	// }
-
-
 	// Window End
 	ImGui::End();
 }

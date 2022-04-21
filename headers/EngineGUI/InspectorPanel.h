@@ -7,5 +7,5 @@
 
 namespace NoxEngineGUI {
 
-	void updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *params);
+	void updateInspectorPanel(NoxEngine::GameState* state, GUIParams *params);
 }

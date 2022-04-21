@@ -18,7 +18,7 @@ Entity::Entity(i32 _id, String _name) : id(_id), components(0), hasComp(0), name
 
 }
 
-Entity::Entity(Scene* scene) : components(0), hasComp(0) {
+Entity::Entity(Scene* scene, String _name) : components(0), hasComp(0) {
 
 	assert(scene != nullptr);
 
@@ -28,7 +28,7 @@ Entity::Entity(Scene* scene) : components(0), hasComp(0) {
 
 	// Assign values to fields
 	id = scene->nEntitiesAdded;
-	name = entName;
+	name = _name == "" ? entName : _name;
 
 }
 

@@ -10,10 +10,6 @@
 */
 #pragma once
 
-// System/std includes
-#include <iostream>
-#include <cassert>
-
 // Engine Includes
 #include <Types.h>
 #include <Utils.h>
@@ -22,15 +18,16 @@ namespace NoxEngine {
 
 	// Forward declares
 	class IComponent;
+	class Scene;
 
 	class Entity
 	{
 		public:
 			
-			// The ID of the sp entity. Used to distiguish between them
 			i32 id; 
 
 			// The components that make the entity
+			// TODO: change to array of arrays
 			Array<IComponent*> components; 
 			
 			// TODO (Vincent): potential flaw - what if an entity needs more than 1 of the same type of components (e.g. multiple audio sources)
@@ -41,11 +38,18 @@ namespace NoxEngine {
 
 			// TODO (Vincent): Can an entity not contain another entity?
 			//Entity* parent;
-			//Array<Entity*> children;
 
 	public:
 			Entity(i32 _id);
 			Entity(i32 _id, String _name);
+
+			// Automatically give a unique ID and a placeholder name to an entity
+			// TODO: Change GameManager to Singleton, so it doesn't need a param
+			Entity(Scene *scene, String _name = "");
+
+			// Move constructor
+			Entity(Entity&& other);
+
 			// Gotta be careful. When comp are destroyed the subsystem have to know
 			// TODO (Vincent): delete the components array and let the specialized component destroyer remove the reference in the subsystem?
 			~Entity();

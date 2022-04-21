@@ -8,7 +8,7 @@
 using namespace NoxEngine;
 
 
-void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state) {
+void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *params) {
 
 	// Variables
 	std::string name = PANEL_NAME_MAP[PanelName::Hierarchy];
@@ -27,47 +27,36 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state) {
 	// Loop through the entities in the active scene
 	else {
 
-		for (auto entItr = state->activeScene->entities.begin(); entItr != state->activeScene->entities.end(); entItr++) {
+		ImGuiTreeNodeFlags baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+		// TODO: revisit example if we want multi-selection
 
-			// Entity name
-			if (ImGui::TreeNode((*entItr)->name.c_str())) {
+		for (int i = 0; i < state->activeScene->entities.size(); i++) {
+			
+			Entity* ent = state->activeScene->entities[i];
+			ImGuiTreeNodeFlags nodeFlags = baseFlags;
+			bool nodeOpen = false;
+
+			// Check if this was previously selected
+			if (params->selectedEntity == i) {
+				nodeFlags |= ImGuiTreeNodeFlags_Selected;
+			}
+
+			// Node with entity name
+			// TODO: Visibility checkbox
+			nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)i, nodeFlags, ent->name.c_str());
+			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+				params->selectedEntity = i;
+			
+			if (nodeOpen) {
 
 				// TODO: Children entities?
-				
-				// TODO: Make this nicer w/ enum?
-				IComponent* comp;
-
-				// PositionComponent
-				if (comp = (*entItr)->getComp(1); nullptr != comp) {
-
-					if (ImGui::TreeNode("Position")) {
-
-						IPosition* pos = reinterpret_cast<IPosition*>(comp->CastType(2));
-
-						ImGui::DragFloat3("XYZ", &pos->x, 0.001f, -10.0f, 10.0f, "%.3f");
-						ImGui::TreePop();
-					}
-				}
-				ImGui::Separator();
-
-				// RenderableComponent
-				if (comp = (*entItr)->getComp(2); nullptr != comp) {
-
-					if (ImGui::TreeNode("Renderable")) {
-						ImGui::Text("Some rendering parameters");
-						ImGui::TreePop();
-					}
-
-				}
 
 				ImGui::TreePop();
 			}
-
-
 		}
 	}
 
-	// Finally, show a bottom-centered button for adding entities
+	// TODO: Finally, show a bottom-centered button for adding entities
 
 
 	// Window End

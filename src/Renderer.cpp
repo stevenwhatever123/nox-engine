@@ -198,6 +198,7 @@ void Renderer::draw() {
 
 	glBindVertexArray(VAO);
 
+    // TODO: ? double loop
 	for (u32 i = 0; i < objects.size(); i++)
 	{
 		// Activate and bind textures of the object

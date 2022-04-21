@@ -164,6 +164,12 @@
     <ClCompile Include="src\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\EngineGUI\HierarchyPanel.cpp">
+      <Filter>Source Files\EngineGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\InspectorPanel.cpp">
+      <Filter>Source Files\EngineGUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Camera.h">
@@ -180,6 +186,15 @@
     </ClInclude>
     <ClInclude Include="headers\GLProgram.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\HierarchyPanel.h">
+      <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\EngineGUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\InspectorPanel.h">
+      <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -224,9 +239,6 @@
     </ClInclude>
     <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h">
       <Filter>Header Files\3rdParty\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\ImGuiCustomWindow.h">
-      <Filter>Header Files\ECS</Filter>
     </ClInclude>
     <ClInclude Include="headers\EventManager.h">
       <Filter>Header Files\Managers</Filter>
