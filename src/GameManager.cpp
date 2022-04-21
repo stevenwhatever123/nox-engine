@@ -9,8 +9,8 @@ using NoxEngine::Entity;
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title) {
-}
+//GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title) {
+//}
 
 void GameManager::init() {
 	Logger::debug("Initing systems");
@@ -104,10 +104,7 @@ void GameManager::init_events() {
 		// this->game_state.meshes.emplace(file_name, pScene);
 
 
-		// TODO (vincent): replace
-		//Entity *ent = game_state.activeScene->createEntity(...);
-
-		
+		// TODO (vincent): replace?		
 		Entity *ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string());
 
 		// TODO: load and sent mesh data to renderable component
@@ -118,16 +115,6 @@ void GameManager::init_events() {
 		ent->addComp(pos);
 
 		game_state.activeScene->addEntity(ent);
-
-		// TODO (Vincent): Maybe have a bunch of conditional checks in `addEntity`
-		//                 e.g. if an entity has a RenderableComponent and a PositionComponent, add it to the renderer
-		this->renderer->addObject(
-			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-		);
-
-		this->renderer->updateBuffers();
-
 	});
 
 

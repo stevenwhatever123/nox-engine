@@ -38,11 +38,16 @@
 #include <EngineGUI/InspectorPanel.h>
 #include <EngineGUI/ImGuizmoTool.h>
 
-#include <Scene.h>
 #include <Entity.h>
 
 #include <RenderableComponent.h>
 #include <PositionComponent.h>
+
+
+// TODO: move to a config file
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 720
+#define WINDOW_TITLE "Nox Engine"
 
 
 namespace NoxEngine {
@@ -50,14 +55,12 @@ namespace NoxEngine {
 	using NoxEngineGUI::GUIParams;
 	using NoxEngine::GameState;
 	using NoxEngine::AudioSource;
-	using NoxEngine::Scene;
 
 	class GameManager : public Singleton<GameManager> {
 
 		friend class Singleton<GameManager>;
 
 		public: 
-			GameManager(u32 width, u32 height, String title);
 			void init();
 			void update();
 
@@ -72,6 +75,11 @@ namespace NoxEngine {
 			time_type currentTime;
 			time_type deltaTime;
 			time_type lastTime;
+
+		protected:
+			// TODO (Vincent): initialize other fields as well to be on the safe side
+			GameManager() : win_width(WINDOW_WIDTH), win_height(WINDOW_HEIGHT), title(WINDOW_TITLE) {};
+			~GameManager() {};
 
 		private:
 
@@ -108,8 +116,6 @@ namespace NoxEngine {
 			Array<GLProgram> programs;
 			GLProgram *current_program;
 			GUIParams ui_params;
-			//Scene scene;	// moved to game_state
-
 	};
 
 }

@@ -68,13 +68,12 @@ int main(int argc, char** argv) {
 	glm::vec3 targetPosition(0, 0, -10);
 #endif
 
-	GameManager gm(1280, 720, "Nox Engine");
-	gm.init();
+	GameManager *gm = GameManager::Instance();
+	gm->init();
 
-	while(gm.KeepRunning()) {
+	while(gm->KeepRunning()) {
 
-
-		gm.update();
+		gm->update();
 
 	}
 
