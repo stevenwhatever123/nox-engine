@@ -14,18 +14,29 @@
 #include <vector>
 #include <algorithm>
 
+using NoxEngine::MeshScene;
+
 struct TestSequencer : public ImSequencer::SequenceInterface {
+
+    TestSequencer(MeshScene* scene) :mFrameMin(0), mFrameMax(scene->numTicks[scene->animationIndex] - 1)
+    {
+        this->scene = scene;
+    }
 
     TestSequencer() :mFrameMin(0), mFrameMax(0) {};
 
-    bool focused = false;
-    int GetFrameMin() const { return 0; }
-    int GetFrameMax() const { return 100; }
-    int GetItemCount() const { return 1; }
-
+    MeshScene* scene;
     int mFrameMin, mFrameMax;
 
-    void BeginEdit(int index) {
+    bool focused = false;
+
+    int GetFrameMin() const { return 0; }
+    int GetFrameMax() const { return scene->numTicks[scene->animationIndex] - 1; }
+    int GetItemCount() const { return scene->allNodes.size(); }
+
+    void BeginEdit(int index) 
+    {
+        
     }
 
     void EndEdit() {
@@ -33,19 +44,34 @@ struct TestSequencer : public ImSequencer::SequenceInterface {
     }
 
     int GetItemTypeCount() const {
-        return 1;
-    }
-    const char* GetItemTypeName(int index) const {
-        return "Animation";
+        return scene->allNodes.size();
     }
 
-    const char* GetItemLabel(int index) const { return "Animation"; }
+    const char* GetItemTypeName(int index) const {
+        //return "Animation";
+        return scene->allNodes[index]->name.c_str();
+    }
+
+    const char* GetItemLabel(int index) const 
+    { 
+        //return "Animation"; 
+        return scene->allNodes[index]->name.c_str();
+    }
     const char* GetCollapseFmt() const { return "Go Away"; }
 
-    void Get(int index, int** start, int** end, int* type, unsigned int* color) {
+    void Get(int index, int** start, int** end, int* type, unsigned int* color) 
+    {
+        // Every animation is starting at 0
+        i32 items[] = { 0 };
 
-        static int items[] = { 0, 1, 2, 3, 4, 5, 6 };
-        static int items2[] = { 7, 8, 9, 10, 11, 12, 13 };
+        i32 items2[] = { scene->numTicks[scene->animationIndex] - 1};
+
+        if (!scene->allNodes[index]->hasAnimations())
+        {
+            items2[0] = 0;
+        }
+
+        //i32 items2[] = { (scene->allNodes[index]->hasAnimations() ? scene->numTicks[scene->animationIndex] - 1 : 1) };
 
         if (color)
             *color = 0xFFAA8080; // same color for everyone, return color based on type
@@ -54,9 +80,9 @@ struct TestSequencer : public ImSequencer::SequenceInterface {
         if (end)
             *end = items2;
         if (type)
-            *type = 1;
-
+            *type = index;
     }
+
     void Add(int index) {}
     void Del(int index) {}
     void Duplicate(int index) {

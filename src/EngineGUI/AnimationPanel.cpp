@@ -131,9 +131,9 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 						// Let try putting the sequencer here
 						if (ImGui::CollapsingHeader("Sequencer"))
 						{
-							TestSequencer mySequence;
+							TestSequencer mySequence(&currentScene);
 							mySequence.mFrameMin = 0;
-							mySequence.mFrameMax = 100;
+							mySequence.mFrameMax = currentScene.numTicks[currentScene.animationIndex] - 1;
 							//mySequence.myItems.push_back(MySequenceItem{0, 10, 30, false});
 
 							// Let's create the sequencer
@@ -153,16 +153,19 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 								&firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND 
 								| ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL 
 								| ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
+
 							//add a UI to edit that particular item
-							//if (selectedEntry != -1)
-							//{
-							//	const MySequenceItem& item = mySequence.myItems[selectedEntry];
-							//	ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
-							//}
+							if (selectedEntry != -1)
+							{
+								ImGui::Text("Number of ticks: %i",
+									(currentScene.allNodes[selectedEntry]->hasAnimations() ?
+									currentScene.numTicks[currentScene.animationIndex] : 0)
+								);
+							}
 						}
 
 					}
-					//ImGui::Dummy(ImVec2(0.0f, 20.0f));
+					ImGui::Dummy(ImVec2(0.0f, 20.0f));
 				}
 				ImGui::TreePop();
 			}
