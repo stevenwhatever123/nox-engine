@@ -198,27 +198,19 @@ void Renderer::draw() {
 
 	glBindVertexArray(VAO);
 
-    // TODO: ? double loop
+    // (Vincent): There was a double loop here that draws all objects for each object
 	for (u32 i = 0; i < objects.size(); i++)
 	{
+		program->set4Matrix("toWorld", objects[i].pos);
 		// Activate and bind textures of the object
 		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
 
-		for (u32 i = 0; i < objects.size(); i++)
-		{
-			program->set4Matrix("toWorld", objects[i].pos);
-			// Activate and bind textures of the object
-			glActiveTexture(GL_TEXTURE0 + 1);
-			glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
+		glActiveTexture(GL_TEXTURE0 + 2);
+		glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
 
-			glActiveTexture(GL_TEXTURE0 + 2);
-			glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
-
-			// Draw the object
-			glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
-		}
-
+		// Draw the object
+		glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
 	}
 
 	glBindVertexArray(0);

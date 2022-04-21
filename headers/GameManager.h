@@ -52,8 +52,10 @@ namespace NoxEngine {
 	using NoxEngine::AudioSource;
 	using NoxEngine::Scene;
 
-	// TOOD: Shouldn't GameManager be a singleton?
-	class GameManager {
+	class GameManager : public Singleton<GameManager> {
+
+		friend class Singleton<GameManager>;
+
 		public: 
 			GameManager(u32 width, u32 height, String title);
 			void init();

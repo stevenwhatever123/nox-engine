@@ -24,9 +24,6 @@
 
 namespace NoxEngineGUI {
 
-	// TODO: This is probably not a good idea in terms of code separation -
-	//       probably better if each new panel (.h/.cpp) contains whatever 
-	//		 classes they need. This is only used for the master updateGUI() function
 	struct GUIParams {
 		bool firstLoop = true;
 
@@ -91,8 +88,6 @@ namespace NoxEngineGUI {
 	// should belong in a separate header file.
 	// TODO: Remove the following - these are only here to show what 
 	//       other panels we could have
-	//void updateFileExplorerPanel();
-	//void updateHierarchyPanel();
 	//void updateConsolePanel();
 
 }

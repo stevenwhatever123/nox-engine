@@ -133,12 +133,11 @@ void GameManager::init_events() {
 
 }
 
+// Initialize audio system
 void GameManager::init_audio() {
-	// Initialize audio system
 
 	audioManager = AudioManager::Instance();
 
-	// TODO: Change to singleton
 	audioManager->Init();
 
 	// Set listener. TODO: Move this inside the engine loop
