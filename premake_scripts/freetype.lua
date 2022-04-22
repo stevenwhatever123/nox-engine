@@ -31,7 +31,7 @@ externalproject "freetype"
 		os.executef("cmake --build .")
 		os.chdir(current_dir)
 
-		harfbuzz_include = path.getabsolute("../libs/harfbazz/srcinclude")
+		harfbuzz_include = path.getabsolute("../libs/harfbazz/src/")
 		harfbuzz_library = path.getabsolute("../libs/build_harfbuzz/Debug/harfbuzz.lib")
 
 		os.executef('cmake --log-level NOTICE -G %q -B%s -S%s -D %s -D %s -D %s -D %s -D %s -D %s',
