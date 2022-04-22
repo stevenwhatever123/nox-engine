@@ -14,44 +14,48 @@
 #include <vector>
 #include <algorithm>
 
-static const char* SequencerItemTypeNames[] = { "Animation" };
-
 using NoxEngine::MeshScene;
 
-struct MySequence : public ImSequencer::SequenceInterface
-{
-    MySequence(MeshScene* scene);
+struct AnimationSequencer : public ImSequencer::SequenceInterface {
 
-    MySequence();
+    AnimationSequencer(MeshScene* scene);
+
+    AnimationSequencer();
 
     MeshScene* scene;
     int mFrameMin, mFrameMax;
 
-    int GetFrameMin() const;
-    int GetFrameMax() const;
-    int GetItemCount() const;
+    bool focused = false;
+
+    int GetFrameMin() const { return 0; }
+    int GetFrameMax() const { return scene->numTicks[scene->animationIndex] - 1; }
+    int GetItemCount() const { return scene->allNodes.size(); }
+
+    void BeginEdit(int index) {};
+
+    void EndEdit() {};
 
     int GetItemTypeCount() const;
-    const char* GetItemTypeName(int typeIndex) const;
+
+    const char* GetItemTypeName(int index) const;
+
     const char* GetItemLabel(int index) const;
+    const char* GetCollapseFmt() const { return "Go Away"; }
 
     void Get(int index, int** start, int** end, int* type, unsigned int* color);
-    void Add(int type);
-    void Del(int index);
-    void Duplicate(int index);
+
+    void Add(int index) {}
+
+    void Del(int index) {}
+    void Duplicate(int index) {}
+
+    void Copy() {}
+    void Paste() {}
 
     size_t GetCustomHeight(int index);
 
-    void DoubleClick(int index);
+    void DoubleClick(int index) {}
 
-    //void CustomDraw(int index, ImDrawList* draw_list,
-    //    const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect,
-    //    const ImRect& legendClippingRect);
-
-
-    //void CustomDrawCompact(int index, ImDrawList* draw_list,
-    //    const ImRect& rc, const ImRect& clippingRect);
-
-    // return true if selection is made
-    bool Sequencer(SequenceInterface* sequence, int* currentFrame, bool* expanded, int* selectedEntry, int* firstFrame, int sequenceOptions);
+    void CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect,
+        const ImRect& clippingRect, const ImRect& legendClippingRect);
 };
