@@ -6,15 +6,16 @@
 #define NOMINMAX
 
 #include <Windows.h>
+#include <math.h>
 #include <FBXFileLoader.h>
 #include <EventManager.h>
 #include <EventNames.h>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 #include <MeshScene.h>
 
 #include <EngineGUI/AnimationSequencer.h>
-#include <EngineGUI/TestingSequencer.h>
 
 using namespace NoxEngine;
 
@@ -49,11 +50,12 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 		// Directly modify the element in the map
 		MeshScene& currentScene = startItr->second;
 
+		ImGui::PushID(sceneID);
+
 		if (!currentScene.hasAnimations())
 		{
 			ImGui::Text(base_filename.c_str());
 			startItr++;
-			continue;
 		}
 
 		if (ImGui::TreeNode(base_filename.c_str()))
@@ -61,7 +63,6 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 			ImGui::Text("Number of Animations: %i", currentScene.getNumOfAnimations());
 			ImGui::Text("Current Animation: %i", currentScene.animationIndex);
 			ImGui::SameLine();
-			ImGui::PushID(sceneID);
 			if (ImGui::Button("+"))
 			{
 				currentScene.setAnimationIndex(currentScene.animationIndex + 1);
@@ -93,86 +94,119 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 			progress = (float)currentScene.frameIndex / (currentScene.numTicks[currentScene.animationIndex] - 1);
 			ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
 
-			if (ImGui::TreeNode("Nodes Data"))
+			if (currentScene.hasAnimations())
 			{
-				for (MeshNode2* node : currentScene.allNodes)
+				// Let try putting the sequencer here
+				if (ImGui::CollapsingHeader("Sequencer"))
 				{
-					ImGui::Text(node->name.c_str());
-					ImGui::Text("Has mesh? %s", node->hasMesh() ? "true" : "false");
-					ImGui::Text("Has animation? %s", node->hasAnimations() ? "true" : "false");
-					if (node->hasAnimations())
-					{
-						if (ImGui::TreeNode("Animation Data"))
-						{
-							glm::mat4 transformaiton = node->getGlobalTransformation(
-								currentScene.frameIndex, currentScene.animationIndex,
-								currentScene.accumulator, currentScene.timeStep,
-								currentScene.whichTickFloor, currentScene.whichTickCeil
-							);
+					AnimationSequencer mySequence(&currentScene);
+					mySequence.mFrameMin = 0;
+					mySequence.mFrameMax = currentScene.numTicks[currentScene.animationIndex] - 1;
+					//mySequence.myItems.push_back(MySequenceItem{0, 10, 30, false});
 
+					// Let's create the sequencer
+					static int selectedEntry = -1;
+					static int firstFrame = 0;
+					static bool expanded = true;
+					static int selectedFrame = 0;
+
+					ImGui::PushItemWidth(130);
+					ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
+					ImGui::SameLine();
+					ImGui::InputInt("Frame ", &selectedFrame);
+					ImGui::SameLine();
+					ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
+					ImGui::PopItemWidth();
+					// Safe guard
+					if (selectedFrame < 0)
+						selectedFrame = 0;
+					if (selectedFrame > currentScene.numTicks[currentScene.animationIndex] - 1)
+						selectedFrame = currentScene.numTicks[currentScene.animationIndex] - 1;
+
+					Sequencer(&mySequence, &selectedFrame, &expanded, &selectedEntry,
+						&firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND
+						| ImSequencer::SEQUENCER_CHANGE_FRAME);
+
+					//add a UI to edit that particular item
+					if (selectedEntry != -1)
+					{
+						if (currentScene.allNodes[selectedEntry]->hasAnimations())
+						{
+							ImGui::Text("Translation");
+							glm::mat4 translationMatrix = currentScene.allNodes[selectedEntry]
+								->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame];
+							float translate[3] = { translationMatrix[0][3], translationMatrix[1][3], translationMatrix [2][3]};
+							ImGui::SliderFloat3("Translation", translate, -100, 100, "%.3f", 0);
+							//Apply value
+							(currentScene.allNodes[selectedEntry]
+								->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame])[0][3] = translate[0];
+							(currentScene.allNodes[selectedEntry]
+								->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame])[1][3] = translate[1];
+							(currentScene.allNodes[selectedEntry]
+								->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame])[2][3] = translate[2];
+
+
+							ImGui::Text("Rotation");
+							float rotation[3] = { currentScene.allNodes[selectedEntry]->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][0],
+								currentScene.allNodes[selectedEntry]->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][1] ,
+								currentScene.allNodes[selectedEntry]->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][2] };
+							ImGui::SliderFloat3("Rotation", rotation, -2, 2, "%.3f", 0);
+							//Apply value
+							currentScene.allNodes[selectedEntry]
+								->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][0] = rotation[0];
+							currentScene.allNodes[selectedEntry]
+								->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][1] = rotation[1];
+							currentScene.allNodes[selectedEntry]
+								->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][2] = rotation[2];
+
+
+							ImGui::Text("Scaling");
+							glm::mat4 scalingMatrix = currentScene.allNodes[selectedEntry]
+								->nodeAnimScalingMatrices[currentScene.animationIndex][selectedFrame];
+							float scaling[3] = { scalingMatrix[0][0], scalingMatrix[1][1], scalingMatrix[2][2]};
+							ImGui::SliderFloat3("Scaling", scaling, 1, 100, "%.3f", 0);
+							//Apply value
+							(currentScene.allNodes[selectedEntry]
+								->nodeAnimScalingMatrices[currentScene.animationIndex][selectedFrame])[0][0] = scaling[0];
+							(currentScene.allNodes[selectedEntry]
+								->nodeAnimScalingMatrices[currentScene.animationIndex][selectedFrame])[1][1] = scaling[1];
+							(currentScene.allNodes[selectedEntry]
+								->nodeAnimScalingMatrices[currentScene.animationIndex][selectedFrame])[2][2] = scaling[2];
+
+
+
+							currentScene.allNodes[selectedEntry]->updateTransformation();
+
+							glm::mat4 transformation = currentScene.allNodes[selectedEntry]
+								->getGlobalTransformation(selectedFrame, currentScene.animationIndex);
+
+							ImGui::Text("Transformation Matrix");
 							if (ImGui::BeginTable("Transformations", 4,
 								ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable
 								| ImGuiSelectableFlags_SpanAllColumns))
 							{
 								ImGui::TableNextRow();
-								for (u32 i = 0; i < transformaiton.length(); i++)
+								for (u32 i = 0; i < transformation.length(); i++)
 								{
 									ImGui::TableNextRow();
-									for (u32 j = 0; j < transformaiton[i].length(); j++)
+									for (u32 j = 0; j < transformation[i].length(); j++)
 									{
 										ImGui::TableNextColumn();
-										ImGui::Text("%.6f", transformaiton[i][j]);
+										ImGui::Text("%.6f", transformation[i][j]);
 									}
 								}
 								ImGui::EndTable();
 							}
-							ImGui::TreePop();
 						}
-						// Let try putting the sequencer here
-						if (ImGui::CollapsingHeader("Sequencer"))
-						{
-							TestSequencer mySequence(&currentScene);
-							mySequence.mFrameMin = 0;
-							mySequence.mFrameMax = currentScene.numTicks[currentScene.animationIndex] - 1;
-							//mySequence.myItems.push_back(MySequenceItem{0, 10, 30, false});
-
-							// Let's create the sequencer
-							static int selectedEntry = -1;
-							static int firstFrame = 0;
-							static bool expanded = true;
-							static int currentFrame = 0;
-
-							ImGui::PushItemWidth(130);
-							ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
-							ImGui::SameLine();
-							ImGui::InputInt("Frame ", &currentFrame);
-							ImGui::SameLine();
-							ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
-							ImGui::PopItemWidth();
-							Sequencer(&mySequence, &currentFrame, &expanded, &selectedEntry, 
-								&firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND 
-								| ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL 
-								| ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
-
-							//add a UI to edit that particular item
-							if (selectedEntry != -1)
-							{
-								ImGui::Text("Number of ticks: %i",
-									(currentScene.allNodes[selectedEntry]->hasAnimations() ?
-									currentScene.numTicks[currentScene.animationIndex] : 0)
-								);
-							}
-						}
-
 					}
-					ImGui::Dummy(ImVec2(0.0f, 20.0f));
-				}
-				ImGui::TreePop();
-			}
 
-			ImGui::PopID();
+
+				}
+			}
 			ImGui::TreePop();
 		}
+
+		ImGui::PopID();
 		sceneID++;
 		startItr++;
 	}

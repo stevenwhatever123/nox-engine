@@ -73,7 +73,6 @@
     <ClInclude Include="headers\EngineGUI\PresetObject.h" />
     <ClInclude Include="headers\EngineGUI\PresetObjectPanel.h" />
     <ClInclude Include="headers\EngineGUI\ScenePanel.h" />
-    <ClInclude Include="headers\EngineGUI\TestingSequencer.h" />
     <ClInclude Include="headers\Entity.h" />
     <ClInclude Include="headers\EventManager.h" />
     <ClInclude Include="headers\EventNames.h" />
