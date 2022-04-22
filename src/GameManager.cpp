@@ -106,7 +106,8 @@ void GameManager::init_events() {
 		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
 		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
 		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-		MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
+		//MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
+		MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
 
 		i32 index = this->scene.entities.size();
 
