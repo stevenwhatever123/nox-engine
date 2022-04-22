@@ -263,6 +263,7 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 		Mesh2* mesh = new Mesh2;
 
 		mesh->hasBones = pMesh->HasBones();
+		mesh->name = pMesh->mName.C_Str();
 
 		const bool has_texture = pMesh->HasTextureCoords(0);
 
@@ -312,6 +313,8 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 
 			face++;
 		}
+
+		mesh->prepTheData();
 
 		meshes.push_back(mesh);
 	}

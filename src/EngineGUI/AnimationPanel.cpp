@@ -56,6 +56,9 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 		{
 			ImGui::Text(base_filename.c_str());
 			startItr++;
+			sceneID++;
+			ImGui::PopID();
+			continue;
 		}
 
 		if (ImGui::TreeNode(base_filename.c_str()))

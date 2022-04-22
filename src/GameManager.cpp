@@ -106,22 +106,42 @@ void GameManager::init_events() {
 		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
 		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
 		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+		MeshScene &meshScene = this->game_state.meshScenes.begin()->second;
 
-		Entity *ent = new Entity();
+		// We're treating every mesh as an entity FOR NOW
+		for (u32 i = 0; i < meshScene.meshes.size(); i++)
+		{
+			Entity* ent = new Entity();
+			RenderableComponent* comp = meshScene.meshes[i];
+			PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+			ent->addComp(comp);
+			ent->addComp(pos);
 
-		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-		PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+			this->scene.addEntity(ent);
+		}
 
+		//Entity *ent = new Entity();
 
-		ent->addComp(comp);
-		ent->addComp(pos);
+		//RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+		//PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+		//ent->addComp(comp);
+		//ent->addComp(pos);
+		//this->scene.addEntity(ent);
 
-		this->scene.addEntity(ent);
+		//this->renderer->addObject(
+		//	reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+		//	reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+		//);
 
-		this->renderer->addObject(
-			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-		);
+		//this->renderer->updateBuffers();
+
+		for (u32 i = 0; i < this->scene.entities.size(); i++)
+		{
+			this->renderer->addObject(
+				reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
+				reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
+			);
+		}
 
 		this->renderer->updateBuffers();
 
@@ -149,8 +169,10 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(glm::vec3(0.0f, 7.0f, 10.0f));
-	camera->turnVerBy(20.0f);
+	//camera = new Camera(glm::vec3(0.0f, 70.0f, 10.0f));
+	camera = new Camera(glm::vec3(10.0f, 20.0f, 150.0f));
+	//camera = new Camera(glm::vec3(0.0f, 70.0f, 100.0f));
+	//camera->turnVerBy(20.0f);
 }
 
 void GameManager::init_shaders() {
@@ -292,7 +314,8 @@ void GameManager::update_animation() {
 	auto meshSceneStart = game_state.meshScenes.begin();
 	auto meshSceneEnd = game_state.meshScenes.end();
 
-	for(; meshSceneStart != meshSceneEnd; meshSceneStart++) {
+	for(; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	{
 		if (meshSceneStart->second.hasAnimations())
 		{
 			if (meshSceneStart->second.frameIndex
@@ -307,6 +330,34 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
+	auto meshSceneStart = game_state.meshScenes.begin();
+	auto meshSceneEnd = game_state.meshScenes.end();
+	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	{
+		MeshScene &currentMeshScene = meshSceneStart->second;
+		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
+		{
+			MeshNode2* node = meshSceneStart->second.allNodes[i];
+			for (u32 j = 0; j < meshSceneStart->second.meshes.size(); j++)
+			{
+				Mesh2* mesh = meshSceneStart->second.meshes[j];
+				if (node->hasAnimations())
+				{
+					if (node->name == mesh->name)
+					{
+						glm::mat4 transformation = node->getGlobalTransformation(
+							currentMeshScene.frameIndex, currentMeshScene.animationIndex,
+							currentMeshScene.accumulator, currentMeshScene.timeStep,
+							currentMeshScene.whichTickCeil, currentMeshScene.whichTickCeil);
+						renderer->updateObjectTransformation(transformation, mesh);
+					}
+				}
+			}
+		}
+	}
+
+
+
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(0.1f, 0.2f, 0.5f);
 	renderer->draw();
