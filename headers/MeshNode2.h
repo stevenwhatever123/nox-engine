@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <glm/glm.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <IRenderable.h>
 
 // Compiler is my biggest enemy
@@ -33,6 +34,10 @@ public:
 	glm::mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, f32 timeStep,
 		i32 whichTickFloor, i32 whichTickCeil);
 
+	void setupEulerAngle();
+	void convertEulerAngleToMatrix();
+	void updateTransformation();
+
 	u32 getNumOfAnimations();
 	bool hasAnimations();
 	bool hasMesh();
@@ -55,6 +60,8 @@ public:
 	std::vector<aiNodeAnim*> nodeAnimations;
 	std::vector<std::vector<glm::mat4>> nodeAnimTransformation;
 	std::vector<std::vector<glm::mat4>> nodeAnimTranslationMatrices;
+
+	std::vector<std::vector<glm::vec3>> eulerAngleXYZ;
 	std::vector<std::vector<glm::mat4>> nodeAnimRotationMatrices;
 	std::vector<std::vector<glm::mat4>> nodeAnimScalingMatrices;
 

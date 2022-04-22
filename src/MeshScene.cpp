@@ -394,6 +394,8 @@ void MeshScene::extractAnimationInfo(const aiScene* scene) {
 					node->nodeAnimTranslationMatrices.resize(numAnimation);
 					node->nodeAnimRotationMatrices.resize(numAnimation);
 					node->nodeAnimScalingMatrices.resize(numAnimation);
+
+					node->eulerAngleXYZ.resize(numAnimation);
 					
 					// Retrieve transformation matrices from keyframes in ascending
 					for (u32 k = 0; k < animation_chl->mNumPositionKeys; k++)
@@ -447,6 +449,7 @@ void MeshScene::extractAnimationInfo(const aiScene* scene) {
 						node->nodeAnimRotationMatrices[i].push_back(rotationMatrix);
 						node->nodeAnimScalingMatrices[i].push_back(scalingMatrix);
 						node->nodeAnimTransformation[i].push_back(translationMatrix * rotationMatrix * scalingMatrix);
+						node->setupEulerAngle();
 					}
 					break;
 				} // Key frames

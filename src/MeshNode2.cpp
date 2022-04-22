@@ -133,6 +133,53 @@ glm::mat4 MeshNode2::getGlobalTransformation(u32 frameIndex, u32 animationIndex,
 	return transformatiom_temp;
 }
 
+void MeshNode2::setupEulerAngle()
+{
+	for (u32 i = 0; i < nodeAnimTransformation.size(); i++)
+	{
+		eulerAngleXYZ[i].resize(nodeAnimTransformation[i].size());
+		for (u32 j = 0; j < nodeAnimTransformation[i].size(); j++)
+		{
+			glm::mat4 rotationMatrix = nodeAnimRotationMatrices[i][j];
+			//float rotation[3] = { atan2(rotationMatrix[2][1], rotationMatrix[2][2]),
+			//					atan2(-rotationMatrix[2][0], std::sqrt(rotationMatrix[2][1] * rotationMatrix[2][1] + rotationMatrix[2][2] * rotationMatrix[2][2])),
+			//					atan2(rotationMatrix[1][0], rotationMatrix[0][0]) };
+			glm::vec3 rotation(0);
+			glm::extractEulerAngleXYX(rotationMatrix, rotation.x, rotation.y, rotation.z);
+
+			eulerAngleXYZ[i][j].x = rotation.x;
+			eulerAngleXYZ[i][j].y = rotation.y;
+			eulerAngleXYZ[i][j].z = rotation.z;
+		}
+	}
+}
+
+void MeshNode2::convertEulerAngleToMatrix()
+{
+	for (u32 i = 0; i < nodeAnimTransformation.size(); i++)
+	{
+		for (u32 j = 0; j < nodeAnimTransformation[i].size(); j++)
+		{
+			nodeAnimRotationMatrices[i][j] = glm::eulerAngleXYZ(eulerAngleXYZ[i][j].x, 
+				eulerAngleXYZ[i][j].y, eulerAngleXYZ[i][j].z);
+		}
+	}
+}
+
+void MeshNode2::updateTransformation()
+{
+	convertEulerAngleToMatrix();
+
+	for (u32 i = 0; i < nodeAnimTransformation.size(); i++)
+	{
+		for (u32 j = 0; j < nodeAnimTransformation[i].size(); j++)
+		{
+			nodeAnimTransformation[i][j] = nodeAnimTranslationMatrices[i][j]
+				* nodeAnimRotationMatrices[i][j] * nodeAnimScalingMatrices[i][j];
+		}
+	}
+}
+
 u32 MeshNode2::getNumOfAnimations()
 {
 	return nodeAnimations.size();
