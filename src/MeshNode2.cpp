@@ -145,7 +145,7 @@ void MeshNode2::setupEulerAngle()
 			//					atan2(-rotationMatrix[2][0], std::sqrt(rotationMatrix[2][1] * rotationMatrix[2][1] + rotationMatrix[2][2] * rotationMatrix[2][2])),
 			//					atan2(rotationMatrix[1][0], rotationMatrix[0][0]) };
 			glm::vec3 rotation(0);
-			glm::extractEulerAngleXYX(rotationMatrix, rotation.x, rotation.y, rotation.z);
+			glm::extractEulerAngleXYZ(rotationMatrix, rotation.x, rotation.y, rotation.z);
 
 			eulerAngleXYZ[i][j].x = rotation.x;
 			eulerAngleXYZ[i][j].y = rotation.y;
