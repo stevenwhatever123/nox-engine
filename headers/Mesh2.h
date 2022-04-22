@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 
 #include <MeshNode.h>
-#include <IRenderable.h>
+#include <RenderableComponent.h>
 
 // Compiler is my biggest enemy
 #define NOMINMAX
@@ -16,7 +16,7 @@
 
 namespace NoxEngine {
 
-	class Mesh2 : public IRenderable {
+	class Mesh2 : public RenderableComponent {
 	public:
 		Mesh2();
 		~Mesh2();
@@ -29,6 +29,8 @@ namespace NoxEngine {
 		std::vector<glm::vec3> normals;
 		std::vector<u32> faceIndices;
 		std::vector<glm::vec2> texCoords;
+
+		void setTexture(const char* filename);
 
 		// IRenderable funcs
 		inline i32 getNumOfVertices() { return (i32)vertices.size(); }
@@ -44,7 +46,12 @@ namespace NoxEngine {
 		const char* getNormalTexture() { return normTexName; }
 		const char* getAmbientTexture() { return ambTexName; }
 
-		const char* ambTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
+		//const char* ambTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
+		const char* ambTexName = "C:/Users/Steven/Gitlab/noxengine/assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
 		const char* normTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg";
+		
+		void* CastType(const i32 castID);
+		void prepTheData();
+	
 	};
 }
