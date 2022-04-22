@@ -38,11 +38,6 @@
 #include <EngineGUI/InspectorPanel.h>
 #include <EngineGUI/ImGuizmoTool.h>
 
-#include <Entity.h>
-
-#include <RenderableComponent.h>
-#include <PositionComponent.h>
-
 
 // TODO: move to a config file
 #define WINDOW_WIDTH 1280
@@ -52,6 +47,7 @@
 
 namespace NoxEngine {
 	
+	// usings
 	using NoxEngineGUI::GUIParams;
 	using NoxEngine::GameState;
 	using NoxEngine::AudioSource;
@@ -85,6 +81,7 @@ namespace NoxEngine {
 
 			void init_window();
 			void init_events();
+			void init_ecs();
 			void init_audio();
 			void init_camera();
 			void init_shaders();

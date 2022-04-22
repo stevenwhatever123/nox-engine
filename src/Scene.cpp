@@ -25,8 +25,8 @@ void Scene::addEntity(Entity* ent) {
 	/*   Register to the appropriate subsystem based on the components it has   */ 
 	if ((ent->hasComp & 0b11) == 0b11) {
 
-		IRenderable* irend = ent->getComp(ComponentType::RenderableType)->CastType<IRenderable>();
-		IPosition* ipos = ent->getComp(ComponentType::PositionType)->CastType<IPosition>();
+		IRenderable* irend = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
+		IPosition* ipos = ent->getComp<PositionComponent>()->CastType<IPosition>();
 
 		gm->GetRenderer()->addObject(
 			irend,
@@ -56,7 +56,7 @@ void Scene::addEntity(PresetObject obj) {
 	// Object with only transform component
 	case Transform:
 		pos = new PositionComponent(0.0, 0.0, 0.0);
-		ent->addComp(pos);
+		ent->addComp<PositionComponent>(pos);
 		break;
 
 	// No need to add any component

@@ -10,6 +10,9 @@
 */
 #pragma once
 
+#include <map>
+#include <typeindex>
+
 // Engine Includes
 #include <Types.h>
 #include <Utils.h>
@@ -31,7 +34,7 @@ namespace NoxEngine {
 		String name;
 
 
-	private:
+	public:
 		// unique entity id
 		i32 id; 
 
@@ -40,10 +43,14 @@ namespace NoxEngine {
 		//                 In the case where multiple of the same components is desired (e.g. multiple BoneComponents),
 		//                 create a container component (e.g. SkeletonComponent) and attach it
 		// https://stackoverflow.com/questions/20720360/ecs-can-an-entity-have-more-than-one-component-of-given-type
-		// TODO (Vincent): Change to std::map<ComponentType,IComponent*> for log(N) search
-		Array<IComponent*> components; 
+		// Map key reference: https://stackoverflow.com/questions/46968176/how-to-avoid-downcasting-in-entity-component-system-c
+		std::map<std::type_index, IComponent*> components; 
 			
 		// Whether this entity has a component type
+		// TODO (Vincent): Potentially switch to std::bitset or a bit field struct
+		// bitset is used here: https://www.david-colson.com/2020/02/09/making-a-simple-ecs.html
+		//					    https://stackoverflow.com/questions/3998091/bit-field-vs-bitset
+		// bit field appears to be better for flags: https://www.reddit.com/r/cpp/comments/nou1rt/shocked_by_the_size_of_stdbitset/
 		HasCompBitMask hasComp;
 
 		// TODO (Vincent): Can an entity not contain another entity?
@@ -67,11 +74,15 @@ namespace NoxEngine {
 		// Gotta be careful. When comp are destroyed the subsystem have to know
 		// TODO (Vincent): delete the components array and let the specialized component destroyer remove the reference in the subsystem?
 		~Entity();
+
+		bool containsComps(HasCompBitMask mask);
 			
 		// Add a component to the entity
-		void addComp(IComponent *comp);
+		template <typename T>
+		void addComp(T *comp);
 
 		// Gets the component with the type provided. If no such comp -> through error and return
-		IComponent * getComp(ComponentType id);
+		template <typename T>
+		T *getComp();
 	};
 }

@@ -35,11 +35,11 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 			IComponent* comp;
 
 			// PositionComponent
-			if (comp = selectedEntity->getComp(ComponentType::PositionType); nullptr != comp) {
+			if (selectedEntity->containsComps(PositionFlag)) {
 
 				if (ImGui::TreeNode("Position")) {
 
-					IPosition* pos = comp->CastType<IPosition>();
+					IPosition* pos = selectedEntity->getComp<PositionComponent>()->CastType<IPosition>();
 
 					ImGui::DragFloat3("XYZ", &pos->x, 0.01f);
 					ImGui::TreePop();
@@ -48,11 +48,11 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 			ImGui::Separator();
 
 			// RenderableComponent
-			if (comp = selectedEntity->getComp(ComponentType::RenderableType); nullptr != comp) {
+			if (selectedEntity->containsComps(RenderableFlag)) {
 
 				if (ImGui::TreeNode("Renderable")) {
 
-					IRenderable* rend = comp->CastType<IRenderable>();
+					IRenderable* rend = selectedEntity->getComp<RenderableComponent>()->CastType<IRenderable>();
 
 					ImGui::Text("Some rendering parameters");
 					ImGui::TreePop();

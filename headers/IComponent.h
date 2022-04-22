@@ -8,8 +8,13 @@
 #pragma once
 
 #include <ComponentType.h>
+#include <Types.h>
 
 namespace NoxEngine {
+
+	// forward declares
+	enum ComponentType : i32;
+
 
 	class IComponent
 	{
@@ -23,6 +28,7 @@ namespace NoxEngine {
 				return reinterpret_cast<T*>(ptr); 
 			};
 
+			// Useless virtual function to allow dynamic_cast to be used
 			virtual ~IComponent() {};
 	};
 }

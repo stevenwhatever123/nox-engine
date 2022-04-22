@@ -2,6 +2,12 @@
 
 #include <filesystem>
 
+#include <Entity.h>
+
+// Components to hook up with event manager
+#include <RenderableComponent.h>
+#include <PositionComponent.h>
+
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
 using NoxEngine::Entity;
@@ -9,12 +15,10 @@ using NoxEngine::Entity;
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-//GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title) {
-//}
-
 void GameManager::init() {
 	Logger::debug("Initing systems");
 	init_window();
+	init_ecs();
 	init_scene();
 	init_events();
 	init_audio();
@@ -94,6 +98,10 @@ void GameManager::init_window() {
 
 }
 
+void GameManager::init_ecs() {
+
+	initComponentTypes();
+}
 
 void GameManager::init_events() {
 
@@ -104,15 +112,15 @@ void GameManager::init_events() {
 		// this->game_state.meshes.emplace(file_name, pScene);
 
 
-		// TODO (vincent): replace?		
+		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity
 		Entity *ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string());
 
 		// TODO: load and sent mesh data to renderable component
 		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
 		PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
 
-		ent->addComp(comp);
-		ent->addComp(pos);
+		ent->addComp<RenderableComponent>(comp);
+		ent->addComp<PositionComponent>(pos);
 
 		game_state.activeScene->addEntity(ent);
 	});
