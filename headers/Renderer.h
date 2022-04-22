@@ -152,5 +152,6 @@ namespace NoxEngine {
 		void updateCamera();
 		void updateLightPos(float x, float y, float z);
 
+		void updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable);
 	};
 }
