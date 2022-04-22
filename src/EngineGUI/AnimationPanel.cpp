@@ -139,7 +139,7 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 							glm::mat4 translationMatrix = currentScene.allNodes[selectedEntry]
 								->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame];
 							float translate[3] = { translationMatrix[0][3], translationMatrix[1][3], translationMatrix [2][3]};
-							ImGui::SliderFloat3("Translation", translate, -100, 100, "%.3f", 0);
+							ImGui::DragFloat3("Translation", translate, 0.005f, -100, 100, "%.3f", 0);
 							//Apply value
 							(currentScene.allNodes[selectedEntry]
 								->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame])[0][3] = translate[0];
@@ -153,7 +153,7 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 							float rotation[3] = { currentScene.allNodes[selectedEntry]->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][0],
 								currentScene.allNodes[selectedEntry]->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][1] ,
 								currentScene.allNodes[selectedEntry]->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][2] };
-							ImGui::SliderFloat3("Rotation", rotation, -2, 2, "%.3f", 0);
+							ImGui::DragFloat3("Rotation", rotation, 0.005f, -10, 10, "%.3f", 0);
 							//Apply value
 							currentScene.allNodes[selectedEntry]
 								->eulerAngleXYZ[currentScene.animationIndex][selectedFrame][0] = rotation[0];
@@ -167,7 +167,7 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 							glm::mat4 scalingMatrix = currentScene.allNodes[selectedEntry]
 								->nodeAnimScalingMatrices[currentScene.animationIndex][selectedFrame];
 							float scaling[3] = { scalingMatrix[0][0], scalingMatrix[1][1], scalingMatrix[2][2]};
-							ImGui::SliderFloat3("Scaling", scaling, 1, 100, "%.3f", 0);
+							ImGui::DragFloat3("Scaling", scaling, 0.005f, 1, 100, "%.3f", 0);
 							//Apply value
 							(currentScene.allNodes[selectedEntry]
 								->nodeAnimScalingMatrices[currentScene.animationIndex][selectedFrame])[0][0] = scaling[0];
