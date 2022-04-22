@@ -29,6 +29,8 @@ namespace NoxEngine {
 		GLuint normalTexture;
 		GLuint ambientTexture; // Texture handlers
 		glm::mat4 pos;
+
+		glm::mat4 transformation;
 	};
 	
 

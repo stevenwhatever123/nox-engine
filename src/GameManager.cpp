@@ -341,14 +341,19 @@ void GameManager::update_renderer() {
 			for (u32 j = 0; j < meshSceneStart->second.meshes.size(); j++)
 			{
 				Mesh2* mesh = meshSceneStart->second.meshes[j];
-				if (node->hasAnimations())
+				if (node->name == mesh->name)
 				{
-					if (node->name == mesh->name)
+					if (node->hasAnimations())
 					{
 						glm::mat4 transformation = node->getGlobalTransformation(
 							currentMeshScene.frameIndex, currentMeshScene.animationIndex,
 							currentMeshScene.accumulator, currentMeshScene.timeStep,
 							currentMeshScene.whichTickCeil, currentMeshScene.whichTickCeil);
+						renderer->updateObjectTransformation(transformation, mesh);
+					}
+					else
+					{
+						glm::mat4 transformation = node->transformation;
 						renderer->updateObjectTransformation(transformation, mesh);
 					}
 				}

@@ -142,6 +142,8 @@ void Renderer::addObject(IRenderable *mesh, IPosition *pos)
 
 	newObj.endInd = i32(elements.size());
 
+    newObj.transformation = glm::mat4(1.0f);
+
 	objects.push_back(newObj);
 
 }
@@ -200,6 +202,9 @@ void Renderer::draw() {
 	for (u32 i = 0; i < objects.size(); i++)
 	{
         program->set4Matrix("toWorld", objects[i].pos);
+
+        program->set4Matrix("modelMatrix", objects[i].transformation);
+
         // Activate and bind textures of the object
         glActiveTexture(GL_TEXTURE0 + 1);
         glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
@@ -515,7 +520,8 @@ void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable*
     {
         if (objects[i].objPtr == pRenderable)
         {
-            program->set4Matrix("modelMatrix", transformation);
+            objects[i].transformation = transformation;
+            //program->set4Matrix("modelMatrix", transformation);
             //std::cout << "Welcome to the Matrix" << "\n";
         }
     }
