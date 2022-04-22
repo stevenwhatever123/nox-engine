@@ -462,6 +462,11 @@ namespace ImSequencer
             }
          }
 
+         for (auto& customDraw : customDraws)
+             sequence->CustomDraw(customDraw.index, draw_list, customDraw.customRect, customDraw.legendRect, customDraw.clippingRect, customDraw.legendClippingRect);
+         for (auto& customDraw : compactCustomDraws)
+             sequence->CustomDrawCompact(customDraw.index, draw_list, customDraw.customRect, customDraw.clippingRect);
+
          // cursor
          if (currentFrame && firstFrame && *currentFrame >= *firstFrame && *currentFrame <= sequence->GetFrameMax())
          {
@@ -476,10 +481,10 @@ namespace ImSequencer
          draw_list->PopClipRect();
          draw_list->PopClipRect();
 
-         for (auto& customDraw : customDraws)
-            sequence->CustomDraw(customDraw.index, draw_list, customDraw.customRect, customDraw.legendRect, customDraw.clippingRect, customDraw.legendClippingRect);
-         for (auto& customDraw : compactCustomDraws)
-            sequence->CustomDrawCompact(customDraw.index, draw_list, customDraw.customRect, customDraw.clippingRect);
+         //for (auto& customDraw : customDraws)
+         //   sequence->CustomDraw(customDraw.index, draw_list, customDraw.customRect, customDraw.legendRect, customDraw.clippingRect, customDraw.legendClippingRect);
+         //for (auto& customDraw : compactCustomDraws)
+         //   sequence->CustomDrawCompact(customDraw.index, draw_list, customDraw.customRect, customDraw.clippingRect);
 
          // copy paste
          if (sequenceOptions & SEQUENCER_COPYPASTE)
