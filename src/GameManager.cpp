@@ -106,7 +106,9 @@ void GameManager::init_events() {
 		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
 		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
 		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-		MeshScene &meshScene = this->game_state.meshScenes.begin()->second;
+		MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
+
+		i32 index = this->scene.entities.size();
 
 		// We're treating every mesh as an entity FOR NOW
 		for (u32 i = 0; i < meshScene.meshes.size(); i++)
@@ -135,7 +137,7 @@ void GameManager::init_events() {
 
 		//this->renderer->updateBuffers();
 
-		for (u32 i = 0; i < this->scene.entities.size(); i++)
+		for (u32 i = index; i < this->scene.entities.size(); i++)
 		{
 			this->renderer->addObject(
 				reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
@@ -338,24 +340,22 @@ void GameManager::update_renderer() {
 		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
 		{
 			MeshNode2* node = meshSceneStart->second.allNodes[i];
-			for (u32 j = 0; j < meshSceneStart->second.meshes.size(); j++)
+
+			if (node->meshIndex.size() > 0)
 			{
-				Mesh2* mesh = meshSceneStart->second.meshes[j];
-				if (node->name == mesh->name)
+				Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
+				if (node->hasAnimations())
 				{
-					if (node->hasAnimations())
-					{
-						glm::mat4 transformation = node->getGlobalTransformation(
-							currentMeshScene.frameIndex, currentMeshScene.animationIndex,
-							currentMeshScene.accumulator, currentMeshScene.timeStep,
-							currentMeshScene.whichTickCeil, currentMeshScene.whichTickCeil);
-						renderer->updateObjectTransformation(transformation, mesh);
-					}
-					else
-					{
-						glm::mat4 transformation = node->transformation;
-						renderer->updateObjectTransformation(transformation, mesh);
-					}
+					glm::mat4 transformation = node->getGlobalTransformation(
+						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
+						currentMeshScene.accumulator, currentMeshScene.timeStep,
+						currentMeshScene.whichTickCeil, currentMeshScene.whichTickCeil);
+					renderer->updateObjectTransformation(transformation, mesh);
+				}
+				else
+				{
+					glm::mat4 transformation = node->transformation;
+					renderer->updateObjectTransformation(transformation, mesh);
 				}
 			}
 		}

@@ -164,6 +164,15 @@ void MeshScene::createNodeHierarchy(aiNode* aiRootnode, MeshNode2* rootNode)
 	rootNode->name = aiRootnode->mName.C_Str();
 	rootNode->parent = nullptr;
 
+	if (aiRootnode->mNumMeshes > 0)
+	{
+		// Apparently there can be more than one mesh index
+		for (u32 i = 0; i < aiRootnode->mNumMeshes; i++)
+		{
+			rootNode->meshIndex.push_back(aiRootnode->mMeshes[i]);
+		}
+	}
+
 	// =====================================================
 	// Convert aiMatrix4x4 to glm::mat4
 	// We can convert this to a tool later on
