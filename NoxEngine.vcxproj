@@ -32,7 +32,8 @@
     <ClCompile Include="3rdParty\headers\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_tables.cpp" />
     <ClCompile Include="3rdParty\headers\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="headers\EngineGUI\ComponentType.cpp" />
+    <ClCompile Include="src\ComponentType.cpp" />
+    <ClCompile Include="src\EngineGUI\ImGuiWidgets.cpp" />
     <ClCompile Include="src\EngineGUI\EngineGUI.cpp" />
     <ClCompile Include="src\EngineGUI\AnimationPanel.cpp" />
     <ClCompile Include="src\EngineGUI\AudioPanel.cpp" />
@@ -69,6 +70,7 @@
     <ClInclude Include="headers\EngineGUI\AudioPanel.h" />
     <ClInclude Include="headers\EngineGUI\EngineGUI.h" />
     <ClInclude Include="headers\EngineGUI\HierarchyPanel.h" />
+    <ClInclude Include="headers\EngineGUI\ImGuiWidgets.h" />
     <ClInclude Include="headers\EngineGUI\ImGuizmoTool.h" />
     <ClInclude Include="headers\EngineGUI\InspectorPanel.h" />
     <ClInclude Include="headers\EngineGUI\PresetObject.h" />

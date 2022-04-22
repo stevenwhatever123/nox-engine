@@ -10,6 +10,8 @@
 */
 #pragma once
 
+#define ENTITY_NAME_MAX_LEN 256
+
 #include <map>
 #include <typeindex>
 
@@ -31,7 +33,7 @@ namespace NoxEngine {
 
 	public:
 		// A human-readable identifier - not necessarily unique
-		String name;
+		char *name;
 
 
 	public:
@@ -59,14 +61,14 @@ namespace NoxEngine {
 
 	protected:
 		// Constructors usable by Scene
-		Entity(i32 _id);
-		Entity(i32 _id, String _name);
+		Entity(i32 _id, char* _name = nullptr);
 
 
 	public:
 		// Automatically give a unique ID and a placeholder name to an entity
 		// TODO: Change GameManager to Singleton, so it doesn't need a param
-		Entity(Scene *scene, String _name = "");
+		Entity(Scene *scene, char* _name = nullptr);
+		Entity(Scene* scene, const char* _name);
 
 		// Move constructor
 		Entity(Entity&& other);

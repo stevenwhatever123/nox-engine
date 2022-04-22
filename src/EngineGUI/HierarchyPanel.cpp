@@ -1,5 +1,7 @@
 #include <EngineGUI/HierarchyPanel.h>
 
+#include <EngineGUI/ImGuiWidgets.h>
+
 #include <Entity.h>
 #include <IComponent.h>
 #include <PositionComponent.h>
@@ -33,26 +35,48 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 		for (int i = 0; i < state->activeScene->entities.size(); i++) {
 			
 			Entity* ent = state->activeScene->entities[i];
-			ImGuiTreeNodeFlags nodeFlags = baseFlags;
-			bool nodeOpen = false;
-
-			// Check if this was previously selected
-			if (params->selectedEntity == i) {
-				nodeFlags |= ImGuiTreeNodeFlags_Selected;
-			}
 
 			// Node with entity name
 			// TODO: Visibility checkbox
-			nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)i, nodeFlags, ent->name.c_str());
-			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+
+			// If this entity's name is not being changed (textActive), use the entity's name
+			//char* objName = ent->name;
+
+			//// Otherwise, use buffer (actively modifying this entity's name)
+			//if (params->selectedEntity == i && params->pSelectableInputResult.tempInputActive) {
+			//	objName = params->modifyingNameBuffer;
+			//}
+
+			char uniqueNameBuf[16];
+			snprintf(uniqueNameBuf, 16, "%i", i);
+
+			// Draw the widget
+			if (SelectableInputResult res = ImGui::SelectableInput(uniqueNameBuf, params->selectedEntity == i,
+				ImGuiSelectableFlags_None, ent->name, ENTITY_NAME_MAX_LEN); res.selected) {
+
 				params->selectedEntity = i;
-			
-			if (nodeOpen) {
-
-				// TODO: Children entities?
-
-				ImGui::TreePop();
 			}
+
+			//if (!strcmp(ent->name, params->modifyingNameBuffer) && res.tempInputStart) {
+
+			//	// On input start, replace the buffer with the entity's name
+			//	memset(params->modifyingNameBuffer, 0, 256);
+			//	strcpy_s(params->modifyingNameBuffer, 256, ent->name);
+
+			//	printf("Started writing in %i\n", i);
+			//}
+
+			// Save: active in previous frame, now not active anymore
+			//if (params->pSelectableInputResult.tempInputActive && !res.tempInputActive) {
+			//	ent->name = params->modifyingNameBuffer;
+			//}
+
+			//if (res.tempInputActive) {
+			//	printf("Actively writing in %i. Text: %s\n", i, params->modifyingNameBuffer);
+			//}
+
+			// Current result becomes previous result
+			//params->pSelectableInputResult = res;
 		}
 	}
 

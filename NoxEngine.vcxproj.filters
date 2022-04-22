@@ -173,8 +173,11 @@
     <ClCompile Include="src\PositionComponent.cpp">
       <Filter>Source Files\ECS\Components</Filter>
     </ClCompile>
-    <ClCompile Include="headers\EngineGUI\ComponentType.cpp">
+    <ClCompile Include="src\ComponentType.cpp">
       <Filter>Source Files\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\ImGuiWidgets.cpp">
+      <Filter>Source Files\EngineGUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +219,9 @@
     </ClInclude>
     <ClInclude Include="headers\AudioManager.h">
       <Filter>Header Files\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\ImGuiWidgets.h">
+      <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

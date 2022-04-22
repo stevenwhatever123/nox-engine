@@ -74,7 +74,7 @@ namespace NoxEngine {
 
 		protected:
 			// TODO (Vincent): initialize other fields as well to be on the safe side
-			GameManager() : win_width(WINDOW_WIDTH), win_height(WINDOW_HEIGHT), title(WINDOW_TITLE) {};
+			GameManager() : win_width(WINDOW_WIDTH), win_height(WINDOW_HEIGHT), title(WINDOW_TITLE), ui_params() {};
 			~GameManager() {};
 
 		private:

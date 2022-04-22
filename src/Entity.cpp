@@ -13,42 +13,52 @@ using namespace NoxEngine;
 using NoxEngineUtils::Logger;
 
 
-Entity::Entity(i32 _id)
-	:
-	id(_id),
-	hasComp(0), 
-	name("") {
-
-}
-
-Entity::Entity(i32 _id, String _name) 
+Entity::Entity(i32 _id, char* _name)
 	: 
 	id(_id), 
-	hasComp(0), 
-	name(_name) {
+	hasComp(0) {
 
+	if (_name != nullptr) name = _name;
+	else name = (char *)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
 }
 
-Entity::Entity(Scene* scene, String _name)
+Entity::Entity(Scene* scene, char* _name)
 	:
 	hasComp(0) {
 
 	assert(scene != nullptr);
 
-	// Form the placeholder name
-	char entName[32];
-	snprintf(entName, 32, "Game Object %i", scene->nEntitiesAdded + 1);
+	// Assign values to fields
+	id = scene->nEntitiesAdded; 
+	
+	if (_name != nullptr) name = _name;
+	else {
+		// placeholder name
+		name = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
+		snprintf(name, ENTITY_NAME_MAX_LEN, "Game Object %i", scene->nEntitiesAdded + 1);
+	}
+}
+
+Entity::Entity(Scene* scene, const char* _name)
+	:
+	hasComp(0) {
+
+	assert(scene != nullptr);
 
 	// Assign values to fields
 	id = scene->nEntitiesAdded;
-	name = _name == "" ? entName : _name;
 
+	name = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
+	memcpy(name, _name, ENTITY_NAME_MAX_LEN);
 }
 
 Entity::Entity(Entity&& other) : id(other.id), hasComp(other.hasComp), components(other.components), name(other.name) {
 }
 
 Entity::~Entity() {
+
+	free(name);
+
 	// Gotta be careful. When comp are destroyed the subsystem have to know
 }
 

@@ -15,7 +15,7 @@
 #include <imgui/imgui_impl_opengl3.h>
 
 // Engine Headers
-
+#include <EngineGUI/ImGuiWidgets.h>
 #include <AudioManager.h>
 #include <Renderer.h>
 #include <Types.h>

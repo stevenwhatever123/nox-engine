@@ -29,7 +29,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 		Entity* selectedEntity = state->activeScene->entities[params->selectedEntity];
 
 		// Entity name
-		if (ImGui::CollapsingHeader(selectedEntity->name.c_str())) {
+		if (ImGui::CollapsingHeader(selectedEntity->name)) {
 
 			// TODO: Make this nicer w/ enum?
 			IComponent* comp;

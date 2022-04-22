@@ -113,7 +113,7 @@ void GameManager::init_events() {
 
 
 		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity
-		Entity *ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string());
+		Entity *ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
 
 		// TODO: load and sent mesh data to renderable component
 		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");

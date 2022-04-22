@@ -21,5 +21,6 @@ void NoxEngine::initComponentTypes() {
 		{ typeid(RenderableComponent),	RenderableType }
 		//{ typeid(LightSourceComponent),	LightSourceType },
 		//{ typeid(AudioSourceComponent),	AudioSourceType },
+		//{ typeid(ScriptComponent),	ScriptType },
 	};
 }
