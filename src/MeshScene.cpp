@@ -100,6 +100,7 @@ void MeshScene::update(time_type dt)
 			// Interpolate time into tick
 			time_type duration = animationDuration[animationIndex];
 			timeStep = duration / numOfTicks;
+			
 
 			while (accumulator >= timeStep)
 			{
@@ -122,8 +123,18 @@ void MeshScene::updateCeilAndFloor()
 {
 	u32 numOfTicks = numTicks[animationIndex];
 
-	whichTickFloor = frameIndex;
-	whichTickCeil = frameIndex < numOfTicks - 1 ? whichTickFloor + 1 : frameIndex;
+	if ((accumulator / timeStep) > 0)
+	{
+		whichTickFloor = frameIndex;
+		if (frameIndex < (numOfTicks - 1))
+		{
+			whichTickCeil = frameIndex + 1;
+		}
+		else
+		{
+			whichTickCeil = frameIndex;
+		}
+	}
 }
 
 // Some modelling software handle UV coordinates differently

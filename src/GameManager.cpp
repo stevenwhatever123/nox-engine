@@ -356,7 +356,7 @@ void GameManager::update_renderer() {
 					glm::mat4 transformation = node->getGlobalTransformation(
 						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
 						currentMeshScene.accumulator, currentMeshScene.timeStep,
-						currentMeshScene.whichTickCeil, currentMeshScene.whichTickCeil);
+						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
 					renderer->updateObjectTransformation(transformation, mesh);
 				}
 				else
