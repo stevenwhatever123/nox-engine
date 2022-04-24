@@ -319,15 +319,21 @@ void GameManager::update_animation() {
 
 	for(; meshSceneStart != meshSceneEnd; meshSceneStart++) 
 	{
-		if (meshSceneStart->second.hasAnimations())
+		if (meshSceneStart->second.playAnimation)
 		{
-			if (meshSceneStart->second.frameIndex
-				== meshSceneStart->second.numTicks[meshSceneStart->second.animationIndex] - 1)
+			if (meshSceneStart->second.hasAnimations())
 			{
-				meshSceneStart->second.resetAnimation();
+				if (meshSceneStart->second.frameIndex
+					== meshSceneStart->second.numTicks[meshSceneStart->second.animationIndex] - 1)
+				{
+					meshSceneStart->second.resetAnimation();
+					meshSceneStart->second.playAnimation = !meshSceneStart->second.playAnimation;
+				}
 			}
+			meshSceneStart->second.update(deltaTime);
 		}
-		meshSceneStart->second.update(deltaTime);
+		// Because we're not updating frame index we still need tick floor and ceil to get our transform
+		meshSceneStart->second.updateCeilAndFloor();
 	}
 
 }

@@ -28,6 +28,8 @@ namespace NoxEngine {
 		void update();
 		void update(time_type dt);
 
+		void updateCeilAndFloor();
+
 		void flipUV();
 		void setAnimationIndex(u32 num);
 
@@ -36,6 +38,9 @@ namespace NoxEngine {
 
 		u32 getNumOfAnimations();
 		bool hasAnimations();
+		
+		void updateNumTicks(u32 animationIndex, u32 num);
+		void setFrameIndex(u32 index);
 
 		// This is the root of the node nodeHierarchy
 		// It contains all the child nodes
@@ -61,6 +66,8 @@ namespace NoxEngine {
 		std::vector<unsigned int> numTicks;
 		// Animation clip -> duration
 		std::vector<time_type> animationDuration;
+
+		bool playAnimation = false;
 
 	private:
 		void extractGeometricInfo(const aiScene* scene);

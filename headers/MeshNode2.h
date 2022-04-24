@@ -38,6 +38,11 @@ public:
 	void convertEulerAngleToMatrix();
 	void updateTransformation();
 
+	void updateMaximumFrame(u32 animationIndex, u32 i);
+	void updateAnimationSize(u32 animationIndex, u32 num);
+	void insertFrameAfter(u32 animationIndex, u32 frame);
+	void insertFrameBefore(u32 animationIndex, u32 frame);
+
 	u32 getNumOfAnimations();
 	bool hasAnimations();
 	bool hasMesh();
@@ -64,6 +69,10 @@ public:
 	std::vector<std::vector<glm::vec3>> eulerAngleXYZ;
 	std::vector<std::vector<glm::mat4>> nodeAnimRotationMatrices;
 	std::vector<std::vector<glm::mat4>> nodeAnimScalingMatrices;
+
+	// A vector storing the maximum frame for every animation
+	// AKA where the clip is supposed to end in which frame
+	std::vector<u32> maximumFrame;
 
 private:
 

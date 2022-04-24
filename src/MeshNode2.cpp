@@ -180,14 +180,95 @@ void MeshNode2::updateTransformation()
 	}
 }
 
+void MeshNode2::updateMaximumFrame(u32 animationIndex, u32 i)
+{
+	if (hasAnimations())
+	{
+		maximumFrame[animationIndex] = i;
+	}
+	else
+	{
+		maximumFrame.resize(animationIndex + 1, 0);
+		nodeAnimTransformation.resize(i);
+		nodeAnimTranslationMatrices.resize(i);
+		nodeAnimRotationMatrices.resize(i);
+		nodeAnimScalingMatrices.resize(i);
+		eulerAngleXYZ.resize(i);
+
+		maximumFrame[animationIndex] = i;
+	}
+}
+
+void MeshNode2::updateAnimationSize(u32 animationIndex, u32 num)
+{
+	if (hasAnimations())
+	{
+		u32 currentSize = nodeAnimTransformation[animationIndex].size();
+		if (num > 0)
+		{
+			if (num < currentSize)
+			{
+				updateMaximumFrame(animationIndex, num);
+				setupEulerAngle();
+				return;
+			}
+			else
+			{
+				updateMaximumFrame(animationIndex, num);
+
+				glm::mat4 lastFrameTransformation = nodeAnimTransformation[animationIndex][currentSize - 1];
+				glm::mat4 lastFrameTranslation = nodeAnimTranslationMatrices[animationIndex][currentSize - 1];
+				glm::mat4 lastFrameRotation = nodeAnimRotationMatrices[animationIndex][currentSize - 1];
+				glm::mat4 lastFrameScaling = nodeAnimScalingMatrices[animationIndex][currentSize - 1];
+
+				nodeAnimTransformation[animationIndex].resize(num);
+				nodeAnimTranslationMatrices[animationIndex].resize(num);
+				nodeAnimRotationMatrices[animationIndex].resize(num);
+				nodeAnimScalingMatrices[animationIndex].resize(num);
+				eulerAngleXYZ[animationIndex].resize(num);
+
+				for (u32 i = currentSize; i < num; i++)
+				{
+					nodeAnimTransformation[animationIndex][i] = lastFrameTransformation;
+					nodeAnimTranslationMatrices[animationIndex][i] = lastFrameTranslation;
+					nodeAnimRotationMatrices[animationIndex][i] = lastFrameRotation;
+					nodeAnimScalingMatrices[animationIndex][i] = lastFrameScaling;
+				}
+
+				setupEulerAngle();
+			}
+		}
+	}
+	else
+	{
+		updateMaximumFrame(animationIndex, num);
+
+		nodeAnimTransformation[animationIndex].resize(num);
+		nodeAnimTranslationMatrices[animationIndex].resize(num);
+		nodeAnimRotationMatrices[animationIndex].resize(num);
+		nodeAnimScalingMatrices[animationIndex].resize(num);
+		eulerAngleXYZ[animationIndex].resize(num);
+
+		for (u32 i = 0; i < num; i++)
+		{
+			nodeAnimTransformation[animationIndex][i] = getTransformation();
+			nodeAnimTranslationMatrices[animationIndex][i] = getTransformation();
+			nodeAnimRotationMatrices[animationIndex][i] = getTransformation();
+			nodeAnimScalingMatrices[animationIndex][i] = getTransformation();
+		}
+
+		setupEulerAngle();
+	}
+}
+
 u32 MeshNode2::getNumOfAnimations()
 {
-	return nodeAnimations.size();
+	return nodeAnimTransformation.size();
 }
 
 bool MeshNode2::hasAnimations()
 {
-	return nodeAnimations.size() > 0;
+	return nodeAnimTransformation.size() > 0;
 }
 
 bool MeshNode2::hasMesh()

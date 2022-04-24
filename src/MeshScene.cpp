@@ -113,10 +113,17 @@ void MeshScene::update(time_type dt)
 			//const time_type alpha = accumulator / timeStep;
 			//frameIndex = frameIndex * alpha + frameIndex * (1.0 - alpha);
 
-			whichTickFloor = frameIndex;
-			whichTickCeil = frameIndex < numOfTicks - 1 ? whichTickFloor + 1 : frameIndex;
+			updateCeilAndFloor();
 		}
 	}
+}
+
+void MeshScene::updateCeilAndFloor()
+{
+	u32 numOfTicks = numTicks[animationIndex];
+
+	whichTickFloor = frameIndex;
+	whichTickCeil = frameIndex < numOfTicks - 1 ? whichTickFloor + 1 : frameIndex;
 }
 
 // Some modelling software handle UV coordinates differently
@@ -157,6 +164,34 @@ u32 MeshScene::getNumOfAnimations()
 bool MeshScene::hasAnimations()
 {
 	return getNumOfAnimations() > 0;
+}
+
+void MeshScene::updateNumTicks(u32 animationIndex, u32 num)
+{
+	if (hasAnimations())
+	{
+		numTicks[animationIndex] = num;
+	}
+	else
+	{
+		numTicks.resize(animationIndex, 0);
+		numTicks[animationIndex] = num;
+	}
+
+	for (u32 i = 0; i < allNodes.size(); i++)
+	{
+		allNodes[i]->updateAnimationSize(animationIndex, num);
+	}
+}
+
+void MeshScene::setFrameIndex(u32 index)
+{
+	if (index == frameIndex || index < 0)
+	{
+		return;
+	}
+
+	frameIndex = index;
 }
 
 void MeshScene::createNodeHierarchy(aiNode* aiRootnode, MeshNode2* rootNode)
@@ -408,6 +443,7 @@ void MeshScene::extractAnimationInfo(const aiScene* scene) {
 					node->nodeAnimScalingMatrices.resize(numAnimation);
 
 					node->eulerAngleXYZ.resize(numAnimation);
+					node->maximumFrame.resize(numAnimation);
 					
 					// Retrieve transformation matrices from keyframes in ascending
 					for (u32 k = 0; k < animation_chl->mNumPositionKeys; k++)
@@ -463,6 +499,9 @@ void MeshScene::extractAnimationInfo(const aiScene* scene) {
 						node->nodeAnimTransformation[i].push_back(translationMatrix * rotationMatrix * scalingMatrix);
 						node->setupEulerAngle();
 					}
+
+					node->updateMaximumFrame(i, animation_chl->mNumPositionKeys);
+
 					break;
 				} // Key frames
 			} // Matched node
