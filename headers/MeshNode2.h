@@ -40,8 +40,8 @@ public:
 
 	void updateMaximumFrame(u32 animationIndex, u32 i);
 	void updateAnimationSize(u32 animationIndex, u32 num);
-	void insertFrameAfter(u32 animationIndex, u32 frame);
-	void insertFrameBefore(u32 animationIndex, u32 frame);
+	void insertFrameAfter(u32 animationIndex, u32 selectedFrame);
+	void insertFrameBefore(u32 animationIndex, u32 selectedFrame);
 
 	u32 getNumOfAnimations();
 	bool hasAnimations();

@@ -184,6 +184,24 @@ void MeshScene::updateNumTicks(u32 animationIndex, u32 num)
 	}
 }
 
+void MeshScene::insertFrame(u32 animationIndex, u32 selectedFrame)
+{
+	if (hasAnimations())
+	{
+		numTicks[animationIndex] = numTicks[animationIndex] + 1;
+	}
+	else
+	{
+		numTicks.resize(animationIndex, 0);
+		numTicks[animationIndex] = 1;
+	}
+
+	for (u32 i = 0; i < allNodes.size(); i++)
+	{
+		allNodes[i]->insertFrameAfter(animationIndex, selectedFrame);
+	}
+}
+
 void MeshScene::setFrameIndex(u32 index)
 {
 	if (index == frameIndex || index < 0)

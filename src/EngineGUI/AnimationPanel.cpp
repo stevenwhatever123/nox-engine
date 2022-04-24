@@ -141,6 +141,7 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
 			static int firstFrame = 0;
 			static bool expanded = true;
 			int selectedFrame = currentScene.frameIndex;
+			bool insertFrame = false;
 
 			ImGui::PushItemWidth(130);
 			ImGui::InputInt("Frame Min", &mySequence.mFrameMin);
@@ -149,6 +150,15 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
 			ImGui::SameLine();
 			ImGui::InputInt("Frame Max", &mySequence.mFrameMax);
 			currentScene.updateNumTicks(currentScene.animationIndex, mySequence.mFrameMax + 1);
+			ImGui::SameLine();
+
+			if (ImGui::Button("+##InsertFrame"))
+			{
+				insertFrame = true;
+			}
+
+			ImGui::SameLine();
+			ImGui::Text("Insert Frame");
 			ImGui::PopItemWidth();
 
 			// Safe guard
@@ -234,7 +244,15 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
 						ImGui::EndTable();
 					}
 				}
+
+				if (insertFrame)
+				{
+					currentScene.insertFrame(currentScene.animationIndex, selectedFrame);
+					//currentScene.allNodes[selectedEntry]->insertFrameAfter(currentScene.animationIndex, selectedEntry);
+				}
 			}
+
+			insertFrame = false;
 		}
 	}
 }

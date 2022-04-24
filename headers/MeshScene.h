@@ -40,6 +40,7 @@ namespace NoxEngine {
 		bool hasAnimations();
 		
 		void updateNumTicks(u32 animationIndex, u32 num);
+		void insertFrame(u32 animationIndex, u32 selectedFrame);
 		void setFrameIndex(u32 index);
 
 		// This is the root of the node nodeHierarchy

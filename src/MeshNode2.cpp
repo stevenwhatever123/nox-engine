@@ -263,6 +263,35 @@ void MeshNode2::updateAnimationSize(u32 animationIndex, u32 num)
 	}
 }
 
+void MeshNode2::insertFrameAfter(u32 animationIndex, u32 selectedFrame)
+{
+	if (hasAnimations())
+	{
+		u32 animationSize = nodeAnimTransformation[animationIndex].size();
+		updateMaximumFrame(animationIndex, animationSize + 1);
+
+		glm::mat4 lastFrameTransformation = nodeAnimTransformation[animationIndex][selectedFrame];
+		glm::mat4 lastFrameTranslation = nodeAnimTranslationMatrices[animationIndex][selectedFrame];
+		glm::mat4 lastFrameRotation = nodeAnimRotationMatrices[animationIndex][selectedFrame];
+		glm::mat4 lastFrameScaling = nodeAnimScalingMatrices[animationIndex][selectedFrame];
+
+		nodeAnimTransformation[animationIndex].insert(
+			(nodeAnimTransformation[animationIndex].begin() + (selectedFrame + 2))
+			, lastFrameTransformation);
+		nodeAnimTranslationMatrices[animationIndex].insert(
+			(nodeAnimTranslationMatrices[animationIndex].begin() + (selectedFrame + 2))
+			, lastFrameTranslation);
+		nodeAnimRotationMatrices[animationIndex].insert(
+			(nodeAnimRotationMatrices[animationIndex].begin() + (selectedFrame + 2))
+			, lastFrameRotation);
+		nodeAnimScalingMatrices[animationIndex].insert(
+			(nodeAnimScalingMatrices[animationIndex].begin() + (selectedFrame + 2))
+			, lastFrameScaling);
+
+		setupEulerAngle();
+	}
+}
+
 u32 MeshNode2::getNumOfAnimations()
 {
 	return nodeAnimTransformation.size();
