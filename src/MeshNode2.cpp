@@ -36,6 +36,8 @@ glm::mat4 MeshNode2::getTransformation(u32 frameIndex, u32 animationIndex, f32 a
 
 	// Interpolate between two keyframe
 	f32 ratio = (f32)(accumulator / timeStep);
+	if (accumulator == 0 || timeStep == 0)
+		ratio = 0;
 
 	glm::mat4 matrixFloor = nodeAnimTransformation[animationIndex][whichTickFloor];
 	glm::mat4 matrixCeil = nodeAnimTransformation[animationIndex][whichTickCeil];
