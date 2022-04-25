@@ -181,15 +181,14 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
 					ImGui::Text("Translation");
 					glm::mat4 translationMatrix = currentScene.allNodes[selectedEntry]
 						->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame];
-					float translate[3] = { translationMatrix[0][3], translationMatrix[1][3], translationMatrix[2][3] };
+					float translate[3] = { translationMatrix[3][0], translationMatrix[3][1], translationMatrix[3][2] };
 					ImGui::DragFloat3("Translation", translate, 0.005f, -100, 100, "%.3f", 0);
+					glm::vec3 translateVec(translate[0], translate[1], translate[2]);
+
 					//Apply value
-					(currentScene.allNodes[selectedEntry]
-						->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame])[0][3] = translate[0];
-					(currentScene.allNodes[selectedEntry]
-						->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame])[1][3] = translate[1];
-					(currentScene.allNodes[selectedEntry]
-						->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame])[2][3] = translate[2];
+					// Turns out glm does translation differently and it follows the glsl format
+					glm::mat4 translateMatrix = glm::translate(glm::mat4(1), translateVec);
+					currentScene.allNodes[selectedEntry]->nodeAnimTranslationMatrices[currentScene.animationIndex][selectedFrame] = translateMatrix;
 
 
 					ImGui::Text("Rotation");
