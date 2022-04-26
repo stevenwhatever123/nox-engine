@@ -16,7 +16,8 @@ using NoxEngineUtils::Logger;
 Entity::Entity(i32 _id, char* _name)
 	: 
 	id(_id), 
-	hasComp(0) {
+	hasComp(0),
+	isVisible(true) {
 
 	if (_name != nullptr) name = _name;
 	else name = (char *)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
@@ -24,7 +25,8 @@ Entity::Entity(i32 _id, char* _name)
 
 Entity::Entity(Scene* scene, char* _name)
 	:
-	hasComp(0) {
+	hasComp(0),
+	isVisible(true) {
 
 	assert(scene != nullptr);
 
@@ -41,7 +43,8 @@ Entity::Entity(Scene* scene, char* _name)
 
 Entity::Entity(Scene* scene, const char* _name)
 	:
-	hasComp(0) {
+	hasComp(0),
+	isVisible(true) {
 
 	assert(scene != nullptr);
 
@@ -52,7 +55,7 @@ Entity::Entity(Scene* scene, const char* _name)
 	memcpy(name, _name, ENTITY_NAME_MAX_LEN);
 }
 
-Entity::Entity(Entity&& other) : id(other.id), hasComp(other.hasComp), components(other.components), name(other.name) {
+Entity::Entity(Entity&& other) : id(other.id), hasComp(other.hasComp), components(other.components), name(other.name), isVisible(other.isVisible) {
 }
 
 Entity::~Entity() {
@@ -65,6 +68,29 @@ Entity::~Entity() {
 
 bool Entity::containsComps(HasCompBitMask mask) {
 	return (hasComp & mask) == mask;
+}
+
+// TODO (Vincent): Extremely ugly solution, think of a better way
+//				   The problem is that a class cannot be stored in a map
+void Entity::addComp(ComponentType type) {
+
+	if (type == PositionType) {
+		PositionComponent* pos = new PositionComponent();
+		addComp<PositionComponent>(pos);
+	}
+
+	else if (type == RenderableType) {
+		RenderableComponent* rend = new RenderableComponent();
+		addComp<RenderableComponent>(rend);
+	}
+
+	else {
+		Logger::debug("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
+	}
+
+	// If there is a way to pass in T in a iterable fashion, this can be used instead:
+	//T* comp = new T();
+	//addComp<T>(comp);
 }
 
 
@@ -83,6 +109,23 @@ void Entity::addComp(T *comp) {
 		Logger::debug("Component (ID: %d) already exists in Entity ", comp->id);
 		return;
 	}
+
+	// TODO (Vincent): Move this logic into subsystems.
+	//                 Subsystems should have access to the Scene.
+	//                 Scene should be able to return a list of entities that matches a bitmask,
+	//                 which the subsystems then register / update
+	//if ((ent->hasComp & 0b11) == 0b11) {
+
+	//	IRenderable* irend = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
+	//	IPosition* ipos = ent->getComp<PositionComponent>()->CastType<IPosition>();
+
+	//	gm->GetRenderer()->addObject(
+	//		irend,
+	//		ipos
+	//	);
+
+	//	gm->GetRenderer()->updateBuffers();
+	//}
 
 	components[typeid(T)] = comp;
 	hasComp |= ( 1 << (comp->id-1) );

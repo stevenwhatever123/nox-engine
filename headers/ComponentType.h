@@ -29,8 +29,9 @@ namespace NoxEngine {
 	};
 
 	extern std::map<std::type_index, ComponentType> kComponentTypeMap;
+	extern std::map<ComponentType, String> kComponentTypeNames;
 
 
-	// Fill the kComponentTypeMap
+	// Fill maps
 	void initComponentTypes();
 }

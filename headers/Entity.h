@@ -2,6 +2,12 @@
  * Entity
  * A container class. What the object of this class is defined by the combinantion of the components.
  * 
+ * Note that an entity is merely a container of a list of components. This implies:
+ * - An entity does not directly contain another entity (i.e. no entity hierarchy)
+ * - An entity can contain at most 1 of each type of components. 
+ *   In the case where multiple of the same type of component is desired (e.g. a collection of CardComponents),
+ *   the user would have to create a new component (e.g. DeckComponent) and attach this to the entity instead.
+ * 
  * Component IDs: 0 - unknown component (should not be. Smth went wrong)
  *				  1 - Position component (contains position of teh entity in the 3D scene) - bitmask 0000 0000 0000 0001 2^0
  *				  2 - Mesh component (contains geometry of the object. Used by Renderer) - bitmask 0000 0000 0000 0010 2^1
@@ -55,9 +61,6 @@ namespace NoxEngine {
 		// bit field appears to be better for flags: https://www.reddit.com/r/cpp/comments/nou1rt/shocked_by_the_size_of_stdbitset/
 		HasCompBitMask hasComp;
 
-		// TODO (Vincent): Can an entity not contain another entity?
-		//Entity* parent;
-
 
 	protected:
 		// Constructors usable by Scene
@@ -80,11 +83,14 @@ namespace NoxEngine {
 		bool containsComps(HasCompBitMask mask);
 			
 		// Add a component to the entity
-		template <typename T>
-		void addComp(T *comp);
+		void addComp(ComponentType type);
+		template <typename T> void addComp(T *comp);
 
 		// Gets the component with the type provided. If no such comp -> through error and return
 		template <typename T>
 		T *getComp();
+
+		// Enable/disable all components in this entity
+		void setEnabled(bool);
 	};
 }

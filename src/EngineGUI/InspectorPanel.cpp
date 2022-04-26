@@ -44,8 +44,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					ImGui::DragFloat3("XYZ", &pos->x, 0.01f);
 					ImGui::TreePop();
 				}
+				ImGui::Separator();
 			}
-			ImGui::Separator();
 
 			// RenderableComponent
 			if (selectedEntity->containsComps(RenderableFlag)) {
@@ -57,10 +57,44 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					ImGui::Text("Some rendering parameters");
 					ImGui::TreePop();
 				}
-
+				ImGui::Separator();
 			}
-		}
 
+			// LightSourceComponent
+			// TODO: implement
+
+		}
+		ImGui::Separator();
+
+		// Add a button that allows the user to add new components
+		if (ImGui::Button("Add Component..."))
+			ImGui::OpenPopup("Component List Popup");
+
+		if (ImGui::BeginPopup("Component List Popup")) {
+
+			// Loop through all available components,
+			// gray out the ones that this entity has
+			for (int i = 1; i < ComponentType::ComponentTypeCount; i++) {
+
+				ComponentType type = static_cast<ComponentType>(i);
+
+				HasCompBitMask mask = (1 << (i - 1));
+				bool compExists = selectedEntity->containsComps(mask);
+
+				// Gray out: Begin
+				ImGui::BeginDisabled(compExists);
+
+				// Draw
+				if (ImGui::Button(kComponentTypeNames[type].c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 0))) {
+					selectedEntity->addComp(type);
+				}
+
+				// Gray out: End
+				ImGui::EndDisabled();
+			}
+
+			ImGui::EndPopup();
+		}
 
 	}
 

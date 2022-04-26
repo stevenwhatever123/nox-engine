@@ -162,8 +162,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <ExternalIncludePath>3rdParty\headers\;3rdParty\headers\freetype;$(ExternalIncludePath)</ExternalIncludePath>
-    <LibraryPath>3rdParty\lib;C:\Program Files (x86)\Windows Kits\10\lib\10.0.19041.0\ucrt\x64;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(ProjectDir)headers\;C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>3rdParty\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)headers\;$(IncludePath)</IncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

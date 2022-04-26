@@ -39,13 +39,10 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 			// Node with entity name
 			// TODO: Visibility checkbox
 
-			// If this entity's name is not being changed (textActive), use the entity's name
-			//char* objName = ent->name;
-
-			//// Otherwise, use buffer (actively modifying this entity's name)
-			//if (params->selectedEntity == i && params->pSelectableInputResult.tempInputActive) {
-			//	objName = params->modifyingNameBuffer;
-			//}
+			// Visibility check box
+			ImGui::PushID(i);
+			ImGui::Checkbox("", &ent->isVisible);
+			ImGui::PopID();
 
 			char uniqueNameBuf[16];
 			snprintf(uniqueNameBuf, 16, "%i", i);

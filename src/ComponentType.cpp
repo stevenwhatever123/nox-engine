@@ -10,6 +10,7 @@ namespace NoxEngine {
 
 	// Give the extern maps/lists a definition in one compile unit
 	std::map<std::type_index, ComponentType> kComponentTypeMap;
+	std::map<ComponentType, String> kComponentTypeNames;
 }
 
 
@@ -22,5 +23,14 @@ void NoxEngine::initComponentTypes() {
 		//{ typeid(LightSourceComponent),	LightSourceType },
 		//{ typeid(AudioSourceComponent),	AudioSourceType },
 		//{ typeid(ScriptComponent),	ScriptType },
+	};
+
+	kComponentTypeNames = {
+		{ AbstractType,		"Abstract Component" },
+		{ PositionType,		"Position Component" },
+		{ RenderableType,	"Renderable Component" },
+		{ LightSourceType,	"Light Source Component" },
+		{ AudioSourceType,	"Audio Source Component" },
+		{ ScriptType,		"Script Component" }
 	};
 }

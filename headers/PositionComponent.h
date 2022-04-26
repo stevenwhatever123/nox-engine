@@ -14,7 +14,7 @@ namespace NoxEngine {
 	{
 		public:
 
-			PositionComponent(f32 newx, f32 newy, f32 newz);
+			PositionComponent(f32 newx = 0.0f, f32 newy = 0.0f, f32 newz = 0.0f);
 	};
 }
 

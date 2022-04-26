@@ -199,9 +199,6 @@
     <ClInclude Include="headers\EngineGUI\HierarchyPanel.h">
       <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
-    <ClInclude Include="headers\EngineGUI\EngineGUI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="headers\EngineGUI\InspectorPanel.h">
       <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
@@ -222,6 +219,9 @@
     </ClInclude>
     <ClInclude Include="headers\EngineGUI\ImGuiWidgets.h">
       <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\EngineGUI.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
