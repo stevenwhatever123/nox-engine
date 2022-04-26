@@ -1,4 +1,5 @@
 #include <GameManager.h>
+#include <glm/gtx/string_cast.hpp>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -135,6 +136,21 @@ void GameManager::init_events() {
 			RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
 			PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
 
+		//Mesh* mesh = new Mesh(NoxEngine::readFBX(file_name.c_str()));
+		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
+		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
+		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+		//MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
+		MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
+
+		i32 index = this->scene.entities.size();
+
+		// We're treating every mesh as an entity FOR NOW
+		for (u32 i = 0; i < meshScene.meshes.size(); i++)
+		{
+			Entity* ent = new Entity();
+			RenderableComponent* comp = meshScene.meshes[i];
+			PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
 			ent->addComp(comp);
 			ent->addComp(pos);
 
@@ -144,6 +160,30 @@ void GameManager::init_events() {
 					reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
 					reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
 					);
+		}
+
+		//Entity *ent = new Entity();
+
+		//RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+		//PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+		//ent->addComp(comp);
+		//ent->addComp(pos);
+		//this->scene.addEntity(ent);
+
+		//this->renderer->addObject(
+		//	reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+		//	reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+		//);
+
+		//this->renderer->updateBuffers();
+
+		for (u32 i = index; i < this->scene.entities.size(); i++)
+		{
+			this->renderer->addObject(
+				reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
+				reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
+			);
+		}
 
 			this->renderer->updateBuffers();
 
@@ -307,38 +347,63 @@ void GameManager::update_animation() {
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
 
-	auto meshStart = game_state.meshes.begin();
-	auto meshEnd = game_state.meshes.end();
+	//auto meshStart = game_state.meshes.begin();
+	//auto meshEnd = game_state.meshes.end();
+	auto meshSceneStart = game_state.meshScenes.begin();
+	auto meshSceneEnd = game_state.meshScenes.end();
 
-	for (; meshStart != meshEnd; meshStart++)
+	for(; meshSceneStart != meshSceneEnd; meshSceneStart++) 
 	{
-		Mesh* currentMesh = &meshStart->second;
-		if (currentMesh->getNumOfAnimations() > 0)
+		if (meshSceneStart->second.playAnimation)
 		{
-			renderer->applyTransformation(
-				currentMesh->nodeAnimTransformation[currentMesh->animationIndex][0][currentMesh->frameIndex],
-				currentMesh);
-		}
-	}
-
-	meshStart = game_state.meshes.begin();
-
-	for(;meshStart != meshEnd; meshStart++) {
-		if (meshStart->second.getNumOfAnimations() > 0)
-		{
-			if (meshStart->second.frameIndex ==
-				meshStart->second.numTicks[meshStart->second.animationIndex] - 1)
+			if (meshSceneStart->second.hasAnimations())
 			{
-				meshStart->second.resetFrameIndex();
+				if (meshSceneStart->second.frameIndex
+					== meshSceneStart->second.numTicks[meshSceneStart->second.animationIndex] - 1)
+				{
+					meshSceneStart->second.resetAnimation();
+					meshSceneStart->second.playAnimation = !meshSceneStart->second.playAnimation;
+				}
 			}
+			meshSceneStart->second.update(deltaTime);
 		}
-		meshStart->second.update(deltaTime);
+		// Because we're not updating frame index we still need tick floor and ceil to get our transform
+		meshSceneStart->second.updateCeilAndFloor();
 	}
 }
 
 void GameManager::update_renderer() {
+	auto meshSceneStart = game_state.meshScenes.begin();
+	auto meshSceneEnd = game_state.meshScenes.end();
+	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	{
+		MeshScene &currentMeshScene = meshSceneStart->second;
+		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
+		{
+			MeshNode2* node = meshSceneStart->second.allNodes[i];
 
-	renderer->updateCamera();
+			if (node->meshIndex.size() > 0)
+			{
+				Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
+				if (node->hasAnimations())
+				{
+					glm::mat4 transformation = node->getGlobalTransformation(
+						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
+						currentMeshScene.accumulator, currentMeshScene.timeStep,
+						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
+					renderer->updateObjectTransformation(transformation, mesh);
+				}
+				else
+				{
+					glm::mat4 transformation = node->transformation;
+					renderer->updateObjectTransformation(transformation, mesh);
+				}
+			}
+		}
+	}
+
+
+
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	
 	renderer->fillBackground(ui_params.sceneBackgroundColor);

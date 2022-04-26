@@ -30,6 +30,8 @@ namespace NoxEngine {
 		GLuint normalTexture;
 		GLuint ambientTexture; // Texture handlers
 		glm::mat4 pos;
+
+		glm::mat4 transformation;
 	};
 	
 	extern GLenum GLRenderTypes[3];
@@ -155,6 +157,6 @@ namespace NoxEngine {
 		void updateCamera();
 		void updateLightPos(float x, float y, float z);
 
-		void applyTransformation(glm::mat4 transformation, IRenderable* pRenderable);
+		void updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable);
 	};
 }

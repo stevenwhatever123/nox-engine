@@ -47,16 +47,14 @@ const aiScene* NoxEngine::readFBX(const char* filename)
 				pScene = importer.GetOrphanedScene();
 			}
 
-			printf("Success reading '%s'\n", filename);
-
-		//std::cout << pScene->mNumMeshes << "\n";
+			NoxEngineUtils::Logger::debug("Success reading '%s'", filename);
 
 		return pScene;
 	}
 	else
 	{
-		printf("Error parsing '%s': '%s'\n", filename,
-				importer.GetErrorString());
+		NoxEngineUtils::Logger::debug("Error parsing '%s': '%s'", filename,
+			importer.GetErrorString());
 
 		return nullptr;
 	}

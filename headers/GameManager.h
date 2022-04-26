@@ -21,6 +21,7 @@
 #include <Singleton.h>
 #include <AudioManager.h>
 #include <Mesh.h>
+#include <MeshScene.h>
 #include <Types.h>
 #include <Renderer.h>
 #include <IOManager.h>

@@ -164,7 +164,6 @@ void Renderer::addObject(IRenderable *mesh, IPosition *pos)
     newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
     newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
 
-
 	// Generate the arrays
 	createVertexArray(mesh);
 
@@ -179,6 +178,8 @@ void Renderer::addObject(IRenderable *mesh, IPosition *pos)
 	createElementArray(mesh);
 
 	newObj.endInd = i32(elements.size());
+
+    newObj.transformation = glm::mat4(1.0f);
 
 	objects.push_back(newObj);
 
@@ -238,13 +239,19 @@ void Renderer::draw() {
 
 	for (u32 i = 0; i < objects.size(); i++)
 	{
-		program->set4Matrix("toWorld", objects[i].pos);
-		// Activate and bind textures of the object
-		glActiveTexture(GL_TEXTURE0 + 1);
-		glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
+        program->set4Matrix("toWorld", objects[i].pos);
 
-		glActiveTexture(GL_TEXTURE0 + 2);
-		glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
+        program->set4Matrix("modelMatrix", objects[i].transformation);
+
+        // Activate and bind textures of the object
+        glActiveTexture(GL_TEXTURE0 + 1);
+        glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
+
+        glActiveTexture(GL_TEXTURE0 + 2);
+        glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
+
+        // Draw the object
+        glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
 
 		// Draw the object
 		glDrawElements(objects[i].renderType, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
@@ -550,6 +557,8 @@ void Renderer::useProgram()
     program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
 
     program->set4Matrix("toWorld", glm::mat4(1.0f));
+
+    program->set4Matrix("modelMatrix", glm::mat4(1.0f));
     
 }
 
@@ -559,13 +568,15 @@ void Renderer::updateLightPos(float x, float y, float z)
     program->set3Float("lightPosition",x, y, z);
 }
 
-void Renderer::applyTransformation(glm::mat4 transformation, IRenderable* pRenderable)
+void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable)
 {
-	for (u32 i = 0; i < objects.size(); i++)
-	{
-		if (objects[i].objPtr == pRenderable)
-		{
-			program->set4Matrix("toWorld", transformation);
-		}
-	}
+    for (u32 i = 0; i < objects.size(); i++)
+    {
+        if (objects[i].objPtr == pRenderable)
+        {
+            objects[i].transformation = transformation;
+            //program->set4Matrix("modelMatrix", transformation);
+            //std::cout << "Welcome to the Matrix" << "\n";
+        }
+    }
 }
