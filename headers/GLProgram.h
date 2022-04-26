@@ -4,23 +4,15 @@
 */
 
 #pragma once
-#define GLEW_STATIC
 
-#include <GL/glew.h>
-#include <glm/glm.hpp>
+#include <glad/glad.h>
 #include <string>
 #include <Types.h>
-#include <vector>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 
 namespace NoxEngine {
 
 	struct ShaderFile {
-		std::string filename;
+		String filename;
 		GLenum shader_type;
 		GLuint id;
 	};
@@ -28,30 +20,25 @@ namespace NoxEngine {
 
 	class GLProgram {
 		private:
-			GLuint compileShader(std::string& filename, GLenum shaderType);
-			GLuint makeProgram(std::vector<ShaderFile> shaders);
-
-		public:
-			// ID of the program 
+			GLuint compileShader(String& filename, GLenum shaderType);
+			GLuint makeProgram(Array<ShaderFile> shaders);
 			u32 _id;
 
-			// Constructor reads and builds the shader
-			GLProgram(std::vector<ShaderFile> shaders);
-
-			// Use/activate the shader
+		public:
+			GLProgram(Array<ShaderFile> shaders);
 			void use();
 
-			// Setters
-			void setBool(const std::string& name, bool value) const;
-			void setInt(const std::string& name, int value) const;
-			void setFloat(const std::string& name, float value) const;
-			void set3Float(const std::string& name, float x, float y, float z) const;
-			void set4Float(const std::string& name, float x, float y, float z, float w) const;
-			void set4Matrix(const std::string& name, glm::mat4 mat) const;
+			void setBool(const String& name, bool value) const;
+			void setInt(const String& name, i32 value) const;
+			void setFloat(const String& name, f32 value) const;
+			void set3Float(const String& name, f32 x, f32 y, f32 z) const;
+			inline void set3Float(const String& name, vec3& v) const { set3Float(name, v.x, v.y, v.z);};
+			void set4Float(const String& name, f32 x, f32 y, f32 z, f32 w) const;
+			void set4Matrix(const String& name, mat4 mat) const;
 
-			// Getters
-			int getUniformLocation(const std::string& name);
-			int getAtrributeLocation(const std::string& name);
+			int getUniformLocation(const String& name);
+			int getAtrributeLocation(const String& name);
+			void printAttribInfo();
 
 	};
 }

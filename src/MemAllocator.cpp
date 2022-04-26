@@ -10,7 +10,7 @@ using namespace NoxEngine;
 u8* NoxEngine::align_ptr(u8* ptr, i32 align_to) {
 
 	if(align_to%2 != 0) {
-		Logger::debug("align(%d) to must be a power of 2", align_to);
+		LOG_DEBUG("align(%d) to must be a power of 2", align_to);
 		exit(-1);
 	}
 
@@ -29,7 +29,7 @@ u8* NoxEngine::align_ptr(u8* ptr, i32 align_to) {
 i32 NoxEngine::align_ptr_needed_bytes(u8* ptr, i32 align_to) {
 
 	if(align_to%2 != 0) {
-		Logger::debug("align(%d) to must be a power of 2", align_to);
+		LOG_DEBUG("align(%d) to must be a power of 2", align_to);
 		assert(false);
 	}
 
@@ -68,13 +68,13 @@ u8* PermanentMemAllocator::allocate(i32 size) {
 		return data_to_return;
 	}
 
-	Logger::debug("Out of Permanent memory");
+	LOG_DEBUG("Out of Permanent memory");
 
 	return NULL;
 }
 
 void PermanentMemAllocator::deallocate(void *ptr) {
-	Logger::debug("Permanent Memory allocator doesn't have a deallocator");
+	LOG_DEBUG("Permanent Memory allocator doesn't have a deallocator");
 	assert(false);
 }
 
@@ -97,7 +97,7 @@ u8* ScratchMemAllocator::allocate(i32 size) {
 		return _data;
 	}
 
-	Logger::debug("Size (%d) is bigger than scratch memory size %d", size, _size);
+	LOG_DEBUG("Size (%d) is bigger than scratch memory size %d", size, _size);
 	return NULL;
 
 }
@@ -115,7 +115,7 @@ u8* StackMemAllocator::allocate(i32 size) {
 	i32 needed_bytes = align_ptr_needed_bytes((u8*)data_to_return, DEFAULT_PTR_ALIGNMENT);
 
 	if((data_to_return + needed_bytes) >= ((uptr)_data + _capacity)) {
-		Logger::debug("Stack Allocator is full");
+		LOG_DEBUG("Stack Allocator is full");
 		return NULL;
 	}
 
@@ -134,7 +134,7 @@ void StackMemAllocator::free(u8 *allocated_mem) {
 	uptr data_to_free = (uptr)allocated_mem;
 
 	if(data_to_free != _last_alloc) {
-		Logger::debug("Memory being freed is not the latest allocated, no changes.");
+		LOG_DEBUG("Memory being freed is not the latest allocated, no changes.");
 		return;
 	}
 

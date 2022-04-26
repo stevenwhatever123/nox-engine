@@ -4,6 +4,11 @@
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
 // base typedefs
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -31,3 +36,10 @@ using Array = std::vector<T>;
 
 
 typedef u16 HasCompBitMask;
+
+// Math & GLM
+
+typedef glm::vec2 vec2;
+typedef glm::vec3 vec3;
+typedef glm::vec4 vec4;
+typedef glm::mat4 mat4;

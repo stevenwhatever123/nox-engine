@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <stb_image.h>
 #include <stb_image_write.h>
 
@@ -24,6 +24,7 @@ namespace NoxEngine {
 	struct RendObj
 	{
 		IRenderable* objPtr; // A pointer to the object
+		GLuint renderType;
 		i32 startInd;
 		i32 endInd; // Start and end indixes in the a united element array 
 		GLuint normalTexture;
@@ -33,11 +34,16 @@ namespace NoxEngine {
 		glm::mat4 transformation;
 	};
 	
+	extern GLenum GLRenderTypes[3];
+
+	// keep this insync with the IRenderable one, a map would be overkill
 
 	/*
 	 * A class that renders 3D using OpenGL
 	 * */
 	class Renderer : public Singleton<Renderer> {
+
+
 
 		friend class Singleton<Renderer>;
 
@@ -62,6 +68,7 @@ namespace NoxEngine {
 		GLuint VAO;
 		GLuint EBO;
 		GLuint TANBO;
+		GLuint FBO;
 
 		i32 numberOfVertices;
 		i32 numberOfNormals;
@@ -78,8 +85,7 @@ namespace NoxEngine {
 		// Buffer and texture to render to.
 		GLuint textureToRenderTo;
 		GLuint tex;
-		GLuint FBO;
-		GLuint curFBO = 0;
+		GLuint curFBO;
 
 		glm::vec3 color;
 
@@ -88,8 +94,6 @@ namespace NoxEngine {
 		void createNormalsArray(IRenderable* mesh);
 		void createTexCoordArray(IRenderable* mesh);
 		void createElementArray(IRenderable* mesh);
-
-
 
 		// This atribute is needed for Normal Mapping. 
 		// Basically, need to transform the normals in the map into tangent space (space of the primitive (triangle))
@@ -127,6 +131,7 @@ namespace NoxEngine {
 		// Draw functions
 		void draw();
 		void fillBackground(f32 r, f32 g, f32 b);
+		void fillBackground(i32 hex);
 
 		// Get the texture the renderer rendered to
 		GLuint getTexture() { return textureToRenderTo; }
@@ -135,9 +140,7 @@ namespace NoxEngine {
 		// Functions updating parts of the shaders
 
 		//void updateLocalTransf(int frame_index);
-
 		void updateProjection(int w, int h);
-
 
 		inline void setFrameBufferToDefault() { curFBO = 0; setRenderTarget(); }
 		inline void setFrameBufferToTexture() { curFBO = FBO; setRenderTarget(); }

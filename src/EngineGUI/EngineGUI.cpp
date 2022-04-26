@@ -36,53 +36,6 @@ void NoxEngineGUI::init_imgui(GLFWwindow* win) {
 	ImGui_ImplOpenGL3_Init("#version 450");
 }
 
-
-// Load the icons / images to be used on the GUI
-#if 0
-void NoxEngineGUI::loadTextures() {
-
-	GLuint tex;
-	glGenTextures(1, &tex);
-	std::cout << "1 " << glGetError() << std::endl; fflush(NULL);
-
-	glActiveTexture(GL_TEXTURE0 + num);
-	std::cout << "2 " << glGetError() << std::endl; fflush(NULL);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	std::cout << "3" << glGetError() << std::endl; fflush(NULL);
-	// Set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	std::cout << "4 " << glGetError() << std::endl; fflush(NULL);
-	// Set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	std::cout << "5 " << glGetError() << std::endl; fflush(NULL);
-	// Load image, create texture and generate mipmaps
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true); // flip loaded texture's on the y-axis.
-
-	unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << stbi_failure_reason() << std::endl;
-	}
-	stbi_image_free(data);
-
-	GLuint textureLoc = program->getUniformLocation(uniName);
-	glUniform1i(textureLoc, num);
-
-	return tex;
-}
-#endif
-
-
 // Make a window as big as the viewport
 // This is expected to run ONCE, AFTER an ImGui::NewFrame is created
 void NoxEngineGUI::setupFixedLayout() {
@@ -98,9 +51,9 @@ void NoxEngineGUI::setupFixedLayout() {
 	ImGui::DockBuilderSetNodePos(mainNodeID, ImGui::GetMainViewport()->WorkPos);
 
 	// Design the layout here with DockBuilderSplitNode
-	ImGuiID dock_right_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Right, 0.2f, nullptr, &mainNodeID);
-	ImGuiID dock_left_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Left, 0.2f, nullptr, &mainNodeID);
-	ImGuiID dock_down_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Down, 0.2f, nullptr, &mainNodeID);
+	ImGuiID dock_right_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Right, 0.2f, nullptr, &mainNodeID);
+	ImGuiID dock_left_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Left, 0.2f, nullptr, &mainNodeID);
+	ImGuiID dock_down_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Down, 0.2f, nullptr, &mainNodeID);
 	ImGuiID dock_down_right_id	= ImGui::DockBuilderSplitNode(dock_down_id, ImGuiDir_Right, 0.6f, nullptr, &dock_down_id);
 	ImGuiID dock_down_down_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Up, 0.05f, nullptr, &mainNodeID);
 
@@ -135,24 +88,30 @@ void NoxEngineGUI::cleanupImGui() {
 }
 
 
-void NoxEngineGUI::updateMenu() {
+void NoxEngineGUI::updateMenu(GUIParams *params) {
 
 	// Create menu bar
 	if (ImGui::BeginMenuBar()) {
 
 		if (ImGui::BeginMenu("File")) {
-
 			if (ImGui::MenuItem("Close", NULL, false, p_open != NULL)) *p_open = false;
-
 			ImGui::EndMenu();
 		}
 
 		if (ImGui::BeginMenu("Edit")) {
-
 			ImGui::EndMenu();
 		}
 
 		if (ImGui::BeginMenu("Preferences")) {
+
+
+			static float backColor[] = HEX_TO_FLOAT4(params->sceneBackgroundColor);
+			ImGui::ColorPicker4("Scene Background", backColor);
+			params->sceneBackgroundColor = FLOAT4_TO_HEX(backColor);
+			// if (ImGui::MenuItem("Background Color", NULL, false, p_open != NULL)){
+				
+			// }
+
 			if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
 			if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
 			if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
@@ -172,9 +131,14 @@ void NoxEngineGUI::updateGUI(GUIParams *params) {
 
 	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 	// because it would be confusing to have two docking targets within each others.
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar
+		         | ImGuiWindowFlags_NoCollapse
+				 | ImGuiWindowFlags_NoResize
+				 | ImGuiWindowFlags_NoMove
+				 | ImGuiWindowFlags_NoBringToFrontOnFocus
+				 | ImGuiWindowFlags_NoNavFocus
+				 | ImGuiWindowFlags_MenuBar
+				 | ImGuiWindowFlags_NoDocking;
 
 	const ImGuiViewport* viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -198,7 +162,7 @@ void NoxEngineGUI::updateGUI(GUIParams *params) {
 	ImGui::PopStyleVar(2);
 
 	// Menu bar
-	updateMenu();
+	updateMenu(params);
 
 	// Setup dockspace only once
 	if (params->firstLoop) setupFixedLayout();
@@ -216,10 +180,14 @@ void NoxEngineGUI::updateGUI(GUIParams *params) {
 
 
 	// Placeholder / debug windows
-	ImGui::Begin(PANEL_NAME_MAP[PanelName::FileExplorer].c_str());    ImGui::End();
-	ImGui::Begin(PANEL_NAME_MAP[PanelName::Hierarchy].c_str());		  ImGui::End();
-	ImGui::ShowDemoWindow();
-	ImGui::ShowMetricsWindow();
+	// ImGui::Begin(PANEL_NAME_MAP[PanelName::FileExplorer].c_str());    ImGui::End();
+	ImGui::Begin(PANEL_NAME_MAP[PanelName::Hierarchy].c_str());
+
+	ImGui::SliderFloat3("Camera ", glm::value_ptr(params->current_cam->user_shift), 0.0f, 100.0f);
+
+	ImGui::End();
+	// ImGui::ShowDemoWindow();
+	// ImGui::ShowMetricsWindow();
 
 
 	// First loop is over

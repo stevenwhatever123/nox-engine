@@ -8,12 +8,13 @@
  */
 #pragma once
 
-#include <vector>
 #include <Types.h>
+#include <glad/glad.h>
 
 namespace NoxEngine {
 	class IRenderable
 	{
+
 		public:
 
 			// Functions that are taken by the Renderer to render
@@ -41,11 +42,11 @@ namespace NoxEngine {
 			Array<i32> facesT;
 			Array<i32> facesN;
 
-			//std::vector<f32> curMatrices; // Animation matrices
-			//std::vector<f32> curVertices; // Vertice Positions after Animation Matrices application
+			i8 has_texture;
+			i8 has_normal;
 
 			f32 color[3] = { 0.2f, 0.7f, 0.5f }; // Color
-			bool prim_type = 0; // If 0 - triangles, 1 - lines
-			bool renderAsDots = 0; // 0 - if not, 1 - if yes
+
+			GLenum glRenderType;
 	};
 }

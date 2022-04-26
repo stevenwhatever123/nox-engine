@@ -17,6 +17,8 @@
 
 #include <EngineGUI/AnimationSequencer.h>
 
+#include <glm/gtx/string_cast.hpp>
+
 using namespace NoxEngine;
 
 void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
@@ -27,8 +29,6 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 
 	// Window Begin
 	ImGui::Begin(name.c_str());
-
-
 	if (ImGui::Button("Load FBX File")) {
 		String picked_file = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
 		if (picked_file.length() > 0)

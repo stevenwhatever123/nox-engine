@@ -39,8 +39,11 @@ namespace NoxEngine {
 
 			void flipUV();
 
+			void setAnimationIndex(u32 num);
+
 			u32 getNumOfAnimations();
 			glm::mat4 getGlobalTransformation(MeshNode currentNode);
+			glm::mat4 getCurrentFrameNodeTransformation(MeshNode *node);
 
 			u32 frameIndex;
 			u32 animationIndex;
@@ -98,8 +101,8 @@ namespace NoxEngine {
 			const char* getNormalTexture() { return normTexName; }
 			const char* getAmbientTexture() { return ambTexName;}
 
-			const char* ambTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
-			const char* normTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg";
+			const char* ambTexName = "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
+			const char* normTexName = "assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg";
 
 		private:
 			void extractGeometricInfo(const aiScene* scene);

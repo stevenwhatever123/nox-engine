@@ -17,7 +17,7 @@ void Entity::addComp(IComponent *comp)
 	{
 		if (c->id == comp->id)
 		{
-			Logger::debug("Component (ID: %d) already exists in Entity ", comp->id);
+			LOG_DEBUG("Component (ID: %d) already exists in Entity ", comp->id);
 			return;
 		}
 	}
@@ -37,7 +37,7 @@ IComponent * Entity::getComp(i32 compId)
 		}
 	}
 
-	Logger::debug("The component (ID: %d) does not exist in Entity (ID: %d)", compId, id);
+	LOG_DEBUG("The component (ID: %d) does not exist in Entity (ID: %d)", compId, id);
 	return nullptr;
 }
 
