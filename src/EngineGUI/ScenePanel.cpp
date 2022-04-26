@@ -36,8 +36,9 @@ void NoxEngineGUI::updateScenePanel(GameState* params) {
 	// }
 
 	// Render background of the app
-	params->renderer->fillBackground(1.0f, 0.5f, 0.9f);
-	params->renderer->draw();
+	//params->renderer->fillBackground(1.0f, 0.5f, 0.9f);
+	//params->renderer->drawSkyBox();
+	//params->renderer->draw();
 
 	// Use IMGUI to show rendered to framebuffer 
 

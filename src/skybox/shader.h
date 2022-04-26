@@ -12,10 +12,13 @@
 class Shader
 {
 public:
+    Shader() {};
+    ~Shader() {};
+
     unsigned int Temp;
 
     //constructor
-    Shader(const char* vertexShaderPath, const char* fragmentShaderPath)// constructor
+    void setShader(const char* vertexShaderPath, const char* fragmentShaderPath)// constructor
     {
         //vertex shader
         std::ifstream VertexShaderFile;

@@ -10,6 +10,7 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 #include <stb_image_write.h>
+#include <string>
 
 // Engine Include
 #include <IRenderable.h>
@@ -17,6 +18,7 @@
 #include <GLProgram.h>
 #include <Singleton.h>
 #include <IPosition.h>
+
 
 namespace NoxEngine {
 
@@ -42,6 +44,15 @@ namespace NoxEngine {
 		private:
 		// The shaders
 		GLProgram *program;
+		// The skybox shaders
+		u32 cubemapTexture;
+
+		u32 skyVAO;
+		u32 skyVBO;
+		float skyBoxVertices[108];
+
+		// skybox images
+		std::vector<std::string> skyboxImages;
 
 		i32 w;
 		i32 h; // Width and Height of the window/texture to render to
@@ -147,6 +158,10 @@ namespace NoxEngine {
 		// Updates the view transformation using the current camera
 		void updateCamera();
 		void updateLightPos(float x, float y, float z);
+
+		void setSkyBoxImages(const std::vector<std::string> skyboxImages);
+		unsigned int skyBoxLoadTexture();
+		void drawSkyBox();
 
 	};
 }

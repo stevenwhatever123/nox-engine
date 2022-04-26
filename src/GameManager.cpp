@@ -70,7 +70,7 @@ void callback(GLenum source,
 		const GLchar* message,
 		const void* userParam) {
 
-	// LOG_DEBUG("Message: %s", message);
+	LOG_DEBUG("Message: %s", message);
 }
 
 void GameManager::init_window() {
@@ -163,6 +163,7 @@ void GameManager::init_audio() {
 
 void GameManager::init_camera() {
 	camera = new Camera(glm::vec3(0.0f, 7.0f, 10.0f));
+	camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f));
 	camera->turnVerBy(20.0f);
 }
 
@@ -170,6 +171,10 @@ void GameManager::init_shaders() {
 	programs.emplace_back(Array<ShaderFile>{
 		{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
+	});
+	programs.emplace_back(Array<ShaderFile>{
+		{"assets/skybox/shaders/vertexShader.vs", GL_VERTEX_SHADER, 0},
+		{ "assets/skybox/shaders/fragmentShader.fs", GL_FRAGMENT_SHADER, 0 }
 	});
 
 	current_program = &programs.back();
@@ -202,6 +207,24 @@ void GameManager::init_renderer() {
 	// renderer->addObject(mesh);
 	// renderer->updateBuffers();
 	// delete mesh;
+
+	//set images
+	std::string texturenumber;
+	//texturenumber = "C:/Users/Steven/Gitlab/noxengine/assets/skybox/textures/picture/bak0";
+	texturenumber = "assets/skybox/textures/picture/bak0";
+	std::vector<std::string> images
+	{
+		texturenumber + "/right.jpg",
+		texturenumber + "/left.jpg",
+		texturenumber + "/top.jpg",
+		texturenumber + "/down.jpg",
+		texturenumber + "/front.jpg",
+		texturenumber + "/back.jpg"
+	};
+
+	//renderer->setSkyBoxShader("assets/skybox/shaders/vertexShader.vs",
+	//	"assets/skybox/shaders/fragmentShader.fs");
+	renderer->setSkyBoxImages(images);
 }
 
 void GameManager::init_imgui() {
@@ -311,7 +334,13 @@ void GameManager::update_animation() {
 
 void GameManager::update_renderer() {
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-	renderer->fillBackground(0.1f, 0.2f, 0.5f);
-	renderer->draw();
+	//renderer->fillBackground(0.1f, 0.2f, 0.5f);
+	renderer->fillBackground(1.0f, 0.5f, 0.9f);
+
+	renderer->setProgram(&programs[1]);
+	renderer->useProgram();
+	renderer->drawSkyBox();
+
+	//renderer->draw();
 }
 

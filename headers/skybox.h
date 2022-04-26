@@ -8,9 +8,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
+#include <string>
 
-#include "shader.h"
-#include "camera.h"
+#endif
+//#include "camera.h"
 
 int WIDTH = 800;
 int HEIGHT = 600;
@@ -18,32 +20,32 @@ int HEIGHT = 600;
 float DeltaTime = 0.0;
 float LastFrame = 0.0;
 
-Camera camera;
+//Camera camera;
 float LastXPosition, LastYPosition;
 bool flag = true;
 
 //to control cusor's position
-void CursorPosCallback(GLFWwindow* window, double xposition, double yposition)
-{
-    float CurrentXPosition = static_cast<float>(xposition);
-    float CurrentYPosition = static_cast<float>(yposition);
-    if (flag == true)
-    {
-        LastXPosition = CurrentXPosition;
-        LastYPosition = CurrentYPosition;
-        flag = false;
-    }
-
-    float xoffset = CurrentXPosition - LastXPosition;
-    float yoffset = LastYPosition - CurrentYPosition;
-
-    camera.MouseMovement(xoffset, yoffset);
-
-    LastXPosition = CurrentXPosition;
-    LastYPosition = CurrentYPosition;
-
-}
-
+//void CursorPosCallback(GLFWwindow* window, double xposition, double yposition)
+//{
+//    float CurrentXPosition = static_cast<float>(xposition);
+//    float CurrentYPosition = static_cast<float>(yposition);
+//    if (flag == true)
+//    {
+//        LastXPosition = CurrentXPosition;
+//        LastYPosition = CurrentYPosition;
+//        flag = false;
+//    }
+//
+//    float xoffset = CurrentXPosition - LastXPosition;
+//    float yoffset = LastYPosition - CurrentYPosition;
+//
+//    camera.MouseMovement(xoffset, yoffset);
+//
+//    LastXPosition = CurrentXPosition;
+//    LastYPosition = CurrentYPosition;
+//
+//}
+//
 ////to control mouse wheel
 //void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 //{
@@ -80,5 +82,3 @@ unsigned int LoadTextures(std::vector<std::string> images)
 
     return texture;
 }
-
-#endif
