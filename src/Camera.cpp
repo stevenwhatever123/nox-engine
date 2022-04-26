@@ -8,8 +8,9 @@ Camera::Camera(vec3 stPos) :
 	lookingAt(vec3(0.0f, 0.0f, -1.0f)),
 	topPointingAt(vec3(0.0f, 1.0f, 0.0f)),
 	user_shift(vec3(0.0f)),
-	user_rotate(vec2(0.0f))
+	user_rotate(vec3(0.0f))
 {
+	user_rotate.y = 0;
 	generateCameraParameters();
 }
 
@@ -20,8 +21,18 @@ void Camera::generateCameraParameters() {
 	// Calculate a matrix out of updated camera
 	cameraTransf = glm::lookAt(currCamPos, currCamPos + lookingAt, topPointingAt);
 	// Rotate cam matrix
-	glm::mat4 rotation = glm::rotate(glm::rotate( glm::mat4(1.0f), glm::radians(user_rotate.y), glm::vec3(1.0f, 0.0f, 0.0f) ), glm::radians(user_rotate.x), glm::vec3(0.0f, 1.0f, 0.0f));
-	cameraTransf = rotation * cameraTransf;
+	
+	mat4 translate_neg = glm::translate(cameraTransf, -currCamPos);
+
+	mat4 rotation = glm::rotate(mat4(1), glm::radians(user_rotate.x), vec3(1.0f, 0.0f, 0.0f) );
+	rotation = rotation*glm::rotate(mat4(1), glm::radians(user_rotate.y), vec3(0.0f, 1.0f, 0.0f) );
+	rotation = rotation*glm::rotate(mat4(1), glm::radians(user_rotate.z), vec3(0.0f, 0.0f, 1.0f) );
+
+	mat4 translate_pos = glm::translate(cameraTransf, currCamPos);
+	// glm::mat4 rotation = glm::rotate( , glm::radians(user_rotate.x), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	cameraTransf = cameraTransf*translate_neg*rotation*translate_pos;
+
 }
 
 

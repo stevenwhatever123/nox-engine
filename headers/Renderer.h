@@ -147,7 +147,6 @@ namespace NoxEngine {
 		// Get the texture the renderer rendered to
 		GLuint getTexture() { return textureToRenderTo; }
 
-
 		// Functions updating parts of the shaders
 
 		//void updateLocalTransf(int frame_index);
@@ -170,7 +169,7 @@ namespace NoxEngine {
 
 		void updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable);
 		void setSkyBoxImages(const std::vector<std::string> skyboxImages);
-		unsigned int skyBoxLoadTexture();
+		void skyBoxLoadTexture();
 		void drawSkyBox();
 
 	};

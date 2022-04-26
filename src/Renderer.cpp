@@ -65,7 +65,7 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	// glEnable(GL_CULL_FACE);
 
 	// Create framebuffer  
 	glGenFramebuffers(1, &FBO);
@@ -624,8 +624,6 @@ void Renderer::setSkyBoxImages(const std::vector<std::string> skyboxImages)
         skyBoxVertices[i] = vertices_temp[i];
     }
 
-    cubemapTexture = skyBoxLoadTexture();
-
     glGenVertexArrays(1, &skyVAO);
     glBindVertexArray(skyVAO);
 
@@ -633,16 +631,16 @@ void Renderer::setSkyBoxImages(const std::vector<std::string> skyboxImages)
     glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyBoxVertices), &skyBoxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     glBindVertexArray(0);
+
+	skyBoxLoadTexture();
 }
 
-unsigned int Renderer::skyBoxLoadTexture()
+void Renderer::skyBoxLoadTexture()
 {
-    unsigned int texture;
-    glGenTextures(1, &texture);
+    glGenTextures(1, &cubemapTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
     int width, height, channels;
     unsigned char* TextureData = stbi_load(skyboxImages[0].c_str(), &width, &height, &channels, 0);
@@ -664,7 +662,6 @@ unsigned int Renderer::skyBoxLoadTexture()
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    return texture;
 }
 
 void Renderer::drawSkyBox()
@@ -673,22 +670,24 @@ void Renderer::drawSkyBox()
     glm::mat4 view;
     glm::mat4 projection;
                                                                 // Front                     //Up
-    view = glm::lookAt(camera->currCamPos, camera->currCamPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    projection = glm::perspective(glm::radians(50.0f), (float)(w / h), 0.1f, 1000.0f);
+	view = camera->getCameraTransf();//glm::lookAt(camera->currCamPos, vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0, 1.0, 0.0f));
 
-    setFrameBufferToTexture();
+	projection = glm::perspective(glm::radians(camera->fov), (float)(1920.0f / 1080.0f), 0.1f, 1000.0f);
 
     program->use();
+
+    setFrameBufferToTexture();
 
     // draw skybox 
     glDepthFunc(GL_LEQUAL);
 
     glBindVertexArray(skyVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
+
     glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
-
-    glActiveTexture(GL_TEXTURE3);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
     program->set4Matrix("view", view);
@@ -696,7 +695,9 @@ void Renderer::drawSkyBox()
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
     setFrameBufferToDefault();
+
     glBindVertexArray(0);
+
 }
 void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable)
 {

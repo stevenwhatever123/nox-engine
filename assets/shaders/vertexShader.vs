@@ -9,7 +9,7 @@ uniform mat4 projection;
 
 void main()
 {
-    vec4 Position = projection * view * vec4(position, 1.0);
+    vec4 Position = (projection) * transpose(view) * vec4(position, 1.0);
     gl_Position = Position.xyww;
     TextureCoordinate = position;
 }

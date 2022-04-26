@@ -184,6 +184,7 @@ void NoxEngineGUI::updateGUI(GUIParams *params) {
 	ImGui::Begin(PANEL_NAME_MAP[PanelName::Hierarchy].c_str());
 
 	ImGui::SliderFloat3("Camera ", glm::value_ptr(params->current_cam->user_shift), 0.0f, 100.0f);
+	ImGui::SliderFloat("FOV ", &params->current_cam->fov, 0.0f, 360.0f);
 
 	ImGui::End();
 	// ImGui::ShowDemoWindow();

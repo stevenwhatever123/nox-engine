@@ -129,6 +129,7 @@ void GameManager::init_events() {
 
 		// Steven: That's how I would do it
 		// clean up: leaky mem
+		String file_name = va_arg(args, String);
 		this->game_state.meshes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
 
 		Entity *ent = new Entity();
@@ -212,7 +213,7 @@ void GameManager::init_audio() {
 
 void GameManager::init_camera() {
 	camera = new Camera(vec3(45.0f, 47.0f, 144.0f));
-	camera->turnVerBy(35.0f);
+	// camera->turnVerBy(35.0f);
 }
 
 void GameManager::init_shaders() {
@@ -222,8 +223,8 @@ void GameManager::init_shaders() {
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
 	});
 	programs.emplace_back(Array<ShaderFile>{
-		{"assets/skybox/shaders/vertexShader.vs", GL_VERTEX_SHADER, 0},
-		{ "assets/skybox/shaders/fragmentShader.fs", GL_FRAGMENT_SHADER, 0 }
+		{"assets/shaders/vertexShader.vs", GL_VERTEX_SHADER, 0},
+		{ "assets/shaders/fragmentShader.fs", GL_FRAGMENT_SHADER, 0 }
 	});
 
 
@@ -239,17 +240,44 @@ void GameManager::init_animation() {
 
 void GameManager::init_renderer() { 
 	renderer = new Renderer(win_width, win_height, camera);
-	renderer->setProgram(current_program);
-	renderer->useProgram();
-	game_state.renderer = renderer;
-	renderer->setFrameBufferToTexture();
-	GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 100);
-	renderer->addObject(
-			static_cast<IRenderable*>(&obj),
-			static_cast<IPosition*>(&obj)
-			);
+	// renderer->setProgram(current_program);
+	// renderer->useProgram();
 
-	renderer->updateBuffers();
+	renderer->setProgram(&programs[1]);
+	// renderer->useProgram();
+
+	programs[1].use();
+
+	//set images
+	std::string texturenumber;
+	//texturenumber = "C:/Users/Steven/Gitlab/noxengine/assets/skybox/textures/picture/bak0";
+	texturenumber = "assets/skybox/textures/picture/bak0";
+	std::vector<std::string> images
+	{
+		texturenumber + "/right.jpg",
+					  texturenumber + "/left.jpg",
+					  texturenumber + "/top.jpg",
+					  texturenumber + "/down.jpg",
+					  texturenumber + "/front.jpg",
+					  texturenumber + "/back.jpg"
+	};
+	renderer->setSkyBoxImages(images);
+
+
+
+
+	game_state.renderer = renderer;
+
+	renderer->setFrameBufferToTexture();
+
+
+	// GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 100);
+	// renderer->addObject(
+	// 		static_cast<IRenderable*>(&obj),
+	// 		static_cast<IPosition*>(&obj)
+	// 		);
+
+	// renderer->updateBuffers();
 	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
 	// Mesh *mesh = NoxEngine::getMesh(pScene);
 
@@ -259,23 +287,8 @@ void GameManager::init_renderer() {
 	// renderer->updateBuffers();
 	// delete mesh;
 
-	//set images
-	std::string texturenumber;
-	//texturenumber = "C:/Users/Steven/Gitlab/noxengine/assets/skybox/textures/picture/bak0";
-	texturenumber = "assets/skybox/textures/picture/bak0";
-	std::vector<std::string> images
-	{
-		texturenumber + "/right.jpg",
-		texturenumber + "/left.jpg",
-		texturenumber + "/top.jpg",
-		texturenumber + "/down.jpg",
-		texturenumber + "/front.jpg",
-		texturenumber + "/back.jpg"
-	};
-
-	//renderer->setSkyBoxShader("assets/skybox/shaders/vertexShader.vs",
+		//renderer->setSkyBoxShader("assets/skybox/shaders/vertexShader.vs",
 	//	"assets/skybox/shaders/fragmentShader.fs");
-	renderer->setSkyBoxImages(images);
 }
 
 void GameManager::init_imgui() {
@@ -361,11 +374,10 @@ void GameManager::update_audio() {
 void GameManager::update_inputs() {
 	glfwPollEvents();
 
-
-	if(keys['W']) { camera->moveFwdBy(0.1f); }
-	if(keys['S']) { camera->moveFwdBy(-0.1f); }
-	if(keys['D']) { camera->moveHorBy(-0.1f); }
-	if(keys['A']) { camera->moveHorBy(0.1f); }
+	if(keys['W']) { camera->turnHorBy(0.1f); }
+	if(keys['S']) { camera->turnHorBy(-0.1f); }
+	if(keys['D']) { camera->turnVerBy(-0.1f); }
+	if(keys['A']) { camera->turnVerBy(0.1f); }
 	if(keys[' '])  { camera->moveVerBy(0.1f); }
 	if(keys['K'])  { camera->moveVerBy(-0.1f); }
 
@@ -403,43 +415,41 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
-	auto meshSceneStart = game_state.meshScenes.begin();
-	auto meshSceneEnd = game_state.meshScenes.end();
-	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
-	{
-		MeshScene &currentMeshScene = meshSceneStart->second;
-		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
-		{
-			MeshNode2* node = meshSceneStart->second.allNodes[i];
+	renderer->setFrameBufferToTexture();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// auto meshSceneStart = game_state.meshScenes.begin();
+	// auto meshSceneEnd = game_state.meshScenes.end();
+	// for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	// {
+	// 	MeshScene &currentMeshScene = meshSceneStart->second;
+	// 	for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
+	// 	{
+	// 		MeshNode2* node = meshSceneStart->second.allNodes[i];
 
-			if (node->meshIndex.size() > 0)
-			{
-				Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
-				if (node->hasAnimations())
-				{
-					glm::mat4 transformation = node->getGlobalTransformation(
-						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
-						currentMeshScene.accumulator, currentMeshScene.timeStep,
-						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
-					renderer->updateObjectTransformation(transformation, mesh);
-				}
-				else
-				{
-					glm::mat4 transformation = node->transformation;
-					renderer->updateObjectTransformation(transformation, mesh);
-				}
-			}
-		}
-	}
+	// 		if (node->meshIndex.size() > 0)
+	// 		{
+	// 			Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
+	// 			if (node->hasAnimations())
+	// 			{
+	// 				glm::mat4 transformation = node->getGlobalTransformation(
+	// 					currentMeshScene.frameIndex, currentMeshScene.animationIndex,
+	// 					currentMeshScene.accumulator, currentMeshScene.timeStep,
+	// 					currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
+	// 				renderer->updateObjectTransformation(transformation, mesh);
+	// 			}
+	// 			else
+	// 			{
+	// 				glm::mat4 transformation = node->transformation;
+	// 				renderer->updateObjectTransformation(transformation, mesh);
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 
+	// renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 
-	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-	//renderer->fillBackground(0.1f, 0.2f, 0.5f);
-	renderer->fillBackground(1.0f, 0.5f, 0.9f);
-
-	renderer->setProgram(&programs[1]);
-	renderer->useProgram();
+	
 	renderer->drawSkyBox();
 
 	//renderer->draw();

@@ -1,6 +1,10 @@
 #pragma once
 
 #include <Types.h>
+#include <Utils.h>
+#include <glm/gtx/rotate_vector.hpp>
+
+using NoxEngineUtils::Logger;
 
 namespace NoxEngine {
 
@@ -9,7 +13,9 @@ namespace NoxEngine {
 			Camera(vec3 stPos);
 
 			inline mat4 getCameraTransf() {
+
 				generateCameraParameters();
+
 				return cameraTransf;
 			}
 
@@ -25,11 +31,12 @@ namespace NoxEngine {
 			vec3 currCamPos;
 			vec3 user_shift;
 
-		private:
 			vec3 lookingAt;
 			vec3 topPointingAt;
+			f32 fov;
+		private:
 			mat4 cameraTransf;
-			vec2 user_rotate;
+			vec3 user_rotate;
 			vec3 startCamPos;
 
 			void generateCameraParameters();
