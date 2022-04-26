@@ -542,3 +542,14 @@ void Renderer::updateLightPos(float x, float y, float z)
     program->use();
     program->set3Float("lightPosition",x, y, z);
 }
+
+void Renderer::applyTransformation(glm::mat4 transformation, IRenderable* pRenderable)
+{
+	for (u32 i = 0; i < objects.size(); i++)
+	{
+		if (objects[i].objPtr == pRenderable)
+		{
+			program->set4Matrix("toWorld", transformation);
+		}
+	}
+}
