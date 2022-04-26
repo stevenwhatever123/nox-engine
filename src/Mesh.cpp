@@ -66,25 +66,25 @@ void Mesh::createNodeHierarchy(aiNode* aiRootnode, MeshNode* rootNode)
 	// Convert aiMatrix4x4 to glm::mat4
 	// We can convert this to a tool later on
 	glm::mat4 transformation;
-	transformation[0][0] = aiRootnode->mTransformation.a1;
-	transformation[0][1] = aiRootnode->mTransformation.a2;
-	transformation[0][2] = aiRootnode->mTransformation.a3;
-	transformation[0][3] = aiRootnode->mTransformation.a4;
+	transformation[0][0] = (f32)aiRootnode->mTransformation.a1;
+	transformation[0][1] = (f32)aiRootnode->mTransformation.a2;
+	transformation[0][2] = (f32)aiRootnode->mTransformation.a3;
+	transformation[0][3] = (f32)aiRootnode->mTransformation.a4;
 
-	transformation[1][0] = aiRootnode->mTransformation.b1;
-	transformation[1][1] = aiRootnode->mTransformation.b2;
-	transformation[1][2] = aiRootnode->mTransformation.b3;
-	transformation[1][3] = aiRootnode->mTransformation.b4;
+	transformation[1][0] = (f32)aiRootnode->mTransformation.b1;
+	transformation[1][1] = (f32)aiRootnode->mTransformation.b2;
+	transformation[1][2] = (f32)aiRootnode->mTransformation.b3;
+	transformation[1][3] = (f32)aiRootnode->mTransformation.b4;
 
-	transformation[2][0] = aiRootnode->mTransformation.c1;
-	transformation[2][1] = aiRootnode->mTransformation.c2;
-	transformation[2][2] = aiRootnode->mTransformation.c3;
-	transformation[2][3] = aiRootnode->mTransformation.c4;
+	transformation[2][0] = (f32)aiRootnode->mTransformation.c1;
+	transformation[2][1] = (f32)aiRootnode->mTransformation.c2;
+	transformation[2][2] = (f32)aiRootnode->mTransformation.c3;
+	transformation[2][3] = (f32)aiRootnode->mTransformation.c4;
 
-	transformation[3][0] = aiRootnode->mTransformation.d1;
-	transformation[3][1] = aiRootnode->mTransformation.d2;
-	transformation[3][2] = aiRootnode->mTransformation.d3;
-	transformation[3][3] = aiRootnode->mTransformation.d4;
+	transformation[3][0] = (f32)aiRootnode->mTransformation.d1;
+	transformation[3][1] = (f32)aiRootnode->mTransformation.d2;
+	transformation[3][2] = (f32)aiRootnode->mTransformation.d3;
+	transformation[3][3] = (f32)aiRootnode->mTransformation.d4;
 	// =====================================================
 
 	rootNode->transformation = transformation;
@@ -114,25 +114,25 @@ void Mesh::traverseTreeStructure(aiNode* node, MeshNode* targetParent)
 		// Convert aiMatrix4x4 to glm::mat4
 		// We can convert this to a tool later on
 		glm::mat4 transformation;
-		transformation[0][0] = node->mTransformation.a1;
-		transformation[0][1] = node->mTransformation.a2;
-		transformation[0][2] = node->mTransformation.a3;
-		transformation[0][3] = node->mTransformation.a4;
+		transformation[0][0] = (f32)node->mTransformation.a1;
+		transformation[0][1] = (f32)node->mTransformation.a2;
+		transformation[0][2] = (f32)node->mTransformation.a3;
+		transformation[0][3] = (f32)node->mTransformation.a4;
 
-		transformation[1][0] = node->mTransformation.b1;
-		transformation[1][1] = node->mTransformation.b2;
-		transformation[1][2] = node->mTransformation.b3;
-		transformation[1][3] = node->mTransformation.b4;
+		transformation[1][0] = (f32)node->mTransformation.b1;
+		transformation[1][1] = (f32)node->mTransformation.b2;
+		transformation[1][2] = (f32)node->mTransformation.b3;
+		transformation[1][3] = (f32)node->mTransformation.b4;
 
-		transformation[2][0] = node->mTransformation.c1;
-		transformation[2][1] = node->mTransformation.c2;
-		transformation[2][2] = node->mTransformation.c3;
-		transformation[2][3] = node->mTransformation.c4;
+		transformation[2][0] = (f32)node->mTransformation.c1;
+		transformation[2][1] = (f32)node->mTransformation.c2;
+		transformation[2][2] = (f32)node->mTransformation.c3;
+		transformation[2][3] = (f32)node->mTransformation.c4;
 
-		transformation[3][0] = node->mTransformation.d1;
-		transformation[3][1] = node->mTransformation.d2;
-		transformation[3][2] = node->mTransformation.d3;
-		transformation[3][3] = node->mTransformation.d4;
+		transformation[3][0] = (f32)node->mTransformation.d1;
+		transformation[3][1] = (f32)node->mTransformation.d2;
+		transformation[3][2] = (f32)node->mTransformation.d3;
+		transformation[3][3] = (f32)node->mTransformation.d4;
 		// ==============================================
 
 		child->transformation = transformation;
@@ -511,16 +511,16 @@ void Mesh::extractGeometricInfo(const aiScene *scene) {
 
 		for (u32 j = 0; j < pMesh->mNumVertices; ++j) {
 
-			vertices[i][j].x = pVertex->x;
-			vertices[i][j].y = pVertex->y;
-			vertices[i][j].z = pVertex->z;
+			vertices[i][j].x = (f32)pVertex->x;
+			vertices[i][j].y = (f32)pVertex->y;
+			vertices[i][j].z = (f32)pVertex->z;
 
-			normals[i][j].x = pNormal->x;
-			normals[i][j].y = pNormal->y;
-			normals[i][j].z = pNormal->z;
+			normals[i][j].x = (f32)pNormal->x;
+			normals[i][j].y = (f32)pNormal->y;
+			normals[i][j].z = (f32)pNormal->z;
 
-			texCoord[i][j].x = pTexCoord->x;
-			texCoord[i][j].y = pTexCoord->y;
+			texCoord[i][j].x = (f32)pTexCoord->x;
+			texCoord[i][j].y = (f32)pTexCoord->y;
 
 			pVertex++;
 			pNormal++;
@@ -647,17 +647,17 @@ void Mesh::extractAnimationInfo(const aiScene* scene) {
 				// Rotation matrix
 				// I think this is how it works, row based
 				glm::mat4 rotationMatrix = glm::mat4(1.0f);
-				rotationMatrix[0][0] = animation_chl->mRotationKeys[z].mValue.GetMatrix().a1;
-				rotationMatrix[0][1] = animation_chl->mRotationKeys[z].mValue.GetMatrix().b1;
-				rotationMatrix[0][2] = animation_chl->mRotationKeys[z].mValue.GetMatrix().c1;
+				rotationMatrix[0][0] = (f32)animation_chl->mRotationKeys[z].mValue.GetMatrix().a1;
+				rotationMatrix[0][1] = (f32)animation_chl->mRotationKeys[z].mValue.GetMatrix().b1;
+				rotationMatrix[0][2] = (f32)animation_chl->mRotationKeys[z].mValue.GetMatrix().c1;
 
-				rotationMatrix[1][0] = animation_chl->mRotationKeys[z].mValue.GetMatrix().a2;
-				rotationMatrix[1][1] = animation_chl->mRotationKeys[z].mValue.GetMatrix().b2;
-				rotationMatrix[1][2] = animation_chl->mRotationKeys[z].mValue.GetMatrix().c2;
+				rotationMatrix[1][0] = (f32)animation_chl->mRotationKeys[z].mValue.GetMatrix().a2;
+				rotationMatrix[1][1] = (f32)animation_chl->mRotationKeys[z].mValue.GetMatrix().b2;
+				rotationMatrix[1][2] = (f32)animation_chl->mRotationKeys[z].mValue.GetMatrix().c2;
 
-				rotationMatrix[2][0] = animation_chl->mRotationKeys[z].mValue.GetMatrix().a3;
-				rotationMatrix[2][1] = animation_chl->mRotationKeys[z].mValue.GetMatrix().b3;
-				rotationMatrix[2][2] = animation_chl->mRotationKeys[z].mValue.GetMatrix().c3;
+				rotationMatrix[2][0] = (f32)animation_chl->mRotationKeys[z].mValue.GetMatrix().a3;
+				rotationMatrix[2][1] = (f32)animation_chl->mRotationKeys[z].mValue.GetMatrix().b3;
+				rotationMatrix[2][2] = (f32)animation_chl->mRotationKeys[z].mValue.GetMatrix().c3;
 
 				// Combine all of them to get the transformation matrix
 				// Notes: I don't think it's a good idea to include translation

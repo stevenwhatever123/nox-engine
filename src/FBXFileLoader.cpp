@@ -92,16 +92,16 @@ NoxEngine::Mesh* NoxEngine::getMesh(const aiScene* pScene)
 			const aiVector3D* pTexCoord = pMesh->HasTextureCoords(0) ?
 				&(pMesh->mTextureCoords[0][j]) : &zero3D;
 
-			f32 vx = pVertex->x;
-			f32 vy = pVertex->y;
-			f32 vz = pVertex->z;
+			f32 vx = (f32)pVertex->x;
+			f32 vy = (f32)pVertex->y;
+			f32 vz = (f32)pVertex->z;
 
-			f32 nx = pNormal->x;
-			f32 ny = pNormal->y;
-			f32 nz = pNormal->z;
+			f32 nx = (f32)pNormal->x;
+			f32 ny = (f32)pNormal->y;
+			f32 nz = (f32)pNormal->z;
 
-			f32 u = pTexCoord->x;
-			f32 v = pTexCoord->y;
+			f32 u = (f32)pTexCoord->x;
+			f32 v = (f32)pTexCoord->y;
 
 			glm::vec3 vertex(vx, vy, vz);
 			glm::vec3 normal(nx, ny, nz);
@@ -216,17 +216,17 @@ NoxEngine::Mesh* NoxEngine::getMesh(const aiScene* pScene)
 					// Rotation matrix
 					// I think this is how it works, row based
 					glm::mat4 rotationMatrix = glm::mat4(1.0f);
-					rotationMatrix[0][0] = pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().a1;
-					rotationMatrix[0][1] = pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().b1;
-					rotationMatrix[0][2] = pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().c1;
+					rotationMatrix[0][0] = (f32)pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().a1;
+					rotationMatrix[0][1] = (f32)pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().b1;
+					rotationMatrix[0][2] = (f32)pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().c1;
 
-					rotationMatrix[1][0] = pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().a2;
-					rotationMatrix[1][1] = pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().b2;
-					rotationMatrix[1][2] = pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().c2;
+					rotationMatrix[1][0] = (f32)pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().a2;
+					rotationMatrix[1][1] = (f32)pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().b2;
+					rotationMatrix[1][2] = (f32)pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().c2;
 
-					rotationMatrix[2][0] = pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().a3;
-					rotationMatrix[2][1] = pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().b3;
-					rotationMatrix[2][2] = pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().c3;
+					rotationMatrix[2][0] = (f32)pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().a3;
+					rotationMatrix[2][1] = (f32)pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().b3;
+					rotationMatrix[2][2] = (f32)pScene->mAnimations[i]->mChannels[j]->mRotationKeys[z].mValue.GetMatrix().c3;
 
 					// Combine all of them to get the transformation matrix
 					// Notes: I don't think it's a good idea to include translation
