@@ -32,6 +32,14 @@ namespace NoxEngineUtils {
 }
 
 
-#define LOG_DEBUG(str, ...) Logger::debug( "%s(%d) "##str, __FILE__, __LINE__, __VA_ARGS__ )
+#define LOG_DEBUG(str, ...) Logger::debug( "%s(%d) " str, __FILE__, __LINE__, __VA_ARGS__ )
 #define print_cwd() _print_cwd(__FILE__, __LINE__)
 void _print_cwd(const char *str, i32 line);
+
+
+#define HEX_TO_FLOAT4(hex) {  ((hex >> 24) & 0xFF)/255.f, ((hex >> 16) & 0xFF)/255.0f, ((hex>>8) & 0xFF)/255.0f, (hex & 0xFF)/255.0f }
+#define FLOAT4_TO_HEX(float4) \
+							  ((i32)(float4[0]*255.0f) << 24)\
+							| ((i32)(float4[1]*255.0f) << 16)\
+							| ((i32)(float4[2]*255.0f) <<  8)\
+							| ((i32)(float4[3]*255.0f) <<  0)\

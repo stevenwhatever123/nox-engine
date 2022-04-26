@@ -7,7 +7,7 @@ using namespace NoxEngine;
 
 GLuint GLProgram::compileShader(std::string& filename, GLenum shaderType) {
 	GLuint id = glCreateShader(shaderType);
-	auto temp = IOManager::Instance()->ReadEntireFileTemp(filename);
+	TempResourceData temp = IOManager::Instance()->ReadEntireFileTemp(filename);
 	const char *data = (const char*)temp.data;
 
 	glShaderSource(id, 1, &data, NULL);
@@ -112,4 +112,24 @@ int GLProgram::getAtrributeLocation(const std::string& name)
 void GLProgram::set4Matrix(const std::string &name, glm::mat4 mat) const
 {
   glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void GLProgram::printAttribInfo()
+{
+	i32 numActiveAttribs = 0;
+	glGetProgramiv(_id, GL_ACTIVE_ATTRIBUTES, &numActiveAttribs);
+
+	LOG_DEBUG("Program: %d has %d active attribs.", _id, numActiveAttribs);
+
+	char *mem = (char*)StackMemAllocator::Instance()->allocate(1024);
+	i32 size;
+	GLenum type;
+	for (i32 i = 0; i < numActiveAttribs; i++)
+	{
+		glGetActiveAttrib(_id, i, 1024, NULL, &size, &type, mem);
+		LOG_DEBUG("Attribute %s idx %d", mem, i);
+		StackMemAllocator::Instance()->free((u8*)mem);
+	}
+	
+
 }

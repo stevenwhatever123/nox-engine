@@ -24,10 +24,11 @@ uniform vec3 cameraPosition;
 uniform mat4 toCamera;
 uniform mat4 toProjection;
 uniform mat4 toWorld;
+uniform mat4 modelMatrix;
 
 void main(void)
-{	
-	gl_Position = toProjection * toCamera * toWorld * vec4(position, 1.0f);
+{
+	gl_Position = toProjection * toCamera * toWorld * modelMatrix * vec4(position, 1.0f);
 
 	v.theNormal = normal;
 	v.theTexCoord = texCoord;

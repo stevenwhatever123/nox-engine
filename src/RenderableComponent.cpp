@@ -91,43 +91,93 @@ RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const char *
 
 	};
 
-	for (i32 i = 0; i < verticesPreped.size()/3; i++)
-	{
-		verticesPreped[i * 3	  ] += trX;
-		verticesPreped[i * 3 + 1] += trY;
-		verticesPreped[i * 3 + 2] += trZ;
-	}
+	// Steven: I have no idea what is this doing
+	// Removing this still works
+	//for (i32 i = 0; i < verticesPreped.size()/3; i++)
+	//{
+	//	verticesPreped[i * 3	  ] += trX;
+	//	verticesPreped[i * 3 + 1] += trY;
+	//	verticesPreped[i * 3 + 2] += trZ;
+	//}
 
 
+	glRenderType = GL_TRIANGLES;
 
 	prepTheData();
 
 }
 
+RenderableComponent::RenderableComponent(const char* texName)
+{
+	id = 2;
+	ambTexName = texName;
+
+	prepTheData();
+}
+
+RenderableComponent::RenderableComponent()
+{
+	id = 2;
+}
 
 void RenderableComponent::prepTheData()
 {
 	// Add the very first ind
 	// THERE IS A LOT O FTHEM
-	verticesFin.push_back(verticesPreped[facesV[0] * 3]); verticesFin.push_back(verticesPreped[facesV[0] * 3 + 1]); verticesFin.push_back(verticesPreped[facesV[0] * 3 + 2]);
-	texCoordFin.push_back(texCoordPreped[facesT[0] * 2]); texCoordFin.push_back(texCoordPreped[facesT[0] * 2 + 1]);
-	normalsFin.push_back(normalsPreped[facesN[0] * 3]); normalsFin.push_back(normalsPreped[facesN[0] * 3 + 1]); normalsFin.push_back(normalsPreped[facesN[0] * 3 + 2]);
+	verticesFin.push_back(verticesPreped[facesV[0] * 3]);
+	verticesFin.push_back(verticesPreped[facesV[0] * 3 + 1]);
+	verticesFin.push_back(verticesPreped[facesV[0] * 3 + 2]);
+
+	texCoordFin.push_back(texCoordPreped[facesT[0] * 2]);
+	texCoordFin.push_back(texCoordPreped[facesT[0] * 2 + 1]);
+
+	normalsFin.push_back(normalsPreped[facesN[0] * 3]);
+	normalsFin.push_back(normalsPreped[facesN[0] * 3 + 1]);
+	normalsFin.push_back(normalsPreped[facesN[0] * 3 + 2]);
+
 	elements.push_back(0);
 
 	for (int i = 1; i < facesV.size(); i++)
 	{
 		// Take the values of each attribute at the i-th index buffer
-		glm::vec3 theV(verticesPreped[facesV[i]*3], verticesPreped[facesV[i] * 3 + 1], verticesPreped[facesV[i] * 3 + 2]);
-		glm::vec2 theT(texCoordPreped[facesT[i]*2], texCoordPreped[facesT[i] * 2 + 1]);
-		glm::vec3 theN(normalsPreped[facesN[i]*3], normalsPreped[facesN[i] * 3 + 1], normalsPreped[facesN[i]*3 + 2]);
+		glm::vec3 theV(
+				verticesPreped[facesV[i]*3],
+				verticesPreped[facesV[i] * 3 + 1],
+				verticesPreped[facesV[i] * 3 + 2]
+				);
+
+		glm::vec2 theT(
+				texCoordPreped[facesT[i]*2],
+				texCoordPreped[facesT[i] * 2 + 1]
+				);
+
+		glm::vec3 theN(
+				normalsPreped[facesN[i]*3],
+				normalsPreped[facesN[i] * 3 + 1],
+				normalsPreped[facesN[i]*3 + 2]
+				);
+
 
 		bool isStored = false;
 		for (int j = 0; j < elements.size(); j++)
 		{
 			// Take the values of each attribute at the j-th final index buffer
-			glm::vec3 thatV(verticesFin[elements[j] * 3], verticesFin[elements[j] * 3+1], verticesFin[elements[j] * 3+2]);
-			glm::vec2 thatT(texCoordFin[elements[j] * 2], texCoordFin[elements[j] * 2 + 1]);
-			glm::vec3 thatN(normalsFin[elements[j] * 3], normalsFin[elements[j] * 3 + 1], normalsFin[elements[j] * 3 + 2]);
+			glm::vec3 thatV(
+					verticesFin[elements[j] * 3],
+					verticesFin[elements[j] * 3+1],
+					verticesFin[elements[j] * 3+2]
+					);
+
+			glm::vec2 thatT(
+					texCoordFin[elements[j] * 2],
+					texCoordFin[elements[j] * 2 + 1]
+					);
+
+			glm::vec3 thatN(
+					normalsFin[elements[j] * 3],
+					normalsFin[elements[j] * 3 + 1],
+					normalsFin[elements[j] * 3 + 2]
+					);
 
 			// Compare the and that (the values)
 			// If stored, add index of the stored one in index buffer

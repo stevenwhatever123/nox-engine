@@ -2,11 +2,11 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 // Engine Include
-#include <GameManager.h>
+#include "GameManager.h"
 using NoxEngine::GameManager;
 
 int main(int argc, char** argv) {
-	GameManager gm(1280, 720, "Nox Engine");
+	GameManager gm(1920, 1080, "Nox Engine");
 	gm.init();
 	while(gm.KeepRunning()) {
 		gm.update();

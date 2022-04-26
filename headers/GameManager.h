@@ -7,7 +7,7 @@
 // 3rd Party Include
 #include <Windows.h>
 #include <glad/glad.h>
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
@@ -21,6 +21,7 @@
 #include <Singleton.h>
 #include <AudioManager.h>
 #include <Mesh.h>
+#include <MeshScene.h>
 #include <Types.h>
 #include <Renderer.h>
 #include <IOManager.h>
@@ -37,11 +38,13 @@
 #include <EngineGUI/PresetObjectPanel.h>
 #include <EngineGUI/ImGuizmoTool.h>
 
+
 #include <Scene.h>
 #include <Entity.h>
 
 #include <RenderableComponent.h>
 #include <PositionComponent.h>
+#include <GridObject.h>
 
 
 namespace NoxEngine {
@@ -88,6 +91,9 @@ namespace NoxEngine {
 			void update_inputs();
 			void update_animation();
 			void update_renderer();
+			
+
+			void keyboard_callback(GLFWwindow *, i32 key, i32 scan, i32 action, i32 mods);
 
 			// Window
 			GLFWwindow *window;

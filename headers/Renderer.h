@@ -26,18 +26,26 @@ namespace NoxEngine {
 	struct RendObj
 	{
 		IRenderable* objPtr; // A pointer to the object
+		GLuint renderType;
 		i32 startInd;
 		i32 endInd; // Start and end indixes in the a united element array 
 		GLuint normalTexture;
 		GLuint ambientTexture; // Texture handlers
 		glm::mat4 pos;
+
+		glm::mat4 transformation;
 	};
 	
+	extern GLenum GLRenderTypes[3];
+
+	// keep this insync with the IRenderable one, a map would be overkill
 
 	/*
 	 * A class that renders 3D using OpenGL
 	 * */
 	class Renderer : public Singleton<Renderer> {
+
+
 
 		friend class Singleton<Renderer>;
 
@@ -134,6 +142,7 @@ namespace NoxEngine {
 		// Draw functions
 		void draw();
 		void fillBackground(f32 r, f32 g, f32 b);
+		void fillBackground(i32 hex);
 
 		// Get the texture the renderer rendered to
 		GLuint getTexture() { return textureToRenderTo; }
@@ -159,6 +168,7 @@ namespace NoxEngine {
 		void updateCamera();
 		void updateLightPos(float x, float y, float z);
 
+		void updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable);
 		void setSkyBoxImages(const std::vector<std::string> skyboxImages);
 		unsigned int skyBoxLoadTexture();
 		void drawSkyBox();

@@ -1,4 +1,5 @@
 #include <GameManager.h>
+#include <glm/gtx/string_cast.hpp>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -7,7 +8,14 @@ using NoxEngine::Entity;
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title), scene(), should_close(false) {
+GameManager::GameManager(u32 width, u32 height, String title) :
+	win_width(width),
+	win_height(height),
+	title(title),
+	scene(),
+	should_close(false),
+	keys()
+{
 }
 
 void GameManager::init() {
@@ -19,6 +27,9 @@ void GameManager::init() {
 	init_shaders();
 	init_imgui();
 	init_animation();
+
+	glPointSize(4.0);
+
 	init_renderer();
 }
 
@@ -48,20 +59,6 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 
 }
 
-void GameManager::addMesh(String name, Mesh m) {
-
-	// m.prepForRenderer();
-	// renderer->addObject(&m);
-	// renderer->updateBuffers();
-
-	// game_state.addMesh().emplace(name, )
-
-	// game_state.audioSources.emplace(audioSource.name, audioSource);
-	// audioManager->LoadSound(audioSource.file);
-}
-
-
-
 void callback(GLenum source,
 		GLenum type,
 		GLuint id,
@@ -74,11 +71,10 @@ void callback(GLenum source,
 }
 
 void GameManager::init_window() {
-
 	LOG_DEBUG("Initializing Window");
 
 	if (!glfwInit()) {
-		std::cout << "Error initializing glfw...exiting.";
+		LOG_DEBUG("Error initializing glfw...exiting.");
 		exit(1);
 	}
 
@@ -86,19 +82,23 @@ void GameManager::init_window() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, true );
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	window = glfwCreateWindow(win_width, win_height, title.c_str(), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
 
+
+	glfwSetWindowPos(window, 100, 100);
+
 	if (window == nullptr) {
-		std::cout << "Failed to create window" << std::endl;
+		LOG_DEBUG("Failed to create window");
 		exit(1);
 	}
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		std::cout << "Failed to initialize OpenGL context" << std::endl;
+		LOG_DEBUG("Failed to initialize OpenGL context");
 	}
 
 
@@ -106,26 +106,51 @@ void GameManager::init_window() {
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
 	glDebugMessageCallback(callback, NULL);
 
+	glfwSetWindowUserPointer(window, this);
 
+	auto func = [](GLFWwindow *w, i32 key, i32 scan, i32 action, i32 mods){
+		glfwGetWindowUserPointer(w);
+
+		GameManager *gm = (GameManager *)glfwGetWindowUserPointer(w);
+		if(action == GLFW_PRESS)
+			gm->keys[(char)key] = 1;
+		if(action == GLFW_RELEASE)
+			gm->keys[(char)key] = 0;
+	};
+
+	glfwSetKeyCallback(window, func);
 
 }
 
 
 void GameManager::init_events() {
-	
 
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
 
-			String file_name = va_arg(args, String);
-			// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
-			// this->game_state.meshes.emplace(file_name, pScene);
+		// Steven: That's how I would do it
+		// clean up: leaky mem
+		this->game_state.meshes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
 
-			Entity *ent = new Entity();
+		Entity *ent = new Entity();
 
 			RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
 			PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
 
+		//Mesh* mesh = new Mesh(NoxEngine::readFBX(file_name.c_str()));
+		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
+		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
+		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+		//MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
+		MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
 
+		i32 index = this->scene.entities.size();
+
+		// We're treating every mesh as an entity FOR NOW
+		for (u32 i = 0; i < meshScene.meshes.size(); i++)
+		{
+			Entity* ent = new Entity();
+			RenderableComponent* comp = meshScene.meshes[i];
+			PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
 			ent->addComp(comp);
 			ent->addComp(pos);
 
@@ -135,6 +160,30 @@ void GameManager::init_events() {
 					reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
 					reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
 					);
+		}
+
+		//Entity *ent = new Entity();
+
+		//RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+		//PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+		//ent->addComp(comp);
+		//ent->addComp(pos);
+		//this->scene.addEntity(ent);
+
+		//this->renderer->addObject(
+		//	reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+		//	reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+		//);
+
+		//this->renderer->updateBuffers();
+
+		for (u32 i = index; i < this->scene.entities.size(); i++)
+		{
+			this->renderer->addObject(
+				reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
+				reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
+			);
+		}
 
 			this->renderer->updateBuffers();
 
@@ -162,12 +211,12 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(glm::vec3(0.0f, 7.0f, 10.0f));
-	camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f));
-	camera->turnVerBy(20.0f);
+	camera = new Camera(vec3(45.0f, 47.0f, 144.0f));
+	camera->turnVerBy(35.0f);
 }
 
 void GameManager::init_shaders() {
+
 	programs.emplace_back(Array<ShaderFile>{
 		{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
@@ -177,28 +226,30 @@ void GameManager::init_shaders() {
 		{ "assets/skybox/shaders/fragmentShader.fs", GL_FRAGMENT_SHADER, 0 }
 	});
 
+
+
 	current_program = &programs.back();
 }
 
 void GameManager::init_animation() {
-
-	
 	currentTime = glfwGetTime();
 	deltaTime = 0;
 	lastTime = currentTime;
 }
 
 void GameManager::init_renderer() { 
-
-	// ------------------------------ Set up of the render --------------------------
-	// // Create Renderer
 	renderer = new Renderer(win_width, win_height, camera);
 	renderer->setProgram(current_program);
 	renderer->useProgram();
-
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
+	GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 100);
+	renderer->addObject(
+			static_cast<IRenderable*>(&obj),
+			static_cast<IPosition*>(&obj)
+			);
 
+	renderer->updateBuffers();
 	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
 	// Mesh *mesh = NoxEngine::getMesh(pScene);
 
@@ -237,6 +288,9 @@ void GameManager::init_imgui() {
 
 	// Initialize panel variables
 	NoxEngineGUI::initPresetObjectPanel();
+
+	ui_params.current_cam = camera;
+	ui_params.sceneBackgroundColor = 0x282828FF;
 
 }
 
@@ -283,15 +337,6 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateAnimationPanel(&game_state);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
-	NoxEngineGUI::updateImGuizmoDemo(&ui_params);
-
-	ImGui::Begin("Light Settings");
-
-	ImGui::DragFloat3("Position", game_state.light);
-
-	ImGui::End();
-
-	// main_contex_ui();
 
 	ImGui::PopFont();
 	ImGui::Render();
@@ -315,6 +360,15 @@ void GameManager::update_audio() {
 
 void GameManager::update_inputs() {
 	glfwPollEvents();
+
+
+	if(keys['W']) { camera->moveFwdBy(0.1f); }
+	if(keys['S']) { camera->moveFwdBy(-0.1f); }
+	if(keys['D']) { camera->moveHorBy(-0.1f); }
+	if(keys['A']) { camera->moveHorBy(0.1f); }
+	if(keys[' '])  { camera->moveVerBy(0.1f); }
+	if(keys['K'])  { camera->moveVerBy(-0.1f); }
+
 }
 
 void GameManager::update_animation() {
@@ -323,16 +377,63 @@ void GameManager::update_animation() {
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
 
-	auto meshStart = game_state.meshes.begin();
-	auto meshEnd = game_state.meshes.end();
+	//auto meshStart = game_state.meshes.begin();
+	//auto meshEnd = game_state.meshes.end();
+	auto meshSceneStart = game_state.meshScenes.begin();
+	auto meshSceneEnd = game_state.meshScenes.end();
 
-	for(;meshStart != meshEnd; meshStart++) {
-		meshStart->second.update(deltaTime);
+	for(; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	{
+		if (meshSceneStart->second.playAnimation)
+		{
+			if (meshSceneStart->second.hasAnimations())
+			{
+				if (meshSceneStart->second.frameIndex
+					== meshSceneStart->second.numTicks[meshSceneStart->second.animationIndex] - 1)
+				{
+					meshSceneStart->second.resetAnimation();
+					meshSceneStart->second.playAnimation = !meshSceneStart->second.playAnimation;
+				}
+			}
+			meshSceneStart->second.update(deltaTime);
+		}
+		// Because we're not updating frame index we still need tick floor and ceil to get our transform
+		meshSceneStart->second.updateCeilAndFloor();
 	}
-
 }
 
 void GameManager::update_renderer() {
+	auto meshSceneStart = game_state.meshScenes.begin();
+	auto meshSceneEnd = game_state.meshScenes.end();
+	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	{
+		MeshScene &currentMeshScene = meshSceneStart->second;
+		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
+		{
+			MeshNode2* node = meshSceneStart->second.allNodes[i];
+
+			if (node->meshIndex.size() > 0)
+			{
+				Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
+				if (node->hasAnimations())
+				{
+					glm::mat4 transformation = node->getGlobalTransformation(
+						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
+						currentMeshScene.accumulator, currentMeshScene.timeStep,
+						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
+					renderer->updateObjectTransformation(transformation, mesh);
+				}
+				else
+				{
+					glm::mat4 transformation = node->transformation;
+					renderer->updateObjectTransformation(transformation, mesh);
+				}
+			}
+		}
+	}
+
+
+
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	//renderer->fillBackground(0.1f, 0.2f, 0.5f);
 	renderer->fillBackground(1.0f, 0.5f, 0.9f);
