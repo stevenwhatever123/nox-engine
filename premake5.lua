@@ -8,6 +8,7 @@ newaction {
 		os.rmdir('libs/compiled_libs')
 		os.rmdir('libs/build_assimp')
 		os.rmdir('libs/build_freetype')
+		os.rmdir('libs/build_harfbuzz')
 		os.rmdir('obj')
 		os.rmdir('project_files')
 		os.rmdir('x64')
