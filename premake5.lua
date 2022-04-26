@@ -93,7 +93,7 @@ workspace "NoxEngine"
 
 		vpaths {
 			["Headers"] = {
-				"headers/*.h",
+				"headers/**.h",
 			},
 			["Headers/imgui"] = {
 				"libs/imgui/*.h"

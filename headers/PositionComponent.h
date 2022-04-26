@@ -1,8 +1,8 @@
 #pragma once
 
-#include <IComponent.h>
-#include <IPosition.h>
-#include <Types.h>
+#include "IComponent.h"
+#include "IPosition.h"
+#include "Types.h"
 
 /*
 * Position Component. Handles postion of the the entity in the 3D world

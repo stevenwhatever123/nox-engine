@@ -24,6 +24,7 @@ namespace NoxEngine {
 	struct RendObj
 	{
 		IRenderable* objPtr; // A pointer to the object
+		GLuint renderType;
 		i32 startInd;
 		i32 endInd; // Start and end indixes in the a united element array 
 		GLuint normalTexture;
@@ -31,11 +32,16 @@ namespace NoxEngine {
 		glm::mat4 pos;
 	};
 	
+	extern GLenum GLRenderTypes[3];
+
+	// keep this insync with the IRenderable one, a map would be overkill
 
 	/*
 	 * A class that renders 3D using OpenGL
 	 * */
 	class Renderer : public Singleton<Renderer> {
+
+
 
 		friend class Singleton<Renderer>;
 
@@ -123,6 +129,7 @@ namespace NoxEngine {
 		// Draw functions
 		void draw();
 		void fillBackground(f32 r, f32 g, f32 b);
+		void fillBackground(i32 hex);
 
 		// Get the texture the renderer rendered to
 		GLuint getTexture() { return textureToRenderTo; }

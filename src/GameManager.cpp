@@ -7,7 +7,14 @@ using NoxEngine::Entity;
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title), scene(), should_close(false) {
+GameManager::GameManager(u32 width, u32 height, String title) :
+	win_width(width),
+	win_height(height),
+	title(title),
+	scene(),
+	should_close(false),
+	keys()
+{
 }
 
 void GameManager::init() {
@@ -19,6 +26,9 @@ void GameManager::init() {
 	init_shaders();
 	init_imgui();
 	init_animation();
+
+	glPointSize(4.0);
+
 	init_renderer();
 }
 
@@ -48,20 +58,6 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 
 }
 
-void GameManager::addMesh(String name, Mesh m) {
-
-	// m.prepForRenderer();
-	// renderer->addObject(&m);
-	// renderer->updateBuffers();
-
-	// game_state.addMesh().emplace(name, )
-
-	// game_state.audioSources.emplace(audioSource.name, audioSource);
-	// audioManager->LoadSound(audioSource.file);
-}
-
-
-
 void callback(GLenum source,
 		GLenum type,
 		GLuint id,
@@ -70,15 +66,14 @@ void callback(GLenum source,
 		const GLchar* message,
 		const void* userParam) {
 
-	// LOG_DEBUG("Message: %s", message);
+	LOG_DEBUG("Message: %s", message);
 }
 
 void GameManager::init_window() {
-
 	LOG_DEBUG("Initializing Window");
 
 	if (!glfwInit()) {
-		std::cout << "Error initializing glfw...exiting.";
+		LOG_DEBUG("Error initializing glfw...exiting.");
 		exit(1);
 	}
 
@@ -86,19 +81,23 @@ void GameManager::init_window() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, true );
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	window = glfwCreateWindow(win_width, win_height, title.c_str(), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
 
+
+	glfwSetWindowPos(window, 100, 100);
+
 	if (window == nullptr) {
-		std::cout << "Failed to create window" << std::endl;
+		LOG_DEBUG("Failed to create window");
 		exit(1);
 	}
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		std::cout << "Failed to initialize OpenGL context" << std::endl;
+		LOG_DEBUG("Failed to initialize OpenGL context");
 	}
 
 
@@ -106,25 +105,33 @@ void GameManager::init_window() {
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
 	glDebugMessageCallback(callback, NULL);
 
+	glfwSetWindowUserPointer(window, this);
 
+	auto func = [](GLFWwindow *w, i32 key, i32 scan, i32 action, i32 mods){
+		glfwGetWindowUserPointer(w);
+
+		GameManager *gm = (GameManager *)glfwGetWindowUserPointer(w);
+		if(action == GLFW_PRESS)
+			gm->keys[(char)key] = 1;
+		if(action == GLFW_RELEASE)
+			gm->keys[(char)key] = 0;
+	};
+
+	glfwSetKeyCallback(window, func);
 
 }
 
 
 void GameManager::init_events() {
-	
 
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
 
 			String file_name = va_arg(args, String);
-			// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
-			// this->game_state.meshes.emplace(file_name, pScene);
 
 			Entity *ent = new Entity();
 
 			RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
 			PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
-
 
 			ent->addComp(comp);
 			ent->addComp(pos);
@@ -162,46 +169,41 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(glm::vec3(0.0f, 7.0f, 10.0f));
-	camera->turnVerBy(20.0f);
+	camera = new Camera(vec3(45.0f, 47.0f, 144.0f));
+	camera->turnVerBy(35.0f);
 }
 
 void GameManager::init_shaders() {
+
 	programs.emplace_back(Array<ShaderFile>{
 		{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
 	});
 
+
+
 	current_program = &programs.back();
 }
 
 void GameManager::init_animation() {
-
-	
 	currentTime = glfwGetTime();
 	deltaTime = 0;
 	lastTime = currentTime;
 }
 
 void GameManager::init_renderer() { 
-
-	// ------------------------------ Set up of the render --------------------------
-	// // Create Renderer
 	renderer = new Renderer(win_width, win_height, camera);
 	renderer->setProgram(current_program);
 	renderer->useProgram();
-
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
+	GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 100);
+	renderer->addObject(
+			static_cast<IRenderable*>(&obj),
+			static_cast<IPosition*>(&obj)
+			);
 
-	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
-	// Mesh *mesh = NoxEngine::getMesh(pScene);
-
-	// mesh->prepForRenderer();
-
-	// renderer->addObject(mesh);
-	// renderer->updateBuffers();
-	// delete mesh;
+	renderer->updateBuffers();
 }
 
 void GameManager::init_imgui() {
@@ -214,6 +216,9 @@ void GameManager::init_imgui() {
 
 	// Initialize panel variables
 	NoxEngineGUI::initPresetObjectPanel();
+
+	ui_params.current_cam = camera;
+	ui_params.sceneBackgroundColor = 0x282828FF;
 
 }
 
@@ -260,15 +265,6 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateAnimationPanel(&game_state);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
-	NoxEngineGUI::updateImGuizmoDemo(&ui_params);
-
-	ImGui::Begin("Light Settings");
-
-	ImGui::DragFloat3("Position", game_state.light);
-
-	ImGui::End();
-
-	// main_contex_ui();
 
 	ImGui::PopFont();
 	ImGui::Render();
@@ -292,6 +288,15 @@ void GameManager::update_audio() {
 
 void GameManager::update_inputs() {
 	glfwPollEvents();
+
+
+	if(keys['W']) { camera->moveFwdBy(0.1f); }
+	if(keys['S']) { camera->moveFwdBy(-0.1f); }
+	if(keys['D']) { camera->moveHorBy(-0.1f); }
+	if(keys['A']) { camera->moveHorBy(0.1f); }
+	if(keys[' '])  { camera->moveVerBy(0.1f); }
+	if(keys['K'])  { camera->moveVerBy(-0.1f); }
+
 }
 
 void GameManager::update_animation() {
@@ -310,8 +315,13 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
+
+	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-	renderer->fillBackground(0.1f, 0.2f, 0.5f);
+	
+	renderer->fillBackground(ui_params.sceneBackgroundColor);
+
 	renderer->draw();
+
 }
 
