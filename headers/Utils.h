@@ -1,7 +1,10 @@
 #pragma once
 
 #include <Types.h>
-#include <string>
+#include <cstdarg>
+#include <iostream>
+#include <ctime>
+#include <chrono>
 
 
 namespace NoxEngineUtils {
@@ -12,7 +15,7 @@ namespace NoxEngineUtils {
 		};
 
 		public:
-			static void debug(std::string fmt_str, ...);
+			static void debug(String fmt_str, ...);
 		private:
 			Logger(){};
 	};
@@ -27,3 +30,8 @@ namespace NoxEngineUtils {
 	};
 
 }
+
+
+#define LOG_DEBUG(str, ...) Logger::debug( "%s(%d) "##str, __FILE__, __LINE__, __VA_ARGS__ )
+#define print_cwd() _print_cwd(__FILE__, __LINE__)
+void _print_cwd(const char *str, i32 line);

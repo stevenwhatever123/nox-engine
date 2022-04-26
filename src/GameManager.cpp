@@ -7,11 +7,11 @@ using NoxEngine::Entity;
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title), scene() {
+GameManager::GameManager(u32 width, u32 height, String title) : win_width(width), win_height(height), title(title), scene(), should_close(false) {
 }
 
 void GameManager::init() {
-	Logger::debug("Initing systems");
+	LOG_DEBUG("Initing systems");
 	init_window();
 	init_events();
 	init_audio();
@@ -61,9 +61,21 @@ void GameManager::addMesh(String name, Mesh m) {
 }
 
 
+
+void callback(GLenum source,
+		GLenum type,
+		GLuint id,
+		GLenum severity,
+		GLsizei length,
+		const GLchar* message,
+		const void* userParam) {
+
+	// LOG_DEBUG("Message: %s", message);
+}
+
 void GameManager::init_window() {
 
-	Logger::debug("Initializing Window");
+	LOG_DEBUG("Initializing Window");
 
 	if (!glfwInit()) {
 		std::cout << "Error initializing glfw...exiting.";
@@ -73,6 +85,7 @@ void GameManager::init_window() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, true );
 
 	window = glfwCreateWindow(win_width, win_height, title.c_str(), nullptr, nullptr);
 
@@ -83,11 +96,17 @@ void GameManager::init_window() {
 		exit(1);
 	}
 
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		std::cout << " Error Initializing Glew" << std::endl;
-		exit(1);
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize OpenGL context" << std::endl;
 	}
+
+
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+	glDebugMessageCallback(callback, NULL);
+
+
 
 }
 
@@ -96,31 +115,28 @@ void GameManager::init_events() {
 	
 
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
-		
-		String file_name = va_arg(args, String);
-		// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
-		// this->game_state.meshes.emplace(file_name, pScene);
 
 		// Steven: That's how I would do it
+		// clean up: leaky mem
 		this->game_state.meshes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
 
 		Entity *ent = new Entity();
 
-		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-		PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+			RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+			PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
 
 
-		ent->addComp(comp);
-		ent->addComp(pos);
+			ent->addComp(comp);
+			ent->addComp(pos);
 
-		this->scene.addEntity(ent);
+			this->scene.addEntity(ent);
 
-		this->renderer->addObject(
-			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-		);
+			this->renderer->addObject(
+					reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+					reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+					);
 
-		this->renderer->updateBuffers();
+			this->renderer->updateBuffers();
 
 	});
 
@@ -193,7 +209,7 @@ void GameManager::init_imgui() {
 	NoxEngineGUI::init_imgui(window);
 	
 	ImGuiIO& io = ImGui::GetIO();
-	font = io.Fonts->AddFontFromFileTTF("envy.ttf", 18);
+	font = io.Fonts->AddFontFromFileTTF("assets/font/envy.ttf", 18);
 	io.Fonts->Build();
 
 	// Initialize panel variables

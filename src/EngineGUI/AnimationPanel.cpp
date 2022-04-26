@@ -5,7 +5,6 @@
 #include <limits>
 #define NOMINMAX
 
-#include <Windows.h>
 #include <FBXFileLoader.h>
 #include <EventManager.h>
 #include <EventNames.h>
@@ -22,8 +21,6 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState *game_state) {
 
 	// Window Begin
 	ImGui::Begin(name.c_str());
-
-
 	if (ImGui::Button("Load FBX File")) {
 		String picked_file = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
 		if (picked_file.length() > 0)

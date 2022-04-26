@@ -5,16 +5,17 @@
 #include <vector>
 
 // 3rd Party Include
-#include <GL/glew.h>
+#include <Windows.h>
+#include <glad/glad.h>
 #include <glfw/glfw3.h>
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
 
 #include <assimp/Importer.hpp>
-#include <fmod/core/fmod.hpp>
-#include <fmod/core/fmod_errors.h>
+#include <fmod.hpp>
+#include <fmod_errors.h>
 
 // Engine Include
 #include <Singleton.h>

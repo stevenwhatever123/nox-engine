@@ -29,7 +29,34 @@ Renderer::~Renderer()
     glDeleteFramebuffers(1, &FBO);
 }
 
-Renderer::Renderer(int width, int height, Camera* cam) : w(width), h(height), camera(cam), elements(0) {
+Renderer::Renderer(int width, int height, Camera* cam) :
+	w(width),
+	h(height),
+	camera(cam),
+	elements(0),
+	projection(0),
+	cam(0),
+	objects(0),
+	VBO(0),
+	NBO(0),
+	TCBO(0),
+	EBO(0),
+	TANBO(0),
+	FBO(0),
+	numberOfVertices(0),
+	numberOfNormals(0),
+	numberOfElements(0),
+	numOfTexCoords(0),
+	numOfTangents(0),
+	vertices(0),
+	normals(0),
+	texCoords(0),
+	tangents(0),
+	textureToRenderTo(0),
+	tex(0),
+	curFBO(0),
+	color(0)
+{
 
 	// Initialise OpenGl
 
@@ -77,7 +104,7 @@ void Renderer::updateBuffers() {
 	// Update GPU containers
 	// Vertice positions
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, 3 * numberOfVertices * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
 
 	int positionAtr = program->getAtrributeLocation("position");
 	glVertexAttribPointer(positionAtr, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -157,8 +184,8 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true); // flip loaded texture's on the y-axis.
@@ -170,10 +197,11 @@ GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int nu
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 	}
 	else
 	{
-		Logger::debug("Failed to load file %s ", texturePath);
+		LOG_DEBUG("Failed to load file %s ", texturePath);
 	}
 	stbi_image_free(data);
 

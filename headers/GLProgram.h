@@ -6,7 +6,7 @@
 #pragma once
 #define GLEW_STATIC
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <string>
 #include <Types.h>
