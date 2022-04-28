@@ -2,116 +2,104 @@
 
 using namespace NoxEngine;
 
-RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const char * texName)
+RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const char * texName) : ambTexName(texName)
 {
 	id = 2;
-	ambTexName = texName;
 
 	// Init data
-	verticesPreped = {
-		1.00f, -1.00f, -1.00f,
-		1.00f, -1.00f,  1.00f,
-		-1.00f, -1.00f,  1.00f,
-		-1.00f, -1.00f, -1.00f,
-		1.00f,  1.00f, -0.99f,
-		0.99f,  1.00f,  1.00f,
-		-1.00f,  1.00f,  1.00f,
-		-1.00f,  1.00f, -1.00f
+
+	vertices = {
+		{1.00f, -1.00f, -1.00f},
+		{ 1.00f, -1.00f,  1.00f},
+		{-1.00f, -1.00f,  1.00f},
+		{-1.00f, -1.00f, -1.00f},
+		{ 1.00f,  1.00f, -0.99f},
+		{ 0.99f,  1.00f,  1.00f},
+		{-1.00f,  1.00f,  1.00f},
+		{-1.00f,  1.00f, -1.00f}
 	};
 
-	normalsPreped = {
-		0.00f, -1.00f,  0.00f,
-		0.00f,  1.00f,  0.00f,
-		1.00f,  0.00f,  0.00f,
-		-0.00f,  0.00f,  1.00f,
-		-1.00f, -0.00f, -0.00f,
-		0.00f,  0.00f, -1.00f
+
+	normals = {
+		{ 0.00f, -1.00f,  0.00f},
+		{ 0.00f,  1.00f,  0.00f},
+		{ 1.00f,  0.00f,  0.00f},
+		{-0.00f,  0.00f,  1.00f},
+		{-1.00f, -0.00f, -0.00f},
+		{ 0.00f,  0.00f, -1.00f}
 	};
 
-	texCoordPreped = {
-		1.000000f, 0.333333f, //0
-		1.000000f, 0.666667f,
-		0.666667f, 0.666667f,
-		0.666667f, 0.333333f,
-		0.666667f, 0.000000f, //4
-		0.000000f, 0.333333f,
-		0.000000f, 0.000000f,
-		0.333333f, 0.000000f,
-		0.333333f, 1.000000f,
-		0.000000f, 1.000000f,
-		0.000000f, 0.666667f,
-		0.333333f, 0.333333f,
-		0.333333f, 0.666667f,
-		1.000000f, 0.000000f
+	texCoords = {
+		{1.000000f, 0.333333f}, //0
+		{1.000000f, 0.666667f},
+		{0.666667f, 0.666667f},
+		{0.666667f, 0.333333f},
+		{0.666667f, 0.000000f}, //4
+		{0.000000f, 0.333333f},
+		{0.000000f, 0.000000f},
+		{0.333333f, 0.000000f},
+		{0.333333f, 1.000000f},
+		{0.000000f, 1.000000f},
+		{0.000000f, 0.666667f},
+		{0.333333f, 0.333333f},
+		{0.333333f, 0.666667f},
+		{1.000000f, 0.000000f}
 	};
 
-	facesV = {
-		1,2,3,
-		7,6,5,
-		4,5,1,
-		5,6,2,
-		2,6,7,
-		0,3,7,
-		0,1,3,	
-		4,7,5,
-		0,4,1,
-		1,5,2,
-		3,2,7,
-		4,0,7
+	faces = {
+		{1,2,3},
+		{7,6,5},
+		{4,5,1},
+		{5,6,2},
+		{2,6,7},
+		{0,3,7},
+		{0,1,3},	
+		{4,7,5},
+		{0,4,1},
+		{1,5,2},
+		{3,2,7},
+		{4,0,7}
 	};
 
-	facesN = {
-		0,0,0,
-		1,1,1,
-		2,2,2,
-		3,3,3,
-		4,4,4,
-		5,5,5,
-		0,0,0,
-		1,1,1,
-		2,2,2,
-		3,3,3,
-		4,4,4,
-		5,5,5			
-	};
+	// facesN = {
+	// 	0,0,0,
+	// 	1,1,1,
+	// 	2,2,2,
+	// 	3,3,3,
+	// 	4,4,4,
+	// 	5,5,5,
+	// 	0,0,0,
+	// 	1,1,1,
+	// 	2,2,2,
+	// 	3,3,3,
+	// 	4,4,4,
+	// 	5,5,5			
+	// };
 
-	facesT = {
-		0,1,2,
-		0,3,4,
-		5,6,7,
-		7,4,3,
-		8,9,10,
-		11,12,10,
-		3,0,2,
-		13,0,4,
-		11,5,7,
-		11,7,3,
-		12,8,10,
-		5,11,10
+	// facesT = {
+	// 	0,1,2,
+	// 	0,3,4,
+	// 	5,6,7,
+	// 	7,4,3,
+	// 	8,9,10,
+	// 	11,12,10,
+	// 	3,0,2,
+	// 	13,0,4,
+	// 	11,5,7,
+	// 	11,7,3,
+	// 	12,8,10,
+	// 	5,11,10
 
-	};
-
-	// Steven: I have no idea what is this doing
-	// Removing this still works
-	//for (i32 i = 0; i < verticesPreped.size()/3; i++)
-	//{
-	//	verticesPreped[i * 3	  ] += trX;
-	//	verticesPreped[i * 3 + 1] += trY;
-	//	verticesPreped[i * 3 + 2] += trZ;
-	//}
-
+	// };
 
 	glRenderType = GL_TRIANGLES;
-
 	prepTheData();
 
 }
 
-RenderableComponent::RenderableComponent(const char* texName)
+RenderableComponent::RenderableComponent(const char* texName) : ambTexName(texName)
 {
 	id = 2;
-	ambTexName = texName;
-
 	prepTheData();
 }
 
@@ -122,19 +110,10 @@ RenderableComponent::RenderableComponent()
 
 void RenderableComponent::prepTheData()
 {
+#if 0
 	// Add the very first ind
 	// THERE IS A LOT O FTHEM
-	verticesFin.push_back(verticesPreped[facesV[0] * 3]);
-	verticesFin.push_back(verticesPreped[facesV[0] * 3 + 1]);
-	verticesFin.push_back(verticesPreped[facesV[0] * 3 + 2]);
-
-	texCoordFin.push_back(texCoordPreped[facesT[0] * 2]);
-	texCoordFin.push_back(texCoordPreped[facesT[0] * 2 + 1]);
-
-	normalsFin.push_back(normalsPreped[facesN[0] * 3]);
-	normalsFin.push_back(normalsPreped[facesN[0] * 3 + 1]);
-	normalsFin.push_back(normalsPreped[facesN[0] * 3 + 2]);
-
+	
 	elements.push_back(0);
 
 	for (int i = 1; i < facesV.size(); i++)
@@ -203,6 +182,8 @@ void RenderableComponent::prepTheData()
 	}
 
 	int k = 0;
+#endif
+
 }
 
 void* RenderableComponent::CastType(const int castID)

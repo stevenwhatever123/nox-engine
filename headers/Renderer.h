@@ -25,6 +25,8 @@ namespace NoxEngine {
 	{
 		IRenderable* objPtr; // A pointer to the object
 		GLuint renderType;
+		i32 has_texture;
+		i32 has_normal;
 		i32 startInd;
 		i32 endInd; // Start and end indixes in the a united element array 
 		GLuint normalTexture;
@@ -76,11 +78,11 @@ namespace NoxEngine {
 		i32 numOfTexCoords;
 		i32 numOfTangents;
 
-		std::vector<GLfloat> vertices;
-		std::vector<GLfloat> normals;
-		std::vector<GLfloat> texCoords;
-		std::vector<GLfloat> tangents;
-		std::vector<GLint> elements;
+		Array<vec3> vertices;
+		Array<vec3> normals;
+		Array<vec2> texCoords;
+		Array<vec3> tangents;
+		Array<i32> elements;
 
 		// Buffer and texture to render to.
 		GLuint textureToRenderTo;
@@ -98,13 +100,11 @@ namespace NoxEngine {
 		// This atribute is needed for Normal Mapping. 
 		// Basically, need to transform the normals in the map into tangent space (space of the primitive (triangle))
 		// To do so:
-		//              - callculate tangents to vertices and submit them in the shader
-		//              - in shader create transformation matrices using them. 
+		//  - callculate tangents to vertices and submit them in the shader
+		//  - in shader create transformation matrices using them. 
 		// More in detail in the report section on Normal Mapping
 		void createTangents(IRenderable* mesh); 
-
-		GLuint setTexture(const char* texturePath, const char* uniName, int num);
-
+		GLuint setTexture(const String texturePath, const char* uniName, int num);
 
 		public:
 

@@ -29,7 +29,7 @@ struct AnimationSequencer : public ImSequencer::SequenceInterface {
 
     int GetFrameMin() const { return 0; }
     int GetFrameMax() const { return scene->numTicks[scene->animationIndex] - 1; }
-    int GetItemCount() const { return scene->allNodes.size(); }
+    int GetItemCount() const { return (i32)scene->allNodes.size(); }
 
     void BeginEdit(int index) {};
 

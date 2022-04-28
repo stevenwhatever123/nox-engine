@@ -127,63 +127,47 @@ void GameManager::init_events() {
 
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
 
-		// Steven: That's how I would do it
-		// clean up: leaky mem
-		this->game_state.meshes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+			// Steven: That's how I would do it
+			// clean up: leaky mem
+			String file_name = va_arg(args, String);
 
-		Entity *ent = new Entity();
+			this->game_state.meshes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+
+			Entity *ent = new Entity();
 
 			RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
 			PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
 
-		//Mesh* mesh = new Mesh(NoxEngine::readFBX(file_name.c_str()));
-		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
-		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
-		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-		//MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
-		MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
+			
+			this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+			MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
 
-		i32 index = this->scene.entities.size();
+			i32 index = this->scene.entities.size();
 
-		// We're treating every mesh as an entity FOR NOW
-		for (u32 i = 0; i < meshScene.meshes.size(); i++)
-		{
-			Entity* ent = new Entity();
-			RenderableComponent* comp = meshScene.meshes[i];
-			PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
-			ent->addComp(comp);
-			ent->addComp(pos);
+			// We're treating every mesh as an entity FOR NOW
+			for (u32 i = 0; i < meshScene.meshes.size(); i++)
+			{
+				Entity* ent = new Entity();
+				RenderableComponent* comp = meshScene.meshes[i];
+				PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+				ent->addComp(comp);
+				ent->addComp(pos);
 
-			this->scene.addEntity(ent);
+				this->scene.addEntity(ent);
 
-			this->renderer->addObject(
-					reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-					reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-					);
-		}
+				this->renderer->addObject(
+						reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+						reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+						);
+			}
 
-		//Entity *ent = new Entity();
-
-		//RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-		//PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
-		//ent->addComp(comp);
-		//ent->addComp(pos);
-		//this->scene.addEntity(ent);
-
-		//this->renderer->addObject(
-		//	reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-		//	reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-		//);
-
-		//this->renderer->updateBuffers();
-
-		for (u32 i = index; i < this->scene.entities.size(); i++)
-		{
-			this->renderer->addObject(
-				reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
-				reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
-			);
-		}
+			for (u32 i = index; i < this->scene.entities.size(); i++)
+			{
+				this->renderer->addObject(
+						reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
+						reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
+						);
+			}
 
 			this->renderer->updateBuffers();
 
@@ -222,8 +206,6 @@ void GameManager::init_shaders() {
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
 	});
 
-
-
 	current_program = &programs.back();
 }
 
@@ -239,11 +221,13 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
-	GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 100);
+	GridObject obj(vec3(0, 0, 0), vec3(10, 0, 10), 5);
+
 	renderer->addObject(
 			static_cast<IRenderable*>(&obj),
 			static_cast<IPosition*>(&obj)
 			);
+
 
 	renderer->updateBuffers();
 }
@@ -336,8 +320,8 @@ void GameManager::update_inputs() {
 	if(keys['S']) { camera->moveFwdBy(-0.1f); }
 	if(keys['D']) { camera->moveHorBy(-0.1f); }
 	if(keys['A']) { camera->moveHorBy(0.1f); }
-	if(keys[' '])  { camera->moveVerBy(0.1f); }
-	if(keys['K'])  { camera->moveVerBy(-0.1f); }
+	if(keys[' ']) { camera->moveVerBy(0.1f); }
+	if(keys['K']) { camera->moveVerBy(-0.1f); }
 
 }
 
@@ -404,10 +388,9 @@ void GameManager::update_renderer() {
 
 
 
+	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-	
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
-
 	renderer->draw();
 
 }
