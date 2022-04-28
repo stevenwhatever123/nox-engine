@@ -129,67 +129,67 @@ void GameManager::init_events() {
 
 		//// Steven: That's how I would do it
 		//// clean up: leaky mem
-		//String file_name = va_arg(args, String);
-		//this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-		////MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
-		//MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
+		String file_name = va_arg(args, String);
+		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+		//MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
+		MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
 
-		//i32 index = this->scene.entities.size();
+		i32 index = this->scene.entities.size();
 
-		//// We're treating every mesh as an entity FOR NOW
-		//for (u32 i = 0; i < meshScene.meshes.size(); i++)
-		//{
-		//	Entity* ent = new Entity();
-		//	RenderableComponent* comp = meshScene.meshes[i];
-		//	PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
-		//	ent->addComp(comp);
-		//	ent->addComp(pos);
+		// We're treating every mesh as an entity FOR NOW
+		for (u32 i = 0; i < meshScene.meshes.size(); i++)
+		{
+			Entity* ent = new Entity();
+			RenderableComponent* comp = meshScene.meshes[i];
+			PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+			ent->addComp(comp);
+			ent->addComp(pos);
 
-		//	this->scene.addEntity(ent);
+			this->scene.addEntity(ent);
 
-		//	this->renderer->addObject(
-		//			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-		//			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-		//			);
-		//}
+			this->renderer->addObject(
+					reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+					reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+					);
+		}
 
-		Entity *ent = new Entity();
+		//Entity *ent = new Entity();
 
-		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-		PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
-		ent->addComp(comp);
-		ent->addComp(pos);
-		this->scene.addEntity(ent);
+		//RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+		//PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+		//ent->addComp(comp);
+		//ent->addComp(pos);
+		//this->scene.addEntity(ent);
 
-		this->renderer->addObject(
-			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-		);
+		//this->renderer->addObject(
+		//	reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+		//	reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+		//);
 
-		Entity* ent2 = new Entity();
+		//Entity* ent2 = new Entity();
 
-		RenderableComponent* comp2 = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-		PositionComponent* pos2 = new PositionComponent(5.0, 0.0, 0.0);
-		ent2->addComp(comp2);
-		ent2->addComp(pos2);
-		this->scene.addEntity(ent2);
+		//RenderableComponent* comp2 = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+		//PositionComponent* pos2 = new PositionComponent(5.0, 0.0, 0.0);
+		//ent2->addComp(comp2);
+		//ent2->addComp(pos2);
+		//this->scene.addEntity(ent2);
 
-		this->renderer->addObject(
-			reinterpret_cast<IRenderable*>(ent2->getComp(2)->CastType(2)),
-			reinterpret_cast<IPosition*>(ent2->getComp(1)->CastType(2))
-		);
+		//this->renderer->addObject(
+		//	reinterpret_cast<IRenderable*>(ent2->getComp(2)->CastType(2)),
+		//	reinterpret_cast<IPosition*>(ent2->getComp(1)->CastType(2))
+		//);
+
+		//this->renderer->updateBuffers();
+
+		for (u32 i = index; i < this->scene.entities.size(); i++)
+		{
+			this->renderer->addObject(
+				reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
+				reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
+			);
+		}
 
 		this->renderer->updateBuffers();
-
-		//for (u32 i = index; i < this->scene.entities.size(); i++)
-		//{
-		//	this->renderer->addObject(
-		//		reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
-		//		reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
-		//	);
-		//}
-
-		//	this->renderer->updateBuffers();
 
 	});
 
