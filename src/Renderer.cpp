@@ -350,16 +350,12 @@ void Renderer::updateProjection(int width, int height) {
 
 }
 
-
-
 void Renderer::createVertexArray(IRenderable* mesh)
 {
 	numberOfVertices += mesh->getNumOfVertices();
 	const auto v = mesh->getVertices();
     copy(v.begin(), v.end(), back_inserter(vertices));
 }
-
-
 
 void Renderer::createTexCoordArray(IRenderable* mesh)
 {
@@ -374,7 +370,6 @@ void Renderer::createNormalsArray(IRenderable* mesh)
 	const auto meshNormals = mesh->getNormals();
     copy(meshNormals.begin(), meshNormals.end(), back_inserter(normals));
 }
-
 
 void Renderer::createElementArray(IRenderable* mesh)
 {
@@ -407,7 +402,6 @@ void Renderer::createElementArray(IRenderable* mesh)
     }
 
 }
-
 
 void Renderer::createTangents(IRenderable* mesh)
 {
@@ -445,12 +439,10 @@ void Renderer::createTangents(IRenderable* mesh)
     for (int i = 0; i < elem.size(); i+=3)
     {
         // Get the positions of the vertices, their tex coordinates and the normal coordinates
-
         // Positions
         int el_ind1 = elem[i][0];
         int el_ind2 = elem[i][1];
         int el_ind3 = elem[i][2];
-
 
         glm::vec3 pos1 = v[el_ind1];
         glm::vec3 pos2 = v[el_ind2];
@@ -478,7 +470,6 @@ void Renderer::createTangents(IRenderable* mesh)
         newTangents[el_ind2] += tangent;
 		newTangents[el_ind3] += tangent;
     }
-
 
     // Once all of the tangents have been calculated, some would have summed tangents.
     // Devide by the number of triangles the vertice is the part of to find the average
@@ -532,11 +523,8 @@ void Renderer::useProgram()
     program->set3Float("cameraPosition", camera->GetCameraPosition());
     // Set up light position
     program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
-
     program->set4Matrix("toWorld", glm::mat4(1.0f));
-
     program->set4Matrix("modelMatrix", glm::mat4(1.0f));
-    
 }
 
 void Renderer::updateLightPos(float x, float y, float z) 

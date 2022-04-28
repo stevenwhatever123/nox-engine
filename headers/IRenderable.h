@@ -28,21 +28,17 @@ namespace NoxEngine {
 			virtual const Array<vec2>& getTexCoords() const = 0;
 			virtual const Array<vec3>& getNormals  () const = 0;
 			virtual const Array<ivec3>& getFaces   () const = 0;
-			virtual const Array<i32>& getIndices () const = 0;
+			virtual const Array<i32>& getIndices   () const = 0;
 
 			virtual const String getNormalTexture() = 0;
 			virtual const String getAmbientTexture() = 0;
 
 			// Stores initial attributes without dublicates
-			Array<vec3> vertices;
-			Array<vec2> texCoords;
-			Array<vec3> normals;
-			Array<ivec3> faces;
-			Array<i32> indices;
-
-			// Array<i32> facesV;
-			// Array<i32> facesT;
-			// Array<i32> facesN;
+			Array<vec3>   vertices;
+			Array<vec2>  texCoords;
+			Array<vec3>    normals;
+			Array<ivec3>     faces;
+			Array<i32>     indices;
 
 			i8 has_texture;
 			i8 has_normal;

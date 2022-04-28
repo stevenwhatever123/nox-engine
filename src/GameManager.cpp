@@ -203,15 +203,14 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
-	// GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 500);
+	GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
 
-	// renderer->addObject(
-	// 		static_cast<IRenderable*>(&obj),
-	// 		static_cast<IPosition*>(&obj)
-	// 		);
+	renderer->addObject(
+			static_cast<IRenderable*>(&obj),
+			static_cast<IPosition*>(&obj)
+			);
 
-
-	// renderer->updateBuffers();
+	renderer->updateBuffers();
 }
 
 void GameManager::init_imgui() {

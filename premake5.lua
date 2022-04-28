@@ -1,5 +1,3 @@
-
-
 newaction {
 	trigger = "clean_up",
 	description = "Clean up files gen",
@@ -19,7 +17,6 @@ newaction {
 	
 }
 
-
 workspace "NoxEngine"
 	configurations {"Debug", "Release"}
 	architecture "x64"
@@ -28,7 +25,6 @@ workspace "NoxEngine"
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
-
 
 	include "premake_scripts/glfw.lua"
 	include "premake_scripts/glm_lib.lua"
@@ -124,6 +120,3 @@ workspace "NoxEngine"
 
 		postbuildcommands { '{COPYFILE} "%{wks.location}/libs/fmod/lib/fmod.dll" %{cfg.targetdir}'  }
 		postbuildcommands { '{COPYFILE} "%{wks.location}/libs/compiled_libs/assimp/Debug/assimp-vc143-mtd.dll" %{cfg.targetdir}'  }
-
-	
-
