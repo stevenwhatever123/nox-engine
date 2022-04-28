@@ -42,19 +42,26 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 			// Visibility check box
 			bool enable = ent->isEntityEnabled();
 			ImGui::PushID(i);
-			ImGui::Checkbox("", &enable);
+			ImGui::Checkbox("##EntityEnableCheckbox", &enable);	ImGui::SameLine();
 			ImGui::PopID();
 			ent->setEntityEnabled(enable);
 
 			char uniqueNameBuf[16];
 			snprintf(uniqueNameBuf, 16, "%i", i);
 
+			// Apply grey out: Begin
+			ImGui::BeginDisabled(!enable);
+
 			// Draw the widget
+			// FIX (Vincent): Text is slightly shifted up?
 			if (SelectableInputResult res = ImGui::SelectableInput(uniqueNameBuf, params->selectedEntity == i,
 				ImGuiSelectableFlags_None, ent->name, ENTITY_NAME_MAX_LEN); res.selected) {
-
+			
 				params->selectedEntity = i;
 			}
+
+			// Apply grey out: End
+			ImGui::EndDisabled();
 
 			//if (!strcmp(ent->name, params->modifyingNameBuffer) && res.tempInputStart) {
 

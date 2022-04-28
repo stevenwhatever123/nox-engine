@@ -26,20 +26,33 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 	// Otherwise, loop through the components of the selected entity
 	else {
-		Entity* selectedEntity = state->activeScene->entities[params->selectedEntity];
+		Entity* ent = state->activeScene->entities[params->selectedEntity];
 
 		// Entity name
-		if (ImGui::CollapsingHeader(selectedEntity->name)) {
+		if (ImGui::CollapsingHeader(ent->name)) {
 
-			// TODO: Make this nicer w/ enum?
-			IComponent* comp;
+			int width = ImGui::GetContentRegionAvail().x;
 
 			// PositionComponent
-			if (selectedEntity->containsComps(PositionFlag)) {
+			if (ent->containsComps(PositionFlag)) {
 
-				if (ImGui::TreeNode("Position")) {
+				bool enable = ent->isEnabled<PositionComponent>();
+				bool expand = ImGui::TreeNode("Position");		// TODO (Vincent): How to change the width of treenode?
 
-					IPosition* pos = selectedEntity->getComp<PositionComponent>()->CastType<IPosition>();
+				ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+				ImGui::Checkbox("##ComponentEnableCheckbox", &enable);
+
+				ImGui::SameLine();
+				bool remove = ImGui::SmallButton("-##RemoveComp");	//TODO: Use ImageButton?
+
+				ent->setEnabled<PositionComponent>(enable);
+
+				if (expand) {
+
+					IPosition* pos = ent->getComp<PositionComponent>()->CastType<IPosition>();
+
+					// Begin: grey out
+					ImGui::BeginDisabled(!enable);
 
 					// TODO: Hook it up with RendObj in the renderer
 					// 1. create transform matrix
@@ -48,19 +61,47 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 					ImGui::DragFloat3("XYZ", &pos->x, 0.01f);
 					ImGui::TreePop();
+
+					// End: grey out
+					ImGui::EndDisabled();
+				}
+
+				if (remove) {
+					ent->removeComp<PositionComponent>();
 				}
 				ImGui::Separator();
 			}
 
 			// RenderableComponent
-			if (selectedEntity->containsComps(RenderableFlag)) {
+			if (ent->containsComps(RenderableFlag)) {
 
-				if (ImGui::TreeNode("Renderable")) {
+				bool enable = ent->isEnabled<RenderableComponent>();
+				bool expand = ImGui::TreeNode("Renderable");		// TODO (Vincent): How to change the width of treenode?
 
-					IRenderable* rend = selectedEntity->getComp<RenderableComponent>()->CastType<IRenderable>();
+				ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+				ImGui::Checkbox("##ComponentEnableCheckbox", &enable);
+
+				ImGui::SameLine();
+				bool remove = ImGui::SmallButton("-##RemoveComp");	//TODO: Use ImageButton?
+
+				ent->setEnabled<RenderableComponent>(enable);
+
+				if (expand) {
+
+					// Begin: grey out
+					ImGui::BeginDisabled(!enable);
+
+					IRenderable* rend = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
 
 					ImGui::Text("Some rendering parameters");
 					ImGui::TreePop();
+
+					// End: grey out
+					ImGui::EndDisabled();
+				}
+
+				if (remove) {
+					ent->removeComp<RenderableComponent>();
 				}
 				ImGui::Separator();
 			}
@@ -84,14 +125,14 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				ComponentType type = static_cast<ComponentType>(i);
 
 				HasCompBitMask mask = (1 << (i - 1));
-				bool compExists = selectedEntity->containsComps(mask);
+				bool compExists = ent->containsComps(mask);
 
 				// Gray out: Begin
 				ImGui::BeginDisabled(compExists);
 
 				// Draw
 				if (ImGui::Button(kComponentTypeNames[type].c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 0))) {
-					selectedEntity->addComp(type);
+					ent->addComp(type);
 				}
 
 				// Gray out: End

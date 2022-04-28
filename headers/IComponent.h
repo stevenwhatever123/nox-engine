@@ -28,8 +28,9 @@ namespace NoxEngine {
 				return reinterpret_cast<T*>(ptr); 
 			};
 
-			// Useless virtual function to allow dynamic_cast to be used
-			virtual ~IComponent() {};
+			// What's the representation of this component in the inspector?
+			// This function being virtual also allows dynamic_cast to be used in CastType()
+			virtual void displayUI() {};
 	};
 }
 

@@ -15,6 +15,9 @@ namespace NoxEngine {
 		public:
 
 			PositionComponent(f32 newx = 0.0f, f32 newy = 0.0f, f32 newz = 0.0f);
+
+			void displayUI() override;
+
 	};
 }
 

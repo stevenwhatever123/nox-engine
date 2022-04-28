@@ -140,16 +140,11 @@ namespace NoxEngine {
 
 
 		// Setter: entity-level enable
-		inline void setEntityEnabled(bool aEnabled) { 
-			entityEnabled = aEnabled;
-		}
+		inline void setEntityEnabled(bool aEnabled) { entityEnabled = aEnabled; }
 		// Enable/disable components in this entity
 		void setEnabled(HasCompBitMask aEnabled) { _isEnabled = aEnabled; };
 		// base case: enable 1
 		template <typename T> void setEnabled(bool aEnabled) {
-			// change enable-ness on entity level
-			entityEnabled = aEnabled;
-
 			// TODO (Vincent): Fix w/ auto component id
 			T* tmp = new T();
 			HasCompBitMask mask = (1 << (tmp->id - 1));

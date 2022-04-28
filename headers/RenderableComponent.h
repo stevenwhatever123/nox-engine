@@ -15,6 +15,8 @@ namespace NoxEngine {
 		public:
 
 			RenderableComponent(f32 trX = 0.0f, f32 trY = 0.0f, f32 trZ = 0.0f, const char * texName = "");
+			void displayUI() override; 
+			
 			void prepTheData();
 
 			inline i32 getNumOfVertices() { return i32( verticesFin.size() / 3 ); }
