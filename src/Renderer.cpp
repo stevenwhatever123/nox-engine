@@ -376,7 +376,6 @@ void Renderer::createNormalsArray(IRenderable* mesh)
 }
 
 
-
 void Renderer::createElementArray(IRenderable* mesh)
 {
 
@@ -410,9 +409,6 @@ void Renderer::createElementArray(IRenderable* mesh)
 }
 
 
-
-
-
 void Renderer::createTangents(IRenderable* mesh)
 {
 
@@ -421,8 +417,17 @@ void Renderer::createTangents(IRenderable* mesh)
     Array<vec3> n = mesh->getNormals();
     Array<ivec3> elem = mesh->getFaces();
 
+
 	if(mesh->use_indices)
+	{
+		Array<vec3> newTangents(mesh->getNumOfVertices());
+		copy(newTangents.begin(), newTangents.end(), back_inserter(tangents));
+		numOfTangents += (i32)tangents.size();
+
 		return;
+	}
+
+
     i32 i = (i32) v[elem[0][0]].x;
 
     Array<vec3> newTangents(mesh->getNumOfVertices());
@@ -495,7 +500,7 @@ void Renderer::createTangents(IRenderable* mesh)
 
     // Add calculated tangents to the container
     copy(newTangents.begin(), newTangents.end(), back_inserter(tangents));
-    numOfTangents = (i32)tangents.size();
+    numOfTangents += (i32)tangents.size();
 }
 
 void Renderer::updateCamera()

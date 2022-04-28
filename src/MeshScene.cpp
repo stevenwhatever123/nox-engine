@@ -335,8 +335,18 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 
 		Mesh2* mesh = new Mesh2;
 
+		mesh->vertices.resize(scene->mNumMeshes);
+		mesh->normals.resize(scene->mNumMeshes);
+		mesh->faceIndices.resize(scene->mNumMeshes);
+		mesh->texCoord.resize(scene->mNumMeshes);
+
+
 		mesh->hasBones = pMesh->HasBones();
-		mesh->name = pMesh->mName.C_Str();
+
+		mesh->vertices[i].resize(pMesh->mNumVertices);
+		mesh->normals[i].resize(pMesh->mNumVertices);
+		mesh->texCoord[i].resize(pMesh->mNumVertices);
+		mesh->faceIndices[i].resize(pMesh->mNumFaces);
 
 		const bool has_texture = pMesh->HasTextureCoords(0);
 
@@ -344,14 +354,8 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 		const aiVector3D* pNormal = pMesh->mNormals;
 		const aiVector3D* pTexCoord = has_texture ? pMesh->mTextureCoords[0] : &zero3D;
 
-		// Resizing and reserve spaces
-		mesh->vertices.resize(pMesh->mNumVertices);
-		mesh->normals.resize(pMesh->mNumVertices);
-		mesh->texCoords.resize(pMesh->mNumVertices);
-		mesh->faceIndices.resize(pMesh->mNumFaces * 3);
+		for (u32 j = 0; j < pMesh->mNumVertices; ++j) {
 
-		for (u32 j = 0; j < pMesh->mNumVertices; ++j) 
-		{
 			mesh->vertices[i][j].x = (f32)pVertex->x;
 			mesh->vertices[i][j].y = (f32)pVertex->y;
 			mesh->vertices[i][j].z = (f32)pVertex->z;
@@ -360,12 +364,12 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 			mesh->normals[i][j].y = (f32)pNormal->y;
 			mesh->normals[i][j].z = (f32)pNormal->z;
 
-			mesh->texCoords[j].x = (f32)pTexCoord->x;
-			mesh->texCoords[j].y = (f32)pTexCoord->y;
+			mesh->texCoord[i][j].x = (f32)pTexCoord->x;
+			mesh->texCoord[i][j].y = (f32)pTexCoord->y;
 
 			pVertex++;
 			pNormal++;
-			if (has_texture) {
+			if(has_texture) {
 				pTexCoord++;
 			}
 		}
@@ -376,11 +380,10 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 
 			if (face->mNumIndices == 3)
 			{
-				mesh->faceIndices[i][j][0] = face->mIndices[0];
-				mesh->faceIndices[i][j][1] = face->mIndices[1];
-				mesh->faceIndices[i][j][2] = face->mIndices[2];
-			}
-			else {
+				mesh->faceIndices[i][j][0] = (i32)(face->mIndices[0]);
+				mesh->faceIndices[i][j][1] = (i32)(face->mIndices[1]);
+				mesh->faceIndices[i][j][2] = (i32)(face->mIndices[2]);
+			} else {
 				Logger::debug("Error: number of face indicies is less than 3");
 			}
 
@@ -388,9 +391,76 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 		}
 
 		mesh->prepTheData();
-
 		meshes.push_back(mesh);
+
 	}
+
+
+
+	// aiMesh** loadedMesh = scene->mMeshes;
+
+	// const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
+
+	// // Get vertex, normal and textcoord data
+	// for (u32 i = 0; i < scene->mNumMeshes; ++i) {
+
+	// 	const aiMesh* pMesh = loadedMesh[i];
+
+	// 	Mesh2* mesh = new Mesh2;
+
+	// 	mesh->hasBones = pMesh->HasBones();
+	// 	mesh->name = pMesh->mName.C_Str();
+
+	// 	const bool has_texture = pMesh->HasTextureCoords(0);
+
+	// 	const aiVector3D* pVertex = pMesh->mVertices;
+	// 	const aiVector3D* pNormal = pMesh->mNormals;
+	// 	const aiVector3D* pTexCoord = has_texture ? pMesh->mTextureCoords[0] : &zero3D;
+
+	// 	// Resizing and reserve spaces
+	// 	mesh->vertices.resize(pMesh->mNumVertices);
+	// 	mesh->normals.resize(pMesh->mNumVertices);
+	// 	mesh->texCoords.resize(pMesh->mNumVertices);
+	// 	mesh->faceIndices.resize(pMesh->mNumFaces * 3);
+
+	// 	for (u32 j = 0; j < pMesh->mNumVertices; ++j) 
+	// 	{
+	// 		mesh->vertices[i][j].x = (f32)pVertex->x;
+	// 		mesh->vertices[i][j].y = (f32)pVertex->y;
+	// 		mesh->vertices[i][j].z = (f32)pVertex->z;
+
+	// 		mesh->normals[i][j].x = (f32)pNormal->x;
+	// 		mesh->normals[i][j].y = (f32)pNormal->y;
+	// 		mesh->normals[i][j].z = (f32)pNormal->z;
+
+	// 		mesh->texCoords[j].x = (f32)pTexCoord->x;
+	// 		mesh->texCoords[j].y = (f32)pTexCoord->y;
+
+	// 		pVertex++;
+	// 		pNormal++;
+	// 		if (has_texture) {
+	// 			pTexCoord++;
+	// 		}
+	// 	}
+
+	// 	const aiFace* face = pMesh->mFaces;
+	// 	for (u32 j = 0; j < pMesh->mNumFaces; ++j)
+	// 	{
+
+	// 		if (face->mNumIndices == 3)
+	// 		{
+	// 			mesh->faceIndices[i][j][0] = face->mIndices[0];
+	// 			mesh->faceIndices[i][j][1] = face->mIndices[1];
+	// 			mesh->faceIndices[i][j][2] = face->mIndices[2];
+	// 		}
+	// 		else {
+	// 			Logger::debug("Error: number of face indicies is less than 3");
+	// 		}
+
+	// 		face++;
+	// 	}
+
+			// }
 }
 
 void MeshScene::extractTextureInfo(const aiScene* scene, Mesh2* mesh) {

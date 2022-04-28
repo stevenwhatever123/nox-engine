@@ -19,7 +19,6 @@ namespace NoxEngine {
 			RenderableComponent();
 
 			void* CastType(const i32 castID);
-			void prepTheData();
 
 			inline i32 getNumOfVertices() { return (i32)vertices.size(); }
 			inline i32 getNumOfTexCoord() { return (i32)texCoords.size(); }

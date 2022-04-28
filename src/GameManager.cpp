@@ -130,24 +130,14 @@ void GameManager::init_events() {
 			// Steven: That's how I would do it
 			// clean up: leaky mem
 			String file_name = va_arg(args, char*);
-
-			this->game_state.meshes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-
-			Entity *ent = new Entity();
-
-			RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-			PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
-
-			
 			this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
 			MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
 
 			i32 index = this->scene.entities.size();
-
 			// We're treating every mesh as an entity FOR NOW
 			for (u32 i = 0; i < meshScene.meshes.size(); i++)
 			{
-				Entity* ent = new Entity();
+				Entity *ent = new Entity();
 				RenderableComponent* comp = meshScene.meshes[i];
 				PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
 				ent->addComp(comp);
@@ -158,14 +148,6 @@ void GameManager::init_events() {
 				this->renderer->addObject(
 						reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
 						reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-						);
-			}
-
-			for (u32 i = index; i < this->scene.entities.size(); i++)
-			{
-				this->renderer->addObject(
-						reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
-						reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
 						);
 			}
 
@@ -195,7 +177,7 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(45.0f, 47.0f, 144.0f));
+	camera = new Camera(vec3(0.0f, 10.0f, 0.0f));
 	camera->turnVerBy(35.0f);
 }
 
@@ -221,15 +203,15 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
-	// GridObject obj(vec3(0, 0, 0), vec3(10, 0, 10), 5);
+	GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 500);
 
-	// renderer->addObject(
-	// 		static_cast<IRenderable*>(&obj),
-	// 		static_cast<IPosition*>(&obj)
-	// 		);
+	renderer->addObject(
+			static_cast<IRenderable*>(&obj),
+			static_cast<IPosition*>(&obj)
+			);
 
 
-	// renderer->updateBuffers();
+	renderer->updateBuffers();
 }
 
 void GameManager::init_imgui() {

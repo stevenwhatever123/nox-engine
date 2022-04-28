@@ -12,8 +12,8 @@ GridObject::GridObject(vec3 start_point, vec3 end_point, const i32 count_point)
 {
 
 	glRenderType = GL_LINES;
-	has_texture = 0;
-	has_normal  = 0;
+	has_texture = 1;
+	has_normal  = 1;
 	use_indices = 1;
 
 	x = start_point.x;
