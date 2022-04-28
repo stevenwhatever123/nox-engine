@@ -179,6 +179,9 @@
     <ClCompile Include="src\EngineGUI\ImGuiWidgets.cpp">
       <Filter>Source Files\EngineGUI</Filter>
     </ClCompile>
+    <ClCompile Include="src\EngineGUI\ComponetUI.cpp">
+      <Filter>Source Files\ECS\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Camera.h">
@@ -219,6 +222,9 @@
     </ClInclude>
     <ClInclude Include="headers\EngineGUI\ImGuiWidgets.h">
       <Filter>Header Files\EngineGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\EngineGUI\EngineGUI.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
