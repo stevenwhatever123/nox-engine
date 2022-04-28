@@ -61,6 +61,12 @@ namespace NoxEngine {
 		// bit field appears to be better for flags: https://www.reddit.com/r/cpp/comments/nou1rt/shocked_by_the_size_of_stdbitset/
 		HasCompBitMask hasComp;
 
+		// bitmask for which components are enabled/disabled. 1 = enabled, 0 = disabled
+		HasCompBitMask _isEnabled;
+
+		// Is the entire entity enabled/disabled?
+		bool entityEnabled;
+
 
 	protected:
 		// Constructors usable by Scene
@@ -80,17 +86,91 @@ namespace NoxEngine {
 		// TODO (Vincent): delete the components array and let the specialized component destroyer remove the reference in the subsystem?
 		~Entity();
 
+		// Check whether this entity has the specified components
 		bool containsComps(HasCompBitMask mask);
+		// base case: check for 1 component
+		template <typename T> bool containsComp() {
+			// TODO (Vincent): Fix w/ auto component id
+			T* tmp = new T();
+			return containsComps(1 << (tmp->id - 1));
+		}
+		template <typename T, typename... Types> bool containsComps() {
+			return containsComp<T>() && containsComps<Types>();
+		}
+
 			
-		// Add a component to the entity
+		// Add component(s) to the entity (call default constructors)
 		void addComp(ComponentType type);
-		template <typename T> void addComp(T *comp);
+
+		// Add an instantiated component to the entity
+		// hasComp is updated here
+		template <typename T> void addComp(T* comp);
+
+		// Base case: add 1 component
+		template <typename T> void addComp() {
+			T* comp = new T();
+			addComp<T>(comp);
+		}
+		template <typename T, typename... Types> void addComps() {
+			addComp<T>();			// add base case
+			addComps<Types>();		// deal with the remaining cases
+		}
+
+
+		// Remove all specified components (even if it doesn't have the component type)
+		//bool removeComps(HasCompBitMask mask);
+		// base case: remove 1 component
+		// Returns the number of components removed
+		template <typename T> size_t removeComp() {
+			// Update bitmask
+			// TODO (Vincent): Fix w/ auto component id
+			T* tmp = new T();
+			hasComp &= ~(1 << (tmp->id - 1));
+
+			// remove component
+			return components.erase(typeid(T));
+		}
+		template <typename T, typename... Types> size_t removeComps() {
+			return removeComp<T>() + removeComp<Types>();
+		}
+
 
 		// Gets the component with the type provided. If no such comp -> through error and return
-		template <typename T>
-		T *getComp();
+		template <typename T> T *getComp();
 
-		// Enable/disable all components in this entity
-		void setEnabled(bool);
+
+		// Setter: entity-level enable
+		inline void setEntityEnabled(bool aEnabled) { 
+			entityEnabled = aEnabled;
+		}
+		// Enable/disable components in this entity
+		void setEnabled(HasCompBitMask aEnabled) { _isEnabled = aEnabled; };
+		// base case: enable 1
+		template <typename T> void setEnabled(bool aEnabled) {
+			// change enable-ness on entity level
+			entityEnabled = aEnabled;
+
+			// TODO (Vincent): Fix w/ auto component id
+			T* tmp = new T();
+			HasCompBitMask mask = (1 << (tmp->id - 1));
+			if (aEnabled) _isEnabled |= mask;
+			else          _isEnabled &= ~mask;
+		}
+		template <typename T, typename Types> void setEnabled(bool aEnabled) {
+			setEnabled<T>(aEnabled);		// base case
+			setEnabled<Types>(aEnabled);	// remaining types
+		}
+
+
+		// Getter: is the entity enabled?
+		inline bool isEntityEnabled() { return entityEnabled; }
+		// Check whether a component is enabled
+		bool isEnabled(u32 bit);
+		template <typename T> bool isEnabled() {
+			// TODO (Vincent): Fix w/ auto component id
+			T* tmp = new T();
+			HasCompBitMask maskSingleBit = (1 << (tmp->id - 1));
+			return _isEnabled & maskSingleBit;
+		}
 	};
 }

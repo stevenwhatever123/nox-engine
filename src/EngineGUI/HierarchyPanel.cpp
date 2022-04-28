@@ -40,9 +40,11 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 			// TODO: Visibility checkbox
 
 			// Visibility check box
+			bool enable = ent->isEntityEnabled();
 			ImGui::PushID(i);
-			ImGui::Checkbox("", &ent->isVisible);
+			ImGui::Checkbox("", &enable);
 			ImGui::PopID();
+			ent->setEntityEnabled(enable);
 
 			char uniqueNameBuf[16];
 			snprintf(uniqueNameBuf, 16, "%i", i);

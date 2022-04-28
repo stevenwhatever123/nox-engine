@@ -98,9 +98,46 @@ void GameManager::init_window() {
 
 }
 
+// Similar to activateScene
 void GameManager::init_ecs() {
 
 	initComponentTypes();
+
+	// cleanup all subsystems
+
+	// loop through all existing entities (loaded from a file?)
+		// add to subsystems
+
+	// prepare entities for subsystems
+
+}
+
+void GameManager::addCompToSubSys(u32 ind) {
+
+	Entity* ent = game_state.activeScene->entities[ind];
+
+	// Check what comp the entity has (bitmask)
+	// Renderer
+	if (ent->containsComp<RenderableComponent>()) {
+
+		// Does it has a position? If so then grab it; otherwise use the default
+		IPosition* pos = new IPosition();
+		if (ent->containsComp<PositionComponent>()) pos = ent->getComp<PositionComponent>()->CastType<IPosition>();
+
+		renderer->addObject(
+			ent->getComp<RenderableComponent>()->CastType<IRenderable>(), 
+			pos
+		);
+	}
+		
+
+		// Light
+	//if (gameObj->hasComp & 4)
+
+	// Audio
+	//if (gameObj->hasComp & 8)
+
+
 }
 
 void GameManager::init_events() {
@@ -112,7 +149,8 @@ void GameManager::init_events() {
 		// this->game_state.meshes.emplace(file_name, pScene);
 
 
-		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity
+		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
+		//                 because the entity ID is managed by the scene
 		Entity *ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
 
 		// TODO: load and sent mesh data to renderable component

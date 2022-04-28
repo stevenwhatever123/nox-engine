@@ -35,7 +35,10 @@ namespace NoxEngine {
 		// Add an entity of a preset type, so it has components predefined in it
 		void addEntity(NoxEngineGUI::PresetObject obj);
 
-		//void removeEntity(i32 entID);
+		//void removeEntity(u32 entID);
+
+		// Return a list of entities that have the specified components
+		template <typename T, typename Types> std::vector<Entity*> getEntities();
 
 
 	private:

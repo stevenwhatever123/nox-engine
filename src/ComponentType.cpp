@@ -33,4 +33,9 @@ void NoxEngine::initComponentTypes() {
 		{ AudioSourceType,	"Audio Source Component" },
 		{ ScriptType,		"Script Component" }
 	};
+
+	// assert every type has a name
+	for (int i = 0; i < ComponentType::ComponentTypeCount; i++) {
+		assert(kComponentTypeNames.find(static_cast<ComponentType>(i)) != kComponentTypeNames.end() && "A component type must have a name as a string - define it!");
+	}
 }

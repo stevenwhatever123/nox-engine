@@ -220,9 +220,6 @@
     <ClInclude Include="headers\EngineGUI\ImGuiWidgets.h">
       <Filter>Header Files\EngineGUI</Filter>
     </ClInclude>
-    <ClInclude Include="headers\EngineGUI\EngineGUI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdParty\headers\imgui\imgui_freetype.h">

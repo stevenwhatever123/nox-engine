@@ -17,7 +17,8 @@ Entity::Entity(i32 _id, char* _name)
 	: 
 	id(_id), 
 	hasComp(0),
-	isVisible(true) {
+	_isEnabled(~0),
+	entityEnabled(true) {
 
 	if (_name != nullptr) name = _name;
 	else name = (char *)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
@@ -26,7 +27,8 @@ Entity::Entity(i32 _id, char* _name)
 Entity::Entity(Scene* scene, char* _name)
 	:
 	hasComp(0),
-	isVisible(true) {
+	_isEnabled(~0),
+	entityEnabled(true) {
 
 	assert(scene != nullptr);
 
@@ -37,14 +39,15 @@ Entity::Entity(Scene* scene, char* _name)
 	else {
 		// placeholder name
 		name = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
-		snprintf(name, ENTITY_NAME_MAX_LEN, "Game Object %i", scene->nEntitiesAdded + 1);
+		snprintf(name, ENTITY_NAME_MAX_LEN, "Entity %i", scene->nEntitiesAdded + 1);
 	}
 }
 
 Entity::Entity(Scene* scene, const char* _name)
 	:
 	hasComp(0),
-	isVisible(true) {
+	_isEnabled(~0),
+	entityEnabled(true) {
 
 	assert(scene != nullptr);
 
@@ -55,7 +58,14 @@ Entity::Entity(Scene* scene, const char* _name)
 	memcpy(name, _name, ENTITY_NAME_MAX_LEN);
 }
 
-Entity::Entity(Entity&& other) : id(other.id), hasComp(other.hasComp), components(other.components), name(other.name), isVisible(other.isVisible) {
+Entity::Entity(Entity&& other) 
+	: 
+	id(other.id), 
+	hasComp(other.hasComp), 
+	components(other.components), 
+	name(other.name), 
+	_isEnabled(other._isEnabled),
+	entityEnabled(true) {
 }
 
 Entity::~Entity() {
@@ -67,30 +77,19 @@ Entity::~Entity() {
 
 
 bool Entity::containsComps(HasCompBitMask mask) {
-	return (hasComp & mask) == mask;
+	return !((hasComp & mask) ^ mask);
 }
 
-// TODO (Vincent): Extremely ugly solution, think of a better way
+// TODO (Vincent): Extremely ugly solution, is there a better way?
 //				   The problem is that a class cannot be stored in a map
 void Entity::addComp(ComponentType type) {
 
-	if (type == PositionType) {
-		PositionComponent* pos = new PositionComponent();
-		addComp<PositionComponent>(pos);
-	}
+	switch (type) {
 
-	else if (type == RenderableType) {
-		RenderableComponent* rend = new RenderableComponent();
-		addComp<RenderableComponent>(rend);
+	case PositionType:		addComp<PositionComponent>(); break;
+	case RenderableType:	addComp<RenderableComponent>(); break;
+	default:				Logger::debug("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
 	}
-
-	else {
-		Logger::debug("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
-	}
-
-	// If there is a way to pass in T in a iterable fashion, this can be used instead:
-	//T* comp = new T();
-	//addComp<T>(comp);
 }
 
 
@@ -148,6 +147,11 @@ T *Entity::getComp() {
 
 	// Component does not exist in this entity
 	return nullptr;
+}
+
+
+bool Entity::isEnabled(u32 bit) {
+	return _isEnabled & (1 << (bit - 1));
 }
 
 
