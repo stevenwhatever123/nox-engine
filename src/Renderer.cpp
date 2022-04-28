@@ -421,7 +421,8 @@ void Renderer::createTangents(IRenderable* mesh)
     Array<vec3> n = mesh->getNormals();
     Array<ivec3> elem = mesh->getFaces();
 
-	return;
+	if(mesh->use_indices)
+		return;
     i32 i = (i32) v[elem[0][0]].x;
 
     Array<vec3> newTangents(mesh->getNumOfVertices());

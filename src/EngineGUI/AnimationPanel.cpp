@@ -5,7 +5,7 @@
 #include <limits>
 #define NOMINMAX
 
-#include <Windows.h>
+// #include <Windows.h>
 #include <math.h>
 #include <FBXFileLoader.h>
 #include <EventManager.h>
@@ -33,7 +33,7 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 		String picked_file = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
 		if (picked_file.length() > 0)
 		{
-			SIGNAL_EVENT(EventNames::meshAdded, picked_file);
+			SIGNAL_EVENT(EventNames::meshAdded, picked_file.c_str());
 		}
 	}
 

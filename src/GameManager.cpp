@@ -129,7 +129,7 @@ void GameManager::init_events() {
 
 			// Steven: That's how I would do it
 			// clean up: leaky mem
-			String file_name = va_arg(args, String);
+			String file_name = va_arg(args, char*);
 
 			this->game_state.meshes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
 
@@ -221,15 +221,15 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
-	GridObject obj(vec3(0, 0, 0), vec3(10, 0, 10), 5);
+	// GridObject obj(vec3(0, 0, 0), vec3(10, 0, 10), 5);
 
-	renderer->addObject(
-			static_cast<IRenderable*>(&obj),
-			static_cast<IPosition*>(&obj)
-			);
+	// renderer->addObject(
+	// 		static_cast<IRenderable*>(&obj),
+	// 		static_cast<IPosition*>(&obj)
+	// 		);
 
 
-	renderer->updateBuffers();
+	// renderer->updateBuffers();
 }
 
 void GameManager::init_imgui() {
@@ -266,7 +266,7 @@ void GameManager::main_contex_ui() {
 
 
 	// Pass texture rendered to to ImGUI
-	ImGui::Image((ImTextureID)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)(u64)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGui::End();
 }

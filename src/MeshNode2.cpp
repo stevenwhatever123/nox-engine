@@ -22,8 +22,7 @@ glm::mat4 MeshNode2::getTransformation(u32 frameIndex, u32 animationIndex)
 }
 
 // Linear interpolated transformation
-glm::mat4 MeshNode2::getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, f32 timeStep,
-	i32 whichTickFloor, i32 whichTickCeil)
+glm::mat4 MeshNode2::getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil)
 {
 	if (!hasAnimations())
 		return getTransformation();
@@ -141,7 +140,7 @@ glm::mat4 MeshNode2::getGlobalTransformation(u32 frameIndex, u32 animationIndex)
 }
 
 // Linear interpolated global transformation
-glm::mat4 MeshNode2::getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, f32 timeStep,
+glm::mat4 MeshNode2::getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep,
 	i32 whichTickFloor, i32 whichTickCeil)
 {
 	glm::mat4 transformatiom_temp(1);
@@ -243,7 +242,7 @@ void MeshNode2::updateAnimationSize(u32 animationIndex, u32 num)
 {
 	if (hasAnimations())
 	{
-		u32 currentSize = nodeAnimTransformation[animationIndex].size();
+		u32 currentSize = (u32)nodeAnimTransformation[animationIndex].size();
 		if (num > 0)
 		{
 			if (num < currentSize)
@@ -305,7 +304,7 @@ void MeshNode2::insertFrameAfter(u32 animationIndex, u32 selectedFrame)
 {
 	if (hasAnimations())
 	{
-		u32 animationSize = nodeAnimTransformation[animationIndex].size();
+		u32 animationSize = (u32)nodeAnimTransformation[animationIndex].size();
 		updateMaximumFrame(animationIndex, animationSize + 1);
 
 		glm::mat4 lastFrameTransformation = nodeAnimTransformation[animationIndex][selectedFrame];
@@ -332,7 +331,7 @@ void MeshNode2::insertFrameAfter(u32 animationIndex, u32 selectedFrame)
 
 u32 MeshNode2::getNumOfAnimations()
 {
-	return nodeAnimTransformation.size();
+	return (u32)nodeAnimTransformation.size();
 }
 
 bool MeshNode2::hasAnimations()
