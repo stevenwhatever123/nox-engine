@@ -390,7 +390,7 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 			face++;
 		}
 
-		mesh->prepTheData();
+		// mesh->prepTheData();
 		meshes.push_back(mesh);
 
 	}

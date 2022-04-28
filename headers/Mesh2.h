@@ -40,7 +40,6 @@ namespace NoxEngine {
 		const char* normTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg";
 		
 		void* CastType(const i32 castID);
-		void prepTheData();
 	
 	};
 }
