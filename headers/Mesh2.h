@@ -25,11 +25,6 @@ namespace NoxEngine {
 		String name;
 		bool hasBones;
 
-		Array<Array<vec3>> vertices;
-		Array<Array<vec3>> normals;
-		Array<Array<ivec3>>faceIndices;
-		Array<Array<vec2>> texCoord;
-
 		void setTexture(const char* filename);
 
 		const String getNormalTexture() { return normTexName; }
