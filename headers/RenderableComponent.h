@@ -28,7 +28,7 @@ namespace NoxEngine {
 			inline f32* getArrayOfVertices() { return verticesFin.data(); }
 			inline f32* getArrayOfTexCoord() { return texCoordFin.data(); }
 			inline f32* getArrayOfNormals()  { return normalsFin.data(); }
-			inline i32 getNumOfElements()    { return (i32)( elements.size() / 3 ); }
+			inline i32 getNumOfElements()    { return (i32)( elements.size()); }
 			inline i32* getArrayOfElements() { return elements.data(); }
 
 			inline const char* getNormalTexture() { return "assets/meshes/textures/leaves_normal.jpg"; }

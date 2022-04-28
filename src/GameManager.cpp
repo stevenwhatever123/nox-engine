@@ -127,66 +127,69 @@ void GameManager::init_events() {
 
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
 
-		// Steven: That's how I would do it
-		// clean up: leaky mem
-		String file_name = va_arg(args, String);
-		this->game_state.meshes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+		//// Steven: That's how I would do it
+		//// clean up: leaky mem
+		//String file_name = va_arg(args, String);
+		//this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+		////MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
+		//MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
+
+		//i32 index = this->scene.entities.size();
+
+		//// We're treating every mesh as an entity FOR NOW
+		//for (u32 i = 0; i < meshScene.meshes.size(); i++)
+		//{
+		//	Entity* ent = new Entity();
+		//	RenderableComponent* comp = meshScene.meshes[i];
+		//	PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+		//	ent->addComp(comp);
+		//	ent->addComp(pos);
+
+		//	this->scene.addEntity(ent);
+
+		//	this->renderer->addObject(
+		//			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+		//			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+		//			);
+		//}
 
 		Entity *ent = new Entity();
 
-			RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-			PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+		PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+		ent->addComp(comp);
+		ent->addComp(pos);
+		this->scene.addEntity(ent);
 
-		//Mesh* mesh = new Mesh(NoxEngine::readFBX(file_name.c_str()));
-		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
-		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
-		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-		//MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
-		MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
+		this->renderer->addObject(
+			reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+			reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+		);
 
-		i32 index = this->scene.entities.size();
+		Entity* ent2 = new Entity();
 
-		// We're treating every mesh as an entity FOR NOW
-		for (u32 i = 0; i < meshScene.meshes.size(); i++)
-		{
-			Entity* ent = new Entity();
-			RenderableComponent* comp = meshScene.meshes[i];
-			PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
-			ent->addComp(comp);
-			ent->addComp(pos);
+		RenderableComponent* comp2 = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+		PositionComponent* pos2 = new PositionComponent(5.0, 0.0, 0.0);
+		ent2->addComp(comp2);
+		ent2->addComp(pos2);
+		this->scene.addEntity(ent2);
 
-			this->scene.addEntity(ent);
+		this->renderer->addObject(
+			reinterpret_cast<IRenderable*>(ent2->getComp(2)->CastType(2)),
+			reinterpret_cast<IPosition*>(ent2->getComp(1)->CastType(2))
+		);
 
-			this->renderer->addObject(
-					reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-					reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-					);
-		}
+		this->renderer->updateBuffers();
 
-		//Entity *ent = new Entity();
+		//for (u32 i = index; i < this->scene.entities.size(); i++)
+		//{
+		//	this->renderer->addObject(
+		//		reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
+		//		reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
+		//	);
+		//}
 
-		//RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-		//PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
-		//ent->addComp(comp);
-		//ent->addComp(pos);
-		//this->scene.addEntity(ent);
-
-		//this->renderer->addObject(
-		//	reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-		//	reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-		//);
-
-		//this->renderer->updateBuffers();
-
-		for (u32 i = index; i < this->scene.entities.size(); i++)
-		{
-			this->renderer->addObject(
-				reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
-				reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
-			);
-		}
-
-			this->renderer->updateBuffers();
+		//	this->renderer->updateBuffers();
 
 	});
 
@@ -212,8 +215,13 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(45.0f, 47.0f, 144.0f));
-	// camera->turnVerBy(35.0f);
+	//camera = new Camera(vec3(45.0f, 47.0f, 144.0f));
+	//camera->turnVerBy(35.0f);
+
+	camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f));
+	//camera->turnHorBy(20.0f);
+	//camera->turnVerBy(20.0f);
+
 }
 
 void GameManager::init_shaders() {
@@ -227,9 +235,7 @@ void GameManager::init_shaders() {
 		{ "assets/shaders/fragmentShader.fs", GL_FRAGMENT_SHADER, 0 }
 	});
 
-
-
-	current_program = &programs.back();
+	current_program = &programs[0];
 }
 
 void GameManager::init_animation() {
@@ -240,13 +246,8 @@ void GameManager::init_animation() {
 
 void GameManager::init_renderer() { 
 	renderer = new Renderer(win_width, win_height, camera);
-	// renderer->setProgram(current_program);
-	// renderer->useProgram();
-
-	renderer->setProgram(&programs[1]);
-	// renderer->useProgram();
-
-	programs[1].use();
+	renderer->setProgram(current_program);
+	renderer->useProgram();
 
 	//set images
 	std::string texturenumber;
@@ -277,7 +278,8 @@ void GameManager::init_renderer() {
 	// 		static_cast<IPosition*>(&obj)
 	// 		);
 
-	// renderer->updateBuffers();
+	//renderer->updateBuffers();
+
 	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
 	// Mesh *mesh = NoxEngine::getMesh(pScene);
 
@@ -415,8 +417,6 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
-	renderer->setFrameBufferToTexture();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// auto meshSceneStart = game_state.meshScenes.begin();
 	// auto meshSceneEnd = game_state.meshScenes.end();
 	// for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
@@ -446,12 +446,22 @@ void GameManager::update_renderer() {
 	// 	}
 	// }
 
+	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 
-	// renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-
+	renderer->fillBackground(ui_params.sceneBackgroundColor);
 	
+	// Skybox Shader
+	current_program = &programs[1];
+	renderer->setProgram(current_program);
+	renderer->useProgram();
+
 	renderer->drawSkyBox();
 
-	//renderer->draw();
+	// The normal shader
+	current_program = &programs[0];
+	renderer->setProgram(current_program);
+	renderer->useProgram();
+
+	renderer->draw();
 }
 

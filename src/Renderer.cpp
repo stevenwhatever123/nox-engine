@@ -65,7 +65,8 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
-	// glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+    glDepthMask(GL_TRUE);
 
 	// Create framebuffer  
 	glGenFramebuffers(1, &FBO);
@@ -235,13 +236,15 @@ void Renderer::draw() {
 	program->use();
 	setFrameBufferToTexture();	
 
+    glDepthFunc(GL_LESS);
+
 	glBindVertexArray(VAO);
 
 	for (u32 i = 0; i < objects.size(); i++)
 	{
         program->set4Matrix("toWorld", objects[i].pos);
 
-        program->set4Matrix("modelMatrix", objects[i].transformation);
+        program->set4Matrix("modelMatrix", glm::mat4(1));
 
         // Activate and bind textures of the object
         glActiveTexture(GL_TEXTURE0 + 1);
@@ -251,10 +254,7 @@ void Renderer::draw() {
         glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
 
         // Draw the object
-        glDrawElements(GL_TRIANGLES, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
-
-		// Draw the object
-		glDrawElements(objects[i].renderType, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
+        glDrawElements(objects[i].renderType, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(unsigned int))); // IMPORTANT (void*)(6*3 * sizeof(unsigned int))
 	}
 
 
@@ -679,7 +679,9 @@ void Renderer::drawSkyBox()
     setFrameBufferToTexture();
 
     // draw skybox 
-    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_FALSE);
+    //glDepthFunc(GL_LEQUAL);
+    glDisable(GL_CULL_FACE);
 
     glBindVertexArray(skyVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
@@ -694,6 +696,11 @@ void Renderer::drawSkyBox()
     program->set4Matrix("projection", projection);
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    // Reset everything back to normal
+    glEnable(GL_CULL_FACE);
+    glDepthMask(GL_TRUE);
+
     setFrameBufferToDefault();
 
     glBindVertexArray(0);
