@@ -1,5 +1,4 @@
 #include <GameManager.h>
-#include <glm/gtx/string_cast.hpp>
 
 #include <filesystem>
 #include <Entity.h>
@@ -21,15 +20,16 @@ GameManager::GameManager() :
 	title(WINDOW_TITLE),
 	ui_params(),
 	should_close(false),
-	keys()
+	keys(),
+	game_state()
 {
 }
 
 void GameManager::init() {
 	LOG_DEBUG("Initing systems");
 	init_window();
-	init_ecs();
 	init_scene();
+	init_ecs();
 	init_events();
 	init_audio();
 	init_camera();
@@ -280,7 +280,7 @@ void GameManager::init_renderer() {
 
 	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
 
-	renderer->addObject(obj);
+	// renderer->addObject(obj);
 
 	renderer->updateBuffers();
 }
@@ -358,11 +358,7 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateScenePanel(&game_state);
 	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
 	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateImGuizmoDemo(&ui_params);
-
-	ImGui::Begin("Light Settings");
-	ImGui::DragFloat3("Position", game_state.light);
-	ImGui::End();
+	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::PopFont();
 	ImGui::Render();

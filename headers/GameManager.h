@@ -1,7 +1,6 @@
 #pragma once
 
 // 3rd Party Include
-#include <Windows.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
