@@ -40,10 +40,10 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				bool expand = ImGui::TreeNode("Position");		// TODO (Vincent): How to change the width of treenode?
 
 				ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
-				ImGui::Checkbox("##ComponentEnableCheckbox", &enable);
+				ImGui::Checkbox("##EnablePos", &enable);
 
 				ImGui::SameLine();
-				bool remove = ImGui::SmallButton("-##RemoveComp");	//TODO: Use ImageButton?
+				bool remove = ImGui::SmallButton("-##RemovePos");	//TODO: Use ImageButton?
 
 				ent->setEnabled<PositionComponent>(enable);
 
@@ -79,10 +79,10 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				bool expand = ImGui::TreeNode("Renderable");		// TODO (Vincent): How to change the width of treenode?
 
 				ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
-				ImGui::Checkbox("##ComponentEnableCheckbox", &enable);
+				ImGui::Checkbox("##EnableRend", &enable);
 
 				ImGui::SameLine();
-				bool remove = ImGui::SmallButton("-##RemoveComp");	//TODO: Use ImageButton?
+				bool remove = ImGui::SmallButton("-##RemoveRend");	// TODO: Use ImageButton?
 
 				ent->setEnabled<RenderableComponent>(enable);
 
@@ -93,7 +93,11 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 					IRenderable* rend = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
 
-					ImGui::Text("Some rendering parameters");
+					ImGui::Text("Ambient Texture");
+					ImGui::Text("Diffuse Map");
+					ImGui::Text("Specular Map");
+					ImGui::DragFloat3("Colour", rend->color);
+
 					ImGui::TreePop();
 
 					// End: grey out

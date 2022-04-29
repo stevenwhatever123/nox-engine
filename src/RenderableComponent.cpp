@@ -91,12 +91,14 @@ RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const char *
 
 	};
 
-	for (i32 i = 0; i < verticesPreped.size()/3; i++)
-	{
-		verticesPreped[i * 3	  ] += trX;
-		verticesPreped[i * 3 + 1] += trY;
-		verticesPreped[i * 3 + 2] += trZ;
-	}
+	// Steven: I have no idea what is this doing
+	// Removing this still works
+	//for (i32 i = 0; i < verticesPreped.size()/3; i++)
+	//{
+	//	verticesPreped[i * 3	  ] += trX;
+	//	verticesPreped[i * 3 + 1] += trY;
+	//	verticesPreped[i * 3 + 2] += trZ;
+	//}
 
 
 
@@ -104,6 +106,13 @@ RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const char *
 
 }
 
+RenderableComponent::RenderableComponent(const char* texName)
+{
+	id = ComponentType::RenderableType;
+	ambTexName = texName;
+
+	prepTheData();
+}
 
 void RenderableComponent::prepTheData()
 {

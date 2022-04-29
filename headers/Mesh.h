@@ -25,7 +25,6 @@ namespace NoxEngine {
 			void resizeNumOfMeshes(u32 i);
 			void resizeNumOfAnimations(u32 i);
 
-			void importAnimationData(aiScene* scene);
 			void createNodeHierarchy(aiNode* aiRootnode, MeshNode* rootNode);
 			void calculateCenterPosition();
 
@@ -39,7 +38,6 @@ namespace NoxEngine {
 			void resetFrameIndex();
 
 			void flipUV();
-			void prepForRenderer();
 
 			u32 getNumOfAnimations();
 			glm::mat4 getGlobalTransformation(MeshNode currentNode);

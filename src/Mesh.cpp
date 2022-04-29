@@ -19,6 +19,8 @@ Mesh::Mesh(const aiScene *scene) :
 	whichTickCeil(0)
 {
 
+	std::cout << "Number of meshes: " << scene->mNumMeshes << "\n";
+
 	extractGeometricInfo(scene);
 
 	// extractTextureInfo(scene);

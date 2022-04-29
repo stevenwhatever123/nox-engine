@@ -17,18 +17,21 @@
 #include <GLProgram.h>
 #include <Singleton.h>
 #include <IPosition.h>
+#include <Entity.h>
 
 namespace NoxEngine {
 
 	// The objects to render
 	struct RendObj
 	{
-		IRenderable* objPtr; // A pointer to the object
+		Entity* ent;
 		i32 startInd;
 		i32 endInd; // Start and end indixes in the a united element array 
 		GLuint normalTexture;
 		GLuint ambientTexture; // Texture handlers
 		glm::mat4 pos;
+
+		glm::mat4 transformation;
 	};
 	
 
@@ -115,7 +118,7 @@ namespace NoxEngine {
 		~Renderer();
 
 		// Add object to renderer to render
-		void addObject(IRenderable *mesh, IPosition *pos);
+		void addObject(Entity *ent);
 		void clearObject();
 		
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
@@ -152,5 +155,6 @@ namespace NoxEngine {
 		void updateCamera();
 		void updateLightPos(float x, float y, float z);
 
+		void updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable);
 	};
 }

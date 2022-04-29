@@ -1,4 +1,5 @@
 #include <GameManager.h>
+#include <glm/gtx/string_cast.hpp>
 
 #include <filesystem>
 
@@ -33,6 +34,7 @@ void GameManager::update() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	update_inputs();
+	update_ecs();
 	update_audio();
 	update_renderer();
 	update_gui();
@@ -65,6 +67,36 @@ void GameManager::addMesh(String name, Mesh m) {
 
 	// game_state.audioSources.emplace(audioSource.name, audioSource);
 	// audioManager->LoadSound(audioSource.file);
+}
+
+
+void GameManager::addCompToSubSys(u32 ind) {
+
+	Entity* ent = game_state.activeScene->entities[ind];
+
+	// Check what comp the entity has (bitmask)
+	// Renderer
+	if (ent->containsComps<PositionComponent, RenderableComponent>()) {
+
+		renderer->addObject(ent);
+	}
+
+
+	// Light
+	//if (gameObj->hasComp & 4)
+
+	// Audio
+	//if (gameObj->hasComp & 8)
+
+
+}
+
+
+// Whenever an entity is created, modified, or deleted, call this function
+// This is done to simplify code since previously we had renderer->addObject() everywhere
+void GameManager::scheduleUpdateECS() {
+
+	updateNeededECS = true;
 }
 
 
@@ -105,38 +137,12 @@ void GameManager::init_ecs() {
 
 	// cleanup all subsystems
 
+	update_ecs();
+
 	// loop through all existing entities (loaded from a file?)
 		// add to subsystems
 
 	// prepare entities for subsystems
-
-}
-
-void GameManager::addCompToSubSys(u32 ind) {
-
-	Entity* ent = game_state.activeScene->entities[ind];
-
-	// Check what comp the entity has (bitmask)
-	// Renderer
-	if (ent->containsComp<RenderableComponent>()) {
-
-		// Does it has a position? If so then grab it; otherwise use the default
-		IPosition* pos = new IPosition();
-		if (ent->containsComp<PositionComponent>()) pos = ent->getComp<PositionComponent>()->CastType<IPosition>();
-
-		renderer->addObject(
-			ent->getComp<RenderableComponent>()->CastType<IRenderable>(), 
-			pos
-		);
-	}
-		
-
-		// Light
-	//if (gameObj->hasComp & 4)
-
-	// Audio
-	//if (gameObj->hasComp & 8)
-
 
 }
 
@@ -148,19 +154,38 @@ void GameManager::init_events() {
 		// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
 		// this->game_state.meshes.emplace(file_name, pScene);
 
+		//Mesh* mesh = new Mesh(NoxEngine::readFBX(file_name.c_str()));
+		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
+		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
+		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+		//MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
+		MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
 
-		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
-		//                 because the entity ID is managed by the scene
-		Entity *ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
+		i32 index = game_state.activeScene->entities.size();
 
-		// TODO: load and sent mesh data to renderable component
-		RenderableComponent* comp = new RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
-		PositionComponent* pos = new PositionComponent(0.0, 2.0, 0.0);
+		// We're treating every mesh as an entity FOR NOW
+		for (u32 i = 0; i < meshScene.meshes.size(); i++)
+		{
+			// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
+			//                 because the entity ID is managed by the scene
+			Entity *ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
 
-		ent->addComp<RenderableComponent>(comp);
-		ent->addComp<PositionComponent>(pos);
+			RenderableComponent* comp = meshScene.meshes[i];
+			PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
 
-		game_state.activeScene->addEntity(ent);
+			ent->addComp<RenderableComponent>(comp);
+			ent->addComp<PositionComponent>(pos);
+
+			game_state.activeScene->addEntity(ent);
+		}
+
+		for (u32 i = index; i < game_state.activeScene->entities.size(); i++)
+		{
+			addCompToSubSys(i);
+		}
+
+		this->renderer->updateBuffers();
+
 	});
 
 
@@ -184,8 +209,10 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(glm::vec3(0.0f, 7.0f, 10.0f));
-	camera->turnVerBy(20.0f);
+	//camera = new Camera(glm::vec3(0.0f, 70.0f, 10.0f));
+	camera = new Camera(glm::vec3(10.0f, 20.0f, 150.0f));
+	//camera = new Camera(glm::vec3(0.0f, 70.0f, 100.0f));
+	//camera->turnVerBy(20.0f);
 }
 
 void GameManager::init_shaders() {
@@ -313,6 +340,40 @@ void GameManager::update_gui() {
 }
 
 
+void GameManager::update_ecs() {
+
+	if (!updateNeededECS) return;
+
+	bool updateRenderer = false;
+	bool updateAudioManager = false;
+
+	// loop through all entities, add to subsystems if needed
+	for (Entity* ent : game_state.activeScene->entities) {
+
+		// Renderer
+		if (ent->containsComps<PositionComponent, RenderableComponent>()) {
+
+			IRenderable* rend = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
+
+			// Don't add again if the entity is already registered
+			if (!rend->registered) {
+				renderer->addObject(ent);
+				rend->registered = true;
+
+				updateRenderer = true;		// Object needed, so renderer update is needed
+			}
+		}
+
+		// Audio
+
+	}
+
+	// update subsystems if needed
+	if (updateRenderer) renderer->updateBuffers();
+	//if (updateAudioManager) audioManager->...
+}
+
+
 void GameManager::update_audio() {
 
 	// Sync audio manager with the game state's audio repo
@@ -336,16 +397,64 @@ void GameManager::update_animation() {
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
 
-	auto meshStart = game_state.meshes.begin();
-	auto meshEnd = game_state.meshes.end();
+	//auto meshStart = game_state.meshes.begin();
+	//auto meshEnd = game_state.meshes.end();
+	auto meshSceneStart = game_state.meshScenes.begin();
+	auto meshSceneEnd = game_state.meshScenes.end();
 
-	for(;meshStart != meshEnd; meshStart++) {
-		meshStart->second.update(deltaTime);
+	for(; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	{
+		if (meshSceneStart->second.playAnimation)
+		{
+			if (meshSceneStart->second.hasAnimations())
+			{
+				if (meshSceneStart->second.frameIndex
+					== meshSceneStart->second.numTicks[meshSceneStart->second.animationIndex] - 1)
+				{
+					meshSceneStart->second.resetAnimation();
+					meshSceneStart->second.playAnimation = !meshSceneStart->second.playAnimation;
+				}
+			}
+			meshSceneStart->second.update(deltaTime);
+		}
+		// Because we're not updating frame index we still need tick floor and ceil to get our transform
+		meshSceneStart->second.updateCeilAndFloor();
 	}
 
 }
 
 void GameManager::update_renderer() {
+	auto meshSceneStart = game_state.meshScenes.begin();
+	auto meshSceneEnd = game_state.meshScenes.end();
+	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	{
+		MeshScene &currentMeshScene = meshSceneStart->second;
+		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
+		{
+			MeshNode2* node = meshSceneStart->second.allNodes[i];
+
+			if (node->meshIndex.size() > 0)
+			{
+				Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
+				if (node->hasAnimations())
+				{
+					glm::mat4 transformation = node->getGlobalTransformation(
+						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
+						currentMeshScene.accumulator, currentMeshScene.timeStep,
+						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
+					renderer->updateObjectTransformation(transformation, mesh);
+				}
+				else
+				{
+					glm::mat4 transformation = node->transformation;
+					renderer->updateObjectTransformation(transformation, mesh);
+				}
+			}
+		}
+	}
+
+
+
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(0.1f, 0.2f, 0.5f);
 	renderer->draw();

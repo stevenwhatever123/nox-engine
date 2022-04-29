@@ -6,6 +6,7 @@
 
 // Engine Include
 #include <GameManager.h>
+#include "script.h"
 using NoxEngine::GameManager;
 
 int main(int argc, char** argv) {
@@ -76,7 +77,7 @@ int main(int argc, char** argv) {
 		gm->update();
 
 	}
-
+	//lua();
 	return 0;
 }
 

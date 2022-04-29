@@ -35,6 +35,7 @@
     <ClCompile Include="src\ComponentType.cpp" />
     <ClCompile Include="src\EngineGUI\ComponetUI.cpp" />
     <ClCompile Include="src\EngineGUI\ImGuiWidgets.cpp" />
+    <ClCompile Include="src\EngineGUI\AnimationSequencer.cpp" />
     <ClCompile Include="src\EngineGUI\EngineGUI.cpp" />
     <ClCompile Include="src\EngineGUI\AnimationPanel.cpp" />
     <ClCompile Include="src\EngineGUI\AudioPanel.cpp" />
@@ -50,7 +51,10 @@
     <ClCompile Include="src\GameManager.cpp" />
     <ClCompile Include="src\IOManager.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\Mesh2.cpp" />
     <ClCompile Include="src\MeshNode.cpp" />
+    <ClCompile Include="src\MeshNode2.cpp" />
+    <ClCompile Include="src\MeshScene.cpp" />
     <ClCompile Include="src\PositionComponent.cpp" />
     <ClCompile Include="src\RenderableComponent.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
@@ -59,6 +63,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MemAllocator.cpp" />
     <ClCompile Include="src\Scene.cpp" />
+    <ClCompile Include="src\script.cpp" />
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -66,8 +71,8 @@
     <ClInclude Include="headers\AudioManager.h" />
     <ClInclude Include="headers\Camera.h" />
     <ClInclude Include="headers\ComponentType.h" />
-    <ClInclude Include="headers\EngineGUI\EngineGUI.h" />
     <ClInclude Include="headers\EngineGUI\AnimationPanel.h" />
+    <ClInclude Include="headers\EngineGUI\AnimationSequencer.h" />
     <ClInclude Include="headers\EngineGUI\AudioPanel.h" />
     <ClInclude Include="headers\EngineGUI\EngineGUI.h" />
     <ClInclude Include="headers\EngineGUI\HierarchyPanel.h" />
@@ -89,12 +94,16 @@
     <ClInclude Include="headers\IRenderable.h" />
     <ClInclude Include="headers\MemAllocator.h" />
     <ClInclude Include="headers\Mesh.h" />
+    <ClInclude Include="headers\Mesh2.h" />
     <ClInclude Include="headers\MeshNode.h" />
+    <ClInclude Include="headers\MeshNode2.h" />
+    <ClInclude Include="headers\MeshScene.h" />
     <ClInclude Include="headers\PositionComponent.h" />
     <ClInclude Include="headers\RenderableComponent.h" />
     <ClInclude Include="headers\Renderer.h" />
     <ClInclude Include="headers\GLProgram.h" />
     <ClInclude Include="headers\Scene.h" />
+    <ClInclude Include="headers\script.h" />
     <ClInclude Include="headers\Singleton.h" />
     <ClInclude Include="headers\stb_image.h" />
     <ClInclude Include="headers\stb_image_write.h" />

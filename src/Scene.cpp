@@ -22,19 +22,7 @@ void Scene::addEntity(Entity* ent) {
 
 	assert(ent->id <= nEntitiesAdded);	// soft check on unique entity ID
 
-	/*   Register to the appropriate subsystem based on the components it has   */ 
-	if ((ent->hasComp & 0b11) == 0b11) {
-
-		IRenderable* irend = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
-		IPosition* ipos = ent->getComp<PositionComponent>()->CastType<IPosition>();
-
-		gm->GetRenderer()->addObject(
-			irend,
-			ipos
-		);
-
-		gm->GetRenderer()->updateBuffers();
-	}
+	gm->scheduleUpdateECS();
 
 	// Add to entities list
 	entities.push_back(ent);

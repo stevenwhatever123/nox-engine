@@ -20,6 +20,7 @@
 #include <Singleton.h>
 #include <AudioManager.h>
 #include <Mesh.h>
+#include <MeshScene.h>
 #include <Types.h>
 #include <Renderer.h>
 #include <IOManager.h>
@@ -60,6 +61,8 @@ namespace NoxEngine {
 			void init();
 			void update();
 
+			void scheduleUpdateECS();
+
 			void addCompToSubSys(u32 ind);
 			void addAudioSource(AudioSource audioSource);
 			void addMesh(String str, Mesh m);
@@ -68,6 +71,7 @@ namespace NoxEngine {
 			u32 win_height;
 			u32 win_width;
 			i8 should_close;
+			bool updateNeededECS;
 
 			time_type currentTime;
 			time_type deltaTime;
@@ -94,6 +98,7 @@ namespace NoxEngine {
 			void asset_ui();
 			void main_contex_ui();
 
+			void update_ecs();
 			void update_gui();
 			void update_audio();
 			void update_inputs();
