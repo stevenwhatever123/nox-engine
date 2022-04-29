@@ -215,6 +215,7 @@ void Renderer::draw() {
 	for (u32 i = 0; i < objects.size(); i++)
 	{
         // Skip if the entity/RenderableComponent is not enabled
+        if (!objects[i].ent->isEntityEnabled()) continue;
         if (!objects[i].ent->isEnabled<RenderableComponent>()) continue;
 
         IPosition* pos = objects[i].ent->getComp<PositionComponent>()->CastType<IPosition>();

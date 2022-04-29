@@ -189,7 +189,7 @@ namespace NoxEngine {
 
 		// Getter: is the entity enabled?
 		inline bool isEntityEnabled() { return entityEnabled; }
-		// Check whether a component is enabled. If the entity is disabled, this returns false.
+		// Check whether a component is enabled. This does not take entity-level enabled-ness into account.
 		bool isEnabled(u32 bit);
 		template <typename T> bool isEnabled() {
 			// TODO (Vincent): Fix w/ auto component id

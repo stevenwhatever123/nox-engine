@@ -137,7 +137,7 @@ T *Entity::getComp() {
 
 
 bool Entity::isEnabled(u32 bit) {
-	return _isEnabled & (1 << (bit - 1)) && entityEnabled;
+	return _isEnabled & (1 << (bit - 1));
 }
 
 
