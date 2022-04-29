@@ -219,8 +219,13 @@ void Renderer::draw() {
         if (!objects[i].ent->isEntityEnabled()) continue;
         if (!objects[i].ent->isEnabled<RenderableComponent>()) continue;
 
-        IPosition* pos = objects[i].ent->getComp<PositionComponent>()->CastType<IPosition>();
-        glm::mat4 worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+        // If the object has a position and it's disabled, use it
+        glm::mat4 worldMat = glm::mat4(1.0f);
+        if (objects[i].ent->containsComps<PositionComponent>() && objects[i].ent->isEnabled<PositionComponent>()) {
+            IPosition* pos = objects[i].ent->getComp<PositionComponent>()->CastType<IPosition>();
+            worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+        }
+
         program->set4Matrix("toWorld", worldMat);
         program->set4Matrix("modelMatrix", objects[i].transformation);
 
