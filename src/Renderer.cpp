@@ -151,6 +151,15 @@ void Renderer::addObject(Entity *ent)
 
 	objects.push_back(newObj);
 
+    Logger::debug("Renderer object count: %i\n", objects.size());
+}
+
+void Renderer::removeObject(Entity* ent) {
+
+    objects.erase(
+        std::remove_if(objects.begin(), objects.end(), [ent](RendObj obj) { return obj.ent == ent; }),
+        objects.end()
+    );
 }
 
 GLuint Renderer::setTexture(const char* texturePath, const char* uniName, int num) {
@@ -203,9 +212,11 @@ void Renderer::draw() {
 
 	glBindVertexArray(VAO);
 
-    // (Vincent): There was a double loop here that draws all objects for each object
 	for (u32 i = 0; i < objects.size(); i++)
 	{
+        // Skip if the entity/RenderableComponent is not enabled
+        if (!objects[i].ent->isEnabled<RenderableComponent>()) continue;
+
         IPosition* pos = objects[i].ent->getComp<PositionComponent>()->CastType<IPosition>();
         glm::mat4 worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
         program->set4Matrix("toWorld", worldMat);

@@ -9,8 +9,6 @@
 #include <PositionComponent.h>
 #include <RenderableComponent.h>
 
-#include <GameManager.h>
-
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
 
@@ -111,20 +109,11 @@ void Entity::addComp(T *comp) {
 		return;
 	}
 
-	// TODO (Vincent): Move this logic into subsystems.
-	//                 Subsystems should have access to the Scene.
-	//                 Scene should be able to return a list of entities that matches a bitmask,
-	//                 which the subsystems then register / update
-	/*   Register to the appropriate subsystem based on the components it has   */
-	if (this->containsComps<PositionComponent, RenderableComponent>()) {
-
-		GameManager::Instance()->GetRenderer()->addObject(this);
-
-		GameManager::Instance()->GetRenderer()->updateBuffers();
-	}
-
 	components[typeid(T)] = comp;
 	hasComp |= ( 1 << (comp->id-1) );
+
+	// Emit a signal to the event manager
+	addCompSignal<T>();
 }
 
 
@@ -148,7 +137,7 @@ T *Entity::getComp() {
 
 
 bool Entity::isEnabled(u32 bit) {
-	return _isEnabled & (1 << (bit - 1));
+	return _isEnabled & (1 << (bit - 1)) && entityEnabled;
 }
 
 

@@ -15,6 +15,8 @@ Scene::Scene(String _name) : entities(0), nEntitiesAdded(0), name(_name), gm(Gam
 Scene::~Scene() {
 	
 	// TODO (Vincent): Delete entities
+
+	gm->scheduleUpdateECS();
 }
 
 
@@ -57,3 +59,8 @@ void Scene::addEntity(PresetObject obj) {
 	// Finally add the entity to the scene
 	this->addEntity(ent);
 }
+
+
+//void Entity::removeEntity(u32 entID) {
+//	gm->scheduleUpdateECS();
+//}

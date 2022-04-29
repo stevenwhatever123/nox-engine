@@ -119,6 +119,7 @@ namespace NoxEngine {
 
 		// Add object to renderer to render
 		void addObject(Entity *ent);
+		void removeObject(Entity* ent);
 		void clearObject();
 		
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}

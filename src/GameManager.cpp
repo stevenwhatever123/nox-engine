@@ -70,7 +70,8 @@ void GameManager::addMesh(String name, Mesh m) {
 }
 
 
-void GameManager::addCompToSubSys(u32 ind) {
+// TODO (Vincent): Might be removable after connecting with EventManager
+void GameManager::addEntityToSubSys(u32 ind) {
 
 	Entity* ent = game_state.activeScene->entities[ind];
 
@@ -78,7 +79,14 @@ void GameManager::addCompToSubSys(u32 ind) {
 	// Renderer
 	if (ent->containsComps<PositionComponent, RenderableComponent>()) {
 
-		renderer->addObject(ent);
+		RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
+		IRenderable* rend = rendComp->CastType<IRenderable>();
+
+		// Add to renderer - but don't add again if the entity is already registered
+		if (!rend->registered) {
+			renderer->addObject(ent);
+			rend->registered = true;
+		}
 	}
 
 
@@ -148,6 +156,7 @@ void GameManager::init_ecs() {
 
 void GameManager::init_events() {
 
+	// Event: Mesh added
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
 		
 		String file_name = va_arg(args, String);
@@ -181,11 +190,58 @@ void GameManager::init_events() {
 
 		for (u32 i = index; i < game_state.activeScene->entities.size(); i++)
 		{
-			addCompToSubSys(i);
+			addEntityToSubSys(i);
 		}
 
 		this->renderer->updateBuffers();
 
+	});
+
+
+	// Event: Component added. Register in the appropriate subsystems
+	EventManager::Instance()->addListener(EventNames::componentAdded, [this](va_list args) {
+
+		Entity* ent = va_arg(args, Entity*);
+		const std::type_index compTypeId = va_arg(args, std::type_index);
+
+		// Renderer
+		if (ent->containsComps<PositionComponent, RenderableComponent>()) {
+
+			RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
+			IRenderable* rend = rendComp->CastType<IRenderable>();
+
+			// Add to renderer - but don't add again if the entity is already registered
+			if (!rend->registered) {
+				renderer->addObject(ent);
+				rend->registered = true;
+
+				// Update renderer
+				// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion
+				this->renderer->updateBuffers();
+			}
+		}
+
+		// Audio
+		// ...
+	});
+
+
+	// Event: Component removed
+	EventManager::Instance()->addListener(EventNames::componentRemoved, [this](va_list args) {
+
+		Entity* ent = va_arg(args, Entity*);
+		const std::type_index compTypeId = va_arg(args, std::type_index);
+
+		// Renderer
+		// As soon as a RenderableComponent is removed, disqualify the RendObj in the renderer
+		if (compTypeId == typeid(RenderableComponent)) {
+
+			renderer->removeObject(ent);
+			// TODO-OPTIMIZATION: Remove in batches every X ms, shift the still-valid indices to take the free space
+		}
+
+		// Audio
+		// ...
 	});
 
 
@@ -347,29 +403,24 @@ void GameManager::update_ecs() {
 	bool updateRenderer = false;
 	bool updateAudioManager = false;
 
-	// loop through all entities, add to subsystems if needed
-	for (Entity* ent : game_state.activeScene->entities) {
+	bool entityRemoved = false;
+	size_t nEntities = game_state.activeScene->entities.size();
 
-		// Renderer
-		if (ent->containsComps<PositionComponent, RenderableComponent>()) {
 
-			IRenderable* rend = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
+	// Check for entity removal
+	game_state.activeScene->entities.erase(
+		std::remove_if(
+			game_state.activeScene->entities.begin(),
+			game_state.activeScene->entities.end(),
+			[](Entity* ent) { return ent->remove; }
+		),
+		game_state.activeScene->entities.end()
+	);
+	entityRemoved = nEntities != game_state.activeScene->entities.size();
 
-			// Don't add again if the entity is already registered
-			if (!rend->registered) {
-				renderer->addObject(ent);
-				rend->registered = true;
-
-				updateRenderer = true;		// Object needed, so renderer update is needed
-			}
-		}
-
-		// Audio
-
-	}
 
 	// update subsystems if needed
-	if (updateRenderer) renderer->updateBuffers();
+	if (updateRenderer && entityRemoved) renderer->updateBuffers();
 	//if (updateAudioManager) audioManager->...
 }
 

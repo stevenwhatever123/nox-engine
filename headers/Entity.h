@@ -28,6 +28,10 @@
 #include <Utils.h>
 #include <ComponentType.h>
 
+#include <EventManager.h>
+#include <EventNames.h>
+
+
 namespace NoxEngine {
 
 	// Forward declares
@@ -39,19 +43,21 @@ namespace NoxEngine {
 		// make Scene a friend so that Entities can only be created in Scene
 		friend class Scene;
 
-	public:
-		// A human-readable identifier - not necessarily unique
-		char *name;
-
-
 	private:
 		// recursive variadic template witchery
 		template <typename...> struct sequence { };
 
+		// Signals for event manager
+		template <typename T> void addCompSignal()	  { SIGNAL_EVENT(EventNames::componentAdded,   this, std::type_index(typeid(T))); }
+		template <typename T> void removeCompSignal() { SIGNAL_EVENT(EventNames::componentRemoved, this, std::type_index(typeid(T))); }
+
 
 	public:
 		// unique entity id
-		i32 id; 
+		i32 id;
+
+		// A human-readable identifier - not necessarily unique
+		char* name;
 
 		// The components that make the entity
 		// Note (Vincent): An entity can only contain one component of each type.
@@ -82,15 +88,15 @@ namespace NoxEngine {
 		// Constructors usable by Scene
 		Entity(i32 _id, char* _name = nullptr);
 
+		// Move constructor
+		Entity(Entity&& other);
+
 
 	public:
 		// Automatically give a unique ID and a placeholder name to an entity
 		// TODO: Change GameManager to Singleton, so it doesn't need a param
 		Entity(Scene *scene, char* _name = nullptr);
 		Entity(Scene* scene, const char* _name);
-
-		// Move constructor
-		Entity(Entity&& other);
 
 		// Gotta be careful. When comp are destroyed the subsystem have to know
 		// TODO (Vincent): delete the components array and let the specialized component destroyer remove the reference in the subsystem?
@@ -146,6 +152,8 @@ namespace NoxEngine {
 			T* tmp = new T();
 			hasComp &= ~(1 << (tmp->id - 1));
 
+			removeCompSignal<T>();
+
 			// remove component
 			return components.erase(typeid(T)) + removeComps__helper(sequence<U...>{});
 		}
@@ -181,13 +189,12 @@ namespace NoxEngine {
 
 		// Getter: is the entity enabled?
 		inline bool isEntityEnabled() { return entityEnabled; }
-		// Check whether a component is enabled
+		// Check whether a component is enabled. If the entity is disabled, this returns false.
 		bool isEnabled(u32 bit);
 		template <typename T> bool isEnabled() {
 			// TODO (Vincent): Fix w/ auto component id
 			T* tmp = new T();
-			HasCompBitMask maskSingleBit = (1 << (tmp->id - 1));
-			return _isEnabled & maskSingleBit;
+			return isEnabled(tmp->id);
 		}
 	};
 }
