@@ -113,6 +113,7 @@ workspace "NoxEngine"
 		}
 
 		files {
+			"headers/*.h",
 			"src/**.cpp",
 			"libs/imgui/*.h",
 			"libs/imgui/*.cpp",

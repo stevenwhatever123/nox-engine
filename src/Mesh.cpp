@@ -416,69 +416,26 @@ u32 Mesh::getNumOfAnimations()
 
 // ========================   IRenderable ======================
 
-void Mesh::getArrayOfVertices(std::vector<float>* v)
+const Array<vec3>& Mesh::getVertices() const
 {
-	std::vector<std::vector<glm::vec3>> mVertices;
-	mVertices.resize(vertices.size());
+	return vertices[0];
+}
 
-	// Apply transformation from nodes
-	for (unsigned int i = 0; i < allNodes.size(); i++)
-	{
-		if (!allNodes[i]->hasMesh)
-		{
-			// Get which mesh to transform
-			unsigned int meshIndex = allNodes[i]->meshIndex;
-
-			mVertices[meshIndex].resize(vertices[meshIndex].size());
-
-			// Apply Transformation to all vertices of the mesh
-			for (unsigned int j = 0; j < vertices[meshIndex].size(); j++)
-			{
-				mVertices[meshIndex][j] = glm::vec3(allNodes[i]->transformation *
-					glm::vec4(vertices[meshIndex][j], 1.0));
-			}
-
-			//for (unsigned int j = 0; j < mVertices[meshIndex].size(); j++)
-			//{
-			//	std::cout << glm::to_string(mVertices[meshIndex][j]) << "\n";
-			//}
-		}
-	}
-
-	for (unsigned int i = 0; i < vertices[0].size(); i++)
-	{
-		//verticesPreped.push_back(vertices[0][i].x); verticesPreped.push_back(vertices[0][i].y); verticesPreped.push_back(vertices[0][i].z);
-		//v->push_back(mVertices[0][i].x); v->push_back(mVertices[0][i].y); v->push_back(mVertices[0][i].z);
-		v->push_back(vertices[0][i].x); v->push_back(vertices[0][i].y); v->push_back(vertices[0][i].z);
-	}
+const Array<vec2>& Mesh::getTexCoords() const
+{
+	return texCoords;
 }
 
 
-void Mesh::getArrayOfTexCoord(std::vector<float>* tC)
+const Array<vec3>& Mesh::getNormals() const
 {
-	for (unsigned int i = 0; i < texCoord[0].size(); i++)
-	{
-		tC->push_back(texCoord[0][i].x); tC->push_back(texCoord[0][i].y);
-	}
-
+	return normals[0];
 }
 
 
-void Mesh::getArrayOfNormals(std::vector<float>* n)
+const Array<ivec3>& Mesh::getFaces() const
 {
-	for (unsigned int i = 0; i < normals[0].size(); i++)
-	{
-		n->push_back(normals[0][i].x); n->push_back(normals[0][i].y); n->push_back(normals[0][i].z);
-	}
-}
-
-
-void Mesh::getArrayOfElements(std::vector<int>* el)
-{
-	for (unsigned int i = 0; i < faceIndices[0].size(); i++)
-	{
-		el->push_back((int)(faceIndices[0][i]));
-	}
+	return faceIndices[0];
 }
 
 
@@ -503,7 +460,7 @@ void Mesh::extractGeometricInfo(const aiScene *scene) {
 		vertices[i].resize(pMesh->mNumVertices);
 		normals[i].resize(pMesh->mNumVertices);
 		texCoord[i].resize(pMesh->mNumVertices);
-		faceIndices[i].resize(pMesh->mNumFaces*3);
+		faceIndices[i].resize(pMesh->mNumFaces);
 
 		const bool has_texture = pMesh->HasTextureCoords(0);
 
@@ -537,9 +494,9 @@ void Mesh::extractGeometricInfo(const aiScene *scene) {
 
 			if (face->mNumIndices == 3)
 			{
-				faceIndices[i].push_back(face->mIndices[0]);
-				faceIndices[i].push_back(face->mIndices[1]);
-				faceIndices[i].push_back(face->mIndices[2]);
+				faceIndices[i][j][0] = (i32)(face->mIndices[0]);
+				faceIndices[i][j][1] = (i32)(face->mIndices[1]);
+				faceIndices[i][j][2] = (i32)(face->mIndices[2]);
 			} else {
 				Logger::debug("Error: number of face indicies is less than 3");
 			}

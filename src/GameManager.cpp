@@ -127,18 +127,17 @@ void GameManager::init_events() {
 
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
 
-		//// Steven: That's how I would do it
-		//// clean up: leaky mem
-		String file_name = va_arg(args, String);
+		// Steven: That's how I would do it
+		// clean up: leaky mem
+		String file_name = va_arg(args, char*);
 		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
 		MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
 
 		i32 index = this->scene.entities.size();
-
 		// We're treating every mesh as an entity FOR NOW
 		for (u32 i = 0; i < meshScene.meshes.size(); i++)
 		{
-			Entity* ent = new Entity();
+			Entity *ent = new Entity();
 			RenderableComponent* comp = meshScene.meshes[i];
 			PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
 			ent->addComp(comp);
@@ -147,17 +146,9 @@ void GameManager::init_events() {
 			this->scene.addEntity(ent);
 
 			this->renderer->addObject(
-					reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-					reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-					);
-		}
-
-		for (u32 i = index; i < this->scene.entities.size(); i++)
-		{
-			this->renderer->addObject(
-				reinterpret_cast<IRenderable*>(scene.entities[i]->getComp(2)->CastType(2)),
-				reinterpret_cast<IPosition*>(scene.entities[i]->getComp(1)->CastType(2))
-			);
+				reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
+				reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
+				);
 		}
 
 		this->renderer->updateBuffers();
@@ -186,13 +177,8 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	//camera = new Camera(vec3(45.0f, 47.0f, 144.0f));
+	camera = new Camera(vec3(0.0f, 10.0f, 150.0f));
 	//camera->turnVerBy(35.0f);
-
-	camera = new Camera(glm::vec3(0.0f, 0.0f, 5.0f));
-	//camera->turnHorBy(20.0f);
-	//camera->turnVerBy(20.0f);
-
 }
 
 void GameManager::init_shaders() {
@@ -241,27 +227,15 @@ void GameManager::init_renderer() {
 	game_state.renderer = renderer;
 
 	renderer->setFrameBufferToTexture();
+	// GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 500);
 
-
-	// GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 100);
 	// renderer->addObject(
 	// 		static_cast<IRenderable*>(&obj),
 	// 		static_cast<IPosition*>(&obj)
 	// 		);
 
-	//renderer->updateBuffers();
 
-	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
-	// Mesh *mesh = NoxEngine::getMesh(pScene);
-
-	// mesh->prepForRenderer();
-
-	// renderer->addObject(mesh);
 	// renderer->updateBuffers();
-	// delete mesh;
-
-		//renderer->setSkyBoxShader("assets/skybox/shaders/vertexShader.vs",
-	//	"assets/skybox/shaders/fragmentShader.fs");
 }
 
 void GameManager::init_imgui() {
@@ -298,7 +272,7 @@ void GameManager::main_contex_ui() {
 
 
 	// Pass texture rendered to to ImGUI
-	ImGui::Image((ImTextureID)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)(u64)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGui::End();
 }
@@ -347,12 +321,13 @@ void GameManager::update_audio() {
 void GameManager::update_inputs() {
 	glfwPollEvents();
 
-	if(keys['W']) { camera->turnHorBy(0.1f); }
-	if(keys['S']) { camera->turnHorBy(-0.1f); }
-	if(keys['D']) { camera->turnVerBy(-0.1f); }
-	if(keys['A']) { camera->turnVerBy(0.1f); }
-	if(keys[' '])  { camera->moveVerBy(0.1f); }
-	if(keys['K'])  { camera->moveVerBy(-0.1f); }
+
+	if(keys['W']) { camera->moveFwdBy(0.1f); }
+	if(keys['S']) { camera->moveFwdBy(-0.1f); }
+	if(keys['D']) { camera->moveHorBy(-0.1f); }
+	if(keys['A']) { camera->moveHorBy(0.1f); }
+	if(keys[' ']) { camera->moveVerBy(0.1f); }
+	if(keys['K']) { camera->moveVerBy(-0.1f); }
 
 }
 
@@ -388,34 +363,34 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
-	// auto meshSceneStart = game_state.meshScenes.begin();
-	// auto meshSceneEnd = game_state.meshScenes.end();
-	// for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
-	// {
-	// 	MeshScene &currentMeshScene = meshSceneStart->second;
-	// 	for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
-	// 	{
-	// 		MeshNode2* node = meshSceneStart->second.allNodes[i];
+	auto meshSceneStart = game_state.meshScenes.begin();
+	auto meshSceneEnd = game_state.meshScenes.end();
+	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	{
+		MeshScene &currentMeshScene = meshSceneStart->second;
+		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
+	 	{
+	 		MeshNode2* node = meshSceneStart->second.allNodes[i];
 
-	// 		if (node->meshIndex.size() > 0)
-	// 		{
-	// 			Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
-	// 			if (node->hasAnimations())
-	// 			{
-	// 				glm::mat4 transformation = node->getGlobalTransformation(
-	// 					currentMeshScene.frameIndex, currentMeshScene.animationIndex,
-	// 					currentMeshScene.accumulator, currentMeshScene.timeStep,
-	// 					currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
-	// 				renderer->updateObjectTransformation(transformation, mesh);
-	// 			}
-	// 			else
-	// 			{
-	// 				glm::mat4 transformation = node->transformation;
-	// 				renderer->updateObjectTransformation(transformation, mesh);
-	// 			}
-	// 		}
-	// 	}
-	// }
+	 		if (node->meshIndex.size() > 0)
+	 		{
+	 			Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
+	 			if (node->hasAnimations())
+	 			{
+	 				glm::mat4 transformation = node->getGlobalTransformation(
+	 					currentMeshScene.frameIndex, currentMeshScene.animationIndex,
+	 					currentMeshScene.accumulator, currentMeshScene.timeStep,
+	 					currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
+	 				renderer->updateObjectTransformation(transformation, mesh);
+	 			}
+	 			else
+	 			{
+	 				glm::mat4 transformation = node->transformation;
+	 				renderer->updateObjectTransformation(transformation, mesh);
+	 			}
+	 		}
+	 	}
+	}
 
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 
