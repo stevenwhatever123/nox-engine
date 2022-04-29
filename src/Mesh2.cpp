@@ -13,7 +13,7 @@ Mesh2::Mesh2() : RenderableComponent()
 
 Mesh2::~Mesh2() { }
 
-void Mesh2::setTexture(const char* filename)
+void Mesh2::setTexture(const String filename)
 {
 	ambTexName = filename;
 }

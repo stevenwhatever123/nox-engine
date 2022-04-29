@@ -4,12 +4,7 @@
 
 #include <MeshNode2.h>
 #include <Mesh2.h>
-
-// Compiler is my biggest enemy
-#define NOMINMAX
 #include <assimp/scene.h>
-#undef NOMINMAX
-
 #include <Types.h>
 #include <Utils.h>
 

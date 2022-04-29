@@ -3,9 +3,7 @@
 // hacky solution to min and max being redefined in Windows.h, causing std::min/std::max
 // to give errors. See https://stackoverflow.com/questions/2561368/illegal-token-on-right-side-of
 #include <limits>
-#define NOMINMAX
 
-// #include <Windows.h>
 #include <math.h>
 #include <FBXFileLoader.h>
 #include <EventManager.h>
