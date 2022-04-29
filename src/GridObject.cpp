@@ -76,8 +76,6 @@ GridObject::GridObject(vec3 start_point, vec3 end_point, const i32 count_point)
 		indices[i] = 0;
 	}
 
-	glRenderType = GL_LINES;
-
 	col_counter = 0;
 	i32 fr_index = 0;
 	i32 lr_index = fr_index + count_point;
@@ -86,7 +84,6 @@ GridObject::GridObject(vec3 start_point, vec3 end_point, const i32 count_point)
 
 	i32 row_index = fc_index;
 	i32 row_sec_index = lc_index;
-
 
 	indices[0]   = fr_index;
 	indices[1]   = fr_index + last_index;

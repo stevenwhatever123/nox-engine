@@ -81,7 +81,7 @@ void GameManager::init_window() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, true );
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	window = glfwCreateWindow(win_width, win_height, title.c_str(), nullptr, nullptr);
@@ -100,7 +100,6 @@ void GameManager::init_window() {
 	{
 		LOG_DEBUG("Failed to initialize OpenGL context");
 	}
-
 
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
@@ -177,8 +176,7 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(0.0f, 10.0f, 150.0f));
-	camera->turnVerBy(35.0f);
+	camera = new Camera(vec3(10.0f, 10.0f, 10.0f));
 }
 
 void GameManager::init_shaders() {
@@ -203,7 +201,7 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
-	GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
+	GridObject obj(vec3(-500, 0, -550), vec3(1000, 0, 1000), 500);
 
 	renderer->addObject(
 			static_cast<IRenderable*>(&obj),

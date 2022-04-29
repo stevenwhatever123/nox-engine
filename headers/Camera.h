@@ -6,7 +6,7 @@ namespace NoxEngine {
 
 	class Camera {
 		public:
-			Camera(vec3 stPos);
+			Camera(vec3 stPos, vec3 lookAt = vec3(0.0f, 0.0f, 0.0f));
 
 			inline mat4 getCameraTransf() {
 				generateCameraParameters();
