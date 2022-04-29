@@ -30,9 +30,9 @@ const char* AnimationSequencer::GetItemLabel(int index) const
 void AnimationSequencer::Get(int index, int** start, int** end, int* type, unsigned int* color)
 {
     // Every animation is starting at 0
-    i32 items[] = { 0 };
+    static i32 items[] = { 0 };
 
-    i32 items2[] = { scene->numTicks[scene->animationIndex] - 1 };
+    static i32 items2[] = { scene->numTicks[scene->animationIndex] - 1 };
 
     if (!scene->allNodes[index]->hasAnimations())
     {

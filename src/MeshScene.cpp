@@ -121,18 +121,21 @@ void MeshScene::update(time_type dt)
 
 void MeshScene::updateCeilAndFloor()
 {
-	u32 numOfTicks = numTicks[animationIndex];
-
-	if ((accumulator / timeStep) > 0)
+	if (hasAnimations())
 	{
-		whichTickFloor = frameIndex;
-		if (frameIndex < (numOfTicks - 1))
+		u32 numOfTicks = numTicks[animationIndex];
+
+		if ((accumulator / timeStep) > 0)
 		{
-			whichTickCeil = frameIndex + 1;
-		}
-		else
-		{
-			whichTickCeil = frameIndex;
+			whichTickFloor = frameIndex;
+			if (frameIndex < (numOfTicks - 1))
+			{
+				whichTickCeil = frameIndex + 1;
+			}
+			else
+			{
+				whichTickCeil = frameIndex;
+			}
 		}
 	}
 }
@@ -335,18 +338,14 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 
 		Mesh2* mesh = new Mesh2;
 
-		mesh->vertices.resize(scene->mNumMeshes);
-		mesh->normals.resize(scene->mNumMeshes);
-		mesh->faceIndices.resize(scene->mNumMeshes);
-		mesh->texCoord.resize(scene->mNumMeshes);
-
-
+		mesh->name = pMesh->mName.C_Str();
 		mesh->hasBones = pMesh->HasBones();
 
-		mesh->vertices[i].resize(pMesh->mNumVertices);
-		mesh->normals[i].resize(pMesh->mNumVertices);
-		mesh->texCoord[i].resize(pMesh->mNumVertices);
-		mesh->faceIndices[i].resize(pMesh->mNumFaces);
+		// Fix this too
+		mesh->vertices.resize(pMesh->mNumVertices);
+		mesh->normals.resize(pMesh->mNumVertices);
+		mesh->faces.resize(pMesh->mNumVertices);
+		mesh->texCoords.resize(pMesh->mNumVertices);
 
 		const bool has_texture = pMesh->HasTextureCoords(0);
 
@@ -356,16 +355,16 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 
 		for (u32 j = 0; j < pMesh->mNumVertices; ++j) {
 
-			mesh->vertices[i][j].x = (f32)pVertex->x;
-			mesh->vertices[i][j].y = (f32)pVertex->y;
-			mesh->vertices[i][j].z = (f32)pVertex->z;
+			mesh->vertices[j].x = (f32)pVertex->x;
+			mesh->vertices[j].y = (f32)pVertex->y;
+			mesh->vertices[j].z = (f32)pVertex->z;
 
-			mesh->normals[i][j].x = (f32)pNormal->x;
-			mesh->normals[i][j].y = (f32)pNormal->y;
-			mesh->normals[i][j].z = (f32)pNormal->z;
+			mesh->normals[j].x = (f32)pNormal->x;
+			mesh->normals[j].y = (f32)pNormal->y;
+			mesh->normals[j].z = (f32)pNormal->z;
 
-			mesh->texCoord[i][j].x = (f32)pTexCoord->x;
-			mesh->texCoord[i][j].y = (f32)pTexCoord->y;
+			mesh->texCoords[j].x = (f32)pTexCoord->x;
+			mesh->texCoords[j].y = (f32)pTexCoord->y;
 
 			pVertex++;
 			pNormal++;
@@ -380,9 +379,9 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 
 			if (face->mNumIndices == 3)
 			{
-				mesh->faceIndices[i][j][0] = (i32)(face->mIndices[0]);
-				mesh->faceIndices[i][j][1] = (i32)(face->mIndices[1]);
-				mesh->faceIndices[i][j][2] = (i32)(face->mIndices[2]);
+				mesh->faces[j][0] = (i32)(face->mIndices[0]);
+				mesh->faces[j][1] = (i32)(face->mIndices[1]);
+				mesh->faces[j][2] = (i32)(face->mIndices[2]);
 			} else {
 				Logger::debug("Error: number of face indicies is less than 3");
 			}
