@@ -24,8 +24,6 @@ void Scene::addEntity(Entity* ent) {
 
 	assert(ent->id <= nEntitiesAdded);	// soft check on unique entity ID
 
-	gm->scheduleUpdateECS();
-
 	// Add to entities list
 	entities.push_back(ent);
 	nEntitiesAdded++;

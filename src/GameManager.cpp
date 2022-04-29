@@ -70,36 +70,6 @@ void GameManager::addMesh(String name, Mesh m) {
 }
 
 
-// TODO (Vincent): Might be removable after connecting with EventManager
-void GameManager::addEntityToSubSys(u32 ind) {
-
-	Entity* ent = game_state.activeScene->entities[ind];
-
-	// Check what comp the entity has (bitmask)
-	// Renderer
-	if (ent->containsComps<PositionComponent, RenderableComponent>()) {
-
-		RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
-		IRenderable* rend = rendComp->CastType<IRenderable>();
-
-		// Add to renderer - but don't add again if the entity is already registered
-		if (!rend->registered) {
-			renderer->addObject(ent);
-			rend->registered = true;
-		}
-	}
-
-
-	// Light
-	//if (gameObj->hasComp & 4)
-
-	// Audio
-	//if (gameObj->hasComp & 8)
-
-
-}
-
-
 // Whenever an entity is created, modified, or deleted, call this function
 // This is done to simplify code since previously we had renderer->addObject() everywhere
 void GameManager::scheduleUpdateECS() {
@@ -187,13 +157,14 @@ void GameManager::init_events() {
 
 			game_state.activeScene->addEntity(ent);
 		}
-
-		for (u32 i = index; i < game_state.activeScene->entities.size(); i++)
-		{
-			addEntityToSubSys(i);
-		}
-
-		this->renderer->updateBuffers();
+		
+		// Vincent: addComp triggers EventNames::componentAdded, which adds the entity to the renderer (although it does immediately update the buffer which is not ideal)
+		//for (u32 i = index; i < game_state.activeScene->entities.size(); i++)
+		//{
+		//	addEntityToSubSys(i);
+		//}
+		//
+		//this->renderer->updateBuffers();
 
 	});
 
@@ -400,28 +371,37 @@ void GameManager::update_ecs() {
 
 	if (!updateNeededECS) return;
 
-	bool updateRenderer = false;
-	bool updateAudioManager = false;
+	//bool updateRenderer = false;
+	//bool updateAudioManager = false;
 
 	bool entityRemoved = false;
 	size_t nEntities = game_state.activeScene->entities.size();
 
 
-	// Check for entity removal
+	// Check for entity removal. 
+	// Free resources explicitly (since `entities` contain raw `Entity*` pointers) and resize vector
 	game_state.activeScene->entities.erase(
 		std::remove_if(
 			game_state.activeScene->entities.begin(),
 			game_state.activeScene->entities.end(),
-			[](Entity* ent) { return ent->remove; }
+			[](auto &&ent) { 
+				bool rm = ent->remove;
+				if (rm) delete ent;
+				return rm;
+			}
 		),
 		game_state.activeScene->entities.end()
 	);
+
 	entityRemoved = nEntities != game_state.activeScene->entities.size();
 
 
 	// update subsystems if needed
-	if (updateRenderer && entityRemoved) renderer->updateBuffers();
+	if (/*updateRenderer && */entityRemoved) renderer->updateBuffers();
 	//if (updateAudioManager) audioManager->...
+
+	// Update done
+	updateNeededECS = false;
 }
 
 

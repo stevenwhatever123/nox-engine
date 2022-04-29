@@ -156,6 +156,7 @@ void Renderer::addObject(Entity *ent)
 
 void Renderer::removeObject(Entity* ent) {
 
+    // Note: This calls the destructor on RendObj
     objects.erase(
         std::remove_if(objects.begin(), objects.end(), [ent](RendObj obj) { return obj.ent == ent; }),
         objects.end()

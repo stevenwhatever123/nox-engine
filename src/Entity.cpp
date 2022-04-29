@@ -72,7 +72,13 @@ Entity::~Entity() {
 
 	free(name);
 
-	// Gotta be careful. When comp are destroyed the subsystem have to know
+	// Emit removal signals for all existing components and let EventManager handle entity cleanup in subsystems
+	for (const auto& itr : components) {
+		SIGNAL_EVENT(EventNames::componentRemoved, this, std::type_index(itr.first));
+	}
+
+	// Mark the components as free
+	components.clear();
 }
 
 

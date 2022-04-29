@@ -6,6 +6,7 @@
 #include <IComponent.h>
 #include <PositionComponent.h>
 #include <RenderableComponent.h>
+#include <GameManager.h>
 
 using namespace NoxEngine;
 
@@ -14,12 +15,14 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 
 	// Variables
 	std::string name = PANEL_NAME_MAP[PanelName::Hierarchy];
+	bool removedEntity = false;
 
 	// Window Begin
 	ImGui::Begin(name.c_str());
 
 
 	/*   Logic   */
+	// TODO: Show a PLUS button on the same line as the panel for adding new empty entities
 
 	// No entity has been added yet - show text
 	if (state->activeScene->entities.size() == 0) {
@@ -32,17 +35,17 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 		ImGuiTreeNodeFlags baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 		// TODO: revisit example if we want multi-selection
 
+		// Available panel width
+		int width = ImGui::GetContentRegionAvail().x;
+
 		for (int i = 0; i < state->activeScene->entities.size(); i++) {
 			
 			Entity* ent = state->activeScene->entities[i];
 
-			// Node with entity name
-			// TODO: Visibility checkbox
-
 			// Visibility check box
 			bool enable = ent->isEntityEnabled();
 			ImGui::PushID(i);
-			ImGui::Checkbox("##EntityEnableCheckbox", &enable);	ImGui::SameLine();
+			ImGui::Checkbox("##EntityEnableCheckbox", &enable); ImGui::SameLine();
 			ImGui::PopID();
 			ent->setEntityEnabled(enable);
 
@@ -63,30 +66,21 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 			// Apply grey out: End
 			ImGui::EndDisabled();
 
-			//if (!strcmp(ent->name, params->modifyingNameBuffer) && res.tempInputStart) {
+			// Remove button
+			ImGui::SameLine(width - ImGui::GetStyle().ItemSpacing.x);
+			ImGui::PushID(i);
+			bool remove = ImGui::SmallButton("-##RemoveEnt");	// TODO: Use ImageButton?
+			ImGui::PopID();
 
-			//	// On input start, replace the buffer with the entity's name
-			//	memset(params->modifyingNameBuffer, 0, 256);
-			//	strcpy_s(params->modifyingNameBuffer, 256, ent->name);
-
-			//	printf("Started writing in %i\n", i);
-			//}
-
-			// Save: active in previous frame, now not active anymore
-			//if (params->pSelectableInputResult.tempInputActive && !res.tempInputActive) {
-			//	ent->name = params->modifyingNameBuffer;
-			//}
-
-			//if (res.tempInputActive) {
-			//	printf("Actively writing in %i. Text: %s\n", i, params->modifyingNameBuffer);
-			//}
-
-			// Current result becomes previous result
-			//params->pSelectableInputResult = res;
+			ent->remove   |= remove;
+			removedEntity |= remove;
+			
 		}
 	}
 
-	// TODO: Finally, show a bottom-centered button for adding entities
+
+	// Tell subsystems we have removed an entity (probably not necessary)
+	if (removedEntity) GameManager::Instance()->scheduleUpdateECS();
 
 
 	// Window End

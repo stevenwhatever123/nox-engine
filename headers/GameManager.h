@@ -63,7 +63,6 @@ namespace NoxEngine {
 
 			void scheduleUpdateECS();
 
-			void addEntityToSubSys(u32 ind);
 			void addAudioSource(AudioSource audioSource);
 			void addMesh(String str, Mesh m);
 			inline Renderer* GetRenderer() { return renderer; };
