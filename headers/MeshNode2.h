@@ -5,10 +5,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <IRenderable.h>
 
-// Compiler is my biggest enemy
-#define NOMINMAX
 #include <assimp/scene.h>
-#undef NOMINMAX
 
 #include <Types.h>
 #include <Utils.h>
