@@ -2,10 +2,10 @@
 
 using namespace NoxEngine;
 
-Camera::Camera(vec3 stPos) :
+Camera::Camera(vec3 stPos, vec3 lookAt) :
 	startCamPos(stPos),
 	currCamPos(stPos),
-	lookingAt(vec3(0.0f, 0.0f, -1.0f)),
+	lookingAt(lookAt),
 	topPointingAt(vec3(0.0f, 1.0f, 0.0f)),
 	user_shift(vec3(0.0f)),
 	user_rotate(vec2(0.0f))
@@ -17,8 +17,10 @@ Camera::Camera(vec3 stPos) :
 void Camera::generateCameraParameters() {
 	// Update camera
 	currCamPos = startCamPos + user_shift;
+
 	// Calculate a matrix out of updated camera
-	cameraTransf = glm::lookAt(currCamPos, currCamPos + lookingAt, topPointingAt);
+	cameraTransf = glm::lookAt(currCamPos, lookingAt, topPointingAt);
+
 	// Rotate cam matrix
 	glm::mat4 rotation = glm::rotate(glm::rotate( glm::mat4(1.0f), glm::radians(user_rotate.y), glm::vec3(1.0f, 0.0f, 0.0f) ), glm::radians(user_rotate.x), glm::vec3(0.0f, 1.0f, 0.0f));
 	cameraTransf = rotation * cameraTransf;

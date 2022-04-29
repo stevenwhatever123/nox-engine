@@ -1,12 +1,8 @@
 #pragma once
 #include <vector>
 #include <string>
-#include <glm/glm.hpp>
-#include <glm/gtx/euler_angles.hpp>
 #include <IRenderable.h>
-
 #include <assimp/scene.h>
-
 #include <Types.h>
 #include <Utils.h>
 
@@ -18,16 +14,16 @@ public:
 	~MeshNode2();
 
 	// The idle transformation
-	glm::mat4 getTransformation();
+	mat4 getTransformation();
 	// Frame based transformation
-	glm::mat4 getTransformation(u32 frameIndex, u32 animationIndex);
+	mat4 getTransformation(u32 frameIndex, u32 animationIndex);
 	// Linear interpolated transformation
-	glm::mat4 getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
+	mat4 getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
 
 	// Global transformation by traversing all parent node and adding them up
-	glm::mat4 getGlobalTransformation();
-	glm::mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex);
-	glm::mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
+	mat4 getGlobalTransformation();
+	mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex);
+	mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
 
 	void setupEulerAngle();
 	void convertEulerAngleToMatrix();
@@ -44,30 +40,30 @@ public:
 
 public:
 
-	std::string name;
+	String name;
 
 	MeshNode2* parent;
 
-	glm::mat4 transformation;
+	mat4 transformation;
 
-	std::vector<u32> meshIndex;
+	Array<u32> meshIndex;
 
 	// There could be more than one child node
-	std::vector<MeshNode2> child;
+	Array<MeshNode2> child;
 
 	// Animation clip -> keyframe transformation
 	// This is just a copy just in case we need it later
-	std::vector<aiNodeAnim*> nodeAnimations;
-	std::vector<std::vector<glm::mat4>> nodeAnimTransformation;
-	std::vector<std::vector<glm::mat4>> nodeAnimTranslationMatrices;
+	Array<aiNodeAnim*> nodeAnimations;
+	Array<Array<mat4>> nodeAnimTransformation;
+	Array<Array<mat4>> nodeAnimTranslationMatrices;
 
-	std::vector<std::vector<glm::vec3>> eulerAngleXYZ;
-	std::vector<std::vector<glm::mat4>> nodeAnimRotationMatrices;
-	std::vector<std::vector<glm::mat4>> nodeAnimScalingMatrices;
+	Array<Array<glm::vec3>> eulerAngleXYZ;
+	Array<Array<mat4>> nodeAnimRotationMatrices;
+	Array<Array<mat4>> nodeAnimScalingMatrices;
 
 	// A vector storing the maximum frame for every animation
 	// AKA where the clip is supposed to end in which frame
-	std::vector<u32> maximumFrame;
+	Array<u32> maximumFrame;
 
 private:
 

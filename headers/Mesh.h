@@ -4,7 +4,6 @@
 
 #include <MeshNode.h>
 #include <IRenderable.h>
-
 #include <assimp/scene.h>
 
 #include <Types.h>

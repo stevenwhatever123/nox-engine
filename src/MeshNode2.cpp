@@ -1,5 +1,6 @@
 #include <MeshNode2.h>
 #include <glm/gtx/matrix_interpolation.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 MeshNode2::MeshNode2(){ }
 
