@@ -12,7 +12,7 @@ AnimationSequencer::AnimationSequencer() :mFrameMin(0), mFrameMax(0) {};
 
 int AnimationSequencer::GetItemTypeCount() const 
 {
-    return scene->allNodes.size();
+    return (i32)scene->allNodes.size();
 }
 
 const char* AnimationSequencer::GetItemTypeName(int index) const

@@ -1,20 +1,15 @@
 #pragma once
-// std libs
-#include <string>
-#include <map>
-#include <vector>
 
 // 3rd Party Include
-#include <GL/glew.h>
-#include <glfw/glfw3.h>
-#include <glm/glm.hpp>
+#include <Windows.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
 
-#include <assimp/Importer.hpp>
-#include <fmod/core/fmod.hpp>
-#include <fmod/core/fmod_errors.h>
+#include <fmod.hpp>
+#include <fmod_errors.h>
 
 // Engine Include
 #include <Singleton.h>
@@ -39,6 +34,9 @@
 #include <EngineGUI/InspectorPanel.h>
 #include <EngineGUI/ImGuizmoTool.h>
 
+#include <RenderableComponent.h>
+#include <PositionComponent.h>
+#include <GridObject.h>
 
 // TODO: move to a config file
 #define WINDOW_WIDTH 1280
@@ -78,7 +76,7 @@ namespace NoxEngine {
 
 		protected:
 			// TODO (Vincent): initialize other fields as well to be on the safe side
-			GameManager() : win_width(WINDOW_WIDTH), win_height(WINDOW_HEIGHT), title(WINDOW_TITLE), ui_params() {};
+			GameManager();
 			~GameManager() {};
 
 		private:
@@ -103,6 +101,9 @@ namespace NoxEngine {
 			void update_inputs();
 			void update_animation();
 			void update_renderer();
+			
+
+			void keyboard_callback(GLFWwindow *, i32 key, i32 scan, i32 action, i32 mods);
 
 			// Window
 			GLFWwindow *window;

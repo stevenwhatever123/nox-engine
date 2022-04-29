@@ -61,12 +61,12 @@ namespace NoxEngine {
 		i32 whichTickCeil;
 
 		// Animation data
-		std::vector<aiAnimation*> animations;
+		Array<aiAnimation*> animations;
 
 		// Animation clip -> numTicks
-		std::vector<unsigned int> numTicks;
+		Array<i32> numTicks;
 		// Animation clip -> duration
-		std::vector<time_type> animationDuration;
+		Array<time_type> animationDuration;
 
 		bool playAnimation = false;
 

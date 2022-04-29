@@ -2,7 +2,6 @@
 
 
 namespace NoxEngineGUI {
-
 	// Give the extern maps/lists a definition in one compile unit
 	std::map< PresetCategory, std::string > PRESET_CATEGORY_NAMES_MAP;
 	std::map< PresetObject, std::string > PRESET_OBJECT_NAMES_MAP;
@@ -21,7 +20,8 @@ void NoxEngineGUI::initPresetObjectVars() {
 		{ PresetCategory::Lights,	"Lights" },
 		{ PresetCategory::Audio,	"Audio" },
 		{ PresetCategory::UI,		"UI" },
-		{ PresetCategory::All,		"All Categories" }
+		{ PresetCategory::All,		"All Categories" },
+		{ PresetCategory::PresetCategoryEND,		"END" }
 	};
 
 	// Give objects names
@@ -38,7 +38,8 @@ void NoxEngineGUI::initPresetObjectVars() {
 		{ PresetObject::AudioSourceComponent,"Audio Source Component" },
 		{ PresetObject::Text2D,				"2D Text" },
 		{ PresetObject::Text3D,				"3D Text" },
-		{ PresetObject::Button,				"Button" }
+		{ PresetObject::Button,				"Button" },
+		{ PresetObject::PresetObjectEND,				"END" },
 	};
 
 	// Create lists of names
@@ -78,14 +79,12 @@ void NoxEngineGUI::initPresetObjectVars() {
 	};
 
 
-	// asserts to make sure all categories/objects are associated
-	// Important note: Need to update the end condition if more enum values are added after these values
-	for (int i = 0; i <= PresetCategory::All; i++) {
+	for (int i = 0; i <= PresetCategory::PresetCategoryEND; i++) {
 		assert(PRESET_CATEGORY_NAMES_MAP.find(static_cast<PresetCategory>(i)) != PRESET_CATEGORY_NAMES_MAP.end() && "A preset category must have a name as a string - define it!");
 		//printf("%s   %s\n", PRESET_CATEGORY_NAMES_LIST[i].c_str(), PRESET_CATEGORY_NAMES_MAP[static_cast<PresetCategory>(i)].c_str());
 		//assert(strcmp(PRESET_CATEGORY_NAMES_LIST[i].c_str(), PRESET_CATEGORY_NAMES_MAP[static_cast<PresetCategory>(i)].c_str()) != 0 && "A preset category must have a name as a string - define it!");
 	}
-	for (int i = 0; i <= PresetObject::Button; i++) {
+	for (int i = 0; i < PresetObject::PresetObjectEND; i++) {
 		assert(PRESET_OBJECT_NAMES_MAP.find(static_cast<PresetObject>(i)) != PRESET_OBJECT_NAMES_MAP.end() && "A preset object must have a name as a string - define it!");
 		//assert(PRESET_OBJECT_NAMES_LIST[i] != PRESET_OBJECT_NAMES_MAP[static_cast<PresetObject>(i)] && "A preset object must have a name as a string - define it!");
 	}

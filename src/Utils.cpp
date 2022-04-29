@@ -1,11 +1,6 @@
 #include <Utils.h>
-#include <Types.h>
-#include <cstdarg>
-#include <iostream>
-#include <iomanip>
-#include <ctime>
-#include <chrono>
 #include <MemAllocator.h>
+#include <Windows.h>
 
 using namespace NoxEngineUtils;
 
@@ -30,3 +25,10 @@ void Logger::debug(std::string fmt_str, ...) {
 	fflush(stdout);
 
 }
+
+void _print_cwd(const char *str, i32 line) {
+	static char buf[240];
+	GetCurrentDirectoryA(240, buf);
+	Logger::debug("cwd: %s(%d) %s", str, line, buf);
+}
+

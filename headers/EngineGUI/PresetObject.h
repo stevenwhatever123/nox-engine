@@ -11,7 +11,8 @@
 namespace NoxEngineGUI {
 
 	enum PresetCategory {
-		Geometry, Cards, Lights, Audio, UI, All
+		Geometry, Cards, Lights, Audio, UI, All,
+		PresetCategoryEND
 	};
 
 	enum PresetObject {
@@ -35,7 +36,9 @@ namespace NoxEngineGUI {
 
 		// UI
 		Text2D, Text3D,
-		Button
+		Button,
+
+		PresetObjectEND
 	};
 
 	extern std::map< PresetCategory, std::string > PRESET_CATEGORY_NAMES_MAP;

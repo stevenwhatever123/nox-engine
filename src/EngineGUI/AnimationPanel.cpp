@@ -5,7 +5,7 @@
 #include <limits>
 #define NOMINMAX
 
-#include <Windows.h>
+// #include <Windows.h>
 #include <math.h>
 #include <FBXFileLoader.h>
 #include <EventManager.h>
@@ -17,6 +17,8 @@
 
 #include <EngineGUI/AnimationSequencer.h>
 
+#include <glm/gtx/string_cast.hpp>
+
 using namespace NoxEngine;
 
 void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
@@ -27,13 +29,11 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 
 	// Window Begin
 	ImGui::Begin(name.c_str());
-
-
 	if (ImGui::Button("Load FBX File")) {
 		String picked_file = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
 		if (picked_file.length() > 0)
 		{
-			SIGNAL_EVENT(EventNames::meshAdded, picked_file);
+			SIGNAL_EVENT(EventNames::meshAdded, picked_file.c_str());
 		}
 	}
 
@@ -82,7 +82,7 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 			ImGui::Text("Number of ticks: %i", currentScene.numTicks[currentScene.animationIndex] - 1);
 			ImGui::Text("Duration: %.6f", currentScene.animationDuration[currentScene.animationIndex]);
 
-			f32 duration = currentScene.animationDuration[currentScene.animationIndex];
+			f32 duration = (f32)currentScene.animationDuration[currentScene.animationIndex];
 
 			if (ImGui::SliderFloat("Duration", &duration, 0.0f, 50.0f))
 				currentScene.resetAnimation();
@@ -140,7 +140,7 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
 			static int selectedEntry = -1;
 			static int firstFrame = 0;
 			static bool expanded = true;
-			int selectedFrame = currentScene.frameIndex;
+			i32 selectedFrame = currentScene.frameIndex;
 			bool insertFrame = false;
 
 			ImGui::PushItemWidth(130);
@@ -231,10 +231,10 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
 						| ImGuiSelectableFlags_SpanAllColumns))
 					{
 						ImGui::TableNextRow();
-						for (u32 i = 0; i < transformation.length(); i++)
+						for (i32 i = 0; i < transformation.length(); i++)
 						{
 							ImGui::TableNextRow();
-							for (u32 j = 0; j < transformation[i].length(); j++)
+							for (i32 j = 0; j < transformation[i].length(); j++)
 							{
 								ImGui::TableNextColumn();
 								ImGui::Text("%.6f", transformation[i][j]);

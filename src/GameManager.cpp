@@ -2,7 +2,6 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include <filesystem>
-
 #include <Entity.h>
 
 // Components to hook up with event manager
@@ -16,8 +15,18 @@ using NoxEngine::Entity;
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
+GameManager::GameManager() :
+	win_width(WINDOW_WIDTH),
+	win_height(WINDOW_HEIGHT),
+	title(WINDOW_TITLE),
+	ui_params(),
+	should_close(false),
+	keys()
+{
+}
+
 void GameManager::init() {
-	Logger::debug("Initing systems");
+	LOG_DEBUG("Initing systems");
 	init_window();
 	init_ecs();
 	init_scene();
@@ -57,54 +66,70 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 
 }
 
-void GameManager::addMesh(String name, Mesh m) {
-
-	// m.prepForRenderer();
-	// renderer->addObject(&m);
-	// renderer->updateBuffers();
-
-	// game_state.addMesh().emplace(name, )
-
-	// game_state.audioSources.emplace(audioSource.name, audioSource);
-	// audioManager->LoadSound(audioSource.file);
-}
-
-
 // Whenever an entity is created, modified, or deleted, call this function
 // This is done to simplify code since previously we had renderer->addObject() everywhere
 void GameManager::scheduleUpdateECS() {
-
 	updateNeededECS = true;
 }
 
+void callback(GLenum source,
+		GLenum type,
+		GLuint id,
+		GLenum severity,
+		GLsizei length,
+		const GLchar* message,
+		const void* userParam) {
+
+	LOG_DEBUG("Message: %s", message);
+}
 
 void GameManager::init_window() {
-
-	Logger::debug("Initializing Window");
+	LOG_DEBUG("Initializing Window");
 
 	if (!glfwInit()) {
-		std::cout << "Error initializing glfw...exiting.";
+		LOG_DEBUG("Error initializing glfw...exiting.");
 		exit(1);
 	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, true );
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	window = glfwCreateWindow(win_width, win_height, title.c_str(), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
+	glfwSetWindowPos(window, 100, 100);
 
 	if (window == nullptr) {
-		std::cout << "Failed to create window" << std::endl;
+		LOG_DEBUG("Failed to create window");
 		exit(1);
 	}
 
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		std::cout << " Error Initializing Glew" << std::endl;
-		exit(1);
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		LOG_DEBUG("Failed to initialize OpenGL context");
 	}
+
+
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+	glDebugMessageCallback(callback, NULL);
+
+	glfwSetWindowUserPointer(window, this);
+
+	auto func = [](GLFWwindow *w, i32 key, i32 scan, i32 action, i32 mods){
+		glfwGetWindowUserPointer(w);
+
+		GameManager *gm = (GameManager *)glfwGetWindowUserPointer(w);
+		if(action == GLFW_PRESS)
+			gm->keys[(char)key] = 1;
+		if(action == GLFW_RELEASE)
+			gm->keys[(char)key] = 0;
+	};
+
+	glfwSetKeyCallback(window, func);
 
 }
 
@@ -115,56 +140,49 @@ void GameManager::init_ecs() {
 
 	// cleanup all subsystems
 
-	update_ecs();
-
 	// loop through all existing entities (loaded from a file?)
 		// add to subsystems
 
 	// prepare entities for subsystems
-
+	update_ecs();
 }
+
 
 void GameManager::init_events() {
 
 	// Event: Mesh added
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
-		
-		String file_name = va_arg(args, String);
-		// const aiScene* pScene = NoxEngine::readFBX(file_name.c_str());
-		// this->game_state.meshes.emplace(file_name, pScene);
 
-		//Mesh* mesh = new Mesh(NoxEngine::readFBX(file_name.c_str()));
-		//NoxEngineUtils::Logger::debug ("Size: %i", mesh->vertices.size());
-		//MeshScene* meshScene = new MeshScene(NoxEngine::readFBX(file_name.c_str()));
-		this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-		//MeshScene &meshScene = this->game_state.meshScenes.rbegin()->second;
-		MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
+			// Steven: That's how I would do it
+			// clean up: leaky mem
+			String file_name = va_arg(args, char*);
+			game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+			MeshScene &meshScene = game_state.meshScenes.find(file_name)->second;
 
-		i32 index = game_state.activeScene->entities.size();
+			i32 index = game_state.activeScene->entities.size();
+			// We're treating every mesh as an entity FOR NOW
+			for (u32 i = 0; i < meshScene.meshes.size(); i++)
+			{
+				// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
+				//                 because the entity ID is managed by the scene
+				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
 
-		// We're treating every mesh as an entity FOR NOW
-		for (u32 i = 0; i < meshScene.meshes.size(); i++)
-		{
-			// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
-			//                 because the entity ID is managed by the scene
-			Entity *ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
+				RenderableComponent* comp = meshScene.meshes[i];
+				PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+				ent->addComp(comp);
+				ent->addComp(pos);
 
-			RenderableComponent* comp = meshScene.meshes[i];
-			PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+				game_state.activeScene->addEntity(ent);
+			}
 
-			ent->addComp<RenderableComponent>(comp);
-			ent->addComp<PositionComponent>(pos);
+			// Vincent: addComp triggers EventNames::componentAdded, which adds the entity to the renderer (although it does immediately update the buffer which is not ideal)
+			//for (u32 i = index; i < game_state.activeScene->entities.size(); i++)
+			//{
+			//	addEntityToSubSys(i);
+			//}
+			//
+			//this->renderer->updateBuffers();
 
-			game_state.activeScene->addEntity(ent);
-		}
-		
-		// Vincent: addComp triggers EventNames::componentAdded, which adds the entity to the renderer (although it does immediately update the buffer which is not ideal)
-		//for (u32 i = index; i < game_state.activeScene->entities.size(); i++)
-		//{
-		//	addEntityToSubSys(i);
-		//}
-		//
-		//this->renderer->updateBuffers();
 
 	});
 
@@ -214,15 +232,14 @@ void GameManager::init_events() {
 		// Audio
 		// ...
 	});
-
-
 }
 
-// Initialize audio system
 void GameManager::init_audio() {
+	// Initialize audio system
 
 	audioManager = AudioManager::Instance();
 
+	// TODO: Change to singleton
 	audioManager->Init();
 
 	// Set listener. TODO: Move this inside the engine loop
@@ -236,13 +253,12 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	//camera = new Camera(glm::vec3(0.0f, 70.0f, 10.0f));
-	camera = new Camera(glm::vec3(10.0f, 20.0f, 150.0f));
-	//camera = new Camera(glm::vec3(0.0f, 70.0f, 100.0f));
-	//camera->turnVerBy(20.0f);
+	camera = new Camera(vec3(0.0f, 10.0f, 150.0f));
+	camera->turnVerBy(35.0f);
 }
 
 void GameManager::init_shaders() {
+
 	programs.emplace_back(Array<ShaderFile>{
 		{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
@@ -252,32 +268,23 @@ void GameManager::init_shaders() {
 }
 
 void GameManager::init_animation() {
-
-	
 	currentTime = glfwGetTime();
 	deltaTime = 0;
 	lastTime = currentTime;
 }
 
 void GameManager::init_renderer() { 
-
-	// ------------------------------ Set up of the render --------------------------
-	// // Create Renderer
 	renderer = new Renderer(win_width, win_height, camera);
 	renderer->setProgram(current_program);
 	renderer->useProgram();
-
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
 
-	// const aiScene* pScene = NoxEngine::readFBX("assets/meshes/card.fbx");
-	// Mesh *mesh = NoxEngine::getMesh(pScene);
+	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
 
-	// mesh->prepForRenderer();
+	renderer->addObject(obj);
 
-	// renderer->addObject(mesh);
-	// renderer->updateBuffers();
-	// delete mesh;
+	renderer->updateBuffers();
 }
 
 void GameManager::init_gui() {
@@ -285,7 +292,7 @@ void GameManager::init_gui() {
 	NoxEngineGUI::init_imgui(window);
 	
 	ImGuiIO& io = ImGui::GetIO();
-	font = io.Fonts->AddFontFromFileTTF("envy.ttf", 18);
+	font = io.Fonts->AddFontFromFileTTF("assets/font/envy.ttf", 18);
 	io.Fonts->Build();
 
 	// Initialize panel variables
@@ -293,6 +300,8 @@ void GameManager::init_gui() {
 
 	// Initialize gui params
 	ui_params.selectedEntity = -1;
+	ui_params.current_cam = camera;
+	ui_params.sceneBackgroundColor = 0x282828FF;
 
 }
 
@@ -300,10 +309,11 @@ void GameManager::init_scene() {
 
 	// Create a new empty scene
 	game_state.scenes.push_back(new Scene());
-	
+
 	// make this scene the active scene
 	game_state.activeScene = game_state.scenes[0];
 }
+
 
 void GameManager::main_contex_ui() {
 
@@ -323,7 +333,7 @@ void GameManager::main_contex_ui() {
 
 
 	// Pass texture rendered to to ImGUI
-	ImGui::Image((ImTextureID)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)(u64)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGui::End();
 }
@@ -353,19 +363,14 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::Begin("Light Settings");
-
 	ImGui::DragFloat3("Position", game_state.light);
-
 	ImGui::End();
-
-	// main_contex_ui();
 
 	ImGui::PopFont();
 	ImGui::Render();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
-
 
 void GameManager::update_ecs() {
 
@@ -420,6 +425,15 @@ void GameManager::update_audio() {
 
 void GameManager::update_inputs() {
 	glfwPollEvents();
+
+
+	if(keys['W']) { camera->moveFwdBy(0.1f); }
+	if(keys['S']) { camera->moveFwdBy(-0.1f); }
+	if(keys['D']) { camera->moveHorBy(-0.1f); }
+	if(keys['A']) { camera->moveHorBy(0.1f); }
+	if(keys[' ']) { camera->moveVerBy(0.1f); }
+	if(keys['K']) { camera->moveVerBy(-0.1f); }
+
 }
 
 void GameManager::update_animation() {
@@ -451,7 +465,6 @@ void GameManager::update_animation() {
 		// Because we're not updating frame index we still need tick floor and ceil to get our transform
 		meshSceneStart->second.updateCeilAndFloor();
 	}
-
 }
 
 void GameManager::update_renderer() {
@@ -486,8 +499,10 @@ void GameManager::update_renderer() {
 
 
 
+	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-	renderer->fillBackground(0.1f, 0.2f, 0.5f);
+	renderer->fillBackground(ui_params.sceneBackgroundColor);
 	renderer->draw();
+
 }
 

@@ -7,11 +7,11 @@
 
 #include <glm/glm.hpp>
 
-#include <fmod/core/fmod.hpp>
-#include <fmod/core/fmod_common.h>
-#include <fmod/core/fmod_errors.h>
-#include <fmod/studio/fmod_studio.hpp>
-#include <fmod/studio/fmod_studio_common.h>
+#include <fmod.hpp>
+#include <fmod_common.h>
+#include <fmod_errors.h>
+#include <fmod_studio.hpp>
+#include <fmod_studio_common.h>
 
 
 #include "Singleton.h"
