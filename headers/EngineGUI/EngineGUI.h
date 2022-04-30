@@ -15,7 +15,6 @@
 #include <imgui/backends/imgui_impl_opengl3.h>
 
 // Engine Headers
-
 #include <AudioManager.h>
 #include <Renderer.h>
 #include <Types.h>
@@ -26,9 +25,6 @@
 
 namespace NoxEngineGUI {
 
-	// TODO: This is probably not a good idea in terms of code separation -
-	//       probably better if each new panel (.h/.cpp) contains whatever 
-	//		 classes they need. This is only used for the master updateGUI() function
 	struct GUIParams {
 		bool firstLoop = true;
 
@@ -37,6 +33,10 @@ namespace NoxEngineGUI {
 		u32 locHeight;
 		u32 prevWidth;
 		u32 prevHeight;
+
+		// Variables to communicate between windows
+		i32 selectedEntity;		// the array index of the selected entity in the hierarchy window
+		
 		u32 sceneBackgroundColor;
 		NoxEngine::Camera *current_cam;
 	};
@@ -53,6 +53,7 @@ namespace NoxEngineGUI {
 		// Scene object manipulation
 		PresetObjects,
 		Hierarchy,
+		Inspector,
 
 		// Animation
 		AnimationSettings,
@@ -70,6 +71,7 @@ namespace NoxEngineGUI {
 		{ PanelName::Scene,			"Scene" },
 		{ PanelName::PresetObjects, "Preset Objects" },
 		{ PanelName::Hierarchy,		"Hierarchy" },
+		{ PanelName::Inspector,		"Inspector" },
 		{ PanelName::AnimationSettings,		"Animation Settings" },
 		{ PanelName::AudioSource,	"Audio Source" }
 	};
@@ -90,8 +92,6 @@ namespace NoxEngineGUI {
 	// should belong in a separate header file.
 	// TODO: Remove the following - these are only here to show what 
 	//       other panels we could have
-	//void updateFileExplorerPanel();
-	//void updateHierarchyPanel();
 	//void updateConsolePanel();
 
 }

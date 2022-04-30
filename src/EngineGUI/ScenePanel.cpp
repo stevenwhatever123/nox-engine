@@ -1,7 +1,12 @@
 #include "EngineGUI/ScenePanel.h"
 
+// move to header
+#include "Entity.h"
 
-void NoxEngineGUI::updateScenePanel(GameState* params) {
+using namespace NoxEngine;
+
+
+void NoxEngineGUI::updateScenePanel(GameState* state) {
 
 	String name = PANEL_NAME_MAP[ PanelName::Scene ];
 
@@ -25,12 +30,16 @@ void NoxEngineGUI::updateScenePanel(GameState* params) {
 			printf("Dropped %s (%i)\n", PRESET_OBJECT_NAMES_MAP[payloadObject].c_str(), payloadObject);
 		
 			// TODO: Logic for translating 2D cursor position to 3D world coordinates
+
+
+			// Add an entity to the active scene
+			state->activeScene->addEntity(payloadObject);
 		}
 		ImGui::EndDragDropTarget();
 	}
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
-	ImGui::Image((ImTextureID)(u64)params->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)(u64)state->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	// Window end
 	ImGui::End();

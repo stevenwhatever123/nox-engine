@@ -7,6 +7,7 @@
 #include <cassert>
 
 
+// TODO: Move this to ECS
 namespace NoxEngineGUI {
 
 	enum PresetCategory {
@@ -16,7 +17,7 @@ namespace NoxEngineGUI {
 
 	enum PresetObject {
 		// Geometry
-		EmptyGameObject,
+		EmptyEntity,
 		Transform,
 		Cube,
 		Sphere,

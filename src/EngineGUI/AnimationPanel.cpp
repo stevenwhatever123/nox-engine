@@ -1,9 +1,5 @@
 #include "EngineGUI/AnimationPanel.h"
 
-// hacky solution to min and max being redefined in Windows.h, causing std::min/std::max
-// to give errors. See https://stackoverflow.com/questions/2561368/illegal-token-on-right-side-of
-#include <limits>
-
 #include <math.h>
 #include <FBXFileLoader.h>
 #include <EventManager.h>
@@ -164,6 +160,11 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
 				selectedFrame = 0;
 			if (selectedFrame > currentScene.numTicks[currentScene.animationIndex] - 1)
 				selectedFrame = currentScene.numTicks[currentScene.animationIndex] - 1;
+
+			if (selectedEntry < 0)
+				selectedEntry = -1;
+			if (selectedEntry > currentScene.allNodes.size() - 1)
+				selectedEntry = currentScene.allNodes.size() - 1;
 
 			Sequencer(&mySequence, &selectedFrame, &expanded, &selectedEntry,
 				&firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND

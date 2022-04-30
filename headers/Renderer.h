@@ -17,13 +17,14 @@
 #include <GLProgram.h>
 #include <Singleton.h>
 #include <IPosition.h>
+#include <Entity.h>
 
 namespace NoxEngine {
 
 	// The objects to render
 	struct RendObj
 	{
-		IRenderable* objPtr; // A pointer to the object
+		Entity* ent;
 		GLuint renderType;
 		i32 has_texture;
 		i32 has_normal;
@@ -121,7 +122,8 @@ namespace NoxEngine {
 		~Renderer();
 
 		// Add object to renderer to render
-		void addObject(IRenderable *mesh, IPosition *pos);
+		void addObject(Entity *ent);
+		void removeObject(Entity* ent);
 		void clearObject();
 		
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}

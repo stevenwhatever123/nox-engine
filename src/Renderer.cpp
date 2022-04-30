@@ -3,6 +3,10 @@
 #include <Utils.h>
 #include <glm/glm.hpp>
 
+#include <PositionComponent.h>
+#include <RenderableComponent.h>
+#include <IRenderable.h>
+
 // TODO: update uniform submissions to use Shader class
 // TODO: fix drawing to default buffer
 // TODO: get some light going
@@ -149,17 +153,19 @@ void Renderer::updateBuffers() {
 }
 
 
-void Renderer::addObject(IRenderable *mesh, IPosition *pos)
+void Renderer::addObject(Entity *ent)
 {
 
     // Add a mesh to the container
     RendObj newObj;
-    newObj.objPtr = mesh;
+    newObj.ent = ent;
+
+	IRenderable* mesh = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
+
 	newObj.renderType = mesh->glRenderType;
     newObj.startInd = (i32)elements.size();
 	newObj.has_texture = mesh->has_texture;
 	newObj.has_normal = mesh->has_normal;
-    newObj.pos = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
     
     // Generate textures for the object
     newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
@@ -179,6 +185,18 @@ void Renderer::addObject(IRenderable *mesh, IPosition *pos)
     newObj.transformation = glm::mat4(1.0f);
 	objects.push_back(newObj);
 
+    LOG_DEBUG("Renderer object count: %i\n", objects.size());
+}
+
+void Renderer::removeObject(Entity* ent) {
+
+    // Note: This calls the destructor on RendObj
+    objects.erase(
+        std::remove_if(objects.begin(), objects.end(), [ent](RendObj obj) { return obj.ent == ent; }),
+        objects.end()
+    );
+    
+    LOG_DEBUG("Renderer object count: %i\n", objects.size());
 }
 
 GLuint Renderer::setTexture(const String texturePath, const char* uniName, int num) {
@@ -235,7 +253,18 @@ void Renderer::draw() {
 
 	for (u32 i = 0; i < objects.size(); i++)
 	{
-        program->set4Matrix("toWorld", objects[i].pos);
+		// Skip if the entity/RenderableComponent is not enabled
+		if (!objects[i].ent->isEntityEnabled()) continue;
+		if (!objects[i].ent->isEnabled<RenderableComponent>()) continue;
+
+		// If the object has a position and it's enabled, use it
+		glm::mat4 worldMat = glm::mat4(1.0f);
+		if (objects[i].ent->containsComps<PositionComponent>() && objects[i].ent->isEnabled<PositionComponent>()) {
+			IPosition* pos = objects[i].ent->getComp<PositionComponent>()->CastType<IPosition>();
+			worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+		}
+
+		program->set4Matrix("toWorld", worldMat);
         program->set4Matrix("modelMatrix", objects[i].transformation);
 
         // Activate and bind textures of the object
@@ -535,13 +564,15 @@ void Renderer::updateLightPos(float x, float y, float z)
 
 void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable)
 {
-    for (u32 i = 0; i < objects.size(); i++)
-    {
-        if (objects[i].objPtr == pRenderable)
-        {
-            objects[i].transformation = transformation;
-            //program->set4Matrix("modelMatrix", transformation);
-            //std::cout << "Welcome to the Matrix" << "\n";
-        }
-    }
+	for (u32 i = 0; i < objects.size(); i++)
+	{
+		IRenderable* rend = objects[i].ent->getComp<RenderableComponent>()->CastType<IRenderable>();
+		if (rend == pRenderable)
+		{
+			objects[i].transformation = transformation;
+			//program->set4Matrix("modelMatrix", transformation);
+			//std::cout << "Welcome to the Matrix" << "\n";
+		}
+	}
 }
+

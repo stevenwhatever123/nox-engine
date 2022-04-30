@@ -5,6 +5,7 @@
 #include <Types.h>
 #include <Mesh.h>
 #include <MeshScene.h>
+#include <Scene.h>
 
 namespace NoxEngine {
 
@@ -25,6 +26,8 @@ namespace NoxEngine {
 		MeshRepo meshes;
 		MeshSceneRepo meshScenes;
 		f32 light[3];
+		Array<Scene *> scenes;
+		Scene *activeScene;
 	};
 
 

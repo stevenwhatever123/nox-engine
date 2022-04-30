@@ -15,11 +15,8 @@ namespace NoxEngine {
 	class GridObject: public IRenderable, public IPosition {
 		public:
 
-			
-			void* CastType(const i32 castID);
 			~GridObject();
 			GridObject(vec3 start_point, vec3 end_point, const i32 number_of_rects);
-			void prepTheData();
 
 			inline i32 getNumOfVertices() { return i32( vertices.size() ); }
 			inline i32 getNumOfTexCoord() { return i32( texCoords.size()/2 ); }

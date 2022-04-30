@@ -9,6 +9,9 @@ using NoxEngineUtils::Logger;
 Mesh2::Mesh2() : RenderableComponent()
 {
 	glRenderType = GL_TRIANGLES;
+	has_normal = true;
+	has_texture = true;
+	use_indices = false;
 }
 
 Mesh2::~Mesh2() { }

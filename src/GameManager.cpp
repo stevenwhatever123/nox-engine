@@ -1,5 +1,11 @@
 #include <GameManager.h>
-#include <glm/gtx/string_cast.hpp>
+
+#include <filesystem>
+#include <Entity.h>
+
+// Components to hook up with event manager
+#include <RenderableComponent.h>
+#include <PositionComponent.h>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -8,28 +14,28 @@ using NoxEngine::Entity;
 using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
-GameManager::GameManager(u32 width, u32 height, String title) :
-	win_width(width),
-	win_height(height),
-	title(title),
-	scene(),
+GameManager::GameManager() :
+	win_width(WINDOW_WIDTH),
+	win_height(WINDOW_HEIGHT),
+	title(WINDOW_TITLE),
+	ui_params(),
 	should_close(false),
-	keys()
+	keys(),
+	game_state()
 {
 }
 
 void GameManager::init() {
 	LOG_DEBUG("Initing systems");
 	init_window();
+	init_scene();
+	init_ecs();
 	init_events();
 	init_audio();
 	init_camera();
 	init_shaders();
-	init_imgui();
+	init_gui();
 	init_animation();
-
-	glPointSize(4.0);
-
 	init_renderer();
 }
 
@@ -37,6 +43,7 @@ void GameManager::update() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	update_inputs();
+	update_ecs();
 	update_audio();
 	update_renderer();
 	update_gui();
@@ -57,6 +64,12 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 	game_state.audioSources.emplace(audioSource.name, audioSource);
 	audioManager->LoadSound(audioSource.file);
 
+}
+
+// Whenever an entity is created, modified, or deleted, call this function
+// This is done to simplify code since previously we had renderer->addObject() everywhere
+void GameManager::scheduleUpdateECS() {
+	updateNeededECS = true;
 }
 
 void callback(GLenum source,
@@ -87,8 +100,6 @@ void GameManager::init_window() {
 	window = glfwCreateWindow(win_width, win_height, title.c_str(), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
-
-
 	glfwSetWindowPos(window, 100, 100);
 
 	if (window == nullptr) {
@@ -121,6 +132,20 @@ void GameManager::init_window() {
 
 }
 
+// Similar to activateScene
+void GameManager::init_ecs() {
+
+	initComponentTypes();
+
+	// cleanup all subsystems
+
+	// loop through all existing entities (loaded from a file?)
+		// add to subsystems
+
+	// prepare entities for subsystems
+	update_ecs();
+}
+
 
 void GameManager::init_events() {
 
@@ -129,43 +154,71 @@ void GameManager::init_events() {
 			// Steven: That's how I would do it
 			// clean up: leaky mem
 			String file_name = va_arg(args, char*);
-			this->game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-			MeshScene &meshScene = this->game_state.meshScenes.find(file_name)->second;
+			game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+			MeshScene &meshScene = game_state.meshScenes.find(file_name)->second;
 
-			i32 index = this->scene.entities.size();
+			i32 index = game_state.activeScene->entities.size();
 			// We're treating every mesh as an entity FOR NOW
 			for (u32 i = 0; i < meshScene.meshes.size(); i++)
 			{
-				Entity *ent = new Entity();
+				// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
+				//                 because the entity ID is managed by the scene
+				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
+
 				RenderableComponent* comp = meshScene.meshes[i];
 				PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
 				ent->addComp(comp);
 				ent->addComp(pos);
 
-				this->scene.addEntity(ent);
-
-				this->renderer->addObject(
-						reinterpret_cast<IRenderable*>(ent->getComp(2)->CastType(2)),
-						reinterpret_cast<IPosition*>(ent->getComp(1)->CastType(2))
-						);
+				game_state.activeScene->addEntity(ent);
 			}
-
-			this->renderer->updateBuffers();
-
 	});
 
 
+	EventManager::Instance()->addListener(EventNames::componentAdded, [this](va_list args) {
+
+		Entity* ent = va_arg(args, Entity*);
+		const std::type_index compTypeId = va_arg(args, std::type_index);
+
+		// Renderer
+		if (ent->containsComps<PositionComponent, RenderableComponent>()) {
+
+			RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
+			IRenderable* rend = rendComp->CastType<IRenderable>();
+
+			if (!rend->registered) {
+				renderer->addObject(ent);
+				rend->registered = true;
+
+				// Update renderer
+				// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion
+				this->renderer->updateBuffers();
+			}
+		}
+
+		// Audio
+		// ...
+	});
+
+	EventManager::Instance()->addListener(EventNames::componentRemoved, [this](va_list args) {
+
+		Entity* ent = va_arg(args, Entity*);
+		const std::type_index compTypeId = va_arg(args, std::type_index);
+
+		if (compTypeId == typeid(RenderableComponent)) {
+			renderer->removeObject(ent);
+			// TODO-OPTIMIZATION: Remove in batches every X ms, shift the still-valid indices to take the free space
+		}
+
+		// Audio
+		// ...
+	});
 }
 
 void GameManager::init_audio() {
-	// Initialize audio system
-
 	audioManager = AudioManager::Instance();
-
-	// TODO: Change to singleton
 	audioManager->Init();
 
-	// Set listener. TODO: Move this inside the engine loop
 	audioManager->Set3dListenerAttributes(
 			{ 0.0f, 0.0f, 0.0f },		// Position
 			{ 0.0f, 0.0f, 0.0f },		// velocity (TODO: calculate)
@@ -201,17 +254,13 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
-	GridObject obj(vec3(-500, 0, -550), vec3(1000, 0, 1000), 500);
 
-	renderer->addObject(
-			static_cast<IRenderable*>(&obj),
-			static_cast<IPosition*>(&obj)
-			);
-
+	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
+	// renderer->addObject(obj);
 	renderer->updateBuffers();
 }
 
-void GameManager::init_imgui() {
+void GameManager::init_gui() {
 
 	NoxEngineGUI::init_imgui(window);
 	
@@ -222,10 +271,17 @@ void GameManager::init_imgui() {
 	// Initialize panel variables
 	NoxEngineGUI::initPresetObjectPanel();
 
+	// Initialize gui params
+	ui_params.selectedEntity = -1;
 	ui_params.current_cam = camera;
 	ui_params.sceneBackgroundColor = 0x282828FF;
-
 }
+
+void GameManager::init_scene() {
+	game_state.scenes.push_back(new Scene());
+	game_state.activeScene = game_state.scenes[0];
+}
+
 
 void GameManager::main_contex_ui() {
 
@@ -242,9 +298,6 @@ void GameManager::main_contex_ui() {
 	ImVec2 wsize = ImGui::GetWindowSize();
 	f32 locWidth = wsize.x;
 	f32 locHeight = wsize.y;
-
-
-	// Pass texture rendered to to ImGUI
 	ImGui::Image((ImTextureID)(u64)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGui::End();
@@ -254,12 +307,10 @@ void GameManager::update_gui() {
 
 	ImGuiIO& io = ImGui::GetIO();
 	
-	// Show FPS
 	char windowTitle[64];
 	snprintf(windowTitle, 64, "%s - FPS %.3f", title.c_str(), io.Framerate);
 	glfwSetWindowTitle(window, windowTitle);
 
-	// Draw window content
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -270,6 +321,9 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateAnimationPanel(&game_state);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
+	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
+	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
+	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::PopFont();
 	ImGui::Render();
@@ -277,9 +331,44 @@ void GameManager::update_gui() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
+void GameManager::update_ecs() {
+
+	if (!updateNeededECS) return;
+
+	//bool updateRenderer = false;
+	//bool updateAudioManager = false;
+
+	bool entityRemoved = false;
+	size_t nEntities = game_state.activeScene->entities.size();
+
+
+	// Check for entity removal. 
+	// Free resources explicitly (since `entities` contain raw `Entity*` pointers) and resize vector
+	game_state.activeScene->entities.erase(
+		std::remove_if(
+			game_state.activeScene->entities.begin(),
+			game_state.activeScene->entities.end(),
+			[](auto &&ent) { 
+				bool rm = ent->remove;
+				if (rm) delete ent;
+				return rm;
+			}
+		),
+		game_state.activeScene->entities.end()
+	);
+
+	entityRemoved = nEntities != game_state.activeScene->entities.size();
+
+
+	// update subsystems if needed
+	if (/*updateRenderer && */entityRemoved) renderer->updateBuffers();
+	//if (updateAudioManager) audioManager->...
+
+	// Update done
+	updateNeededECS = false;
+}
 
 void GameManager::update_audio() {
-
 	// Sync audio manager with the game state's audio repo
 	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
 	//       set the pos/volume in the appropriate ChannelGroup / ChannelControl
@@ -293,7 +382,6 @@ void GameManager::update_audio() {
 
 void GameManager::update_inputs() {
 	glfwPollEvents();
-
 
 	if(keys['W']) { camera->moveFwdBy(0.1f); }
 	if(keys['S']) { camera->moveFwdBy(-0.1f); }

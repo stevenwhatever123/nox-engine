@@ -2,9 +2,11 @@
 
 using namespace NoxEngine;
 
-RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const char * texName) : ambTexName(texName)
+RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const String texName):
+	ambientTexture(texName),
+	normalTexture()
 {
-	id = 2;
+	id = ComponentType::RenderableType;
 
 	has_normal = 1;
 	has_texture = 1;
@@ -68,23 +70,9 @@ RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const char *
 
 }
 
-RenderableComponent::RenderableComponent(const char* texName) : ambTexName(texName)
+RenderableComponent::RenderableComponent(const String texName):
+	ambientTexture(texName),
+	normalTexture()
 {
-	id = 2;
-}
-
-RenderableComponent::RenderableComponent()
-{
-	id = 2;
-}
-
-void* RenderableComponent::CastType(const int castID)
-{
-	switch (castID)
-	{
-	case 2: return static_cast<IRenderable*>(this); break;
-	case 1: return static_cast<IComponent*>(this); break;
-	default:
-		return nullptr;
-	}
+	id = ComponentType::RenderableType;
 }
