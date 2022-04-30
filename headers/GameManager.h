@@ -34,7 +34,7 @@
 #include <EngineGUI/ImGuizmoTool.h>
 
 #include <RenderableComponent.h>
-#include <PositionComponent.h>
+#include <TransformComponent.h>
 #include <GridObject.h>
 
 // TODO: move to a config file

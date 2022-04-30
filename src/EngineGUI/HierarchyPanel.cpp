@@ -4,7 +4,7 @@
 
 #include <Entity.h>
 #include <IComponent.h>
-#include <PositionComponent.h>
+#include <TransformComponent.h>
 #include <RenderableComponent.h>
 #include <GameManager.h>
 

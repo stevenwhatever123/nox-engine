@@ -1,7 +1,7 @@
 #include <Scene.h>
 
 #include <GameManager.h>
-#include "PositionComponent.h"
+#include "TransformComponent.h"
 #include "RenderableComponent.h"
 #include <Entity.h>
 
@@ -35,7 +35,7 @@ void Scene::addEntity(PresetObject obj) {
 	Entity* ent = new Entity(this);
 	
 	// Empty components created before the switch/case, allocate memory with `new` inside
-	PositionComponent* pos;
+	TransformComponent* transform;
 	RenderableComponent* rend;
 
 	// Check which preset object is needed, create components accordingly
@@ -43,8 +43,8 @@ void Scene::addEntity(PresetObject obj) {
 
 	// Object with only transform component
 	case Transform:
-		pos = new PositionComponent(0.0, 0.0, 0.0);
-		ent->addComp<PositionComponent>(pos);
+		transform = new TransformComponent(0.0, 0.0, 0.0);
+		ent->addComp<TransformComponent>(transform);
 		break;
 
 	// No need to add any component

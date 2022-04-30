@@ -2,7 +2,7 @@
 
 // Component classes
 #include <IComponent.h>
-#include <PositionComponent.h>
+#include <TransformComponent.h>
 #include <RenderableComponent.h>
 
 
@@ -18,7 +18,7 @@ void NoxEngine::initComponentTypes() {
 	
 	kComponentTypeMap = {
 		{ typeid(IComponent),			AbstractType },
-		{ typeid(PositionComponent),	PositionType },
+		{ typeid(TransformComponent),	TransformType },
 		{ typeid(RenderableComponent),	RenderableType }
 		//{ typeid(LightSourceComponent),	LightSourceType },
 		//{ typeid(AudioSourceComponent),	AudioSourceType },
@@ -27,7 +27,7 @@ void NoxEngine::initComponentTypes() {
 
 	kComponentTypeNames = {
 		{ AbstractType,		"Abstract Component" },
-		{ PositionType,		"Position Component" },
+		{ TransformType,	"Transform Component" },
 		{ RenderableType,	"Renderable Component" },
 		{ LightSourceType,	"Light Source Component" },
 		{ AudioSourceType,	"Audio Source Component" },

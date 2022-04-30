@@ -6,7 +6,7 @@
 #include <GameState.h>
 #include <ComponentType.h>
 #include <IComponent.h>
-#include <PositionComponent.h>
+#include <TransformComponent.h>
 #include <RenderableComponent.h>
 
 using namespace NoxEngine;
@@ -92,7 +92,7 @@ void Entity::addComp(ComponentType type) {
 
 	switch (type) {
 
-	case PositionType:		addComp<PositionComponent>(); break;
+	case TransformType:		addComp<TransformComponent>(); break;
 	case RenderableType:	addComp<RenderableComponent>(); break;
 	default:				Logger::debug("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
 	}
@@ -148,8 +148,8 @@ bool Entity::isEnabled(u32 bit) {
 
 
 // explicit template instantiation
-template void Entity::addComp<PositionComponent>(PositionComponent*);
+template void Entity::addComp<TransformComponent>(TransformComponent*);
 template void Entity::addComp<RenderableComponent>(RenderableComponent*);
 
-template PositionComponent* Entity::getComp<PositionComponent>();
+template TransformComponent* Entity::getComp<TransformComponent>();
 template RenderableComponent* Entity::getComp<RenderableComponent>();

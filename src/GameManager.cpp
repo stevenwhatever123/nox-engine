@@ -5,7 +5,7 @@
 
 // Components to hook up with event manager
 #include <RenderableComponent.h>
-#include <PositionComponent.h>
+#include <TransformComponent.h>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -80,7 +80,7 @@ void callback(GLenum source,
 		const GLchar* message,
 		const void* userParam) {
 
-	LOG_DEBUG("Message: %s", message);
+	//LOG_DEBUG("Message: %s", message);
 }
 
 void GameManager::init_window() {
@@ -166,7 +166,7 @@ void GameManager::init_events() {
 				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
 
 				RenderableComponent* comp = meshScene.meshes[i];
-				PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+				TransformComponent* pos = new TransformComponent(0.0, 0.0, 0.0);
 				ent->addComp(comp);
 				ent->addComp(pos);
 
@@ -181,7 +181,7 @@ void GameManager::init_events() {
 		const std::type_index compTypeId = va_arg(args, std::type_index);
 
 		// Renderer
-		if (ent->containsComps<PositionComponent, RenderableComponent>()) {
+		if (ent->containsComps<TransformComponent, RenderableComponent>()) {
 
 			RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
 			IRenderable* rend = rendComp->CastType<IRenderable>();

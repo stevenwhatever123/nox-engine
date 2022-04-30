@@ -3,7 +3,7 @@
 #include <Utils.h>
 #include <glm/glm.hpp>
 
-#include <PositionComponent.h>
+#include <TransformComponent.h>
 #include <RenderableComponent.h>
 #include <IRenderable.h>
 
@@ -259,9 +259,13 @@ void Renderer::draw() {
 
 		// If the object has a position and it's enabled, use it
 		glm::mat4 worldMat = glm::mat4(1.0f);
-		if (objects[i].ent->containsComps<PositionComponent>() && objects[i].ent->isEnabled<PositionComponent>()) {
-			IPosition* pos = objects[i].ent->getComp<PositionComponent>()->CastType<IPosition>();
-			worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+		if (objects[i].ent->containsComps<TransformComponent>() && objects[i].ent->isEnabled<TransformComponent>()) {
+			ITransform* pos = objects[i].ent->getComp<TransformComponent>()->CastType<ITransform>();
+			glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+			glm::mat4 rotation = glm::eulerAngleXYZ(pos->rx, pos->ry, pos->rz);
+			glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(pos->sx, pos->sy, pos->sz));
+			//worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+			worldMat = translation * rotation * scale;
 		}
 
 		program->set4Matrix("toWorld", worldMat);
@@ -572,6 +576,19 @@ void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable*
 			objects[i].transformation = transformation;
 			//program->set4Matrix("modelMatrix", transformation);
 			//std::cout << "Welcome to the Matrix" << "\n";
+		}
+	}
+}
+
+void Renderer::changeTexture(Entity* ent)
+{
+	for (u32 i = 0; i < objects.size(); i++)
+	{
+		if (objects[i].ent == ent)
+		{
+			RenderableComponent* rendComp = objects[i].ent->getComp<RenderableComponent>();
+			//rendComp->getAmbientTexture() doesn't return anything here atm
+			objects[i].ambientTexture = setTexture(rendComp->ambientTexture, "AmbTexture", 1);
 		}
 	}
 }

@@ -11,7 +11,7 @@ RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const String
 	has_normal = 1;
 	has_texture = 1;
 	use_indices = 0;
-		// Init data
+	// Init data
 
 	vertices = {
 		{1.00f, -1.00f, -1.00f},

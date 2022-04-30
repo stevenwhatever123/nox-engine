@@ -2,7 +2,7 @@
 
 #include <IRenderable.h>
 #include <IComponent.h>
-#include <IPosition.h>
+#include <ITransform.h>
 #include <Types.h>
 #include <Utils.h>
 
@@ -12,7 +12,7 @@ namespace NoxEngine {
 	/*
 	 * A mock up class for Renderer to render a cube
 	 */
-	class GridObject: public IRenderable, public IPosition {
+	class GridObject: public IRenderable, public ITransform {
 		public:
 
 			~GridObject();

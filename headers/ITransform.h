@@ -8,11 +8,19 @@
 
 namespace NoxEngine {
 
-	class IPosition
+	class ITransform
 	{
 		public:
 			f32 x;
 			f32 y;
 			f32 z;
+
+			f32 rx;
+			f32 ry;
+			f32 rz;
+			
+			f32 sx;
+			f32 sy;
+			f32 sz;
 	};
 }

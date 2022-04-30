@@ -2,7 +2,7 @@
 
 #include <Entity.h>
 #include <IComponent.h>
-#include <PositionComponent.h>
+#include <TransformComponent.h>
 #include <RenderableComponent.h>
 
 using namespace NoxEngine;
@@ -34,10 +34,10 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 			int width = ImGui::GetContentRegionAvail().x;
 
 			// PositionComponent
-			if (ent->containsComps(PositionFlag)) {
+			if (ent->containsComps(TransformFlag)) {
 
-				bool enable = ent->isEnabled<PositionComponent>();
-				bool expand = ImGui::TreeNode("Position");		// TODO (Vincent): How to change the width of treenode?
+				bool enable = ent->isEnabled<TransformComponent>();
+				bool expand = ImGui::TreeNode("Transform");		// TODO (Vincent): How to change the width of treenode?
 
 				ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
 				ImGui::Checkbox("##EnablePos", &enable);
@@ -45,11 +45,11 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				ImGui::SameLine();
 				bool remove = ImGui::SmallButton("-##RemovePos");	//TODO: Use ImageButton?
 
-				ent->setEnabled<PositionComponent>(enable);
+				ent->setEnabled<TransformComponent>(enable);
 
 				if (expand) {
 
-					IPosition* pos = ent->getComp<PositionComponent>()->CastType<IPosition>();
+					ITransform* transform = ent->getComp<TransformComponent>()->CastType<ITransform>();
 
 					// Begin: grey out
 					ImGui::BeginDisabled(!enable);
@@ -59,7 +59,12 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					// 2. submit it to renderer updateTransformationMatrix(matrix, IRenderable)
 					//	  (impl: loop through rendObjs, check pointers match. O(N))
 
-					ImGui::DragFloat3("XYZ", &pos->x, 0.01f);
+					ImGui::DragFloat3("Position", &transform->x, 0.01f);
+
+					ImGui::DragFloat3("Rotation", &transform->rx, 0.01f);
+
+					ImGui::DragFloat3("Scale", &transform->sx, 0.01f);
+
 					ImGui::TreePop();
 
 					// End: grey out
@@ -67,7 +72,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				}
 
 				if (remove) {
-					ent->removeComp<PositionComponent>();
+					ent->removeComp<TransformComponent>();
 				}
 				ImGui::Separator();
 			}
@@ -92,8 +97,18 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					ImGui::BeginDisabled(!enable);
 
 					IRenderable* rend = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
+					RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
 
 					ImGui::Text("Ambient Texture");
+					// Select Ambient Texture
+					ImGui::SameLine();
+					if (ImGui::Button("Select"))
+					{
+						String picked_file = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
+						rendComp->ambientTexture = picked_file;
+						state->renderer->changeTexture(ent);
+					}
+
 					ImGui::Text("Diffuse Map");
 					ImGui::Text("Specular Map");
 					ImGui::DragFloat3("Colour", rend->color);

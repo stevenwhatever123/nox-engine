@@ -4,13 +4,13 @@
 * 
 */
 
-#include "PositionComponent.h"
+#include "TransformComponent.h"
 #include "RenderableComponent.h"
 
 using namespace NoxEngine;
 
 
-void PositionComponent::displayUI() {
+void TransformComponent::displayUI() {
 
 }
 

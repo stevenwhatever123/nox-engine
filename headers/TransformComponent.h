@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IComponent.h"
-#include "IPosition.h"
+#include "ITransform.h"
 #include "Types.h"
 
 /*
@@ -10,11 +10,11 @@
 
 namespace NoxEngine {
 
-	class PositionComponent : public IPosition, public IComponent
+	class TransformComponent : public ITransform, public IComponent
 	{
 		public:
 
-			PositionComponent(f32 newx = 0.0f, f32 newy = 0.0f, f32 newz = 0.0f);
+			TransformComponent(f32 newx = 0.0f, f32 newy = 0.0f, f32 newz = 0.0f);
 
 			void displayUI() override;
 
