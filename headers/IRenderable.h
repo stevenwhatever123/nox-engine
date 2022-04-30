@@ -17,7 +17,7 @@ namespace NoxEngine {
 
 		public:
 			virtual ~IRenderable() {};
-			IRenderable() {};
+			IRenderable() : has_normal(0), has_texture(0), use_indices(0), registered(0), glRenderType(GL_INVALID_INDEX) {};
 
 			virtual i32 getNumOfVertices() = 0;
 			virtual i32 getNumOfTexCoord() = 0;
@@ -47,6 +47,6 @@ namespace NoxEngine {
 			f32 color[3];
 			GLenum glRenderType;
 
-			bool registered;	// Is this component registered in the Renderer?
+			bool registered;
 	};
 }

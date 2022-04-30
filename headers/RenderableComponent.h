@@ -18,7 +18,6 @@ namespace NoxEngine {
 			RenderableComponent(const String texName);
 
 			void displayUI() override; 
-			void prepTheData();
 
 			inline i32 getNumOfVertices() { return (i32)vertices.size(); }
 			inline i32 getNumOfTexCoord() { return (i32)texCoords.size(); }
@@ -26,8 +25,8 @@ namespace NoxEngine {
 			inline i32 getNumOfFaces() { return (i32)faces.size(); }
 
 			// TODO: change to a parameter
-			inline const String getNormalTexture()  { return "assets/meshes/textures/leaves_normal.jpg"; }
-			inline const String getAmbientTexture() { return ambTexName; }
+			inline const String getNormalTexture()  { return normalTexture; }
+			inline const String getAmbientTexture() { return ambientTexture; }
 
 			inline const Array<vec3>&  getVertices () const { return vertices; }
 			inline const Array<vec2>&  getTexCoords() const { return texCoords; }
@@ -35,7 +34,8 @@ namespace NoxEngine {
 			inline const Array<ivec3>& getFaces    () const { return faces; }
 			inline const Array<i32>&   getIndices  () const { return indices; }
 
-			const String ambTexName;
+			String ambientTexture;
+			String normalTexture;
 
 	};
 }

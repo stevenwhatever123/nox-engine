@@ -344,7 +344,7 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 		// Fix this too
 		mesh->vertices.resize(pMesh->mNumVertices);
 		mesh->normals.resize(pMesh->mNumVertices);
-		mesh->faces.resize(pMesh->mNumVertices);
+		mesh->faces.resize(pMesh->mNumFaces);
 		mesh->texCoords.resize(pMesh->mNumVertices);
 
 		const bool has_texture = pMesh->HasTextureCoords(0);

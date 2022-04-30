@@ -2,7 +2,9 @@
 
 using namespace NoxEngine;
 
-RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const String texName) : ambTexName(texName)
+RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const String texName):
+	ambientTexture(texName),
+	normalTexture()
 {
 	id = ComponentType::RenderableType;
 
@@ -68,7 +70,9 @@ RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const String
 
 }
 
-RenderableComponent::RenderableComponent(const String texName) : ambTexName(texName)
+RenderableComponent::RenderableComponent(const String texName):
+	ambientTexture(texName),
+	normalTexture()
 {
 	id = ComponentType::RenderableType;
 }

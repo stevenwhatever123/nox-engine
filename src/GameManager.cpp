@@ -149,7 +149,6 @@ void GameManager::init_ecs() {
 
 void GameManager::init_events() {
 
-	// Event: Mesh added
 	EventManager::Instance()->addListener(EventNames::meshAdded, [this](va_list args){
 
 			// Steven: That's how I would do it
@@ -173,20 +172,9 @@ void GameManager::init_events() {
 
 				game_state.activeScene->addEntity(ent);
 			}
-
-			// Vincent: addComp triggers EventNames::componentAdded, which adds the entity to the renderer (although it does immediately update the buffer which is not ideal)
-			//for (u32 i = index; i < game_state.activeScene->entities.size(); i++)
-			//{
-			//	addEntityToSubSys(i);
-			//}
-			//
-			//this->renderer->updateBuffers();
-
-
 	});
 
 
-	// Event: Component added. Register in the appropriate subsystems
 	EventManager::Instance()->addListener(EventNames::componentAdded, [this](va_list args) {
 
 		Entity* ent = va_arg(args, Entity*);
@@ -198,7 +186,6 @@ void GameManager::init_events() {
 			RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
 			IRenderable* rend = rendComp->CastType<IRenderable>();
 
-			// Add to renderer - but don't add again if the entity is already registered
 			if (!rend->registered) {
 				renderer->addObject(ent);
 				rend->registered = true;
@@ -213,17 +200,12 @@ void GameManager::init_events() {
 		// ...
 	});
 
-
-	// Event: Component removed
 	EventManager::Instance()->addListener(EventNames::componentRemoved, [this](va_list args) {
 
 		Entity* ent = va_arg(args, Entity*);
 		const std::type_index compTypeId = va_arg(args, std::type_index);
 
-		// Renderer
-		// As soon as a RenderableComponent is removed, disqualify the RendObj in the renderer
 		if (compTypeId == typeid(RenderableComponent)) {
-
 			renderer->removeObject(ent);
 			// TODO-OPTIMIZATION: Remove in batches every X ms, shift the still-valid indices to take the free space
 		}
@@ -234,14 +216,9 @@ void GameManager::init_events() {
 }
 
 void GameManager::init_audio() {
-	// Initialize audio system
-
 	audioManager = AudioManager::Instance();
-
-	// TODO: Change to singleton
 	audioManager->Init();
 
-	// Set listener. TODO: Move this inside the engine loop
 	audioManager->Set3dListenerAttributes(
 			{ 0.0f, 0.0f, 0.0f },		// Position
 			{ 0.0f, 0.0f, 0.0f },		// velocity (TODO: calculate)
@@ -279,9 +256,7 @@ void GameManager::init_renderer() {
 	renderer->setFrameBufferToTexture();
 
 	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
-
 	// renderer->addObject(obj);
-
 	renderer->updateBuffers();
 }
 
@@ -300,15 +275,10 @@ void GameManager::init_gui() {
 	ui_params.selectedEntity = -1;
 	ui_params.current_cam = camera;
 	ui_params.sceneBackgroundColor = 0x282828FF;
-
 }
 
 void GameManager::init_scene() {
-
-	// Create a new empty scene
 	game_state.scenes.push_back(new Scene());
-
-	// make this scene the active scene
 	game_state.activeScene = game_state.scenes[0];
 }
 
@@ -328,9 +298,6 @@ void GameManager::main_contex_ui() {
 	ImVec2 wsize = ImGui::GetWindowSize();
 	f32 locWidth = wsize.x;
 	f32 locHeight = wsize.y;
-
-
-	// Pass texture rendered to to ImGUI
 	ImGui::Image((ImTextureID)(u64)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGui::End();
@@ -340,12 +307,10 @@ void GameManager::update_gui() {
 
 	ImGuiIO& io = ImGui::GetIO();
 	
-	// Show FPS
 	char windowTitle[64];
 	snprintf(windowTitle, 64, "%s - FPS %.3f", title.c_str(), io.Framerate);
 	glfwSetWindowTitle(window, windowTitle);
 
-	// Draw window content
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -403,9 +368,7 @@ void GameManager::update_ecs() {
 	updateNeededECS = false;
 }
 
-
 void GameManager::update_audio() {
-
 	// Sync audio manager with the game state's audio repo
 	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
 	//       set the pos/volume in the appropriate ChannelGroup / ChannelControl
@@ -419,7 +382,6 @@ void GameManager::update_audio() {
 
 void GameManager::update_inputs() {
 	glfwPollEvents();
-
 
 	if(keys['W']) { camera->moveFwdBy(0.1f); }
 	if(keys['S']) { camera->moveFwdBy(-0.1f); }
