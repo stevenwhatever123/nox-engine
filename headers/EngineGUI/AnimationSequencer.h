@@ -26,13 +26,17 @@ struct AnimationSequencer : public ImSequencer::SequenceInterface {
 
     MeshScene* scene;
     GameState* game_state;
+
     int mFrameMin, mFrameMax;
 
     bool focused = false;
 
     int GetFrameMin() const { return 0; }
     int GetFrameMax() const { return scene->numTicks[scene->animationIndex] - 1; }
-    int GetItemCount() const { return (i32)scene->allNodes.size() + (i32)game_state->audioSources.size(); }
+    int GetItemCount() const 
+    { 
+        return (i32)scene->allNodes.size() + (i32) game_state->selectedAudio.size();
+    }
 
     void BeginEdit(int index) {};
 
@@ -47,7 +51,19 @@ struct AnimationSequencer : public ImSequencer::SequenceInterface {
 
     void Get(int index, int** start, int** end, int* type, unsigned int* color);
 
-    void Add(int index) {}
+    void Add(int index) 
+    {
+        if (!game_state->audioSources.empty())
+        {
+            auto startItr = game_state->audioSources.begin();
+            auto endItr = game_state->audioSources.end();
+            for (u32 i = 0; i < index; i++)
+            {
+                startItr++;
+            }
+            game_state->selectedAudio.push_back(startItr->second.name);
+        }
+    }
 
     void Del(int index) {}
     void Duplicate(int index) {}

@@ -270,6 +270,7 @@ void GameManager::init_gui() {
 
 	// Initialize panel variables
 	NoxEngineGUI::initPresetObjectPanel();
+	NoxEngineGUI::initAnimationPanel();
 
 	// Initialize gui params
 	ui_params.selectedEntity = -1;

@@ -9,11 +9,13 @@
 
 #include <MeshScene.h>
 
-#include <EngineGUI/AnimationSequencer.h>
-
 #include <glm/gtx/string_cast.hpp>
 
 using namespace NoxEngine;
+
+void NoxEngineGUI::initAnimationPanel()
+{
+}
 
 void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 
@@ -162,19 +164,36 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene, NoxEngine
 
 			if (selectedEntry < 0)
 				selectedEntry = -1;
-			if (selectedEntry > currentScene.allNodes.size() - 1)
-				selectedEntry = currentScene.allNodes.size() - 1;
+
+			if (game_state->audioSources.size() > 0)
+			{
+				if (selectedEntry > currentScene.allNodes.size() - 1 + game_state->audioSources.size())
+				{
+					selectedEntry = currentScene.allNodes.size() + game_state->audioSources.size() - 1;
+				}
+			}
+			else
+			{
+				if (selectedEntry > currentScene.allNodes.size() - 1)
+					selectedEntry = currentScene.allNodes.size() - 1;
+			}
 
 			Sequencer(&mySequence, &selectedFrame, &expanded, &selectedEntry,
 				&firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND
-				| ImSequencer::SEQUENCER_CHANGE_FRAME);
+				| ImSequencer::SEQUENCER_CHANGE_FRAME
+				| ImSequencer::SEQUENCER_ADD);
 
 			currentScene.frameIndex = selectedFrame;
 
 			//add a UI to edit that particular item
 			if (selectedEntry != -1)
 			{
-				if (currentScene.allNodes[selectedEntry]->hasAnimations())
+				// Which mean this is the audio clip
+				if (selectedEntry > currentScene.allNodes.size() - 1)
+				{
+					ImGui::Text("Audio goes Boom");
+				}
+				else if (currentScene.allNodes[selectedEntry]->hasAnimations())
 				{
 					ImGui::Text("Translation");
 					glm::mat4 translationMatrix = currentScene.allNodes[selectedEntry]

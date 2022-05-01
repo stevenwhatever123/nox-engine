@@ -185,6 +185,10 @@ bool MeshScene::hasAnimations()
 
 void MeshScene::updateNumTicks(u32 animationIndex, u32 num)
 {
+	// Don't do anything if the number is the same
+	if (num == numTicks[animationIndex])
+		return;
+
 	if (hasAnimations())
 	{
 		numTicks[animationIndex] = num;
