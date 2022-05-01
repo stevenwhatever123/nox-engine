@@ -587,8 +587,9 @@ void Renderer::changeTexture(Entity* ent)
 		if (objects[i].ent == ent)
 		{
 			RenderableComponent* rendComp = objects[i].ent->getComp<RenderableComponent>();
-			//rendComp->getAmbientTexture() doesn't return anything here atm
-			objects[i].ambientTexture = setTexture(rendComp->ambientTexture, "AmbTexture", 1);
+			//rendComp->getAmbientTexture() doesn't return anything here atm, dunno why
+			//objects[i].ambientTexture = setTexture(rendComp->ambientTexture, "AmbTexture", 1);
+			objects[i].ambientTexture = setTexture(rendComp->getAmbientTexture(), "AmbTexture", 1);
 		}
 	}
 }

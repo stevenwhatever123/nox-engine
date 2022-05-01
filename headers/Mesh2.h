@@ -17,12 +17,12 @@ namespace NoxEngine {
 
 		void setTexture(const String filename);
 
-		const String getNormalTexture() { return normTexName; }
-		const String getAmbientTexture() { return ambTexName; }
+		const String getNormalTexture() { return normalTexture; }
+		const String getAmbientTexture() { return ambientTexture; }
 
 		//const char* ambTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
-		String ambTexName;
-		String normTexName;
+		//String ambTexName;
+		//String normTexName;
 		
 		void* CastType(const i32 castID);
 	

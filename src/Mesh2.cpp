@@ -18,7 +18,7 @@ Mesh2::~Mesh2() { }
 
 void Mesh2::setTexture(const String filename)
 {
-	ambTexName = filename;
+	ambientTexture = filename;
 }
 
 void* Mesh2::CastType(const int castID)
