@@ -28,6 +28,7 @@
 #include <FBXFileLoader.h>
 #include <EventManager.h>
 #include <EventNames.h>
+#include <ScriptsManager.h>
 
 #include <EngineGUI/EngineGUI.h>
 #include <EngineGUI/AudioPanel.h>
@@ -78,6 +79,7 @@ namespace NoxEngine {
 			void init_animation();
 			void init_renderer();
 			void init_imgui();
+			void init_scripts();
 
 			void asset_ui();
 			void main_contex_ui();
@@ -103,6 +105,11 @@ namespace NoxEngine {
 			GLProgram *current_program;
 			GUIParams ui_params;
 			Scene scene;
+
+			//scripts
+			ScriptsManager* scriptsManager;
+	public:
+			static void exportLua();
 
 	};
 

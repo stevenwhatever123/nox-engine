@@ -35,7 +35,7 @@
     </Filter>
     <Filter Include="Header Files\EngineGUI">
       <UniqueIdentifier>{fe148aed-d997-43af-923a-a871ede80940}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="Header Files\Managers">
       <UniqueIdentifier>{eda1e24c-a50f-413e-8577-886a03b2a413}</UniqueIdentifier>
     </Filter>
@@ -58,27 +58,6 @@
     </ClCompile>
     <ClCompile Include="src\MeshNode.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\AudioPanel.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\AnimationPanel.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\EngineGUI.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\ImGuizmoTool.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\PresetObject.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\PresetObjectPanel.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EngineGUI\ScenePanel.cpp">
-      <Filter>Source Files\EngineGUI</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene.cpp">
       <Filter>Source Files\ECS</Filter>
@@ -164,6 +143,30 @@
     <ClCompile Include="src\script.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\EngineGUI\EngineGUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\AnimationPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\AudioPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\ImGuizmoTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\PresetObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\PresetObjectPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EngineGUI\ScenePanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ScriptsManager.cpp">
+      <Filter>Source Files\Managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Camera.h">
@@ -186,6 +189,9 @@
     </ClInclude>
     <ClInclude Include="headers\script.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\ScriptsManager.h">
+      <Filter>Header Files\Managers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

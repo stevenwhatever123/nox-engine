@@ -79,7 +79,9 @@ int main(int argc, char** argv) {
 
 	}
 #endif
-	lua();
+	auto a = new LuaTest();
+	a->InitLua();
+	a->Test();
 	return 0;
 }
 

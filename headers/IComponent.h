@@ -15,6 +15,8 @@ namespace NoxEngine {
 	{
 		public:
 			i32 id;
+			i32 get_id() { return id; };
+			void set_id(i32 value) { id = value; };
 			// This function is implemented to be able to downcast classes stored as IComponent to their respective actual classes
 			virtual void* CastType(const i32 castID) = 0;
 	};

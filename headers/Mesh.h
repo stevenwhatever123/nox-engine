@@ -22,6 +22,17 @@ namespace NoxEngine {
 			Mesh();
 			~Mesh();
 
+			static void exportLua() {
+				auto lua_state = ScriptsManager::Instance()->get_lua_state();
+				luaL_openlibs(lua_state);
+
+				luabridge::getGlobalNamespace(lua_state).
+					beginNamespace("game").
+					beginClass<Mesh>("Mesh").
+					addConstructor<void(*)(void)>().
+					endClass().
+					endNamespace();
+			}
 			void resizeNumOfMeshes(u32 i);
 			void resizeNumOfAnimations(u32 i);
 

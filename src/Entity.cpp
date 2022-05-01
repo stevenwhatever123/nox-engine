@@ -1,5 +1,5 @@
 #include <Entity.h>
-
+#include "ScriptsManager.h"
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
 
@@ -40,4 +40,21 @@ IComponent * Entity::getComp(i32 compId)
 	Logger::debug("The component (ID: %d) does not exist in Entity (ID: %d)", compId, id);
 	return nullptr;
 }
+
+void NoxEngine::Entity::exportLua()
+{
+	auto lua_state = ScriptsManager::Instance()->get_lua_state();
+	luaL_openlibs(lua_state);
+
+	luabridge::getGlobalNamespace(lua_state).
+		beginNamespace("game").
+		beginClass<Entity>("Entity").
+		addConstructor<void(*)(void)>().
+		addProperty("id", &Entity::get_id, &Entity::set_id).
+		addFunction("addComp", &Entity::addComp).
+		addFunction("getComp", &Entity::getComp).
+		endClass().
+		endNamespace();
+}
+
 

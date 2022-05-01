@@ -20,6 +20,7 @@ void GameManager::init() {
 	init_imgui();
 	init_animation();
 	init_renderer();
+	init_scripts();
 }
 
 void GameManager::update() {
@@ -58,6 +59,7 @@ void GameManager::addMesh(String name, Mesh m) {
 
 	// game_state.audioSources.emplace(audioSource.name, audioSource);
 	// audioManager->LoadSound(audioSource.file);
+
 }
 
 
@@ -198,6 +200,13 @@ void GameManager::init_imgui() {
 
 }
 
+void NoxEngine::GameManager::init_scripts()
+{
+	scriptsManager = ScriptsManager::Instance();
+
+	scriptsManager->Init();
+}
+
 void GameManager::main_contex_ui() {
 
 	ImGuiWindowFlags flags =
@@ -294,5 +303,19 @@ void GameManager::update_renderer() {
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(0.1f, 0.2f, 0.5f);
 	renderer->draw();
+}
+
+void NoxEngine::GameManager::exportLua()
+{
+	auto lua_state = ScriptsManager::Instance()->get_lua_state();
+	luaL_openlibs(lua_state);
+
+	luabridge::getGlobalNamespace(lua_state).
+		beginNamespace("game").
+		beginClass<GameManager>("GameManager").
+		addConstructor<void(*)(void)>().
+		addFunction("addMesh", &GameManager::addMesh).
+		endClass().
+		endNamespace();
 }
 

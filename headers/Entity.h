@@ -38,5 +38,14 @@ namespace NoxEngine {
 			// Gets the component with the ID provided. If no such comp -> through error and return
 			IComponent * getComp(i32 id);
 
+
+
+			/********************** lua export ********************************/
+			static void exportLua();
+			i32 get_id() { return id; }
+			i32 set_id(i32 value) { id = value; }
+
+
+
 	};
 }
