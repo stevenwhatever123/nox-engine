@@ -7,29 +7,32 @@
 #include "imguizmo/ImCurveEdit.h"
 #include "imguizmo/GraphEditor.h"
 
-#include "MeshScene.h"
-#include "MeshNode2.h"
+#include <MeshScene.h>
+#include <MeshNode2.h>
+#include <GameState.h>
 
 #include <math.h>
 #include <vector>
 #include <algorithm>
 
 using NoxEngine::MeshScene;
+using NoxEngine::GameState;
 
 struct AnimationSequencer : public ImSequencer::SequenceInterface {
 
-    AnimationSequencer(MeshScene* scene);
+    AnimationSequencer(MeshScene* scene, NoxEngine::GameState* game_state);
 
     AnimationSequencer();
 
     MeshScene* scene;
+    GameState* game_state;
     int mFrameMin, mFrameMax;
 
     bool focused = false;
 
     int GetFrameMin() const { return 0; }
     int GetFrameMax() const { return scene->numTicks[scene->animationIndex] - 1; }
-    int GetItemCount() const { return (i32)scene->allNodes.size(); }
+    int GetItemCount() const { return (i32)scene->allNodes.size() + (i32)game_state->audioSources.size(); }
 
     void BeginEdit(int index) {};
 

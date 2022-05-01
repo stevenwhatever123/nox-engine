@@ -1,9 +1,10 @@
 #include <EngineGUI/AnimationSequencer.h>
 
-AnimationSequencer::AnimationSequencer(MeshScene* scene) :
+AnimationSequencer::AnimationSequencer(MeshScene* scene, NoxEngine::GameState* game_state) :
 mFrameMin(0), 
 mFrameMax(scene->numTicks[scene->animationIndex] - 1),
-scene(scene)
+scene(scene),
+game_state(game_state)
 {
    
 }
@@ -12,11 +13,28 @@ AnimationSequencer::AnimationSequencer() :mFrameMin(0), mFrameMax(0) {};
 
 int AnimationSequencer::GetItemTypeCount() const 
 {
-    return (i32)scene->allNodes.size();
+    return (i32)scene->allNodes.size() + (i32) game_state->audioSources.size();
 }
 
 const char* AnimationSequencer::GetItemTypeName(int index) const
 {
+    if (index > scene->allNodes.size() - 1)
+    {
+        u32 audioIndex = index - (scene->allNodes.size() - 1);
+        if (!game_state->audioSources.empty())
+        {
+            //return game_state->audioSources.
+            auto startItr = game_state->audioSources.begin();
+            auto endItr = game_state->audioSources.end();
+            for (u32 i = 0; i < audioIndex; i++)
+            {
+                startItr++;
+            }
+            return startItr->second.name.c_str();
+        }
+        return "hahaha";
+    }
+
     //return "Animation";
     return scene->allNodes[index]->name.c_str();
 }
@@ -24,6 +42,23 @@ const char* AnimationSequencer::GetItemTypeName(int index) const
 const char* AnimationSequencer::GetItemLabel(int index) const
 {
     //return "Animation"; 
+    if (index > scene->allNodes.size() - 1)
+    {
+        u32 audioIndex = index - scene->allNodes.size();
+        if (!game_state->audioSources.empty())
+        {
+            //return game_state->audioSources.
+            auto startItr = game_state->audioSources.begin();
+            auto endItr = game_state->audioSources.end();
+            for (u32 i = 0; i < audioIndex; i++)
+            {
+                startItr++;
+            }
+            return startItr->second.name.c_str();
+        }
+        return "hahaha";
+    }
+
     return scene->allNodes[index]->name.c_str();
 }
 
@@ -34,7 +69,12 @@ void AnimationSequencer::Get(int index, int** start, int** end, int* type, unsig
 
     static i32 items2[] = { scene->numTicks[scene->animationIndex] - 1 };
 
-    if (!scene->allNodes[index]->hasAnimations())
+    if (index > scene->allNodes.size() - 1)
+    {
+        items2[0] = 5;
+     
+    }
+    else if(!scene->allNodes[index]->hasAnimations())
     {
         items2[0] = 0;
     }
@@ -47,7 +87,29 @@ void AnimationSequencer::Get(int index, int** start, int** end, int* type, unsig
     if (start)
         *start = items;
     if (end)
-        *end = items2;
+    {
+        if (index > scene->allNodes.size() - 1)
+        {
+            *end = items;
+            //u32 audioIndex = index - scene->allNodes.size();
+            //auto startItr = game_state->audioSources.begin();
+            //auto endItr = game_state->audioSources.end();
+            //for (u32 i = 0; i < audioIndex; i++)
+            //{
+            //    startItr++;
+            //}
+            //items2[0] = startItr->second.
+        }
+        else if (!scene->allNodes[index]->hasAnimations())
+        {
+            *end = items;
+        }
+        else
+        {
+            *end = &scene->numTicks[scene->animationIndex];
+            //*end = items2;
+        }
+    }
     if (type)
         *type = index;
 }

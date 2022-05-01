@@ -106,8 +106,7 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 			progress = (float)currentScene.frameIndex / (currentScene.numTicks[currentScene.animationIndex] - 1);
 			ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
 
-			updateSequencer(currentScene);
-
+			updateSequencer(currentScene, game_state);
 			ImGui::TreePop();
 		}
 
@@ -119,14 +118,14 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 	ImGui::End();
 }
 
-void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
+void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene, NoxEngine::GameState* game_state)
 {
 	if (currentScene.hasAnimations())
 	{
 		// Let try putting the sequencer here
 		if (ImGui::CollapsingHeader("Sequencer"))
 		{
-			AnimationSequencer mySequence(&currentScene);
+			AnimationSequencer mySequence(&currentScene, game_state);
 			mySequence.mFrameMin = 0;
 			mySequence.mFrameMax = currentScene.numTicks[currentScene.animationIndex] - 1;
 

@@ -158,6 +158,9 @@ void MeshScene::setAnimationIndex(u32 num)
 	if (num > getNumOfAnimations() - 1)
 		return;
 
+	if (num < 0)
+		return;
+
 	animationIndex = num;
 }
 

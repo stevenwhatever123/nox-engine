@@ -14,5 +14,5 @@
 
 namespace NoxEngineGUI {
 	void updateAnimationPanel(NoxEngine::GameState *game_state);
-	void updateSequencer(NoxEngine::MeshScene &currentScene);
+	void updateSequencer(NoxEngine::MeshScene &currentScene, NoxEngine::GameState* game_state);
 };
