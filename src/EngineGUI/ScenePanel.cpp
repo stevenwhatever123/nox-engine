@@ -39,7 +39,8 @@ void NoxEngineGUI::updateScenePanel(GameState* state) {
 	}
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
-	ImGui::Image((ImTextureID)(u64)state->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+
+	ImGui::Image((ImTextureID)(u64)state->texture_used, wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	// Window end
 	ImGui::End();

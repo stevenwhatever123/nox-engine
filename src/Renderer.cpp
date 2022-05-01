@@ -69,7 +69,7 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	// glEnable(GL_CULL_FACE);
 
 	// Create framebuffer  
 	glGenFramebuffers(1, &FBO);
@@ -280,8 +280,8 @@ void Renderer::draw() {
 
 		// Draw the object
 		glDrawElements(objects[i].renderType, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(i32)));
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
-
 
 	glBindVertexArray(0);
 	setFrameBufferToDefault();

@@ -32,7 +32,7 @@ namespace NoxEngineUtils {
 }
 
 
-#define LOG_DEBUG(str, ...) Logger::debug( "%s(%d) " str, __FILE__, __LINE__, __VA_ARGS__ )
+#define LOG_DEBUG(str, ...) NoxEngineUtils::Logger::debug( "%s(%d) " str, __FILE__, __LINE__, __VA_ARGS__ )
 #define print_cwd() _print_cwd(__FILE__, __LINE__)
 void _print_cwd(const char *str, i32 line);
 

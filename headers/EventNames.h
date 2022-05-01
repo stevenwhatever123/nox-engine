@@ -9,6 +9,7 @@ namespace NoxEngine {
 		ADD_EVENT(meshAdded);
 		ADD_EVENT(componentAdded);
 		ADD_EVENT(componentRemoved);
+		ADD_EVENT(textureChanged);
 
 #undef ADD_EVENT
 	};

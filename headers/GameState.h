@@ -1,24 +1,24 @@
 #pragma once
 
-#include <string>
 #include <Renderer.h>
 #include <Types.h>
 #include <Mesh.h>
 #include <MeshScene.h>
 #include <Scene.h>
+#include <FullscreenShader.h>
 
 namespace NoxEngine {
 
 	struct AudioSource {
-		std::string name;
-		std::string file;
+		String name;
+		String file;
 		glm::vec3 position;
 		f32 sourceVolume;
 	};
 
-	typedef std::map<std::string, AudioSource> AudioRepo;
-	typedef std::map<std::string, Mesh> MeshRepo;
-	typedef std::map<std::string, MeshScene> MeshSceneRepo;
+	typedef Map<String, AudioSource> AudioRepo;
+	typedef Map<String, Mesh> MeshRepo;
+	typedef Map<String, MeshScene> MeshSceneRepo;
 
 	struct GameState {
 		AudioRepo audioSources;
@@ -28,8 +28,9 @@ namespace NoxEngine {
 		f32 light[3];
 		Array<Scene *> scenes;
 		Scene *activeScene;
+		GLuint texture_used;
+		Array<FullscreenShader> post_processors;
+		FullscreenShader& current_post_processor;
 	};
-
-
 
 }

@@ -1,4 +1,5 @@
 #include <GameManager.h>
+#include <FullscreenShader.h>
 
 #include <filesystem>
 #include <Entity.h>
@@ -21,7 +22,7 @@ GameManager::GameManager() :
 	ui_params(),
 	should_close(false),
 	keys(),
-	game_state()
+	use_pp(0)
 {
 }
 
@@ -37,11 +38,10 @@ void GameManager::init() {
 	init_gui();
 	init_animation();
 	init_renderer();
+	init_postprocess();
 }
 
 void GameManager::update() {
-	glClear(GL_COLOR_BUFFER_BIT);
-
 	update_inputs();
 	update_ecs();
 	update_audio();
@@ -131,6 +131,14 @@ void GameManager::init_window() {
 	glfwSetKeyCallback(window, func);
 
 }
+
+
+void GameManager::init_scene() {
+	game_state.scenes.push_back(new Scene());
+	game_state.activeScene = game_state.scenes[0];
+}
+
+
 
 // Similar to activateScene
 void GameManager::init_ecs() {
@@ -239,25 +247,12 @@ void GameManager::init_shaders() {
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
 	});
 
-	current_program = &programs.back();
-}
 
-void GameManager::init_animation() {
-	currentTime = glfwGetTime();
-	deltaTime = 0;
-	lastTime = currentTime;
-}
+	programs.push_back(Array<ShaderFile>{
+		{ "assets/shaders/fullScreenShader.vert", GL_VERTEX_SHADER, 0},
+		{ "assets/shaders/fullScreenShader.frag", GL_FRAGMENT_SHADER, 0},
+	});
 
-void GameManager::init_renderer() { 
-	renderer = new Renderer(win_width, win_height, camera);
-	renderer->setProgram(current_program);
-	renderer->useProgram();
-	game_state.renderer = renderer;
-	renderer->setFrameBufferToTexture();
-
-	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
-	// renderer->addObject(obj);
-	renderer->updateBuffers();
 }
 
 void GameManager::init_gui() {
@@ -277,30 +272,44 @@ void GameManager::init_gui() {
 	ui_params.sceneBackgroundColor = 0x282828FF;
 }
 
-void GameManager::init_scene() {
-	game_state.scenes.push_back(new Scene());
-	game_state.activeScene = game_state.scenes[0];
+void GameManager::init_animation() {
+	currentTime = glfwGetTime();
+	deltaTime = 0;
+	lastTime = currentTime;
 }
 
+void GameManager::init_renderer() { 
+	renderer = new Renderer(win_width, win_height, camera);
+	renderer->setProgram(&programs[0]);
+	renderer->useProgram();
+	game_state.renderer = renderer;
+	renderer->setFrameBufferToTexture();
 
-void GameManager::main_contex_ui() {
+	GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
 
-	ImGuiWindowFlags flags =
-		ImGuiWindowFlags_NoTitleBar  |
-		ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoCollapse;
+	i32 indices[6] = { 0, 1, 2, 0, 2, 3 };
 
-	ImGui::SetNextWindowPos(ImVec2( 100, 100 ), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2( 100, 100 ), ImGuiCond_FirstUseEver);
+	glGenVertexArrays(1, &random_vao);
+	glBindVertexArray(random_vao);
+	glGenBuffers(1, &quad_index_buffer);
 
-	ImGui::Begin("Player", NULL, flags);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad_index_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i32)*6, indices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindVertexArray(0);
+}
 
-	ImVec2 wsize = ImGui::GetWindowSize();
-	f32 locWidth = wsize.x;
-	f32 locHeight = wsize.y;
-	ImGui::Image((ImTextureID)(u64)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
-
-	ImGui::End();
+void GameManager::init_postprocess() { 
+	game_state.post_processors.push_back(
+		FullscreenShader{
+			"assets/shaders/fullScreenShader.frag", Array<TextureInput>{
+				{renderer->getTexture(), 0}
+			},
+			win_width,
+			win_height
+			}
+	);
 }
 
 void GameManager::update_gui() {
@@ -368,6 +377,7 @@ void GameManager::update_ecs() {
 	updateNeededECS = false;
 }
 
+
 void GameManager::update_audio() {
 	// Sync audio manager with the game state's audio repo
 	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
@@ -389,6 +399,15 @@ void GameManager::update_inputs() {
 	if(keys['A']) { camera->moveHorBy(0.1f); }
 	if(keys[' ']) { camera->moveVerBy(0.1f); }
 	if(keys['K']) { camera->moveVerBy(-0.1f); }
+	if(keys['1']) {
+		use_pp = 0;
+		game_state.texture_used = renderer->getTexture();
+
+	}
+	if(keys['2']) {
+		use_pp = 1;
+		game_state.texture_used = game_state.current_post_processor.GetTexture();
+	}
 
 }
 
@@ -455,10 +474,23 @@ void GameManager::update_renderer() {
 
 
 
+	renderer->useProgram();
 	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
 	renderer->draw();
 
+
+	// renderer->setProgram(programs[1]);
+	// renderer->setProgram(programs[1]);
+	if(use_pp == 1) {
+		glBindVertexArray(random_vao);
+		glClearColor(0.5, 0.2, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		for(auto post_process : game_state.post_processors) {
+			post_process.draw();
+		}
+	}
 }
 

@@ -21,6 +21,8 @@ void EventManager::addListener(String eventName, ListenFunc func) {
 
 }
 
+// TODO(sharo): variadic vars work~ish
+// but having a "messaging system would be better where you send a message with a type and the receiving end decodes the message"
 void EventManager::signal(String eventName, ...) {
 
 	bool exists = _event_subs.contains(eventName);

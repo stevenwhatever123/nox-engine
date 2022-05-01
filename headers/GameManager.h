@@ -72,6 +72,7 @@ namespace NoxEngine {
 			time_type currentTime;
 			time_type deltaTime;
 			time_type lastTime;
+			i32 postprocess_framebuffer;
 
 		protected:
 			// TODO (Vincent): initialize other fields as well to be on the safe side
@@ -81,18 +82,16 @@ namespace NoxEngine {
 		private:
 
 			void init_window();
-			void init_events();
+			void init_scene();
 			void init_ecs();
+			void init_events();
 			void init_audio();
 			void init_camera();
 			void init_shaders();
+			void init_gui();
 			void init_animation();
 			void init_renderer();
-			void init_gui();
-			void init_scene();
-
-			void asset_ui();
-			void main_contex_ui();
+			void init_postprocess();
 
 			void update_ecs();
 			void update_gui();
@@ -118,6 +117,9 @@ namespace NoxEngine {
 			Array<GLProgram> programs;
 			GLProgram *current_program;
 			GUIParams ui_params;
+			GLuint quad_index_buffer;
+			GLuint random_vao;
+			i8 use_pp;
 	};
 
 }

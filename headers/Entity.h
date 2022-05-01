@@ -48,7 +48,7 @@ namespace NoxEngine {
 		template <typename...> struct sequence { };
 
 		// Signals for event manager
-		template <typename T> void addCompSignal()	  { SIGNAL_EVENT(EventNames::componentAdded,   this, std::type_index(typeid(T))); }
+		template <typename T> void addCompSignal()	  { SIGNAL_EVENT(EventNames::componentAdded, this,  std::type_index(typeid(T))); }
 		template <typename T> void removeCompSignal() { SIGNAL_EVENT(EventNames::componentRemoved, this, std::type_index(typeid(T))); }
 
 
