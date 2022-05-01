@@ -7,17 +7,30 @@
 */
 #pragma once
 
+#include <ComponentType.h>
 #include <Types.h>
 
 namespace NoxEngine {
 
+	// forward declares
+	enum ComponentType : i32;
+
+
 	class IComponent
 	{
 		public:
-			i32 id;
+			ComponentType id;
+			// This function is implemented to be able to downcast classes stored as IComponent to their respective actual classes
+			// TODO (Vincent): fix this witchcraft
+			template <class T> inline T* CastType() { 
+				void* ptr = dynamic_cast<T*>(this);
+				return reinterpret_cast<T*>(ptr); 
+			};
+			// What's the representation of this component in the inspector?
+			// This function being virtual also allows dynamic_cast to be used in CastType()
+			virtual void displayUI() {};
 			i32 get_id() { return id; };
 			void set_id(i32 value) { id = value; };
-			// This function is implemented to be able to downcast classes stored as IComponent to their respective actual classes
-			virtual void* CastType(const i32 castID) = 0;
 	};
 }
+

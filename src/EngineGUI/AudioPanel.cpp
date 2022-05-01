@@ -39,7 +39,7 @@ void NoxEngineGUI::updateAudioPanel(NoxEngine::GameState* game_state) {
 					ImGui::TreePop();
 				}
 
-				ImGui::SliderFloat("Volume", &audio_source->sourceVolume, 0.0f, 1.0f, "%.1f\%");
+				ImGui::SliderFloat("Volume", &audio_source->sourceVolume, 0.0f, 1.0f, "%.1f");
 				if (ImGui::Button("Play")) {
 					//NoxEngine::AudioManager::Instance()->LoadSound(audio_source->file, true);
 					NoxEngine::AudioManager::Instance()->PlaySounds(audio_source->file);

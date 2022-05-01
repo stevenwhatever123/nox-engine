@@ -7,8 +7,8 @@ namespace NoxEngine {
 #define ADD_EVENT(event_name) static const char* event_name = #event_name;
 
 		ADD_EVENT(meshAdded);
-		
-
+		ADD_EVENT(componentAdded);
+		ADD_EVENT(componentRemoved);
 
 #undef ADD_EVENT
 	};

@@ -34,7 +34,7 @@ PermResourceData IOManager::ReadEntireFilePerm(std::string filename) {
 				0,
 				NULL
 				);
-		Logger::debug("Couldn't Open file (%s): %s", filename.c_str(), buf);
+		LOG_DEBUG("Couldn't Open file (%s): %s", filename.c_str(), buf);
 		LocalFree(buf);
 	}
 
@@ -42,7 +42,7 @@ PermResourceData IOManager::ReadEntireFilePerm(std::string filename) {
 	GetFileSizeEx(file, &size);
 
 	if(size.QuadPart == 0) {
-		Logger::debug("File %s has zero size.", filename.c_str());
+		LOG_DEBUG("File %s has zero size.", filename.c_str());
 	}
 
 	u8 *data = PermanentMemAllocator::Instance()->allocate(size.LowPart);
@@ -52,7 +52,7 @@ PermResourceData IOManager::ReadEntireFilePerm(std::string filename) {
 
 	assert(size.QuadPart == readBytes );
 
-	Logger::debug("%s size: %d", filename.c_str(),  size.QuadPart);
+	LOG_DEBUG("%s size: %d", filename.c_str(),  size.QuadPart);
 
 
 	CloseHandle(file);
@@ -86,7 +86,7 @@ TempResourceData IOManager::ReadEntireFileTemp(std::string filename) {
 				0,
 				NULL
 				);
-		Logger::debug("Couldn't Open file (%s): %s", filename.c_str(), buf);
+		LOG_DEBUG("Couldn't Open file (%s): %s", filename.c_str(), buf);
 		LocalFree(buf);
 	}
 
@@ -94,10 +94,10 @@ TempResourceData IOManager::ReadEntireFileTemp(std::string filename) {
 	GetFileSizeEx(file, &size);
 
 	if(size.QuadPart == 0) {
-		Logger::debug("File %s has zero size.", filename.c_str());
+		LOG_DEBUG("File %s has zero size.", filename.c_str());
 	}
 
-	Logger::debug("%s size: %d", filename.c_str(),  size.QuadPart);
+	LOG_DEBUG("%s size: %d", filename.c_str(),  size.QuadPart);
 
 	DWORD readBytes = 0;
 
@@ -133,11 +133,11 @@ std::string IOManager::PickFile(const char* filters) {
 		.nMaxFile = 1024,
 		.lpstrInitialDir = (LPCSTR)dir,
 		.lpstrTitle = "Selecting File...",
-		.Flags = OFN_DONTADDTORECENT|OFN_ENABLESIZING|OFN_HIDEREADONLY|OFN_NONETWORKBUTTON,
+		.Flags = OFN_DONTADDTORECENT|OFN_ENABLESIZING|OFN_HIDEREADONLY|OFN_NONETWORKBUTTON|OFN_NOCHANGEDIR,
 	};
 
 	if(!GetOpenFileNameA(&open_file)) {
-		Logger::debug("Failed to Open File Dialog: %x", CommDlgExtendedError() );
+		LOG_DEBUG("Failed to Open File Dialog: %x", CommDlgExtendedError() );
 	}
 
 	return std::string((char*)file_name);

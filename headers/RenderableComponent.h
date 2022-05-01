@@ -14,41 +14,28 @@ namespace NoxEngine {
 	class RenderableComponent : public IRenderable, public IComponent {
 		public:
 
-			void* CastType(const i32 castID);
-			RenderableComponent(f32 trX, f32 trY, f32 trZ, const char * texName);
-			void prepTheData();
+			RenderableComponent(f32 trX = 0.0f, f32 trY = 0.0f, f32 trZ = 0.0f, const String texName = "");
+			RenderableComponent(const String texName);
 
-			inline i32 getNumOfVertices() { return i32( verticesFin.size() / 3 ); }
-			inline i32 getNumOfTexCoord() { return i32( texCoordFin.size() / 2 ); }
-			inline i32 getNumOfNormals()  { return i32( normalsFin.size() / 3 ); }
+			void displayUI() override; 
 
-			inline f32* getArrayOfVertices() { return verticesFin.data(); }
-			inline f32* getArrayOfTexCoord() { return texCoordFin.data(); }
-			inline f32* getArrayOfNormals()  { return normalsFin.data(); }
-			inline i32 getNumOfElements()    { return (i32)( elements.size() / 3 ); }
-			inline i32* getArrayOfElements() { return elements.data(); }
+			inline i32 getNumOfVertices() { return (i32)vertices.size(); }
+			inline i32 getNumOfTexCoord() { return (i32)texCoords.size(); }
+			inline i32 getNumOfNormals()  { return (i32)normals.size(); }
+			inline i32 getNumOfFaces() { return (i32)faces.size(); }
 
-			inline const char* getNormalTexture() { return "assets/meshes/textures/leaves_normal.jpg"; }
-			inline const char* getAmbientTexture() { return ambTexName; }
+			// TODO: change to a parameter
+			inline const String getNormalTexture()  { return normalTexture; }
+			inline const String getAmbientTexture() { return ambientTexture; }
 
-			inline void getArrayOfVertices(Array<f32>* v)  { *v = verticesFin; }
-			inline void getArrayOfTexCoord(Array<f32>* tC) { *tC = texCoordFin; }
-			inline void getArrayOfNormals (Array<f32>* n)  { *n = normalsFin; }
-			inline void getArrayOfElements(Array<i32>* el) { *el = elements; }
+			inline const Array<vec3>&  getVertices () const { return vertices; }
+			inline const Array<vec2>&  getTexCoords() const { return texCoords; }
+			inline const Array<vec3>&  getNormals  () const { return normals; }
+			inline const Array<ivec3>& getFaces    () const { return faces; }
+			inline const Array<i32>&   getIndices  () const { return indices; }
 
-			Array<f32> verticesFin;
-			Array<f32> texCoordFin;
-			Array<f32> normalsFin;
-			Array<i32> elements;
-			const char* ambTexName;
-
-			std::vector<float> verticesPreped;
-			std::vector<float> texCoordPreped;
-			std::vector<float> normalsPreped;
-
-			std::vector<int> facesV;
-			std::vector<int> facesT;
-			std::vector<int> facesN;
+			String ambientTexture;
+			String normalTexture;
 
 	};
 }

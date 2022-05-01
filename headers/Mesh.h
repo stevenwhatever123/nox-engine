@@ -4,11 +4,7 @@
 
 #include <MeshNode.h>
 #include <IRenderable.h>
-
-// Compiler is my biggest enemy
-#define NOMINMAX
 #include <assimp/scene.h>
-#undef NOMINMAX
 
 #include <Types.h>
 #include <Utils.h>
@@ -37,7 +33,6 @@ namespace NoxEngine {
 			void resizeNumOfMeshes(u32 i);
 			void resizeNumOfAnimations(u32 i);
 
-			void importAnimationData(aiScene* scene);
 			void createNodeHierarchy(aiNode* aiRootnode, MeshNode* rootNode);
 			void calculateCenterPosition();
 
@@ -47,14 +42,16 @@ namespace NoxEngine {
 			void update();
 			void update(time_type dt);
 
-			void generateAnimation(glm::vec3 targetPosition);
+			void generateAnimation(vec3 targetPosition);
 			void resetFrameIndex();
 
 			void flipUV();
-			void prepForRenderer();
+
+			void setAnimationIndex(u32 num);
 
 			u32 getNumOfAnimations();
-			glm::mat4 getGlobalTransformation(MeshNode currentNode);
+			mat4 getGlobalTransformation(MeshNode currentNode);
+			mat4 getCurrentFrameNodeTransformation(MeshNode *node);
 
 			u32 frameIndex;
 			u32 animationIndex;
@@ -66,54 +63,55 @@ namespace NoxEngine {
 			i32 whichTickCeil;
 
 			bool hasBones;
-			glm::vec3 centerPosition;
+			vec3 centerPosition;
 
 
 			// The root node of the hierarchy, it contains all the child nodes
 			MeshNode nodeHierarchy;
 			// A reference to all the nodes so we don't have to traversal the tree every time
-			std::vector<MeshNode*> allNodes;
+			Array<MeshNode*> allNodes;
 
-			std::vector<std::vector<glm::vec3>> vertices;
-			std::vector<std::vector<glm::vec3>> normals;
-			std::vector<std::vector<u32>> faceIndices;
-			std::vector<std::vector<glm::vec2>> texCoord;
+			Array<Array<vec3>> vertices;
+			Array<Array<vec3>> normals;
+			Array<Array<ivec3>>  faceIndices;
+			Array<Array<vec2>> texCoord;
 
-			std::vector<std::vector<aiMaterial>> materials;
-			std::vector<std::vector<aiTexture>> textures;
+			Array<Array<aiMaterial>> materials;
+			Array<Array<aiTexture>> textures;
 
 			// Animation data
-			std::vector<aiAnimation*> animations;
-			std::vector<std::vector<aiNodeAnim*>> nodeAnimations;
+			Array<aiAnimation*> animations;
+			Array<Array<aiNodeAnim*>> nodeAnimations;
 
 			// Animation clip -> node -> keyframe transformation
-			std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimTransformation;
-			std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimTranslationMatrices;
-			std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimRotationMatrices;
-			std::vector<std::vector<std::vector<glm::mat4>>> nodeAnimScalingMatrices;
+			Array<Array<Array<mat4>>> nodeAnimTransformation;
+			Array<Array<Array<mat4>>> nodeAnimTranslationMatrices;
+			Array<Array<Array<mat4>>> nodeAnimRotationMatrices;
+			Array<Array<Array<mat4>>> nodeAnimScalingMatrices;
 
 			// Animation clip -> node -> numTicks
-			std::vector<unsigned int> numTicks;
+			Array<unsigned int> numTicks;
 			// Animation clip -> duration
-			std::vector<time_type> animationDuration;
+			Array<time_type> animationDuration;
 
 
 			// IRenderable funcs
 			inline i32 getNumOfVertices() { return (i32)vertices[0].size(); }
 			inline i32 getNumOfTexCoord() { return (i32)texCoord[0].size(); }
 			inline i32 getNumOfNormals()  { return (i32)normals[0].size(); }
-			inline i32 getNumOfElements() { return (i32)faceIndices[0].size() / 3; }
+			inline i32 getNumOfFaces()    { return (i32)faceIndices[0].size(); }
 
-			void getArrayOfVertices(std::vector<f32>* v);
-			void getArrayOfTexCoord(std::vector<f32>* tC);
-			void getArrayOfNormals(std::vector<f32>* n);
-			void getArrayOfElements(std::vector<i32>* el);
+			const Array<vec3>& getVertices () const;
+			const Array<vec2>& getTexCoords() const;
+			const Array<vec3>& getNormals  () const;
+			const Array<ivec3>& getFaces   () const;
+			const Array<i32>& getIndices   () const { return indices; };
 
-			const char* getNormalTexture() { return normTexName; }
-			const char* getAmbientTexture() { return ambTexName;}
+			const String getNormalTexture() { return normTexName; }
+			const String getAmbientTexture() { return ambTexName;}
 
-			const char* ambTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
-			const char* normTexName = "S:/Masters/COMP5530M Group Project/Work/code/NoxEngine/assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg";
+			const char* ambTexName = "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg";
+			const char* normTexName = "assets/meshes/textures/Terracotta_Tiles_002_Normal.jpg";
 
 		private:
 			void extractGeometricInfo(const aiScene* scene);
@@ -121,7 +119,7 @@ namespace NoxEngine {
 			void extractAnimationInfo(const aiScene* scene);
 
 			void traverseTreeStructure(aiNode* node, MeshNode* targetParent);
-			void loopAllNodes(MeshNode node, std::vector<MeshNode>& list);
+			void loopAllNodes(MeshNode node, Array<MeshNode>& list);
 	};
 
 }

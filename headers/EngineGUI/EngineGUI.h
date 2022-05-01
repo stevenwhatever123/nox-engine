@@ -11,22 +11,20 @@
 // 3rd Party Header
 #include <imgui/imgui_internal.h>	// for fixed-layout docking
 #include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
 
 // Engine Headers
-
 #include <AudioManager.h>
 #include <Renderer.h>
 #include <Types.h>
+#include <Camera.h>
+
 
 
 
 namespace NoxEngineGUI {
 
-	// TODO: This is probably not a good idea in terms of code separation -
-	//       probably better if each new panel (.h/.cpp) contains whatever 
-	//		 classes they need. This is only used for the master updateGUI() function
 	struct GUIParams {
 		bool firstLoop = true;
 
@@ -35,6 +33,12 @@ namespace NoxEngineGUI {
 		u32 locHeight;
 		u32 prevWidth;
 		u32 prevHeight;
+
+		// Variables to communicate between windows
+		i32 selectedEntity;		// the array index of the selected entity in the hierarchy window
+		
+		u32 sceneBackgroundColor;
+		NoxEngine::Camera *current_cam;
 	};
 
 	// Each panel should have an enum associated with it
@@ -49,6 +53,7 @@ namespace NoxEngineGUI {
 		// Scene object manipulation
 		PresetObjects,
 		Hierarchy,
+		Inspector,
 
 		// Animation
 		AnimationSettings,
@@ -63,11 +68,12 @@ namespace NoxEngineGUI {
 	// TODO: Make this const?
 	static std::map< PanelName, std::string > PANEL_NAME_MAP {
 		{ PanelName::FileExplorer,	"File Explorer" },
-			{ PanelName::Scene,			"Scene" },
-			{ PanelName::PresetObjects, "Preset Objects" },
-			{ PanelName::Hierarchy,		"Hierarchy" },
-			{ PanelName::AnimationSettings,		"Animation Settings" },
-			{ PanelName::AudioSource,	"Audio Source" }
+		{ PanelName::Scene,			"Scene" },
+		{ PanelName::PresetObjects, "Preset Objects" },
+		{ PanelName::Hierarchy,		"Hierarchy" },
+		{ PanelName::Inspector,		"Inspector" },
+		{ PanelName::AnimationSettings,		"Animation Settings" },
+		{ PanelName::AudioSource,	"Audio Source" }
 	};
 
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -79,15 +85,13 @@ namespace NoxEngineGUI {
 	void setupFixedLayout();
 	void cleanupImGui();
 
-	void updateMenu();
+	void updateMenu(GUIParams*);
 	void updateGUI(GUIParams*);
 
 	// Functions that contain the logic for each sub-window ("tool")
 	// should belong in a separate header file.
 	// TODO: Remove the following - these are only here to show what 
 	//       other panels we could have
-	//void updateFileExplorerPanel();
-	//void updateHierarchyPanel();
 	//void updateConsolePanel();
 
 }

@@ -16,18 +16,18 @@ out Vertex {
 } v;
 
 
-
 // Uniforms
 uniform vec3 lightPosition;
 uniform vec3 cameraPosition;
 
-uniform mat4 toCamera;
-uniform mat4 toProjection;
-uniform mat4 toWorld;
+uniform mat4 toCamera = mat4(1);
+uniform mat4 toProjection = mat4(1);
+uniform mat4 toWorld = mat4(1);
+uniform mat4 modelMatrix = mat4(1);
 
 void main(void)
-{	
-	gl_Position = toProjection * toCamera * toWorld * vec4(position, 1.0f);
+{
+	gl_Position = toProjection * toCamera * toWorld * modelMatrix * vec4(position, 1.0f);
 
 	v.theNormal = normal;
 	v.theTexCoord = texCoord;
