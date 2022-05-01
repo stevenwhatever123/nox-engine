@@ -1,5 +1,7 @@
 #include <Entity.h>
+
 #include "ScriptsManager.h"
+
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
 
@@ -43,8 +45,9 @@ IComponent * Entity::getComp(i32 compId)
 
 void NoxEngine::Entity::exportLua()
 {
+#if 0
 	auto lua_state = ScriptsManager::Instance()->get_lua_state();
-	luaL_openlibs(lua_state);
+	
 
 	luabridge::getGlobalNamespace(lua_state).
 		beginNamespace("game").
@@ -55,6 +58,7 @@ void NoxEngine::Entity::exportLua()
 		addFunction("getComp", &Entity::getComp).
 		endClass().
 		endNamespace();
+#endif
 }
 
 

@@ -17,6 +17,7 @@ namespace NoxEngine {
 			PositionComponent(f32 newx, f32 newy, f32 newz);
 			static void exportLua()
 			{
+#if 0
 				auto lua_state = ScriptsManager::Instance()->get_lua_state();
 				luaL_openlibs(lua_state);
 
@@ -38,7 +39,7 @@ namespace NoxEngine {
 					endClass().
 					endNamespace();
 			
-			
+#endif		
 			};
 	};
 

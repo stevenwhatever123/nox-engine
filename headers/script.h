@@ -1,14 +1,12 @@
 #pragma once
 
 #include <iostream>
-extern "C" {
-# include "lua/lua.h"
-# include "lua/lauxlib.h"
-# include "lua/lualib.h"
-}
+#include <lua/lua.hpp>
 #include <LuaBridge/LuaBridge.h>
 #include <iostream>
+
 using namespace luabridge;
+
 class LuaTest
 {
 public:
@@ -62,6 +60,5 @@ public:
     }
 
 };
-
 
 int BlackJack();

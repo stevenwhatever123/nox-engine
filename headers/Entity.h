@@ -10,10 +10,6 @@
 */
 #pragma once
 
-// System/std includes
-#include <iostream>
-#include <cassert>
-
 // Engine Includes
 #include <IComponent.h>
 #include <Types.h>
@@ -33,8 +29,9 @@ namespace NoxEngine {
 			// Gotta be careful. When comp are destroyed the subsystem have to know
 			~Entity();
 			
-			// Add a component to the entity
+			
 			void addComp(IComponent *comp);
+			
 			// Gets the component with the ID provided. If no such comp -> through error and return
 			IComponent * getComp(i32 id);
 

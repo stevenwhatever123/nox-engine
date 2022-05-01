@@ -12,6 +12,7 @@
 
 #include <Types.h>
 #include <Utils.h>
+#include <ScriptsManager.h>
 
 namespace NoxEngine {
 

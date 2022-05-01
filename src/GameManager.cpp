@@ -203,8 +203,9 @@ void GameManager::init_imgui() {
 void NoxEngine::GameManager::init_scripts()
 {
 	scriptsManager = ScriptsManager::Instance();
-
 	scriptsManager->Init();
+	scriptsManager->DoLuaFile("assets/scripts/test.lua");
+	exit(1);
 }
 
 void GameManager::main_contex_ui() {
@@ -305,17 +306,15 @@ void GameManager::update_renderer() {
 	renderer->draw();
 }
 
-void NoxEngine::GameManager::exportLua()
+void GameManager::exportLua()
 {
 	auto lua_state = ScriptsManager::Instance()->get_lua_state();
-	luaL_openlibs(lua_state);
-
-	luabridge::getGlobalNamespace(lua_state).
-		beginNamespace("game").
-		beginClass<GameManager>("GameManager").
-		addConstructor<void(*)(void)>().
-		addFunction("addMesh", &GameManager::addMesh).
-		endClass().
-		endNamespace();
+	luabridge::getGlobalNamespace(lua_state)
+	.beginNamespace("game")
+		.beginClass<GameManager>("GameManager")
+			.addConstructor<void (*)(u32 width, u32 height, String title)>()
+		.addFunction("addMesh", &GameManager::addMesh)
+	.endClass()
+	.endNamespace();
 }
 

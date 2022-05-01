@@ -8,6 +8,7 @@ namespace NoxEngine
 	void ScriptsManager::Init()
 	{
 		luaStateMachine = luaL_newstate();
+		luaL_openlibs(luaStateMachine);
 		Entity::exportLua();
 		GameManager::exportLua();
 		Mesh::exportLua();

@@ -1,14 +1,11 @@
 #pragma once
 #include <Singleton.h>
 #include <Types.h>
-#include <iostream>
-extern "C" {
-# include "lua/lua.h"
-# include "lua/lauxlib.h"
-# include "lua/lualib.h"
-}
+
+#include <lua/lua.hpp>
 #include <LuaBridge/LuaBridge.h>
-#include <string>
+
+
 namespace NoxEngine
 {
 	class ScriptsManager : public Singleton<ScriptsManager> {
@@ -34,12 +31,8 @@ namespace NoxEngine
 		// shutdown fmod and free all resources
 		void Destroy();
 
-		void DoLuaFile(std::string path);
+		void DoLuaFile(String path);
 
 		lua_State* get_lua_state();
-
-
-
-
 	};
 };
