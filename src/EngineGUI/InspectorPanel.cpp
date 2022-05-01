@@ -31,7 +31,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 		// Entity name
 		if (ImGui::CollapsingHeader(ent->name)) {
 
-			int width = ImGui::GetContentRegionAvail().x;
+			int width = (i32)ImGui::GetContentRegionAvail().x;
 
 			// PositionComponent
 			if (ent->containsComps(PositionFlag)) {

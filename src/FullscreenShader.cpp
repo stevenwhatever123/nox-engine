@@ -5,7 +5,7 @@ using namespace NoxEngine;
 
 FullscreenShader::FullscreenShader(const String shader_src, Array<TextureInput> texture_inputs, u32 frame_width, u32 frame_height)
 	:GLProgram(Array<ShaderFile>{
-		{"assets/shaders/fullscreenShader.vert", GL_VERTEX_SHADER, 0},
+		{"assets/shaders/fullScreenShader.vert", GL_VERTEX_SHADER, 0},
 		{shader_src, GL_FRAGMENT_SHADER, 0}
 	}),
 	fragment_shader(shader_src),

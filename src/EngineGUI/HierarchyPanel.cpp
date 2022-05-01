@@ -36,7 +36,7 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 		// TODO: revisit example if we want multi-selection
 
 		// Available panel width
-		int width = ImGui::GetContentRegionAvail().x;
+		int width = (int)ImGui::GetContentRegionAvail().x;
 
 		for (int i = 0; i < state->activeScene->entities.size(); i++) {
 			

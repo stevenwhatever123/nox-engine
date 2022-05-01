@@ -21,8 +21,7 @@ GameManager::GameManager() :
 	title(WINDOW_TITLE),
 	ui_params(),
 	should_close(false),
-	keys(),
-	use_pp(0)
+	keys()
 {
 }
 
@@ -248,10 +247,6 @@ void GameManager::init_shaders() {
 	});
 
 
-	programs.push_back(Array<ShaderFile>{
-		{ "assets/shaders/fullScreenShader.vert", GL_VERTEX_SHADER, 0},
-		{ "assets/shaders/fullScreenShader.frag", GL_FRAGMENT_SHADER, 0},
-	});
 
 }
 
@@ -310,6 +305,8 @@ void GameManager::init_postprocess() {
 			win_height
 			}
 	);
+
+	game_state.current_post_processor = &game_state.post_processors.back();
 }
 
 void GameManager::update_gui() {
@@ -406,7 +403,7 @@ void GameManager::update_inputs() {
 	}
 	if(keys['2']) {
 		use_pp = 1;
-		game_state.texture_used = game_state.current_post_processor.GetTexture();
+		game_state.texture_used = game_state.current_post_processor->GetTexture();
 	}
 
 }
@@ -485,7 +482,7 @@ void GameManager::update_renderer() {
 	// renderer->setProgram(programs[1]);
 	if(use_pp == 1) {
 		glBindVertexArray(random_vao);
-		glClearColor(0.5, 0.2, 0, 1);
+		glClearColor(0.5f, 0.2f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		for(auto post_process : game_state.post_processors) {

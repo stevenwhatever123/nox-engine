@@ -30,7 +30,7 @@ namespace NoxEngine {
 		Scene *activeScene;
 		GLuint texture_used;
 		Array<FullscreenShader> post_processors;
-		FullscreenShader& current_post_processor;
+		FullscreenShader *current_post_processor;
 	};
 
 }
