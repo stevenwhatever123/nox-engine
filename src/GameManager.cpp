@@ -472,13 +472,17 @@ void GameManager::update_renderer() {
 
 void GameManager::exportLua()
 {
+
+	LOG_DEBUG("\ntest: %p ", GameManager::Instance);
+
 	auto lua_state = ScriptsManager::Instance()->get_lua_state();
 	luabridge::getGlobalNamespace(lua_state)
 	.beginNamespace("game")
-		.beginClass<GameManager>("GameManager")
-			.addConstructor<void (*)(u32 width, u32 height, String title)>()
-		.addFunction("addMesh", &GameManager::addMesh)
+	.deriveClass<GameManager, Singleton>("GameManager")
+	.addFunction("inst", GameManager::Instance)
 	.endClass()
 	.endNamespace();
+
+
 }
 

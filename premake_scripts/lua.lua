@@ -6,7 +6,7 @@ project "lua"
 	targetdir "../libs/compiled_libs/lua"
 	location "../project_files/"
 
-	includedirs {"../libs/lua/" }
+	includedirs {"../libs/" }
 	
 
 	vpaths {

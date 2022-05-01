@@ -29,8 +29,8 @@ namespace NoxEngine {
 			// What's the representation of this component in the inspector?
 			// This function being virtual also allows dynamic_cast to be used in CastType()
 			virtual void displayUI() {};
-			i32 get_id() { return id; };
-			void set_id(i32 value) { id = value; };
+			ComponentType get_id() { return id; };
+			void set_id(ComponentType value) { id = value; };
 	};
 }
 
