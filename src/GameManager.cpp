@@ -279,6 +279,7 @@ void GameManager::init_renderer() {
 	renderer->useProgram();
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
+	game_state.texture_used = renderer->getTexture();
 
 	GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
 
@@ -290,21 +291,36 @@ void GameManager::init_renderer() {
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad_index_buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i32)*6, indices, GL_STATIC_DRAW);
+	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindVertexArray(0);
 }
 
 void GameManager::init_postprocess() { 
+
 	game_state.post_processors.push_back(
 		FullscreenShader{
-			"assets/shaders/fullScreenShader.frag", Array<TextureInput>{
-				{renderer->getTexture(), 0}
+			"assets/shaders/fullScreenShader.frag",
+			Array<TextureInput>{
+				{ renderer->getTexture(), 0},
 			},
 			win_width,
 			win_height
-			}
+		}
 	);
+
+
+	game_state.post_processors.push_back(
+		FullscreenShader{
+			"assets/shaders/fullScreenShader2.frag",
+			Array<TextureInput>{
+				{ game_state.post_processors.back().GetTexture(), 0},
+			},
+			win_width,
+			win_height
+		}
+	);
+
 
 	game_state.current_post_processor = &game_state.post_processors.back();
 }
@@ -396,15 +412,22 @@ void GameManager::update_inputs() {
 	if(keys['A']) { camera->moveHorBy(0.1f); }
 	if(keys[' ']) { camera->moveVerBy(0.1f); }
 	if(keys['K']) { camera->moveVerBy(-0.1f); }
-	if(keys['1']) {
+
+	if(keys['0']) {
 		use_pp = 0;
 		game_state.texture_used = renderer->getTexture();
-
 	}
+
+	if(keys['1']) {
+		use_pp = 1;
+		game_state.texture_used = game_state.post_processors[0].GetTexture();
+	}
+
 	if(keys['2']) {
 		use_pp = 1;
-		game_state.texture_used = game_state.current_post_processor->GetTexture();
+		game_state.texture_used = game_state.post_processors[1].GetTexture();
 	}
+
 
 }
 
@@ -440,34 +463,34 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
-	auto meshSceneStart = game_state.meshScenes.begin();
-	auto meshSceneEnd = game_state.meshScenes.end();
-	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
-	{
-		MeshScene &currentMeshScene = meshSceneStart->second;
-		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
-		{
-			MeshNode2* node = meshSceneStart->second.allNodes[i];
+	// auto meshSceneStart = game_state.meshScenes.begin();
+	// auto meshSceneEnd = game_state.meshScenes.end();
+	// for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
+	// {
+	// 	MeshScene &currentMeshScene = meshSceneStart->second;
+	// 	for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
+	// 	{
+	// 		MeshNode2* node = meshSceneStart->second.allNodes[i];
 
-			if (node->meshIndex.size() > 0)
-			{
-				Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
-				if (node->hasAnimations())
-				{
-					glm::mat4 transformation = node->getGlobalTransformation(
-						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
-						currentMeshScene.accumulator, currentMeshScene.timeStep,
-						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
-					renderer->updateObjectTransformation(transformation, mesh);
-				}
-				else
-				{
-					glm::mat4 transformation = node->transformation;
-					renderer->updateObjectTransformation(transformation, mesh);
-				}
-			}
-		}
-	}
+	// 		if (node->meshIndex.size() > 0)
+	// 		{
+	// 			Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
+	// 			if (node->hasAnimations())
+	// 			{
+	// 				glm::mat4 transformation = node->getGlobalTransformation(
+	// 					currentMeshScene.frameIndex, currentMeshScene.animationIndex,
+	// 					currentMeshScene.accumulator, currentMeshScene.timeStep,
+	// 					currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
+	// 				renderer->updateObjectTransformation(transformation, mesh);
+	// 			}
+	// 			else
+	// 			{
+	// 				glm::mat4 transformation = node->transformation;
+	// 				renderer->updateObjectTransformation(transformation, mesh);
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 
 
@@ -482,11 +505,10 @@ void GameManager::update_renderer() {
 	// renderer->setProgram(programs[1]);
 	if(use_pp == 1) {
 		glBindVertexArray(random_vao);
-		glClearColor(0.5f, 0.2f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
+		// glClearColor(0.5f, 0.2f, 0.0f, 1.0f);
+		// glClear(GL_COLOR_BUFFER_BIT);
 		for(auto post_process : game_state.post_processors) {
-			post_process.draw();
+			post_process.draw(currentTime);
 		}
 	}
 }

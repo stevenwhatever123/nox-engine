@@ -11,7 +11,10 @@ FullscreenShader::FullscreenShader(const String shader_src, Array<TextureInput> 
 	fragment_shader(shader_src),
 	texture_inputs(texture_inputs),
 	frame_width(frame_width),
-	frame_height(frame_height)
+	frame_height(frame_height),
+	current_bound_program(0),
+	current_bound_texture(0),
+	current_bound_framebuffer(0)
 {
 
 	saveState();
@@ -39,7 +42,7 @@ FullscreenShader::FullscreenShader(const String shader_src, Array<TextureInput> 
 
 void FullscreenShader::saveState() {
 	glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &current_bound_texture);
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER, &current_bound_framebuffer);
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &current_bound_framebuffer);
 	glGetIntegerv(GL_CURRENT_PROGRAM, &current_bound_program);
 }
 
@@ -50,9 +53,12 @@ void FullscreenShader::restoreState() {
 
 }
 
-void FullscreenShader::draw() {
+void FullscreenShader::draw(time_type deltaTime) {
 	saveState();
 	use();
+
+	setFloat("dt", deltaTime);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
 
 	for(u32 i = 0; i < texture_inputs.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + texture_inputs[i].texture_location);
@@ -61,7 +67,7 @@ void FullscreenShader::draw() {
 
 	// the vertex shader is common across all fullscreen shaders
 	// it just contains the coords for a quad and here it renders that quad
-	glDrawElements(0, 6, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	restoreState();
 }

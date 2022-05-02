@@ -13,10 +13,15 @@ namespace NoxEngine {
 
 	class FullscreenShader : public GLProgram {
 		public:
-			FullscreenShader(const String shader_src, Array<TextureInput> texture_inputs = Array<TextureInput>(), u32 frame_width = 0, u32 frame_height = 0);
+			FullscreenShader(
+					const String shader_src,
+					Array<TextureInput> texture_inputs = Array<TextureInput>(),
+					u32 frame_width = 0,
+					u32 frame_height = 0
+			);
 			void saveState();
 			void restoreState();
-			void draw();
+			void draw(time_type deltaTime);
 
 			inline u32 GetTexture() { return texture_id; }
 
