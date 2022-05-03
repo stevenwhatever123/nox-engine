@@ -31,7 +31,7 @@ namespace NoxEngine {
 		// Reset the play time
 		void resetAnimation();
 
-		u32 getNumOfAnimations();
+		u32 getNumOfAnimations() const;
 		bool hasAnimations();
 		
 		void updateNumTicks(u32 animationIndex, u32 num);

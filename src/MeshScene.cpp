@@ -173,7 +173,7 @@ void MeshScene::resetAnimation()
 	whichTickFloor = 0;
 }
 
-u32 MeshScene::getNumOfAnimations()
+u32 MeshScene::getNumOfAnimations() const
 {
 	return (u32)animations.size();
 }

@@ -108,7 +108,13 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state) {
 			progress = (float)currentScene.frameIndex / (currentScene.numTicks[currentScene.animationIndex] - 1);
 			ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
 
+			if (ImGui::Button("Export"))
+			{
+				NoxEngine::exportFBX(NoxEngine::generateAiScene(currentScene));
+			}
+
 			updateSequencer(currentScene, game_state);
+
 			ImGui::TreePop();
 		}
 
