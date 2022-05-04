@@ -420,7 +420,10 @@ void Renderer::createElementArray(IRenderable* mesh)
 		copy(indices.begin(), indices.end(), back_inserter(elements));
 
 	} else {
-		numberOfElements += mesh->getNumOfFaces();
+		// REMEMBER TO MULTIPLY BY 3 !!!
+		// Steven: This line is causing problem as the number of elements is not the same as
+		// number of faces.
+		numberOfElements += mesh->getNumOfFaces() * 3;
 		const auto faces = mesh->getFaces();
 		for(i32 i = 0; i < faces.size(); i++) {
 			elements.push_back(faces[i][0]);
