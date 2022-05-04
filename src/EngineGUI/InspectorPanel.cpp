@@ -128,6 +128,37 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 			// LightSourceComponent
 			// TODO: implement
 
+			if (ent->containsComps(AnimationFlag))
+			{
+				bool enable = ent->isEnabled<RenderableComponent>();
+				bool expand = ImGui::TreeNode("Animation");
+
+				ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+				ImGui::Checkbox("##EnableRend", &enable);
+
+				ImGui::SameLine();
+				bool remove = ImGui::SmallButton("-##RemoveRend");
+
+				ent->setEnabled<RenderableComponent>(enable);
+
+				if (expand)
+				{
+					// Begin: grey out
+					ImGui::BeginDisabled(!enable);
+
+
+					ImGui::TreePop();
+
+					// End: grey out
+					ImGui::EndDisabled();
+				}
+
+				if (remove) {
+					ent->removeComp<RenderableComponent>();
+				}
+				ImGui::Separator();
+			}
+
 		}
 		ImGui::Separator();
 

@@ -189,7 +189,7 @@ void GameManager::init_events() {
 
 			if (!rend->registered) {
 				renderer->addObject(ent);
-				rend->registered = true;
+				//rend->registered = true;
 
 				// Update renderer
 				// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion

@@ -16,6 +16,7 @@ namespace NoxEngine {
 		LightSourceType,
 		AudioSourceType,
 		ScriptType,
+		AnimationType,
 		ComponentTypeCount
 	};
 
@@ -26,6 +27,7 @@ namespace NoxEngine {
 		LightSourceFlag		= 1 << (LightSourceType		- 1),
 		AudioSourceFlag		= 1 << (AudioSourceType		- 1),
 		ScriptFlag			= 1 << (ScriptType			- 1),
+		AnimationFlag		= 1 << (AnimationType		- 1)
 	};
 
 	extern std::map<std::type_index, ComponentType> kComponentTypeMap;

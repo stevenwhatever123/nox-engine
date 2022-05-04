@@ -222,7 +222,8 @@ void MeshScene::resetAnimation()
 
 u32 MeshScene::getNumOfAnimations() const
 {
-	return (u32)animations.size();
+	//return (u32)animations.size();
+	return (u32)numTicks.size();
 }
 
 bool MeshScene::hasAnimations()

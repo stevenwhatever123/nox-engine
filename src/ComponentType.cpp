@@ -31,7 +31,8 @@ void NoxEngine::initComponentTypes() {
 		{ RenderableType,	"Renderable Component" },
 		{ LightSourceType,	"Light Source Component" },
 		{ AudioSourceType,	"Audio Source Component" },
-		{ ScriptType,		"Script Component" }
+		{ ScriptType,		"Script Component" },
+		{ AnimationType,	"Animation Component" }
 	};
 
 	// assert every type has a name
