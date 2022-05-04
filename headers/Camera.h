@@ -26,6 +26,12 @@ namespace NoxEngine {
 			void moveVerBy(f32 shift);
 			void turnHorBy(f32 shift);
 			void turnVerBy(f32 shift);
+
+			void turndirUP(f32 shift);
+			void turndirDOWN(f32 shift);
+			void turndirLEFT(f32 shift);
+			void turndirRIGHT(f32 shift);
+
 			vec3 getLookingAt();
 
 			vec3 currCamPos;
@@ -34,6 +40,9 @@ namespace NoxEngine {
 			vec3 lookingAt;
 			vec3 topPointingAt;
 			f32 fov;
+
+			float Yaw;
+			float Pitch;
 		private:
 			mat4 cameraTransf;
 			vec3 user_rotate;

@@ -212,7 +212,7 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(45.0f, 47.0f, 144.0f));
+	camera = new Camera(vec3(0.0f, 0.0f, 0.0f));
 	// camera->turnVerBy(35.0f);
 }
 
@@ -240,11 +240,11 @@ void GameManager::init_animation() {
 
 void GameManager::init_renderer() { 
 	renderer = new Renderer(win_width, win_height, camera);
-	// renderer->setProgram(current_program);
-	// renderer->useProgram();
+	//renderer->setProgram(current_program);
+	//renderer->useProgram();
 
 	renderer->setProgram(&programs[1]);
-	// renderer->useProgram();
+	renderer->useProgram();
 
 	programs[1].use();
 
@@ -378,8 +378,14 @@ void GameManager::update_inputs() {
 	if(keys['S']) { camera->turnHorBy(-0.1f); }
 	if(keys['D']) { camera->turnVerBy(-0.1f); }
 	if(keys['A']) { camera->turnVerBy(0.1f); }
-	if(keys[' '])  { camera->moveVerBy(0.1f); }
-	if(keys['K'])  { camera->moveVerBy(-0.1f); }
+	if(keys[' '])  { camera->moveHorBy(0.1f); }
+	if(keys['L'])  { camera->moveHorBy(-0.1f); }
+
+	
+	if (keys['G']) { camera->turndirUP(0.1f); }
+	if (keys['B']) { camera->turndirDOWN(0.1f); }
+	if (keys['N']) { camera->turndirRIGHT(0.1f); }
+	if (keys['V']) { camera->turndirLEFT(0.1f); }
 
 }
 
