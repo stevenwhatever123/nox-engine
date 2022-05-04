@@ -34,6 +34,53 @@ MeshScene::MeshScene(const aiScene* scene) :
 	}
 }
 
+MeshScene::MeshScene(std::istream& stream)
+{
+	stream.read((char*)&nodeHierarchy, sizeof(MeshNode2));
+
+	size_t allNodeSize = allNodes.size();
+	stream.read((char*)&allNodeSize, sizeof(allNodeSize));
+	allNodes.resize(allNodeSize);
+	for (u32 i = 0; i < allNodeSize; i++)
+	{
+		allNodes[i] = new MeshNode2();
+		allNodes[i]->deserialize(stream);
+	}
+
+	size_t meshSize = allNodes.size();
+	stream.read((char*)&meshSize, sizeof(meshSize));
+	meshes.resize(meshSize);
+	for (u32 i = 0; i < meshSize; i++)
+	{
+		meshes[i] = new Mesh2();
+		meshes[i]->deserialize(stream);
+	}
+
+	stream.read((char*)&frameIndex, sizeof(u32));
+	stream.read((char*)&animationIndex, sizeof(u32));
+
+	stream.read((char*)&accumulator, sizeof(time_type));
+	stream.read((char*)&timeStep, sizeof(time_type));
+
+	stream.read((char*)&whichTickFloor, sizeof(i32));
+	stream.read((char*)&whichTickCeil, sizeof(i32));
+
+	size_t animationSize = animations.size();
+	stream.read((char*)&animationSize, sizeof(animationSize));
+	animations.resize(animationSize);
+	stream.read((char*)&animations[0], animationSize * sizeof(aiAnimation));
+
+	size_t numberOfTicks;
+	stream.read((char*)&numberOfTicks, sizeof(numberOfTicks));
+	numTicks.resize(numberOfTicks);
+	stream.read((char*)&numTicks[0], numberOfTicks * sizeof(i32));
+
+	animationDuration.resize(animationSize);
+	stream.read((char*)&animationDuration[0], animationSize * sizeof(time_type));
+
+	stream.read((char*)&playAnimation, sizeof(playAnimation));
+}
+
 // Some function to print out data just to make sure we're getting data correctly
 void MeshScene::printAllNodes()
 {
@@ -618,4 +665,44 @@ void MeshScene::extractAnimationInfo(const aiScene* scene) {
 		animationDuration[i] = numTicks[i] / scene_animation->mTicksPerSecond;
 	}
 
+}
+
+void MeshScene::serialize(std::ostream& stream)
+{
+	stream.write((char*)&nodeHierarchy, sizeof(MeshNode2));
+
+	size_t allNodeSize = allNodes.size();
+	stream.write((char*)&allNodeSize, sizeof(allNodeSize));
+	for (u32 i = 0; i < allNodeSize; i++)
+	{
+		allNodes[i]->serialize(stream);
+	}
+
+	size_t meshSize = meshes.size();
+	stream.write((char*)&meshSize, sizeof(meshSize));
+	for (u32 i = 0; i < meshSize; i++)
+	{
+		meshes[i]->serialize(stream);
+	}
+
+	stream.write((char*)&frameIndex, sizeof(u32));
+	stream.write((char*)&animationIndex, sizeof(u32));
+
+	stream.write((char*)&accumulator, sizeof(time_type));
+	stream.write((char*)&timeStep, sizeof(time_type));
+
+	stream.write((char*)&whichTickFloor, sizeof(i32));
+	stream.write((char*)&whichTickCeil, sizeof(i32));
+
+	size_t animationSize = animations.size();
+	stream.write((char*)&animationSize, sizeof(animationSize));
+	stream.write((char*)&animations[0], animationSize * sizeof(aiAnimation));
+
+	size_t numberOfTicks = numTicks.size();
+	stream.write((char*)&numberOfTicks, sizeof(numberOfTicks));
+	stream.write((char*)&numTicks[0], numberOfTicks * sizeof(i32));
+
+	stream.write((char*)&animationDuration[0], animationSize * sizeof(time_type));
+
+	stream.write((char*)&playAnimation, sizeof(playAnimation));
 }

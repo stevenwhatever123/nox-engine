@@ -22,6 +22,8 @@ Entity::Entity(i32 _id, char* _name)
 
 	if (_name != nullptr) name = _name;
 	else name = (char *)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
+
+	filepath = nullptr;
 }
 
 Entity::Entity(Scene* scene, char* _name)
@@ -41,6 +43,7 @@ Entity::Entity(Scene* scene, char* _name)
 		name = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
 		snprintf(name, ENTITY_NAME_MAX_LEN, "Entity %i", scene->nEntitiesAdded + 1);
 	}
+	filepath = nullptr;
 }
 
 Entity::Entity(Scene* scene, const char* _name)
@@ -56,6 +59,25 @@ Entity::Entity(Scene* scene, const char* _name)
 
 	name = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
 	memcpy(name, _name, ENTITY_NAME_MAX_LEN);
+
+	filepath = nullptr;
+}
+
+Entity::Entity(Scene* scene, const char* _name, const char* _filepath)
+	:
+	hasComp(0),
+	_isEnabled(~0),
+	entityEnabled(true) {
+
+	assert(scene != nullptr);
+
+	// Assign values to fields
+	id = scene->nEntitiesAdded;
+
+	name = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
+	filepath = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
+	memcpy(name, _name, ENTITY_NAME_MAX_LEN);
+	memcpy(filepath, _filepath, ENTITY_NAME_MAX_LEN);
 }
 
 Entity::Entity(Entity&& other) 

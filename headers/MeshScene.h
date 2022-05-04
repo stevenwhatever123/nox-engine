@@ -14,6 +14,7 @@ namespace NoxEngine {
 	public:
 
 		MeshScene(const aiScene* mesh);
+		MeshScene(std::istream& stream);
 		MeshScene();
 		~MeshScene();
 
@@ -64,6 +65,8 @@ namespace NoxEngine {
 		Array<time_type> animationDuration;
 
 		bool playAnimation = false;
+
+		void serialize(std::ostream& stream);
 
 	private:
 		void extractGeometricInfo(const aiScene* scene);

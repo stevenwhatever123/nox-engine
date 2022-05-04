@@ -163,7 +163,8 @@ void GameManager::init_events() {
 			{
 				// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
 				//                 because the entity ID is managed by the scene
-				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
+				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str(),
+					file_name.c_str());
 
 				RenderableComponent* comp = meshScene.meshes[i];
 				TransformComponent* pos = new TransformComponent(0.0, 0.0, 0.0);
@@ -317,7 +318,7 @@ void GameManager::update_gui() {
 	ImGui::NewFrame();
 	ImGui::PushFont(font);
 	
-	NoxEngineGUI::updateGUI(&ui_params);
+	NoxEngineGUI::updateGUI(game_state , &ui_params);
 	NoxEngineGUI::updateAudioPanel(&game_state);
 	NoxEngineGUI::updateAnimationPanel(&game_state);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);

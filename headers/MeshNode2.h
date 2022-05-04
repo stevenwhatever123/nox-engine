@@ -11,6 +11,7 @@ class MeshNode2
 public:
 
 	MeshNode2();
+	MeshNode2(std::istream& stream);
 	~MeshNode2();
 
 	// The idle transformation
@@ -64,6 +65,11 @@ public:
 	// A vector storing the maximum frame for every animation
 	// AKA where the clip is supposed to end in which frame
 	Array<u32> maximumFrame;
+
+	MeshNode2* parse(std::ostream& stream);
+
+	void serialize(std::ostream& stream);
+	void deserialize(std::istream& stream);
 
 private:
 

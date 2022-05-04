@@ -9,6 +9,7 @@ namespace NoxEngine {
 	class Mesh2 : public RenderableComponent {
 	public:
 		Mesh2();
+		Mesh2(std::istream& stream);
 		~Mesh2();
 
 
@@ -25,6 +26,8 @@ namespace NoxEngine {
 		//String normTexName;
 		
 		void* CastType(const i32 castID);
-	
+
+		void serialize(std::ostream& stream);
+		void deserialize(std::istream& stream);
 	};
 }

@@ -24,7 +24,6 @@ namespace NoxEngine {
 	struct GameState {
 		AudioRepo audioSources;
 		Renderer *renderer;
-		MeshRepo meshes;
 		MeshSceneRepo meshScenes;
 		f32 light[3];
 		Array<Scene *> scenes;

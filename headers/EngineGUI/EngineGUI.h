@@ -19,6 +19,11 @@
 #include <Renderer.h>
 #include <Types.h>
 #include <Camera.h>
+#include <GameState.h>
+
+#include <TransformComponent.h>
+#include <RenderableComponent.h>
+#include <FBXFileLoader.h>
 
 
 
@@ -85,8 +90,8 @@ namespace NoxEngineGUI {
 	void setupFixedLayout();
 	void cleanupImGui();
 
-	void updateMenu(GUIParams*);
-	void updateGUI(GUIParams*);
+	void updateMenu(NoxEngine::GameState&, GUIParams*);
+	void updateGUI(NoxEngine::GameState&, GUIParams*);
 
 	// Functions that contain the logic for each sub-window ("tool")
 	// should belong in a separate header file.
