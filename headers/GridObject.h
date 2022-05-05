@@ -18,10 +18,10 @@ namespace NoxEngine {
 			~GridObject();
 			GridObject(vec3 start_point, vec3 end_point, const i32 number_of_rects);
 
-			inline i32 getNumOfVertices() { return i32( vertices.size() ); }
-			inline i32 getNumOfTexCoord() { return i32( texCoords.size()/2 ); }
-			inline i32 getNumOfNormals()  { return i32( normals.size()/3 ); }
-			inline i32 getNumOfFaces()  { return i32( faces.size() ); }
+			inline const i32 getNumOfVertices() const { return i32( vertices.size() ); }
+			inline const i32 getNumOfTexCoord() const { return i32( texCoords.size()/2 ); }
+			inline const i32 getNumOfNormals()  const { return i32( normals.size()/3 ); }
+			inline const i32 getNumOfFaces()	const { return i32( faces.size() ); }
 
 			inline const String getNormalTexture() { return "assets/meshes/textures/leaves_normal.jpg"; }
 			inline const String getAmbientTexture() { return "assets/meshes/textures/leaves_normal.jpg"; }

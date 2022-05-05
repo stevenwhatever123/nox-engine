@@ -62,7 +62,7 @@ void GameManager::addAudioSource(AudioSource audioSource) {
 
 	// TODO(sharo): handle duplicates better
 	game_state.audioSources.emplace(audioSource.name, audioSource);
-	audioManager->LoadSound(audioSource.file);
+	audioManager->loadSound(audioSource.file);
 
 }
 
@@ -217,9 +217,9 @@ void GameManager::init_events() {
 
 void GameManager::init_audio() {
 	audioManager = AudioManager::Instance();
-	audioManager->Init();
+	audioManager->init();
 
-	audioManager->Set3dListenerAttributes(
+	audioManager->set3dListenerAttributes(
 			{ 0.0f, 0.0f, 0.0f },		// Position
 			{ 0.0f, 0.0f, 0.0f },		// velocity (TODO: calculate)
 			{ 0.0f, 0.0f, 1.0f },		// Forward
@@ -317,7 +317,7 @@ void GameManager::update_gui() {
 	ImGui::PushFont(font);
 	
 	NoxEngineGUI::updateGUI(&ui_params);
-	NoxEngineGUI::updateAudioPanel(&game_state);
+	NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
 	NoxEngineGUI::updateAnimationPanel(&game_state);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
@@ -373,11 +373,11 @@ void GameManager::update_audio() {
 	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
 	//       set the pos/volume in the appropriate ChannelGroup / ChannelControl
 	for (auto itr : game_state.audioSources) {
-		audioManager->SetChannel3dPosition(0, itr.second.position);
-		audioManager->SetChannelVolume(0, itr.second.sourceVolume);
+		audioManager->setChannel3dPosition(0, itr.second.position);
+		audioManager->setChannelVolume(0, itr.second.sourceVolume);
 	}
 
-	audioManager->Update();
+	audioManager->update();
 }
 
 void GameManager::update_inputs() {

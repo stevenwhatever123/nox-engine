@@ -1,22 +1,36 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <map>
-#include <iostream>
-
-#include <glm/glm.hpp>
-
+#include <Types.h>
 #include <fmod.hpp>
-#include <fmod_common.h>
-#include <fmod_errors.h>
 #include <fmod_studio.hpp>
 #include <fmod_studio_common.h>
 
-
 #include "Singleton.h"
 
+#define MAX_CHANNELS 512
+
+
 namespace NoxEngine {
+	
+	// Forward declares
+	class Mesh;
+
+	// Usings from FMOD
+	using AudioDSPType = FMOD_DSP_TYPE;
+	using AudioDSPPitchShift = FMOD_DSP_PITCHSHIFT;
+
+
+	struct DSP {
+		friend class AudioManager;
+
+	public:
+		DspId dspId;
+		ChannelId channelId;
+
+	protected:
+		FMOD::DSP* effect;
+	};
+
 
 	class AudioManager : public Singleton<AudioManager> {
 
@@ -28,76 +42,157 @@ namespace NoxEngine {
 		FMOD::Studio::System* studioSystem;
 
 		int mnNextChannelId;
+		int nextDSPId;
 
-		// FMOD Core API
-		typedef std::map<std::string, FMOD::Sound*> SoundMap;
-		typedef std::map<int, FMOD::Channel*> ChannelMap;
-		typedef std::map<std::string, int> SoundChannelIdMap;
+		///////////////////
+		/*   FMOD Core   */
+		///////////////////
+		
+		// Sound filepath -> Sound object
+		typedef std::map<String, FMOD::Sound*> SoundMap;
 		SoundMap mSounds;
+
+		// Channel id (monotonically increasing) -> Channel object
+		typedef std::map<int, FMOD::Channel*> ChannelMap;
 		ChannelMap mChannels;
+
+		// Sound filepath -> Channel id
+		typedef std::map<String, int> SoundChannelIdMap;
 		SoundChannelIdMap mSoundChannelIds;
 
-		// FMOD Studio API
-		typedef std::map<std::string, FMOD::Studio::EventInstance*> EventMap;
-		typedef std::map<std::string, FMOD::Studio::Bank*> BankMap;
+		// TODO: ChannelGroup...
+
+		// DSP	
+		// Array of DSP filters, intended to be retrieved by index
+		Array<FMOD::DSP*> dsps;
+
+		// Channel -> Chain of DSPs
+		typedef std::map<int, Array<int>> ChannelDSPMap;
+		ChannelDSPMap mDSPs;
+
+		// Geometry objects for occlusion
+		Array<FMOD::Geometry*> geometries;
+
+		/////////////////////
+		/*   FMOD Studio   */
+		/////////////////////
+		typedef std::map<String, FMOD::Studio::EventInstance*> EventMap;
+		typedef std::map<String, FMOD::Studio::Bank*> BankMap;
 		BankMap mBanks;
 		EventMap mEvents;
 
 	protected:
-		AudioManager() {};
-		~AudioManager() {};
+		AudioManager();
+		~AudioManager();
 
 	public:
 		// dummy constructors and destroyers
 
-		// Initialize
-		void Init();
+		/***
+		 * Initialize the audio engine
+		 * 
+		 * @param maxChannels	Maximum number of virtual channels available for playback
+		 * @param maxWorldSize	Maximum size of the world from the centerpoint to the edge using the same units used in other 3D functions.
+		 * @param flags			Initialization flags. 
+								FMOD_INIT_GEOMETRY_USECLOSEST:	only use occlusion result from closest geometry rather than a summation of all
+		 */
+		void init(
+			float maxChannels = MAX_CHANNELS, 
+			float maxWorldSize = 500.0f, 
+			FMOD_INITFLAGS flags = FMOD_INIT_NORMAL
+		);
 
 		// update loop
-		void Update();
+		void update();
 
 		// shutdown fmod and free all resources
-		void Destroy();
+		void destroy();
 
 		// check whether the result is FMOD_OK or not
-		// TODO: change to throw std::exception
-		static int errorCheck(FMOD_RESULT result, bool bPrint = true, bool bExit = false);
+		static int ERRCHK(FMOD_RESULT result, bool bPrint = true, bool bExit = false);
 
 
+		////////////////////////////
 		/*   Core API Functions   */
-		void LoadSound(const std::string& strSoundName, bool is3d = true, bool isLooping = false, bool isStream = false);
-		void UnLoadSound(const std::string& strSoundName);
-		void UnLoadSound(const char* strSoundName);
-		int PlaySounds(const std::string& strSoundName, const glm::vec3& vPos = glm::vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
+		////////////////////////////
+		void loadSound(const String& strSoundName, bool is3d = true, bool isLooping = false, bool isStream = false);
+		void unLoadSound(const String& strSoundName);
+		void unLoadSound(const char* strSoundName);
+		int playSounds(const String& strSoundName, const vec3& vPos = vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
 
-		void SetChannel3dPosition(int nChannelId, const glm::vec3& vPosition);
-		void SetChannelVolume(int nChannelId, float fNormalizedVolume);
-		// Global 3D settings
-		void Set3dSettings(float dopplerScale, float distanceFactor, float rolloffScale);
+		void setChannel3dPosition(int nChannelId, const vec3& vPosition);
+		void setChannelVolume(int nChannelId, float fNormalizedVolume);
+
+		/***
+		 * Global 3D settings
+		 *
+		 * @param dopplerScale:		Exaggerate / diminish doppler effect
+		 * @param distanceFactor:	Set units per meter (e.g. if using feet then 3.28). Only affects doppler - does not affect min/max distance
+		 * @param rolloffScale:		How fast 3D sounds attenuate using FMOD_3D_LOGROLLOFF
+		 */
+		void set3dSettings(float dopplerScale, float distanceFactor, float rolloffScale);
+		
 		// Listener position and orientation. TODO: Use velocity != 0 to enable doppler
-		void Set3dListenerAttributes(const glm::vec3& vPos, const glm::vec3& vVel, const glm::vec3& vForward, const glm::vec3& vUp);
+		void set3dListenerAttributes(const vec3& vPos, const vec3& vVel, const vec3& vForward, const vec3& vUp);
 
-		bool IsPlaying(int nChannelId) const;
-		//int GetChannelId(const string& strSoundName);
+		/*   Occlusion   */
+		// Create a Geometry object, return the id
+		int createGeometry(
+			int nMaxPolygons, int nMaxVertices, 
+			const vec3 &pos = vec3{0, 0, 0}, 
+			const vec3 &forward = vec3{ 0, 0, 0 },
+			const vec3 &scale = vec3{ 0, 0, 0 }
+		);
+
+		// Create an occlusion Geometry object from a mesh, return the id
+		int createGeometry(const Mesh* mesh);
+
+		// Add a polygon to the Geometry object
+		void addPolygon(int nGeometryId, float fDirectOcclusion, float fReverbOcclusion, bool isDoubleSided, int nVertices, const Array<vec3>& vVertices);
+
+		// Set whether a Geometry is active
+		void setGeometryActive(int nGeometryId, bool isActive);
+
+		// Place Geometry in world space
+		void orientGeometry(int nGeometryId, const vec3& pos, const vec3& forward, const vec3& scale, const vec3& up = vec3{ 0, 0, 0 });
+
+		// Save/load Geoemtry object on disk
+		void saveGeometry(int nGeometryId, const String& filePath);
+		int loadGeometry(const String& filePath);
+		
+
+		/*   DSP Filters   */ 
+		DspId createDSP(AudioDSPType type, int channelGroup = 0, int channel = 0, int chainPosition = 0);
+		void addDSP();	// add to channel group
+		//void addDSP();  // add to DSP input
+		
+
+		bool isPlaying(int nChannelId) const;
+		//int getChannelId(const string& strSoundName);
 
 
+		//////////////////////////////
 		/*   Studio API Functions   */
-		void LoadBank(const  std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags);
-		void LoadEvent(const std::string& strEventName);
-		void PlayEvent(const std::string& strEventName);
-		void StopChannel(int nChannelId);
-		void StopEvent(const std::string& strEventName, bool bImmediate = false);
-		void GetEventParameter(const std::string& strEventName, const std::string& strEventParameter, float* parameter);
-		void SetEventParameter(const std::string& strEventName, const std::string& strParameterName, float fValue);
-		void StopAllChannels();
+		//////////////////////////////
+		void loadBank(const  String& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags);
+		void loadEvent(const String& strEventName);
+		void playEvent(const String& strEventName);
+		void stopChannel(int nChannelId);
+		void stopEvent(const String& strEventName, bool bImmediate = false);
+		void getEventParameter(const String& strEventName, const String& strEventParameter, float* parameter);
+		void setEventParameter(const String& strEventName, const String& strParameterName, float fValue);
+		void stopAllChannels();
 
 
-		bool IsEventPlaying(const std::string& strEventName) const;
+		bool isEventPlaying(const String& strEventName) const;
 
-		/*   Helpers   */
-		float dbToVolume(float dB);
-		float VolumeTodB(float volume);
-		static FMOD_VECTOR VectorToFmod(const glm::vec3& vPosition);
+
+		//////////////////////////
+		/*   HELPER FUNCTIONS   */
+		//////////////////////////
+		static float dbToVolume(float dB);
+		static float volumeTodB(float volume);
+		static FMOD_VECTOR vectorToFmod(const vec3& v);
 	};
 
 }

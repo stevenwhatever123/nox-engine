@@ -1,37 +1,75 @@
 #include <AudioManager.h>
 
+#include <iostream>
+#include <fmod_common.h>
+#include <fmod_errors.h>
+
+#include "Mesh.h"
+
+#include <Utils.h>
 
 using namespace NoxEngine;
-//////////////
-//   CORE   //
-//////////////
+using namespace NoxEngineUtils;
 
-void AudioManager::Init() {
-	// Initialize FMOD Core API
-	coreSystem = NULL;
 
-	// Create the main system object
-	FMOD_RESULT result = FMOD::System_Create(&coreSystem);
-	errorCheck(result);
+/////////////////////
+//   CTOR / DTOR   //
+/////////////////////
 
-	// Initialize FMOD
-	// can try FMOD_STUDIO_INIT_LIVEUPDATE
-	result = coreSystem->init(512, FMOD_INIT_NORMAL, 0);
-	errorCheck(result);
+AudioManager::AudioManager() :
+	mnNextChannelId(0),
+	nextDSPId(0),
+	coreSystem(nullptr),
+	studioSystem(nullptr) {
+
+}
+
+AudioManager::~AudioManager() {
+
 }
 
 
-void AudioManager::Destroy() {
+
+////////////////////////////
+/*   Core API Functions   */
+////////////////////////////
+
+void AudioManager::init(float maxChannels, float maxWorldSize, FMOD_INITFLAGS flags) {
+
+	// We're using OpenGL, so it's always right handed
+	flags |= FMOD_INIT_3D_RIGHTHANDED;
+
+	// Create the main system object & Initialize
+	ERRCHK( FMOD::System_Create(&coreSystem) );
+	ERRCHK( coreSystem->init(maxChannels, flags, 0) );
+
+	// TODO: Initialize studio system
+	// can try FMOD_STUDIO_INIT_LIVEUPDATE
+
+	// Various settings
+	coreSystem->setGeometrySettings(maxWorldSize);
+	//coreSystem->set3DSettings();
+	//coreSystem->setAdvancedSettings();
+}
+
+
+void AudioManager::destroy() {
 
 	// Unload all sounds
-	for (auto it = mSounds.begin(), itEnd = mSounds.end(); it != itEnd; ++it) {
+	for (auto it = mSounds.begin(), itEnd = mSounds.end(); it != itEnd; it++) {
 		const int nameLen = 64;
 		char name[nameLen];
 
 		it->second->getName(name, nameLen);
 
-		std::cout << "Unloading " << name << std::endl;
-		UnLoadSound(name);		
+		LOG_DEBUG("Unloading sound %s...", name);
+		unLoadSound(name);
+		LOG_DEBUG(" - Finished.", name);
+	}
+
+	// TODO: Free all geometries
+	for (int i = 0; i < geometries.size(); i++) {
+		geometries[i]->release();
 	}
 
 	// Shutdown FMOD
@@ -39,7 +77,7 @@ void AudioManager::Destroy() {
 }
 
 
-void AudioManager::Update() {
+void AudioManager::update() {
 
 	/*   Remove all stopped channels   */
 	std::vector<ChannelMap::iterator> pStoppedChannels;
@@ -50,6 +88,15 @@ void AudioManager::Update() {
 		if (!bIsPlaying) {
 			pStoppedChannels.push_back(it);
 		}
+
+		// TODO: Handle occlusion ourselves
+		//float fDirectOcclusion = 0.0f, fReverbOcclusion = 0.0f;
+		//coreSystem->getGeometryOcclusion(
+		//	mListenerPosition,
+		//	source.Position,
+		//	&fDirectOcclusion,
+		//	&fReverbOcclusion);
+		//it->second->set3DOcclusion(fDirectOcclusion, fReverbOcclusion);
 	}
 
 	for (auto& it : pStoppedChannels) {
@@ -57,11 +104,11 @@ void AudioManager::Update() {
 	}
 
 	// fmod needs to be updated at once once per game tick
-	AudioManager::errorCheck(coreSystem->update());
+	AudioManager::ERRCHK(coreSystem->update());
 }
 
 
-void AudioManager::LoadSound(const std::string& fileName, bool is3d, bool isLooping, bool isStream) {
+void AudioManager::loadSound(const String& fileName, bool is3d, bool isLooping, bool isStream) {
 
 	// first check that this sound hasn't been loaded into the sound map
 	auto soundItr = this->mSounds.find(fileName);
@@ -83,39 +130,39 @@ void AudioManager::LoadSound(const std::string& fileName, bool is3d, bool isLoop
 	/*   create the sound and store it in the sound map   */
 	FMOD::Sound* sound = nullptr;		// sound object
 	FMOD_CREATESOUNDEXINFO* exinfo = nullptr;		// extended info
-	errorCheck(coreSystem->createSound(fileName.c_str(), eMode, exinfo, &sound));
+	ERRCHK(coreSystem->createSound(fileName.c_str(), eMode, exinfo, &sound));
 	if (sound) {
 		mSounds[fileName] = sound;
 	}
 }
 
 
-void AudioManager::UnLoadSound(const std::string& strSoundName) {
+void AudioManager::unLoadSound(const String& strSoundName) {
 
-	UnLoadSound(strSoundName.c_str());
+	unLoadSound(strSoundName.c_str());
 }
 
 
-void AudioManager::UnLoadSound(const char *strSoundName) {
+void AudioManager::unLoadSound(const char *strSoundName) {
 
 	// If the specified sound isn't loaded, don't do anything
 	auto sound = this->mSounds.find(strSoundName);
 	if (sound == mSounds.end()) return;
 
 	// free the memory occupied by the sound object
-	errorCheck(sound->second->release());
+	ERRCHK(sound->second->release());
 	mSounds.erase(sound);
 }
 
 
-int AudioManager::PlaySounds(const std::string& strSoundName, const glm::vec3& vPos, float fVolumedB) {
+int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float fVolumedB) {
 
 	// Has this sound been loaded?
 	auto sound = mSounds.find(strSoundName);
 
 	// Sound hasn't been loaded, so load it
 	if (sound == mSounds.end()) {
-		LoadSound(strSoundName);
+		loadSound(strSoundName);
 		sound = mSounds.find(strSoundName);
 
 		// if not successfully loaded, return the next available channel ID
@@ -138,27 +185,97 @@ int AudioManager::PlaySounds(const std::string& strSoundName, const glm::vec3& v
 
 		// match this sound name with the channel id
 		mSoundChannelIds[strSoundName] = channelId;
-		std::cout << "Playing a sound in channel " << channelId << std::endl;
+		LOG_DEBUG("Playing a sound in channel %i\n", channelId);
 
 		// Create a new channel for the sound and play it. 
 		// Start paused ("true") so we don't get a pop when we change the parameters
 		// TODO: Differentiate type of sound with an enum and allocate it to the appropriate channel group
 		FMOD::Channel* channel = nullptr;
 		FMOD::ChannelGroup* channelGroup = nullptr;
-		errorCheck(coreSystem->playSound(sound->second, channelGroup, true, &channel));
+		ERRCHK( coreSystem->playSound(sound->second, channelGroup, true, &channel) );
 
 		// Channel successfully allocated
 		if (channel) {
-			FMOD_MODE currMode;
-			sound->second->getMode(&currMode);
-			if (currMode & FMOD_3D) {
-				FMOD_VECTOR position = VectorToFmod(vPos);
-				errorCheck(channel->set3DAttributes(&position, nullptr));
+			FMOD_MODE eMode;
+			sound->second->getMode(&eMode);
+
+			// TODO: Handle occlusion ourselves - disable ray cast by FMOD
+			//eMode |= FMOD_3D_IGNOREGEOMETRY;
+			//channel->setMode(eMode);
+
+			if (eMode & FMOD_3D) {
+				FMOD_VECTOR position = vectorToFmod(vPos);
+				ERRCHK( channel->set3DAttributes(&position, nullptr) );
 			}
 
-			// update parameters and unpause
-			errorCheck(channel->setVolume(dbToVolume(fVolumedB)));
-			errorCheck(channel->setPaused(false));
+			// update parameters 
+			ERRCHK(channel->setVolume(dbToVolume(fVolumedB)));
+
+			// Connect DSP chain
+			// TODO: restructure
+			{
+				// TODO: Implement time-invariant pitch shifting? Seems hard (phase vocoder?)
+				//float freq;
+				//channel->getFrequency(&freq);
+				//channel->setFrequency(freq * 2);
+
+				// Create the DSP
+				FMOD::DSP* dsp;
+				u32 position = 0;
+
+				// Channel Mix
+				// Chorus
+				// Compressor
+				// Convolutional Reverb
+				// Delay
+				// Distortion
+				
+				// Echo
+				//ERRCHK(coreSystem->createDSPByType(FMOD_DSP_TYPE_ECHO, &dsp));
+				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_ECHO_DELAY, 250)); 
+				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_ECHO_FEEDBACK, 10));
+				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_ECHO_DRYLEVEL, 0));
+				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_ECHO_WETLEVEL, -10));
+
+				// Fader (volume control)
+				// FFT
+				
+				// Flange (wooshing, sweeping effect)
+				//ERRCHK(coreSystem->createDSPByType(FMOD_DSP_TYPE_FLANGE, &dsp));
+				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_FLANGE_DEPTH, 1));
+				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_FLANGE_RATE, 0.1));
+				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_FLANGE_MIX, 50));
+
+				// IT Echo
+				// IT Lowpass
+				// Limiter
+				// Loudness meter
+				// Multiband equalizer / Three Equalizer
+				// Normalize (normalize volume)
+				// Object pan
+				// Oscillator (simple signal generator)
+				// Pan (possible but we don't have speakers in the demo, so let's not implement it)
+
+				// Pitch shifter
+				//ERRCHK( coreSystem->createDSPByType(FMOD_DSP_TYPE_PITCHSHIFT, &dsp) );
+				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, 0.8));
+
+				// Return / Send
+				
+				// SFX Reverb: tons of customization
+				// TODO: lookup
+				
+				// Transceiever
+				
+				// Tremolo
+				//ERRCHK(coreSystem->createDSPByType(FMOD_DSP_TYPE_TREMOLO, &dsp));
+				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_TREMOLO_SKEW, 0.5));
+
+				//ERRCHK( channel->addDSP(position, dsp) );
+			}
+
+			// unpause
+			ERRCHK(channel->setPaused(false));
 			mChannels[channelId] = channel;
 		}
 	}
@@ -170,7 +287,7 @@ int AudioManager::PlaySounds(const std::string& strSoundName, const glm::vec3& v
 	return channelId;
 }
 
-bool AudioManager::IsPlaying(int nChannelId) const {
+bool AudioManager::isPlaying(int nChannelId) const {
 
 	// If this channel does not exist, then it's not playing
 	auto channel = mChannels.find(nChannelId);
@@ -178,22 +295,131 @@ bool AudioManager::IsPlaying(int nChannelId) const {
 
 	// Otherwise, fetch from fmod
 	bool isPlaying;
-	errorCheck(channel->second->isPlaying(&isPlaying));
+	ERRCHK(channel->second->isPlaying(&isPlaying));
 	return isPlaying;
 }
 
 
+/*   Occlusion   */
+int AudioManager::createGeometry(int nMaxPolygons, int nMaxVertices, const vec3 &pos, const vec3 &forward, const vec3 &scale) {
+
+	FMOD::Geometry* geo;
+	ERRCHK( coreSystem->createGeometry(nMaxPolygons, nMaxVertices, &geo) );
+
+	u32 geoId = geometries.size();
+	geometries.push_back(geo);
+
+	orientGeometry(geoId, pos, forward, scale);
+
+	return geoId;
+}
+
+int AudioManager::createGeometry(const Mesh* mesh) {
+
+	int nFaces = mesh->getNumOfVertices();
+	int nVertices = mesh->getNumOfVertices();
+	int vpf = 3;	// Vertices Per Face. Assume mesh contains triangles
+	// Also assume winding order is CCW
+
+	// TODO: Pass in Entity* and get ITransform
+	vec3 pos{ 0, 0, 0 };
+	vec3 forward{ 0, 0, 0 };
+	vec3 scale{ 0, 0, 0 };
+
+	int geoId = createGeometry(nFaces, nVertices, pos, forward, scale);
+
+	Array<vec3> vVertices = mesh->getVertices();
+
+	for (int f = 0; f < nFaces; f++) {
+
+		// TODO: Get custom data for each face from mesh
+		float fDirectOcclusion = 0.5f;
+		float fReverbOcclusion = 0.5f;
+
+		// Form an array of the vertices for this face, assuming each face has exactly 3 vertices
+		Array<vec3> faceVertices(vVertices.begin() + f * vpf, vVertices.begin() + (f+1) * vpf);
+
+		addPolygon(geoId, fDirectOcclusion, fReverbOcclusion, false, vpf, faceVertices);
+	}
+
+	return geoId;
+}
+
+void AudioManager::addPolygon(int nGeometryId, float fDirectOcclusion, float fReverbOcclusion, bool isDoubleSided, int nVertices, const Array<vec3> &vVertices) {
+
+	FMOD::Geometry* geo = geometries[nGeometryId];
+
+	// Convert vertices to FMOD_VECTOR
+	std::vector<FMOD_VECTOR> vertices(nVertices);
+	for (int i = 0; i < nVertices; i++) {
+		vertices[i] = vectorToFmod(vVertices[i]);
+	}
+
+	ERRCHK( geo->addPolygon(fDirectOcclusion, fReverbOcclusion, isDoubleSided, nVertices, vertices.data(), nullptr) );
+}
+
+void AudioManager::setGeometryActive(int nGeometryId, bool isActive) {
+
+	FMOD::Geometry* geo = geometries[nGeometryId];
+	ERRCHK( geo->setActive(isActive) );
+}
+
+void AudioManager::orientGeometry(int nGeometryId, const vec3 &pos, const vec3 &forward, const vec3 &scale, const vec3 &up) {
+
+	FMOD_VECTOR fmPos = vectorToFmod(pos);
+	FMOD_VECTOR fmFwd = vectorToFmod(forward);
+	FMOD_VECTOR fmUp = vectorToFmod(up);
+	FMOD_VECTOR fmScale = vectorToFmod(scale);
+
+	FMOD::Geometry* geo = geometries[nGeometryId];
+	ERRCHK( geo->setPosition(&fmPos)		);
+	ERRCHK( geo->setRotation(&fmFwd, &fmUp) );
+	ERRCHK( geo->setScale	(&fmScale)		);
+}
+
+void AudioManager::saveGeometry(int nGeometryId, const String& filePath) {
+	throw std::exception("Implement");
+}
+int AudioManager::loadGeometry(const String& filePath) {
+	throw std::exception("Implement");
+	return -1;
+}
+
 
 //////////////////////////
-//   SETTER FUNCTIONS   //
+/*    DSP FUNCTIONS     */
 //////////////////////////
 
-void AudioManager::Set3dListenerAttributes(const glm::vec3& vPos, const glm::vec3& vVel, const glm::vec3& vForward, const glm::vec3& vUp) {
+//
+//DspId AudioManager::createDSP(AudioDSPType type, int channel, int position) {
+//
+//	// Create the DSP
+//	FMOD::DSP* dsp;
+//	ERRCHK( coreSystem->createDSPByType(type, &dsp) );
+//	
+//	// Add to the map
+//	mDSPs[channel].insert(mDSPs[channel].begin() + position, dsp);
+//
+//	ERRCHK(dsp->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, 0.8));
+//	ERRCHK( channel->addDSP(position, dsp) );
+//
+//	// Return a unique id for this DSP for reference
+//	return nextDSPId++;
+//}
+
+
+
+
+//////////////////////////
+/*   SETTER FUNCTIONS   */
+//////////////////////////
+
+void AudioManager::set3dListenerAttributes(const vec3& vPos, const vec3& vVel, const vec3& vForward, const vec3& vUp) {
 
 	// convert to fmod vectors
-	FMOD_VECTOR pos = VectorToFmod(vPos);
-	FMOD_VECTOR forward = VectorToFmod(vForward);
-	FMOD_VECTOR up = VectorToFmod(vUp);
+	FMOD_VECTOR pos = vectorToFmod(vPos);
+	FMOD_VECTOR forward = vectorToFmod(vForward);
+	FMOD_VECTOR up = vectorToFmod(vUp);
 	FMOD_VECTOR vel = {0.0f, 0.0f, 0.0f };   // TODO: Take this into account to enable Doppler
 
 	// create and set the listener
@@ -204,83 +430,77 @@ void AudioManager::Set3dListenerAttributes(const glm::vec3& vPos, const glm::vec
 	//listener.up = up;
 	//listener.velocity = vel;
 
-	errorCheck(coreSystem->set3DListenerAttributes(
+	ERRCHK(coreSystem->set3DListenerAttributes(
 				0,			// Listener ID. For singleplayer this is always 0
 				&pos,
 				&vel,
 				&forward,
 				&up
 				));		// Core API
-	//errorCheck(studioSystem->setListenerAttributes(0, &listener));		// studio API
+	//ERRCHK(studioSystem->setListenerAttributes(0, &listener));		// studio API
 	//std::cout << "Position: " << listener.forward.x << "," << listener.forward.y << "," << listener.forward.z << std::endl;
 }
 
+void AudioManager::set3dSettings(float dopplerScale, float distanceFactor, float rolloffScale) {
 
-/***
- * Global 3D settings
- * 
- * @param dopplerScale Exaggerate / diminish doppler effect
- * @param distanceFactor Set units per meter (e.g. if using feet then 3.28). Only affects doppler - does not affect min/max distance
- * @param rolloffScale How fast 3D sounds attenuate using FMOD_3D_LOGROLLOFF
- */
-void AudioManager::Set3dSettings(float dopplerScale, float distanceFactor, float rolloffScale) {
-
-	errorCheck(coreSystem->set3DSettings(dopplerScale, distanceFactor, rolloffScale));
+	ERRCHK(coreSystem->set3DSettings(dopplerScale, distanceFactor, rolloffScale));
 }
 
-void AudioManager::SetChannel3dPosition(int nChannelId, const glm::vec3& vPosition) {
+
+void AudioManager::setChannel3dPosition(int nChannelId, const vec3& vPosition) {
 
 	// find the specified channel
 	auto channelItr = mChannels.find(nChannelId);
 	if (channelItr == mChannels.end()) return;
 
-	// update position
-	FMOD_VECTOR position = VectorToFmod(vPosition);
-	errorCheck(channelItr->second->set3DAttributes(&position, NULL));
+	// update position if channel is 3D
+	FMOD_VECTOR position = vectorToFmod(vPosition);
+	
+	ERRCHK( channelItr->second->set3DAttributes(&position, NULL) );
 }
 
 
-void AudioManager::SetChannelVolume(int nChannelId, float fNormalizedVolume) {
+void AudioManager::setChannelVolume(int nChannelId, float fNormalizedVolume) {
 
 	// find the specified channel
 	auto channelItr = mChannels.find(nChannelId);
 	if (channelItr == mChannels.end()) return;
 
 	// update volume
-	errorCheck(channelItr->second->setVolume(fNormalizedVolume));
+	ERRCHK(channelItr->second->setVolume(fNormalizedVolume));
 }
 
 
 
 //////////////////////////
-//   HELPER FUNCTIONS   //
+/*   HELPER FUNCTIONS   */
 //////////////////////////
 
 float AudioManager::dbToVolume(float dB) {
 	return powf(10.0f, 0.05f * dB);
 }
 
-float AudioManager::VolumeTodB(float volume) {
+float AudioManager::volumeTodB(float volume) {
 	return 20.0f * log10f(volume);
 }
 
-FMOD_VECTOR AudioManager::VectorToFmod(const glm::vec3& vPosition) {
+FMOD_VECTOR AudioManager::vectorToFmod(const vec3& v) {
 	FMOD_VECTOR fVec;
-	fVec.x = vPosition.x;
-	fVec.y = vPosition.y;
-	fVec.z = vPosition.z;
+	fVec.x = v.x;
+	fVec.y = v.y;
+	fVec.z = v.z;
 	return fVec;
 }
 
-int AudioManager::errorCheck(FMOD_RESULT result, bool bPrint, bool bExit) {
+int AudioManager::ERRCHK(FMOD_RESULT result, bool bPrint, bool bExit) {
 	if (FMOD_OK != result) {
 
 		if (bPrint) {
-			std::cout << "FMOD ERROR " << result << std::endl;
+			LOG_DEBUG("FMOD Error (%d): %s\n", result, FMOD_ErrorString(result));
 		}
 
 		if (bExit) {
-			exit(-1);
+			throw std::exception("FMOD Error");
 		}
 
 		return 1;

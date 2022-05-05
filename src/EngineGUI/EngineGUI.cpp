@@ -63,7 +63,7 @@ void NoxEngineGUI::setupFixedLayout() {
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::PresetObjects].c_str(), dock_left_id);
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Hierarchy].c_str(), dock_left_down_id);
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AnimationSettings].c_str(), dock_down_id);
-	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AudioSource].c_str(), dock_down_right_id);
+	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AudioPanel].c_str(), dock_down_right_id);
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::FileExplorer].c_str(), dock_down_down_id);
 			
 	// Change node flags here

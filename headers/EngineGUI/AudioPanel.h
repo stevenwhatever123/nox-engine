@@ -9,5 +9,5 @@
 #include <IOManager.h>
 
 namespace NoxEngineGUI {
-	void updateAudioPanel(NoxEngine::GameState *game_state);
+	void updateAudioPanel(NoxEngine::GameState *state, NoxEngineGUI::GUIParams *params);
 }

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -25,9 +26,6 @@ typedef double f64;
 typedef uintptr_t uptr;
 
 
-// animation typedef
-typedef double time_type;
-
 // Rename std libs for if we want to remove them
 using String = std::string;
 
@@ -35,16 +33,24 @@ template<class T>
 using Array = std::vector<T>;
 
 
+// animation typedef
+typedef double time_type;
+
+
+// ECS typedef
 typedef u16 HasCompBitMask;
 
-// Math & GLM
 
+// Math & GLM
 typedef glm::vec2 vec2;
 typedef glm::vec3 vec3;
 typedef glm::vec4 vec4;
 typedef glm::mat4 mat4;
 
 typedef glm::ivec3 ivec3;
-
-
 // typedef glm::vec3<i32> ivec3;
+
+
+// Audio
+typedef u32 DspId;
+typedef u32 ChannelId;

@@ -19,10 +19,10 @@ namespace NoxEngine {
 			virtual ~IRenderable() {};
 			IRenderable() : has_normal(0), has_texture(0), use_indices(0), registered(0), glRenderType(GL_INVALID_INDEX) {};
 
-			virtual i32 getNumOfVertices() = 0;
-			virtual i32 getNumOfTexCoord() = 0;
-			virtual i32 getNumOfNormals()  = 0;
-			virtual i32 getNumOfFaces() = 0;
+			virtual const i32 getNumOfVertices() const = 0;
+			virtual const i32 getNumOfTexCoord() const = 0;
+			virtual const i32 getNumOfNormals()  const = 0;
+			virtual const i32 getNumOfFaces()    const = 0;
 
 			virtual const Array<vec3>& getVertices () const = 0;
 			virtual const Array<vec2>& getTexCoords() const = 0;

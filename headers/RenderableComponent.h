@@ -19,10 +19,10 @@ namespace NoxEngine {
 
 			void displayUI() override; 
 
-			inline i32 getNumOfVertices() { return (i32)vertices.size(); }
-			inline i32 getNumOfTexCoord() { return (i32)texCoords.size(); }
-			inline i32 getNumOfNormals()  { return (i32)normals.size(); }
-			inline i32 getNumOfFaces() { return (i32)faces.size(); }
+			inline const i32 getNumOfVertices() const { return (i32)vertices.size(); }
+			inline const i32 getNumOfTexCoord() const { return (i32)texCoords.size(); }
+			inline const i32 getNumOfNormals()  const { return (i32)normals.size(); }
+			inline const i32 getNumOfFaces()	const { return (i32)faces.size(); }
 
 			// TODO: change to a parameter
 			inline const String getNormalTexture()  { return normalTexture; }

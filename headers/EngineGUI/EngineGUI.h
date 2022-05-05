@@ -39,6 +39,9 @@ namespace NoxEngineGUI {
 		
 		u32 sceneBackgroundColor;
 		NoxEngine::Camera *current_cam;
+
+		// TODO: make is3d a checkbox. if updated, unload and create a new sound
+		bool soundIs3d;
 	};
 
 	// Each panel should have an enum associated with it
@@ -59,7 +62,7 @@ namespace NoxEngineGUI {
 		AnimationSettings,
 
 		// Audio
-		AudioSource
+		AudioPanel
 
 			// Scripting
 	};
@@ -73,7 +76,7 @@ namespace NoxEngineGUI {
 		{ PanelName::Hierarchy,		"Hierarchy" },
 		{ PanelName::Inspector,		"Inspector" },
 		{ PanelName::AnimationSettings,		"Animation Settings" },
-		{ PanelName::AudioSource,	"Audio Source" }
+		{ PanelName::AudioPanel,	"Audio Source" }
 	};
 
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;

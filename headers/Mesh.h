@@ -84,10 +84,10 @@ namespace NoxEngine {
 
 
 			// IRenderable funcs
-			inline i32 getNumOfVertices() { return (i32)vertices[0].size(); }
-			inline i32 getNumOfTexCoord() { return (i32)texCoord[0].size(); }
-			inline i32 getNumOfNormals()  { return (i32)normals[0].size(); }
-			inline i32 getNumOfFaces()    { return (i32)faceIndices[0].size(); }
+			inline const i32 getNumOfVertices() const { return (i32)vertices[0].size(); }
+			inline const i32 getNumOfTexCoord() const { return (i32)texCoord[0].size(); }
+			inline const i32 getNumOfNormals()  const { return (i32)normals[0].size(); }
+			inline const i32 getNumOfFaces()    const { return (i32)faceIndices[0].size(); }
 
 			const Array<vec3>& getVertices () const;
 			const Array<vec2>& getTexCoords() const;

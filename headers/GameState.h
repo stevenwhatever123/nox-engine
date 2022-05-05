@@ -14,6 +14,7 @@ namespace NoxEngine {
 		std::string file;
 		glm::vec3 position;
 		f32 sourceVolume;
+		bool is3d;
 	};
 
 	typedef std::map<std::string, AudioSource> AudioRepo;
