@@ -1,3 +1,23 @@
+/* ======================================================================================== */
+/* AudioManager.h																			*/
+/*                                                                                          */
+/* A basic audio engine that uses FMOD as the middleware/backend - essentially              */
+/* a wrapper for simpler access/modification to sounds in the game engine.                  */
+/*                                                                                          */
+/* This is built upon Cody Claborn's tutorial from											*/
+/* https://codyclaborn.me/tutorials/making-a-basic-fmod-audio-engine-in-c/ .                */
+/* License: MIT License.                                                                    */
+/*                                                                                          */
+/* DSP effects and ChannelGroups are introduced in Guy Somberg's book:			            */
+/* Game Audio Programming, Chapter 6.                                                       */
+/*                                                                                          */
+/* Geometry occlusion (audio ray casting) is introduced in Guy Somberg's book:              */
+/* Game Audio Programming 2, Chapter 8.                                                     */
+/* More information can be found in Chapter 17 and 18 (for further development).            */
+/*                                                                                          */
+/* @author: Chan Wai Lou															        */
+/* ======================================================================================== */
+
 #pragma once
 
 #include <Types.h>
