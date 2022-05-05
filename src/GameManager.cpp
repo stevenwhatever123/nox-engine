@@ -6,6 +6,7 @@
 // Components to hook up with event manager
 #include <RenderableComponent.h>
 #include <TransformComponent.h>
+#include <AnimationComponent.h>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -171,6 +172,20 @@ void GameManager::init_events() {
 				ent->addComp(comp);
 				ent->addComp(pos);
 
+				if (meshScene.hasAnimations())
+				{
+					// Get the node associated to this mesh
+					for (MeshNode2* node : meshScene.allNodes)
+					{
+						if (node->hasAnimations() && node->meshIndex[0] == i)
+						{
+							AnimationComponent* anim = new AnimationComponent(meshScene, node);
+							ent->addComp(anim);
+							break;
+						}
+					}
+				}
+
 				game_state.activeScene->addEntity(ent);
 			}
 	});
@@ -189,7 +204,7 @@ void GameManager::init_events() {
 
 			if (!rend->registered) {
 				renderer->addObject(ent);
-				//rend->registered = true;
+				rend->registered = true;
 
 				// Update renderer
 				// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion
@@ -320,7 +335,7 @@ void GameManager::update_gui() {
 	
 	NoxEngineGUI::updateGUI(game_state , &ui_params);
 	NoxEngineGUI::updateAudioPanel(&game_state);
-	NoxEngineGUI::updateAnimationPanel(&game_state);
+	NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
 	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
@@ -400,60 +415,37 @@ void GameManager::update_animation() {
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
 
-	//auto meshStart = game_state.meshes.begin();
-	//auto meshEnd = game_state.meshes.end();
-	auto meshSceneStart = game_state.meshScenes.begin();
-	auto meshSceneEnd = game_state.meshScenes.end();
-
-	for(; meshSceneStart != meshSceneEnd; meshSceneStart++) 
-	{
-		if (meshSceneStart->second.playAnimation)
+	for (Entity* ent : game_state.activeScene->entities)
+	{ 
+		if (ent->containsComps<AnimationComponent>())
 		{
-			if (meshSceneStart->second.hasAnimations())
-			{
-				if (meshSceneStart->second.frameIndex
-					== meshSceneStart->second.numTicks[meshSceneStart->second.animationIndex] - 1)
-				{
-					meshSceneStart->second.resetAnimation();
-					meshSceneStart->second.playAnimation = !meshSceneStart->second.playAnimation;
-				}
-			}
-			meshSceneStart->second.update(deltaTime);
+			AnimationComponent *animComp = ent->getComp<AnimationComponent>();
+
+			animComp->update(deltaTime);
 		}
-		// Because we're not updating frame index we still need tick floor and ceil to get our transform
-		meshSceneStart->second.updateCeilAndFloor();
 	}
 }
 
 void GameManager::update_renderer() {
-	auto meshSceneStart = game_state.meshScenes.begin();
-	auto meshSceneEnd = game_state.meshScenes.end();
-	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
-	{
-		MeshScene &currentMeshScene = meshSceneStart->second;
-		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
-		{
-			MeshNode2* node = meshSceneStart->second.allNodes[i];
 
-			if (node->meshIndex.size() > 0)
-			{
-				Mesh2* mesh = currentMeshScene.meshes[node->meshIndex[0]];
-				if (node->hasAnimations())
-				{
-					glm::mat4 transformation = node->getGlobalTransformation(
-						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
-						currentMeshScene.accumulator, currentMeshScene.timeStep,
-						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
-					renderer->updateObjectTransformation(transformation, mesh);
-				}
-				else
-				{
-					glm::mat4 transformation = node->transformation;
-					renderer->updateObjectTransformation(transformation, mesh);
-				}
-			}
+	for (Entity* ent : game_state.activeScene->entities)
+	{
+		//if (ent->containsComps<AnimationComponent>())
+		if (ent->containsComps<RenderableComponent, AnimationComponent>())
+		{
+			AnimationComponent* animComp = ent->getComp<AnimationComponent>();
+			RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
+
+			MeshNode2* node = animComp->node;
+
+			glm::mat4 transformation = node->getGlobalTransformation(
+				animComp->frameIndex, animComp->animationIndex,
+				animComp->accumulator, animComp->timeStep,
+				animComp->whichTickFloor, animComp->whichTickCeil);
+			renderer->updateObjectTransformation(transformation, rendComp);
 		}
 	}
+
 
 
 

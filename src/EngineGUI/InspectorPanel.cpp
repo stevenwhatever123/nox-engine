@@ -4,6 +4,7 @@
 #include <IComponent.h>
 #include <TransformComponent.h>
 #include <RenderableComponent.h>
+#include <AnimationComponent.h>
 
 using namespace NoxEngine;
 
@@ -128,24 +129,77 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 			// LightSourceComponent
 			// TODO: implement
 
+			// Animation Component
 			if (ent->containsComps(AnimationFlag))
 			{
-				bool enable = ent->isEnabled<RenderableComponent>();
+				bool enable = ent->isEnabled<AnimationComponent>();
 				bool expand = ImGui::TreeNode("Animation");
 
 				ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
-				ImGui::Checkbox("##EnableRend", &enable);
+				ImGui::Checkbox("##EnableAnim", &enable);
 
 				ImGui::SameLine();
-				bool remove = ImGui::SmallButton("-##RemoveRend");
+				bool remove = ImGui::SmallButton("-##RemoveAnim");
 
-				ent->setEnabled<RenderableComponent>(enable);
+				ent->setEnabled<AnimationComponent>(enable);
 
 				if (expand)
 				{
 					// Begin: grey out
 					ImGui::BeginDisabled(!enable);
 
+					AnimationComponent* animComp = ent->getComp<AnimationComponent>();
+
+					ImGui::Text("Number of Animations: %i", animComp->getNumOfAnimations());
+					ImGui::Text("Current Animation: %i", animComp->animationIndex);
+					ImGui::SameLine();
+
+					if (ImGui::Button("+##Anim"))
+					{
+						animComp->setAnimationIndex(animComp->animationIndex + 1);
+						animComp->resetAnimation();
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("-##Anim"))
+					{
+						animComp->setAnimationIndex(animComp->animationIndex - 1);
+						animComp->resetAnimation();
+					}
+
+					ImGui::Text("Animation name: %s", animComp->animationName[animComp->animationIndex].c_str());
+					ImGui::Text("Frame index: %i", animComp->frameIndex);
+					ImGui::Text("Number of ticks: %i", animComp->numTicks[animComp->animationIndex] - 1);
+					ImGui::Text("Duration: %.6f", animComp->animationDuration[animComp->animationIndex]);
+
+					f32 duration = (f32)animComp->animationDuration[animComp->animationIndex];
+
+					if (ImGui::SliderFloat("Duration", &duration, 0.0f, 50.0f))
+						animComp->resetAnimation();
+
+					if (!animComp->playAnimation)
+					{
+						if (ImGui::Button("Play"))
+						{
+							animComp->playAnimation = !animComp->playAnimation;
+						}
+					}
+					else
+					{
+						if (ImGui::Button("Stop"))
+						{
+							animComp->playAnimation = !animComp->playAnimation;
+						}
+					}
+
+					animComp->animationDuration[animComp->animationIndex] = static_cast<double>(duration);
+
+					ImGui::Text("Progress Bar");
+					ImGui::SameLine();
+
+					// Progress has to be between 0 and 1
+					f32 progress = 0.0f;
+					progress = (float)animComp->frameIndex / (animComp->numTicks[animComp->animationIndex] - 1);
+					ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
 
 					ImGui::TreePop();
 
@@ -154,7 +208,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				}
 
 				if (remove) {
-					ent->removeComp<RenderableComponent>();
+					ent->removeComp<AnimationComponent>();
 				}
 				ImGui::Separator();
 			}

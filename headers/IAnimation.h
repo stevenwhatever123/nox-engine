@@ -16,6 +16,8 @@ namespace NoxEngine
 		i32 whichTickFloor;
 		i32 whichTickCeil;
 
+		Array<String> animationName;
+
 		// Animation clip -> numTicks
 		Array<i32> numTicks;
 		// Animation clip -> duration

@@ -4,6 +4,7 @@
 #include <IComponent.h>
 #include <TransformComponent.h>
 #include <RenderableComponent.h>
+#include <AnimationComponent.h>
 
 
 namespace NoxEngine {
@@ -19,7 +20,8 @@ void NoxEngine::initComponentTypes() {
 	kComponentTypeMap = {
 		{ typeid(IComponent),			AbstractType },
 		{ typeid(TransformComponent),	TransformType },
-		{ typeid(RenderableComponent),	RenderableType }
+		{ typeid(RenderableComponent),	RenderableType },
+		{ typeid(AnimationComponent),	AnimationType}
 		//{ typeid(LightSourceComponent),	LightSourceType },
 		//{ typeid(AudioSourceComponent),	AudioSourceType },
 		//{ typeid(ScriptComponent),	ScriptType },
@@ -29,10 +31,10 @@ void NoxEngine::initComponentTypes() {
 		{ AbstractType,		"Abstract Component" },
 		{ TransformType,	"Transform Component" },
 		{ RenderableType,	"Renderable Component" },
+		{ AnimationType,	"Animation Component" },
 		{ LightSourceType,	"Light Source Component" },
 		{ AudioSourceType,	"Audio Source Component" },
-		{ ScriptType,		"Script Component" },
-		{ AnimationType,	"Animation Component" }
+		{ ScriptType,		"Script Component" }
 	};
 
 	// assert every type has a name

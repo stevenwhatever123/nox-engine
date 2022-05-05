@@ -8,6 +8,7 @@
 #include <FBXFileLoader.h>
 #include <TransformComponent.h>
 #include <RenderableComponent.h>
+#include <AnimationComponent.h>
 
 namespace NoxEngine
 {

@@ -10,6 +10,8 @@
 #include <MeshScene.h>
 #include <MeshNode2.h>
 #include <GameState.h>
+#include <Entity.h>
+#include <AnimationComponent.h>
 
 #include <math.h>
 #include <vector>
@@ -20,11 +22,11 @@ using NoxEngine::GameState;
 
 struct AnimationSequencer : public ImSequencer::SequenceInterface {
 
-    AnimationSequencer(MeshScene* scene, NoxEngine::GameState* game_state);
+    AnimationSequencer(NoxEngine::AnimationComponent *animComp, NoxEngine::GameState* game_state);
 
     AnimationSequencer();
 
-    MeshScene* scene;
+    NoxEngine::AnimationComponent* animComp;
     GameState* game_state;
 
     int mFrameMin, mFrameMax;
@@ -32,10 +34,11 @@ struct AnimationSequencer : public ImSequencer::SequenceInterface {
     bool focused = false;
 
     int GetFrameMin() const { return 0; }
-    int GetFrameMax() const { return scene->numTicks[scene->animationIndex] - 1; }
+    int GetFrameMax() const { return animComp->numTicks[animComp->animationIndex] - 1; }
     int GetItemCount() const 
     { 
-        return (i32)scene->allNodes.size() + (i32) game_state->selectedAudio.size();
+        //return (i32)animComp->allNodes.size() + (i32) game_state->selectedAudio.size();
+        return 1;
     }
 
     void BeginEdit(int index) {};

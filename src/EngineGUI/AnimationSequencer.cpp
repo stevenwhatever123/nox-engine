@@ -1,9 +1,9 @@
 #include <EngineGUI/AnimationSequencer.h>
 
-AnimationSequencer::AnimationSequencer(MeshScene* scene, NoxEngine::GameState* game_state) :
+AnimationSequencer::AnimationSequencer(NoxEngine::AnimationComponent *animComp, NoxEngine::GameState* game_state) :
 mFrameMin(0), 
-mFrameMax(scene->numTicks[scene->animationIndex] - 1),
-scene(scene),
+mFrameMax(animComp->numTicks[animComp->animationIndex] - 1),
+animComp(animComp),
 game_state(game_state)
 {
    
@@ -37,17 +37,18 @@ const char* AnimationSequencer::GetItemTypeName(int index) const
 const char* AnimationSequencer::GetItemLabel(int index) const
 {
     //return "Animation"; 
-    if (index > scene->allNodes.size() - 1)
-    {
-        u32 audioIndex = index - scene->allNodes.size();
-        if (!game_state->audioSources.empty())
-        {
-            return game_state->selectedAudio[audioIndex].c_str();
-        }
-        return "hahaha";
-    }
+    //if (index > scene->allNodes.size() - 1)
+    //{
+    //    u32 audioIndex = index - scene->allNodes.size();
+    //    if (!game_state->audioSources.empty())
+    //    {
+    //        return game_state->selectedAudio[audioIndex].c_str();
+    //    }
+    //    return "hahaha";
+    //}
 
-    return scene->allNodes[index]->name.c_str();
+    //return scene->allNodes[index]->name.c_str();
+    return "";
 }
 
 void AnimationSequencer::Get(int index, int** start, int** end, int* type, unsigned int* color)
@@ -64,26 +65,7 @@ void AnimationSequencer::Get(int index, int** start, int** end, int* type, unsig
         *start = items;
     if (end)
     {
-        if (index > scene->allNodes.size() - 1)
-        {
-            *end = items;
-            //u32 audioIndex = index - scene->allNodes.size();
-            //auto startItr = game_state->audioSources.begin();
-            //auto endItr = game_state->audioSources.end();
-            //for (u32 i = 0; i < audioIndex; i++)
-            //{
-            //    startItr++;
-            //}
-            //items2[0] = startItr->second.
-        }
-        else if (!scene->allNodes[index]->hasAnimations())
-        {
-            *end = items;
-        }
-        else
-        {
-            *end = &scene->numTicks[scene->animationIndex];
-        }
+        *end = &animComp->numTicks[animComp->animationIndex];
     }
     if (type)
     {

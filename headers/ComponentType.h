@@ -13,10 +13,10 @@ namespace NoxEngine {
 		AbstractType = 0,
 		TransformType,		// TODO: change to Transform (pos, rot, scale)
 		RenderableType,
+		AnimationType,
 		LightSourceType,
 		AudioSourceType,
 		ScriptType,
-		AnimationType,
 		ComponentTypeCount
 	};
 
@@ -24,10 +24,10 @@ namespace NoxEngine {
 		AbstractFlag		= 0,
 		TransformFlag		= 1 << (TransformType		- 1),
 		RenderableFlag		= 1 << (RenderableType		- 1),
+		AnimationFlag		= 1 << (AnimationType		- 1),
 		LightSourceFlag		= 1 << (LightSourceType		- 1),
 		AudioSourceFlag		= 1 << (AudioSourceType		- 1),
-		ScriptFlag			= 1 << (ScriptType			- 1),
-		AnimationFlag		= 1 << (AnimationType		- 1)
+		ScriptFlag			= 1 << (ScriptType			- 1)
 	};
 
 	extern std::map<std::type_index, ComponentType> kComponentTypeMap;

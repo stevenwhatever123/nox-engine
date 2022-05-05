@@ -8,6 +8,7 @@
 #include <IComponent.h>
 #include <TransformComponent.h>
 #include <RenderableComponent.h>
+#include <AnimationComponent.h>
 
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
@@ -116,6 +117,7 @@ void Entity::addComp(ComponentType type) {
 
 	case TransformType:		addComp<TransformComponent>(); break;
 	case RenderableType:	addComp<RenderableComponent>(); break;
+	case AnimationType:		addComp<AnimationComponent>(); break;
 	default:				Logger::debug("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
 	}
 }
@@ -172,6 +174,8 @@ bool Entity::isEnabled(u32 bit) {
 // explicit template instantiation
 template void Entity::addComp<TransformComponent>(TransformComponent*);
 template void Entity::addComp<RenderableComponent>(RenderableComponent*);
+template void Entity::addComp<AnimationComponent>(AnimationComponent*);
 
 template TransformComponent* Entity::getComp<TransformComponent>();
 template RenderableComponent* Entity::getComp<RenderableComponent>();
+template AnimationComponent* Entity::getComp<AnimationComponent>();

@@ -80,6 +80,53 @@ void NoxEngine::saveScene(std::string file_path, NoxEngine::GameState& game_stat
 					}
 
 				}
+
+				// The assumption is if there's a renderable component
+				// It may also has an animation component
+				// Animation Component
+				bool hasAnimationComp = ent->containsComps(AnimationFlag);
+				outputStream.write((char*)&hasAnimationComp, sizeof(bool));
+
+				if (hasAnimationComp)
+				{
+					AnimationComponent* animComp = ent->getComp<AnimationComponent>();
+
+					size_t numAnimation = animComp->numTicks.size();
+					outputStream.write((char*)&numAnimation, sizeof(numAnimation));
+					// numTicks
+					outputStream.write((char*)&animComp->numTicks[0], numAnimation * sizeof(i32));
+
+					// Animation duration
+					outputStream.write((char*)&animComp->animationDuration[0], numAnimation * sizeof(time_type));
+
+					// maximumFrame
+					outputStream.write((char*)&animComp->node->maximumFrame[0], numAnimation * sizeof(u32));
+
+					
+					for (u32 i = 0; i < numAnimation; i++)
+					{
+						size_t numKeyFrame = animComp->node->nodeAnimTransformation[i].size();
+						outputStream.write((char*)&numKeyFrame, sizeof(numKeyFrame));
+
+						for (u32 j = 0; j < numKeyFrame; j++)
+						{
+							// nodeAnimTransformation
+							outputStream.write((char*)&animComp->node->nodeAnimTransformation[i][j], sizeof(mat4));
+
+							// nodeAnimTranslationMatrices
+							outputStream.write((char*)&animComp->node->nodeAnimTranslationMatrices[i][j], sizeof(mat4));
+
+							// eulerAngleXYZ
+							outputStream.write((char*)&animComp->node->eulerAngleXYZ[i][j], sizeof(glm::vec3));
+
+							// nodeAnimRotationMatrices
+							outputStream.write((char*)&animComp->node->nodeAnimRotationMatrices[i][j], sizeof(mat4));
+
+							// nodeAnimScalingMatrices
+							outputStream.write((char*)&animComp->node->nodeAnimScalingMatrices[i][j], sizeof(mat4));
+						}
+					}
+				}
 			}
 		}
 
@@ -190,6 +237,84 @@ void NoxEngine::loadScene(std::string file_path, NoxEngine::GameState& game_stat
 
 						ent->addComp(rendComp);
 					}
+				}
+
+				// The assumption is if there's a renderable component
+				// It may also has an animation component
+				// Animation Component
+				bool hasAnimationComp;
+				inputStream.read((char*)&hasAnimationComp, sizeof(bool));
+
+				if (hasAnimationComp)
+				{
+					MeshNode2* meshnode = nullptr;
+
+					MeshScene& meshScene = game_state.meshScenes.find(fbx_filepath)->second;
+
+					// Get the node associated to this mesh
+					for (MeshNode2* node : meshScene.allNodes)
+					{
+						if (node->hasAnimations() && node->meshIndex[0] == i)
+						{
+							meshnode = node;
+							break;
+						}
+					}
+
+					AnimationComponent* animComp = new AnimationComponent(meshScene, meshnode);
+
+					size_t numAnimation;
+					inputStream.read((char*)&numAnimation, sizeof(numAnimation));
+
+					animComp->numTicks.resize(numAnimation);
+					animComp->animationDuration.resize(numAnimation);
+
+					animComp->node->nodeAnimTransformation.resize(numAnimation);
+					animComp->node->nodeAnimTranslationMatrices.resize(numAnimation);
+					animComp->node->nodeAnimRotationMatrices.resize(numAnimation);
+					animComp->node->nodeAnimScalingMatrices.resize(numAnimation);
+					animComp->node->maximumFrame.resize(numAnimation);
+					
+					// numTicks
+					inputStream.read((char*)&animComp->numTicks[0], numAnimation * sizeof(i32));
+
+					// Animation duration
+					inputStream.read((char*)&animComp->animationDuration[0], numAnimation * sizeof(time_type));
+
+					// maximumFrame
+					inputStream.read((char*)&animComp->node->maximumFrame[0], numAnimation * sizeof(u32));
+
+					for (u32 i = 0; i < numAnimation; i++)
+					{
+						size_t numKeyFrame;
+						inputStream.read((char*)&numKeyFrame, sizeof(numKeyFrame));
+
+						animComp->node->nodeAnimTransformation[i].resize(numKeyFrame);
+						animComp->node->nodeAnimTranslationMatrices[i].resize(numKeyFrame);
+						animComp->node->eulerAngleXYZ[i].resize(numKeyFrame);
+						animComp->node->nodeAnimRotationMatrices[i].resize(numKeyFrame);
+						animComp->node->nodeAnimScalingMatrices[i].resize(numKeyFrame);
+
+						for (u32 j = 0; j < numKeyFrame; j++)
+						{
+							// nodeAnimTransformation
+							inputStream.read((char*)&animComp->node->nodeAnimTransformation[i][j], sizeof(mat4));
+
+							// nodeAnimTranslationMatrices
+							inputStream.read((char*)&animComp->node->nodeAnimTranslationMatrices[i][j], sizeof(mat4));
+
+							// eulerAngleXYZ
+							inputStream.read((char*)&animComp->node->eulerAngleXYZ[i][j], sizeof(glm::vec3));
+
+							// nodeAnimRotationMatrices
+							inputStream.read((char*)&animComp->node->nodeAnimRotationMatrices[i][j], sizeof(mat4));
+
+							// nodeAnimScalingMatrices
+							inputStream.read((char*)&animComp->node->nodeAnimScalingMatrices[i][j], sizeof(mat4));
+						}
+					}
+
+					ent->addComp(animComp);
 				}
 			}
 
