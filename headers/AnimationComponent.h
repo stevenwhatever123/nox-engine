@@ -1,4 +1,6 @@
 #pragma once
+#include <glm/gtx/euler_angles.hpp>
+
 #include <IAnimation.h>
 #include "IComponent.h"
 #include "MeshScene.h"
@@ -30,5 +32,15 @@ namespace NoxEngine
 
 		void updateNumTicks(u32 animationIndex, u32 num);
 		void insertFrame(u32 animationIndex, u32 selectedFrame);
+
+		void setupEulerAngle();
+		void convertEulerAngleToMatrix();
+		void updateTransformation();
+
+		mat4 getTransformation();
+
+		void updateMaximumFrame(u32 animationIndex, u32 i);
+		void updateAnimationSize(u32 animationIndex, u32 num);
+		void insertFrameAfter(u32 animationIndex, u32 selectedFrame);
 	};
 }

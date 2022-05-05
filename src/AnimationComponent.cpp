@@ -18,7 +18,15 @@ AnimationComponent::AnimationComponent()
 	numTicks.resize(0);
 	animationDuration.resize(0);
 
-	node = nullptr;
+	transformation.resize(0);
+	translationMatrices.resize(0);
+	eulerAngleXYZ.resize(0);
+	rotationMatrices.resize(0);
+	scalingMatrices.resize(0);
+
+	maximumFrame.resize(0);
+
+	//node = nullptr;
 }
 
 AnimationComponent::AnimationComponent(const MeshScene& scene, MeshNode2 *node)
@@ -38,15 +46,40 @@ AnimationComponent::AnimationComponent(const MeshScene& scene, MeshNode2 *node)
 	numTicks.resize(scene.numTicks.size());
 	animationDuration.resize(scene.animationDuration.size());
 
+	transformation.resize(node->nodeAnimTransformation.size());
+	translationMatrices.resize(node->nodeAnimTranslationMatrices.size());
+	eulerAngleXYZ.resize(node->eulerAngleXYZ.size());
+	rotationMatrices.resize(node->nodeAnimRotationMatrices.size());
+	scalingMatrices.resize(node->nodeAnimScalingMatrices.size());
+
+	maximumFrame.resize(node->nodeAnimTransformation.size());
+
 	for (u32 i = 0; i < scene.numTicks.size(); i++)
 	{
 		animationName[i] = scene.animations[i]->mName.C_Str();
 	}
 
+	for (u32 i = 0; i < node->nodeAnimations.size(); i++)
+	{
+		transformation[i].resize(node->nodeAnimTransformation[i].size());
+		translationMatrices[i].resize(node->nodeAnimTranslationMatrices[i].size());
+		eulerAngleXYZ[i].resize(node->eulerAngleXYZ[i].size());
+		rotationMatrices[i].resize(node->nodeAnimRotationMatrices[i].size());
+		scalingMatrices[i].resize(node->nodeAnimScalingMatrices[i].size());
+
+		transformation[i] = node->nodeAnimTransformation[i];
+		translationMatrices[i] = node->nodeAnimTranslationMatrices[i];
+		eulerAngleXYZ[i] = node->eulerAngleXYZ[i];
+		rotationMatrices[i] = node->nodeAnimRotationMatrices[i];
+		scalingMatrices[i] = node->nodeAnimScalingMatrices[i];
+
+		maximumFrame[i] = node->nodeAnimTransformation[i].size();
+	}
+
 	numTicks = scene.numTicks;
 	animationDuration = scene.animationDuration;
 
-	this->node = node;
+	//this->node = node;
 }
 
 // Frame based update function
@@ -171,7 +204,7 @@ void AnimationComponent::updateNumTicks(u32 animationIndex, u32 num)
 		numTicks[animationIndex] = num;
 	}
 
-	node->updateAnimationSize(animationIndex, num);
+	updateAnimationSize(animationIndex, num);
 }
 
 void AnimationComponent::insertFrame(u32 animationIndex, u32 selectedFrame)
@@ -186,5 +219,145 @@ void AnimationComponent::insertFrame(u32 animationIndex, u32 selectedFrame)
 		numTicks[animationIndex] = 1;
 	}
 
-	node->insertFrameAfter(animationIndex, selectedFrame);
+	insertFrameAfter(animationIndex, selectedFrame);
+}
+
+void AnimationComponent::setupEulerAngle()
+{
+	for (u32 i = 0; i < transformation.size(); i++)
+	{
+		eulerAngleXYZ[i].resize(transformation[i].size());
+		for (u32 j = 0; j < transformation[i].size(); j++)
+		{
+			glm::mat4 rotationMatrix = rotationMatrices[i][j];
+			//float rotation[3] = { atan2(rotationMatrix[2][1], rotationMatrix[2][2]),
+			//					atan2(-rotationMatrix[2][0], std::sqrt(rotationMatrix[2][1] * rotationMatrix[2][1] + rotationMatrix[2][2] * rotationMatrix[2][2])),
+			//					atan2(rotationMatrix[1][0], rotationMatrix[0][0]) };
+			glm::vec3 rotation(0);
+			glm::extractEulerAngleXYZ(rotationMatrix, rotation.x, rotation.y, rotation.z);
+
+			eulerAngleXYZ[i][j].x = rotation.x;
+			eulerAngleXYZ[i][j].y = rotation.y;
+			eulerAngleXYZ[i][j].z = rotation.z;
+		}
+	}
+}
+
+void AnimationComponent::convertEulerAngleToMatrix()
+{
+	for (u32 i = 0; i < transformation.size(); i++)
+	{
+		for (u32 j = 0; j < transformation[i].size(); j++)
+		{
+			rotationMatrices[i][j] = glm::eulerAngleXYZ(eulerAngleXYZ[i][j].x,
+				eulerAngleXYZ[i][j].y, eulerAngleXYZ[i][j].z);
+		}
+	}
+}
+
+void AnimationComponent::updateTransformation()
+{
+	convertEulerAngleToMatrix();
+
+	for (u32 i = 0; i < transformation.size(); i++)
+	{
+		for (u32 j = 0; j < transformation[i].size(); j++)
+		{
+			transformation[i][j] = translationMatrices[i][j]
+				* rotationMatrices[i][j] * scalingMatrices[i][j];
+		}
+	}
+}
+
+mat4 AnimationComponent::getTransformation()
+{
+	mat4 defaultTransformation(1);
+
+	// Interpolate between two keyframe
+	f32 ratio = (f32)(accumulator / timeStep);
+	if (accumulator == 0 || timeStep == 0)
+		ratio = 0;
+
+	glm::mat4 matrixFloor = transformation[animationIndex][whichTickFloor];
+	glm::mat4 matrixCeil = transformation[animationIndex][whichTickCeil];
+
+	// Linear interpolation
+	return ((float)ratio * matrixCeil) + (matrixFloor * (1.0f - (float)ratio));
+}
+
+void AnimationComponent::updateMaximumFrame(u32 animationIndex, u32 i)
+{
+	maximumFrame.resize(animationIndex + 1, 0);
+	transformation.resize(i);
+	translationMatrices.resize(i);
+	rotationMatrices.resize(i);
+	scalingMatrices.resize(i);
+	eulerAngleXYZ.resize(i);
+
+	maximumFrame[animationIndex] = i;
+}
+
+void AnimationComponent::updateAnimationSize(u32 animationIndex, u32 num)
+{
+	u32 currentSize = (u32)transformation[animationIndex].size();
+	if (num > 0)
+	{
+		if (num < currentSize)
+		{
+			updateMaximumFrame(animationIndex, num);
+			setupEulerAngle();
+			return;
+		}
+		else
+		{
+			updateMaximumFrame(animationIndex, num);
+
+			glm::mat4 lastFrameTransformation = transformation[animationIndex][currentSize - 1];
+			glm::mat4 lastFrameTranslation = translationMatrices[animationIndex][currentSize - 1];
+			glm::mat4 lastFrameRotation = rotationMatrices[animationIndex][currentSize - 1];
+			glm::mat4 lastFrameScaling = scalingMatrices[animationIndex][currentSize - 1];
+
+			transformation[animationIndex].resize(num);
+			translationMatrices[animationIndex].resize(num);
+			rotationMatrices[animationIndex].resize(num);
+			scalingMatrices[animationIndex].resize(num);
+			eulerAngleXYZ[animationIndex].resize(num);
+
+			for (u32 i = currentSize; i < num; i++)
+			{
+				transformation[animationIndex][i] = lastFrameTransformation;
+				translationMatrices[animationIndex][i] = lastFrameTranslation;
+				rotationMatrices[animationIndex][i] = lastFrameRotation;
+				scalingMatrices[animationIndex][i] = lastFrameScaling;
+			}
+
+			setupEulerAngle();
+		}
+	}
+}
+
+void AnimationComponent::insertFrameAfter(u32 animationIndex, u32 selectedFrame)
+{
+	u32 animationSize = (u32)transformation[animationIndex].size();
+	updateMaximumFrame(animationIndex, animationSize + 1);
+
+	glm::mat4 lastFrameTransformation = transformation[animationIndex][selectedFrame];
+	glm::mat4 lastFrameTranslation = translationMatrices[animationIndex][selectedFrame];
+	glm::mat4 lastFrameRotation = rotationMatrices[animationIndex][selectedFrame];
+	glm::mat4 lastFrameScaling = scalingMatrices[animationIndex][selectedFrame];
+
+	transformation[animationIndex].insert(
+		(transformation[animationIndex].begin() + (selectedFrame + 2))
+		, lastFrameTransformation);
+	translationMatrices[animationIndex].insert(
+		(translationMatrices[animationIndex].begin() + (selectedFrame + 2))
+		, lastFrameTranslation);
+	rotationMatrices[animationIndex].insert(
+		(rotationMatrices[animationIndex].begin() + (selectedFrame + 2))
+		, lastFrameRotation);
+	scalingMatrices[animationIndex].insert(
+		(scalingMatrices[animationIndex].begin() + (selectedFrame + 2))
+		, lastFrameScaling);
+
+	setupEulerAngle();
 }

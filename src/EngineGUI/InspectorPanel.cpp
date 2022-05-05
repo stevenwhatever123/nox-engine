@@ -180,14 +180,14 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					{
 						if (ImGui::Button("Play"))
 						{
-							animComp->playAnimation = !animComp->playAnimation;
+							animComp->playAnimation = true;
 						}
 					}
 					else
 					{
 						if (ImGui::Button("Stop"))
 						{
-							animComp->playAnimation = !animComp->playAnimation;
+							animComp->playAnimation = false;
 						}
 					}
 

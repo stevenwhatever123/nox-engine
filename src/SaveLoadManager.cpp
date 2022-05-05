@@ -72,11 +72,25 @@ void NoxEngine::saveScene(std::string file_path, NoxEngine::GameState& game_stat
 						outputStream.write((char*)&meshNameSize, sizeof(meshNameSize));
 						outputStream.write((char*)meshName.c_str(), meshNameSize);
 
-						std::string ambientTexture(rendComp->getAmbientTexture());
-						size_t ambientTextureSize = ambientTexture.size();
+						for (RendObj obj : game_state.renderer->getObjects())
+						{
+							if (obj.ent == ent)
+							{
+								std::string ambientTexture(obj.ambientTexturePath);
+								size_t ambientTextureSize = ambientTexture.size();
 
-						outputStream.write((char*)&ambientTextureSize, sizeof(ambientTextureSize));
-						outputStream.write((char*)ambientTexture.c_str(), ambientTextureSize);
+								outputStream.write((char*)&ambientTextureSize, sizeof(ambientTextureSize));
+								outputStream.write((char*)ambientTexture.c_str(), ambientTextureSize);
+
+								std::string normalTexture(obj.normalTexturePath);
+								size_t normalTextureSize = normalTexture.size();
+
+								outputStream.write((char*)&normalTextureSize, sizeof(normalTextureSize));
+								outputStream.write((char*)normalTexture.c_str(), normalTextureSize);
+
+								break;
+							}
+						}
 					}
 
 				}
@@ -100,30 +114,30 @@ void NoxEngine::saveScene(std::string file_path, NoxEngine::GameState& game_stat
 					outputStream.write((char*)&animComp->animationDuration[0], numAnimation * sizeof(time_type));
 
 					// maximumFrame
-					outputStream.write((char*)&animComp->node->maximumFrame[0], numAnimation * sizeof(u32));
+					outputStream.write((char*)&animComp->maximumFrame[0], numAnimation * sizeof(u32));
 
 					
 					for (u32 i = 0; i < numAnimation; i++)
 					{
-						size_t numKeyFrame = animComp->node->nodeAnimTransformation[i].size();
+						size_t numKeyFrame = animComp->transformation[i].size();
 						outputStream.write((char*)&numKeyFrame, sizeof(numKeyFrame));
 
 						for (u32 j = 0; j < numKeyFrame; j++)
 						{
 							// nodeAnimTransformation
-							outputStream.write((char*)&animComp->node->nodeAnimTransformation[i][j], sizeof(mat4));
+							outputStream.write((char*)&animComp->transformation[i][j], sizeof(mat4));
 
 							// nodeAnimTranslationMatrices
-							outputStream.write((char*)&animComp->node->nodeAnimTranslationMatrices[i][j], sizeof(mat4));
+							outputStream.write((char*)&animComp->translationMatrices[i][j], sizeof(mat4));
 
 							// eulerAngleXYZ
-							outputStream.write((char*)&animComp->node->eulerAngleXYZ[i][j], sizeof(glm::vec3));
+							outputStream.write((char*)&animComp->eulerAngleXYZ[i][j], sizeof(glm::vec3));
 
 							// nodeAnimRotationMatrices
-							outputStream.write((char*)&animComp->node->nodeAnimRotationMatrices[i][j], sizeof(mat4));
+							outputStream.write((char*)&animComp->rotationMatrices[i][j], sizeof(mat4));
 
 							// nodeAnimScalingMatrices
-							outputStream.write((char*)&animComp->node->nodeAnimScalingMatrices[i][j], sizeof(mat4));
+							outputStream.write((char*)&animComp->scalingMatrices[i][j], sizeof(mat4));
 						}
 					}
 				}
@@ -208,7 +222,8 @@ void NoxEngine::loadScene(std::string file_path, NoxEngine::GameState& game_stat
 				{
 					if (loadedFromFile)
 					{
-						game_state.meshScenes.emplace(fbx_filepath, NoxEngine::readFBX(fbx_filepath.c_str()));
+						if(game_state.meshScenes.find(fbx_filepath) == game_state.meshScenes.end())
+							game_state.meshScenes.emplace(fbx_filepath, NoxEngine::readFBX(fbx_filepath.c_str()));
 						MeshScene& meshScene = game_state.meshScenes.find(fbx_filepath)->second;
 
 						std::string meshName;
@@ -235,6 +250,13 @@ void NoxEngine::loadScene(std::string file_path, NoxEngine::GameState& game_stat
 						inputStream.read((char*)&ambientTexture[0], ambientTextureSize);
 						rendComp->ambientTexture = ambientTexture;
 
+						std::string normalTexture;
+						size_t normalTextureSize;
+						inputStream.read((char*)&normalTextureSize, sizeof(normalTextureSize));
+						normalTexture.resize(normalTextureSize);
+						inputStream.read((char*)normalTexture[0], normalTextureSize);
+						rendComp->normalTexture = normalTexture;
+
 						ent->addComp(rendComp);
 					}
 				}
@@ -247,6 +269,8 @@ void NoxEngine::loadScene(std::string file_path, NoxEngine::GameState& game_stat
 
 				if (hasAnimationComp)
 				{
+
+					RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
 					MeshNode2* meshnode = nullptr;
 
 					MeshScene& meshScene = game_state.meshScenes.find(fbx_filepath)->second;
@@ -254,7 +278,7 @@ void NoxEngine::loadScene(std::string file_path, NoxEngine::GameState& game_stat
 					// Get the node associated to this mesh
 					for (MeshNode2* node : meshScene.allNodes)
 					{
-						if (node->hasAnimations() && node->meshIndex[0] == i)
+						if (node->hasAnimations() && meshScene.meshes[node->meshIndex[0]] == rendComp)
 						{
 							meshnode = node;
 							break;
@@ -269,11 +293,11 @@ void NoxEngine::loadScene(std::string file_path, NoxEngine::GameState& game_stat
 					animComp->numTicks.resize(numAnimation);
 					animComp->animationDuration.resize(numAnimation);
 
-					animComp->node->nodeAnimTransformation.resize(numAnimation);
-					animComp->node->nodeAnimTranslationMatrices.resize(numAnimation);
-					animComp->node->nodeAnimRotationMatrices.resize(numAnimation);
-					animComp->node->nodeAnimScalingMatrices.resize(numAnimation);
-					animComp->node->maximumFrame.resize(numAnimation);
+					animComp->transformation.resize(numAnimation);
+					animComp->translationMatrices.resize(numAnimation);
+					animComp->rotationMatrices.resize(numAnimation);
+					animComp->scalingMatrices.resize(numAnimation);
+					animComp->maximumFrame.resize(numAnimation);
 					
 					// numTicks
 					inputStream.read((char*)&animComp->numTicks[0], numAnimation * sizeof(i32));
@@ -282,35 +306,35 @@ void NoxEngine::loadScene(std::string file_path, NoxEngine::GameState& game_stat
 					inputStream.read((char*)&animComp->animationDuration[0], numAnimation * sizeof(time_type));
 
 					// maximumFrame
-					inputStream.read((char*)&animComp->node->maximumFrame[0], numAnimation * sizeof(u32));
+					inputStream.read((char*)&animComp->maximumFrame[0], numAnimation * sizeof(u32));
 
 					for (u32 i = 0; i < numAnimation; i++)
 					{
 						size_t numKeyFrame;
 						inputStream.read((char*)&numKeyFrame, sizeof(numKeyFrame));
 
-						animComp->node->nodeAnimTransformation[i].resize(numKeyFrame);
-						animComp->node->nodeAnimTranslationMatrices[i].resize(numKeyFrame);
-						animComp->node->eulerAngleXYZ[i].resize(numKeyFrame);
-						animComp->node->nodeAnimRotationMatrices[i].resize(numKeyFrame);
-						animComp->node->nodeAnimScalingMatrices[i].resize(numKeyFrame);
+						animComp->transformation[i].resize(numKeyFrame);
+						animComp->translationMatrices[i].resize(numKeyFrame);
+						animComp->eulerAngleXYZ[i].resize(numKeyFrame);
+						animComp->rotationMatrices[i].resize(numKeyFrame);
+						animComp->scalingMatrices[i].resize(numKeyFrame);
 
 						for (u32 j = 0; j < numKeyFrame; j++)
 						{
 							// nodeAnimTransformation
-							inputStream.read((char*)&animComp->node->nodeAnimTransformation[i][j], sizeof(mat4));
+							inputStream.read((char*)&animComp->transformation[i][j], sizeof(mat4));
 
 							// nodeAnimTranslationMatrices
-							inputStream.read((char*)&animComp->node->nodeAnimTranslationMatrices[i][j], sizeof(mat4));
+							inputStream.read((char*)&animComp->translationMatrices[i][j], sizeof(mat4));
 
 							// eulerAngleXYZ
-							inputStream.read((char*)&animComp->node->eulerAngleXYZ[i][j], sizeof(glm::vec3));
+							inputStream.read((char*)&animComp->eulerAngleXYZ[i][j], sizeof(glm::vec3));
 
 							// nodeAnimRotationMatrices
-							inputStream.read((char*)&animComp->node->nodeAnimRotationMatrices[i][j], sizeof(mat4));
+							inputStream.read((char*)&animComp->rotationMatrices[i][j], sizeof(mat4));
 
 							// nodeAnimScalingMatrices
-							inputStream.read((char*)&animComp->node->nodeAnimScalingMatrices[i][j], sizeof(mat4));
+							inputStream.read((char*)&animComp->scalingMatrices[i][j], sizeof(mat4));
 						}
 					}
 

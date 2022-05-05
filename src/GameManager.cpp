@@ -155,7 +155,12 @@ void GameManager::init_events() {
 			// Steven: That's how I would do it
 			// clean up: leaky mem
 			String file_name = va_arg(args, char*);
-			game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+
+			// Add to hash map if it does not exist
+			if (game_state.meshScenes.find(file_name) == game_state.meshScenes.end())
+			{
+				game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+			}
 			MeshScene &meshScene = game_state.meshScenes.find(file_name)->second;
 
 			i32 index = game_state.activeScene->entities.size();
@@ -202,14 +207,21 @@ void GameManager::init_events() {
 			RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
 			IRenderable* rend = rendComp->CastType<IRenderable>();
 
-			if (!rend->registered) {
+			if (!renderer->hasEntity(ent))
+			{
 				renderer->addObject(ent);
-				rend->registered = true;
 
-				// Update renderer
-				// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion
 				this->renderer->updateBuffers();
 			}
+
+			//if (!rend->registered) {
+			//	renderer->addObject(ent);
+			//	rend->registered = true;
+
+			//	// Update renderer
+			//	// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion
+			//	this->renderer->updateBuffers();
+			//}
 		}
 
 		// Audio
@@ -434,15 +446,9 @@ void GameManager::update_renderer() {
 		if (ent->containsComps<RenderableComponent, AnimationComponent>())
 		{
 			AnimationComponent* animComp = ent->getComp<AnimationComponent>();
-			RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
 
-			MeshNode2* node = animComp->node;
-
-			glm::mat4 transformation = node->getGlobalTransformation(
-				animComp->frameIndex, animComp->animationIndex,
-				animComp->accumulator, animComp->timeStep,
-				animComp->whichTickFloor, animComp->whichTickCeil);
-			renderer->updateObjectTransformation(transformation, rendComp);
+			mat4 transformation = animComp->getTransformation();
+			renderer->updateObjectTransformation(transformation, ent);
 		}
 	}
 

@@ -171,6 +171,9 @@ void Renderer::addObject(Entity *ent)
     newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
     newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
 
+	newObj.ambientTexturePath = "";
+	newObj.normalTexturePath = "";
+
 	// Generate the arrays
 	createVertexArray(mesh);
 
@@ -184,6 +187,11 @@ void Renderer::addObject(Entity *ent)
 	newObj.endInd = i32(elements.size());
     newObj.transformation = glm::mat4(1.0f);
 	objects.push_back(newObj);
+
+	// Reset texture path for RenderableComponent as other object may use the same reference
+	RenderableComponent* rendComp = (RenderableComponent*)mesh;
+	rendComp->ambientTexture = "";
+	rendComp->normalTexture = "";
 
     LOG_DEBUG("Renderer object count: %i\n", objects.size());
 }
@@ -569,16 +577,14 @@ void Renderer::updateLightPos(float x, float y, float z)
     program->set3Float("lightPosition",x, y, z);
 }
 
-void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable)
+//void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable)
+void Renderer::updateObjectTransformation(glm::mat4 transformation, Entity *ent)
 {
 	for (u32 i = 0; i < objects.size(); i++)
 	{
-		IRenderable* rend = objects[i].ent->getComp<RenderableComponent>()->CastType<IRenderable>();
-		if (rend == pRenderable)
+		if (ent == objects[i].ent)
 		{
 			objects[i].transformation = transformation;
-			//program->set4Matrix("modelMatrix", transformation);
-			//std::cout << "Welcome to the Matrix" << "\n";
 		}
 	}
 }
@@ -593,7 +599,23 @@ void Renderer::changeTexture(Entity* ent)
 			//rendComp->getAmbientTexture() doesn't return anything here atm, dunno why
 			//objects[i].ambientTexture = setTexture(rendComp->ambientTexture, "AmbTexture", 1);
 			objects[i].ambientTexture = setTexture(rendComp->getAmbientTexture(), "AmbTexture", 1);
+			objects[i].ambientTexturePath = rendComp->getAmbientTexture();
+			objects[i].normalTexturePath = rendComp->getNormalTexture();
+
+			// Reset texture path for RenderableComponent as other object may use the same reference
+			rendComp->ambientTexture = "";
+			rendComp->normalTexture = "";
 		}
 	}
 }
 
+bool Renderer::hasEntity(Entity* ent)
+{
+	for (u32 i = 0; i < objects.size(); i++)
+	{
+		if (objects[i].ent == ent)
+			return true;
+	}
+
+	return false;
+}

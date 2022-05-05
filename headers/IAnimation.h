@@ -26,6 +26,18 @@ namespace NoxEngine
 		bool playAnimation = false;
 
 		// The associated node
-		MeshNode2 *node;
+		//MeshNode2 *node;
+
+		// A vector storing the maximum frame for every animation
+		// AKA where the clip is supposed to end in which frame
+		Array<u32> maximumFrame;
+
+		// Animation clip -> keyframe transformation
+		Array<Array<mat4>> transformation;
+		Array<Array<mat4>> translationMatrices;
+
+		Array<Array<glm::vec3>> eulerAngleXYZ;
+		Array<Array<mat4>> rotationMatrices;
+		Array<Array<mat4>> scalingMatrices;
 	};
 }

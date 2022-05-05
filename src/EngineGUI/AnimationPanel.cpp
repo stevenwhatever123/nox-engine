@@ -99,8 +99,7 @@ void NoxEngineGUI::updateSequencer(NoxEngine::Entity *ent, NoxEngine::GameState*
 
 		//add a UI to edit that particular item
 		ImGui::Text("Translation");
-		glm::mat4 translationMatrix = animComp->node
-			->nodeAnimTranslationMatrices[animComp->animationIndex][selectedFrame];
+		glm::mat4 translationMatrix = animComp->translationMatrices[animComp->animationIndex][selectedFrame];
 		float translate[3] = { translationMatrix[3][0], translationMatrix[3][1], translationMatrix[3][2] };
 		ImGui::DragFloat3("Translation", translate, 0.005f, -100, 100, "%.3f", 0);
 		glm::vec3 translateVec(translate[0], translate[1], translate[2]);
@@ -108,41 +107,33 @@ void NoxEngineGUI::updateSequencer(NoxEngine::Entity *ent, NoxEngine::GameState*
 		//Apply value
 		// Turns out glm does translation differently and it follows the glsl format
 		glm::mat4 translateMatrix = glm::translate(glm::mat4(1), translateVec);
-		animComp->node->nodeAnimTranslationMatrices[animComp->animationIndex][selectedFrame] = translateMatrix;
+		animComp->translationMatrices[animComp->animationIndex][selectedFrame] = translateMatrix;
 
 		ImGui::Text("Rotation");
-		float rotation[3] = { animComp->node->eulerAngleXYZ[animComp->animationIndex][selectedFrame][0],
-			animComp->node->eulerAngleXYZ[animComp->animationIndex][selectedFrame][1] ,
-			animComp->node->eulerAngleXYZ[animComp->animationIndex][selectedFrame][2] };
+		float rotation[3] = { animComp->eulerAngleXYZ[animComp->animationIndex][selectedFrame][0],
+			animComp->eulerAngleXYZ[animComp->animationIndex][selectedFrame][1] ,
+			animComp->eulerAngleXYZ[animComp->animationIndex][selectedFrame][2] };
 		ImGui::DragFloat3("Rotation", rotation, 0.005f, -10, 10, "%.3f", 0);
 		//Apply value
-		animComp->node
-			->eulerAngleXYZ[animComp->animationIndex][selectedFrame][0] = rotation[0];
-		animComp->node
-			->eulerAngleXYZ[animComp->animationIndex][selectedFrame][1] = rotation[1];
-		animComp->node
-			->eulerAngleXYZ[animComp->animationIndex][selectedFrame][2] = rotation[2];
+		animComp->eulerAngleXYZ[animComp->animationIndex][selectedFrame][0] = rotation[0];
+		animComp->eulerAngleXYZ[animComp->animationIndex][selectedFrame][1] = rotation[1];
+		animComp->eulerAngleXYZ[animComp->animationIndex][selectedFrame][2] = rotation[2];
 
 
 		ImGui::Text("Scaling");
-		glm::mat4 scalingMatrix = animComp->node
-			->nodeAnimScalingMatrices[animComp->animationIndex][selectedFrame];
+		glm::mat4 scalingMatrix = animComp->scalingMatrices[animComp->animationIndex][selectedFrame];
 		float scaling[3] = { scalingMatrix[0][0], scalingMatrix[1][1], scalingMatrix[2][2] };
 		ImGui::DragFloat3("Scaling", scaling, 0.005f, 1, 100, "%.3f", 0);
 		//Apply value
-		(animComp->node
-			->nodeAnimScalingMatrices[animComp->animationIndex][selectedFrame])[0][0] = scaling[0];
-		(animComp->node
-			->nodeAnimScalingMatrices[animComp->animationIndex][selectedFrame])[1][1] = scaling[1];
-		(animComp->node
-			->nodeAnimScalingMatrices[animComp->animationIndex][selectedFrame])[2][2] = scaling[2];
+		(animComp->scalingMatrices[animComp->animationIndex][selectedFrame])[0][0] = scaling[0];
+		(animComp->scalingMatrices[animComp->animationIndex][selectedFrame])[1][1] = scaling[1];
+		(animComp->scalingMatrices[animComp->animationIndex][selectedFrame])[2][2] = scaling[2];
 
 
 
-		animComp->node->updateTransformation();
+		animComp->updateTransformation();
 
-		glm::mat4 transformation = animComp->node
-			->getGlobalTransformation(selectedFrame, animComp->animationIndex);
+		glm::mat4 transformation = animComp->getTransformation();
 
 		ImGui::Text("Transformation Matrix");
 		if (ImGui::BeginTable("Transformations", 4,
