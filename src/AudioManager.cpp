@@ -104,7 +104,7 @@ void AudioManager::update() {
 	}
 
 	// fmod needs to be updated at once once per game tick
-	AudioManager::ERRCHK(coreSystem->update());
+	ERRCHK( coreSystem->update() );
 }
 
 
@@ -318,7 +318,7 @@ int AudioManager::createGeometry(const Mesh* mesh) {
 
 	int nFaces = mesh->getNumOfVertices();
 	int nVertices = mesh->getNumOfVertices();
-	int vpf = 3;	// Vertices Per Face. Assume mesh contains triangles
+	int nVertsPerFace = 3;	// Assume mesh contains triangles
 	// Also assume winding order is CCW
 
 	// TODO: Pass in Entity* and get ITransform
@@ -329,6 +329,7 @@ int AudioManager::createGeometry(const Mesh* mesh) {
 	int geoId = createGeometry(nFaces, nVertices, pos, forward, scale);
 
 	Array<vec3> vVertices = mesh->getVertices();
+	Array<ivec3> faceIndices = mesh->getFaces();
 
 	for (int f = 0; f < nFaces; f++) {
 
@@ -337,9 +338,13 @@ int AudioManager::createGeometry(const Mesh* mesh) {
 		float fReverbOcclusion = 0.5f;
 
 		// Form an array of the vertices for this face, assuming each face has exactly 3 vertices
-		Array<vec3> faceVertices(vVertices.begin() + f * vpf, vVertices.begin() + (f+1) * vpf);
+		Array<vec3> faceVertices(nVertsPerFace);
+		for (int faceVertex = 0; faceVertex < nVertsPerFace; faceVertex++) {
+			faceVertices[faceVertex] = vVertices[ faceIndices[f][faceVertex] ];
+		}
 
-		addPolygon(geoId, fDirectOcclusion, fReverbOcclusion, false, vpf, faceVertices);
+		// Add this face
+		addPolygon(geoId, fDirectOcclusion, fReverbOcclusion, false, nVertsPerFace, faceVertices);
 	}
 
 	return geoId;
@@ -453,10 +458,15 @@ void AudioManager::setChannel3dPosition(int nChannelId, const vec3& vPosition) {
 	auto channelItr = mChannels.find(nChannelId);
 	if (channelItr == mChannels.end()) return;
 
-	// update position if channel is 3D
-	FMOD_VECTOR position = vectorToFmod(vPosition);
-	
-	ERRCHK( channelItr->second->set3DAttributes(&position, NULL) );
+	FMOD_MODE eMode;
+	channelItr->second->getMode(&eMode);
+
+	// update position only if channel is 3D 
+	// (calling set3DAttributes on a 2D channel returns an error: FMOD_ERR_NEEDS3D)
+	if (eMode & FMOD_3D) {
+		FMOD_VECTOR position = vectorToFmod(vPosition);
+		ERRCHK( channelItr->second->set3DAttributes(&position, nullptr) );
+	}
 }
 
 
