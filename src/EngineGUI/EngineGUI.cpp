@@ -199,7 +199,7 @@ void NoxEngineGUI::updateGUI(NoxEngine::GameState& game_state,GUIParams *params)
 	// Placeholder / debug windows
 	ImGui::Begin(PANEL_NAME_MAP[PanelName::FileExplorer].c_str());    
 
-	ImGui::SliderFloat3("Camera ", glm::value_ptr(params->current_cam->user_shift), 0.0f, 100.0f);
+	ImGui::DragFloat3("Camera ", glm::value_ptr(params->current_cam->user_shift), 0.0f, 100.0f);
 	ImGui::End();
 
 

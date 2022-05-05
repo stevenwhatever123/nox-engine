@@ -263,8 +263,7 @@ void AnimationComponent::updateTransformation()
 	{
 		for (u32 j = 0; j < transformation[i].size(); j++)
 		{
-			transformation[i][j] = translationMatrices[i][j]
-				* rotationMatrices[i][j] * scalingMatrices[i][j];
+			transformation[i][j] = rotationMatrices[i][j] * scalingMatrices[i][j] * translationMatrices[i][j];
 		}
 	}
 }
