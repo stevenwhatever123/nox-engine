@@ -71,7 +71,8 @@ workspace "NoxEngine"
 			"libs/freetype/include/",
 			"libs/imguizmo/",
 			"libs/luabridge/Source/",
-			"libs/lua/"
+			"libs/lua/",
+			"libs/3rdParty/",
 		}
 
 		dependson {
@@ -105,16 +106,21 @@ workspace "NoxEngine"
 		}
 
 		vpaths {
-			["Headers"] = {
-				"headers/**.h",
-			},
-			["Headers/imgui"] = {
-				"libs/imgui/*.h"
-			},
+			["Headers"]            = { "headers/*.h", },
+			["Headers/imgui"]      = { "libs/imgui/*.h" },
+			["Headers/Components"] = { "headers/Components/*.h" },
+			["Headers/Core"]       = { "headers/Core/*.h" },
+			["Headers/EngineGUI"]  = { "headers/EngineGUI/*.h" },
+			["Headers/Managers"]   = { "headers/Managers/*.h" },
+			["Headers/Utils"]      = { "headers/Utils/*.h" },
 
-			["Source Files"] = {
-				"src/**.cpp",
-			},
+			["Source Files"]            = { "src/*.cpp" },
+			["Source Files/Components"] = { "src/Components/*.cpp" },
+			["Source Files/EngineGUI"]  = { "src/EngineGUI/*.cpp" },
+			["Source Files/Managers"]   = { "src/Managers/*.cpp" },
+			["Source Files/Utils"]      = { "src/Utils/*.cpp" },
+			["Source Files/Core"]       = { "src/Core/*.cpp" },
+
 			["Source Files/imgui"] = {
 				"libs/imgui/*.cpp",
 				"libs/imgui/backends/imgui_impl_opengl3.cpp",
@@ -125,7 +131,7 @@ workspace "NoxEngine"
 		}
 
 		files {
-			"headers/*.h",
+			"headers/**.h",
 			"src/**.cpp",
 			"libs/imgui/*.h",
 			"libs/imgui/*.cpp",

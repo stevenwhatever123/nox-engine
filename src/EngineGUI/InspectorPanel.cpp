@@ -1,9 +1,9 @@
 #include <EngineGUI/InspectorPanel.h>
 
-#include <Entity.h>
-#include <IComponent.h>
-#include <PositionComponent.h>
-#include <RenderableComponent.h>
+#include <Core/Entity.h>
+#include <Components/IComponent.h>
+#include <Components/PositionComponent.h>
+#include <Components/RenderableComponent.h>
 
 using namespace NoxEngine;
 
