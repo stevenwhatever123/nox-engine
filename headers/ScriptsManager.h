@@ -1,13 +1,7 @@
 #pragma once
 #include <Singleton.h>
 #include <Types.h>
-
-extern "C" {
-	#include <lua/lua.h>
-	#include <lua/lauxlib.h>
-	#include <lua/lualib.h>
-}
-
+#include <lua.hpp>
 #include <LuaBridge/LuaBridge.h>
 
 

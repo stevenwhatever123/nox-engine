@@ -9,6 +9,7 @@
 
 #include <ComponentType.h>
 #include <Types.h>
+#include <Entity.h>
 
 namespace NoxEngine {
 
@@ -20,6 +21,7 @@ namespace NoxEngine {
 	{
 		public:
 			ComponentType id;
+			Entity* parent;
 			// This function is implemented to be able to downcast classes stored as IComponent to their respective actual classes
 			// TODO (Vincent): fix this witchcraft
 			template <class T> inline T* CastType() { 
@@ -31,6 +33,9 @@ namespace NoxEngine {
 			virtual void displayUI() {};
 			ComponentType get_id() { return id; };
 			void set_id(ComponentType value) { id = value; };
+
+			virtual Entity* getParentEntity() = 0;
+			virtual void attachedToEntity(Entity*) = 0; 
 	};
 }
 

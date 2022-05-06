@@ -19,23 +19,26 @@ namespace NoxEngine {
 
 			void displayUI() override; 
 
-			inline i32 getNumOfVertices() { return (i32)vertices.size(); }
-			inline i32 getNumOfTexCoord() { return (i32)texCoords.size(); }
-			inline i32 getNumOfNormals()  { return (i32)normals.size(); }
-			inline i32 getNumOfFaces() { return (i32)faces.size(); }
+			i32 getNumOfVertices() override { return (i32)vertices.size(); }
+			i32 getNumOfTexCoord() override { return (i32)texCoords.size(); }
+			i32 getNumOfNormals() override { return (i32)normals.size(); }
+			i32 getNumOfFaces()   override { return (i32)faces.size(); }
 
 			// TODO: change to a parameter
-			inline const String getNormalTexture()  { return normalTexture; }
-			inline const String getAmbientTexture() { return ambientTexture; }
+			const String getNormalTexture() override { return normalTexture; }
+			const String getAmbientTexture() override { return ambientTexture; }
 
-			inline const Array<vec3>&  getVertices () const { return vertices; }
-			inline const Array<vec2>&  getTexCoords() const { return texCoords; }
-			inline const Array<vec3>&  getNormals  () const { return normals; }
-			inline const Array<ivec3>& getFaces    () const { return faces; }
-			inline const Array<i32>&   getIndices  () const { return indices; }
+			const Array<vec3>&  getVertices () const override { return vertices; }
+			const Array<vec2>&  getTexCoords() const override { return texCoords; }
+			const Array<vec3>&  getNormals  () const override { return normals; }
+			const Array<ivec3>& getFaces    () const override { return faces; }
+			const Array<i32>&   getIndices  () const override { return indices; }
 
 			String ambientTexture;
 			String normalTexture;
+
+			Entity* getParentEntity() override { return parent;};
+			void attachedToEntity(Entity* ent) override { parent = ent;};
 
 	};
 }

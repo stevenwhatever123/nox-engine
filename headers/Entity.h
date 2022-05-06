@@ -83,6 +83,7 @@ namespace NoxEngine {
 		// Flag for removal
 		bool remove;
 
+		void tick(time_type dt);
 
 	protected:
 		// Constructors usable by Scene

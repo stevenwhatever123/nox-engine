@@ -6,6 +6,7 @@
 // Components to hook up with event manager
 #include <RenderableComponent.h>
 #include <PositionComponent.h>
+#include <ScriptComponent.h>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -54,7 +55,6 @@ void GameManager::update() {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)) {
 		should_close = true;
 	}
-
 
 	glfwSwapBuffers(window);
 }
@@ -168,8 +168,12 @@ void GameManager::init_events() {
 
 				RenderableComponent* comp = meshScene.meshes[i];
 				PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+
+				ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
+
 				ent->addComp(comp);
 				ent->addComp(pos);
+				ent->addComp(script);
 
 				game_state.activeScene->addEntity(ent);
 			}
@@ -230,7 +234,7 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(10.0f, 10.0f, 10.0f));
+	camera = new Camera(vec3(50.0f, 50.0f, 50.0f));
 }
 
 void GameManager::init_shaders() {
@@ -285,10 +289,37 @@ void GameManager::init_scene() {
 
 void NoxEngine::GameManager::init_scripts()
 {
-	scriptsManager = ScriptsManager::Instance();
-	scriptsManager->Init();
-	scriptsManager->DoLuaFile("assets/scripts/test.lua");
-	exit(1);
+	// scriptsManager = ScriptsManager::Instance();
+	// scriptsManager->Init();
+	// scriptsManager->DoLuaFile("assets/scripts/test.lua");
+
+
+
+	String file_name = "assets/meshes/card.fbx";
+
+	game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+	MeshScene &meshScene = game_state.meshScenes.find(file_name)->second;
+
+	i32 index = game_state.activeScene->entities.size();
+	// We're treating every mesh as an entity FOR NOW
+	for (u32 i = 0; i < meshScene.meshes.size(); i++)
+	{
+		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
+		//                 because the entity ID is managed by the scene
+		Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
+
+		RenderableComponent* comp = meshScene.meshes[i];
+		PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+
+		ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
+
+		ent->addComp(comp);
+		ent->addComp(pos);
+		ent->addComp(script);
+
+		game_state.activeScene->addEntity(ent);
+	}
+
 }
 
 void GameManager::main_contex_ui() {
@@ -341,13 +372,22 @@ void GameManager::update_gui() {
 
 void GameManager::update_ecs() {
 
+	size_t nEntities = game_state.activeScene->entities.size();
+	// script update
+	const auto entities = game_state.activeScene->entities;
+	for (i32 i = 0; i < nEntities; i++)
+	{
+		entities[i]->tick(deltaTime);
+	}
+
+
 	if (!updateNeededECS) return;
 
 	//bool updateRenderer = false;
 	//bool updateAudioManager = false;
 
 	bool entityRemoved = false;
-	size_t nEntities = game_state.activeScene->entities.size();
+
 
 
 	// Check for entity removal. 
@@ -473,15 +513,16 @@ void GameManager::update_renderer() {
 void GameManager::exportLua()
 {
 
-	LOG_DEBUG("\ntest: %p ", GameManager::Instance);
+	LOG_DEBUG("hello world");
+	// LOG_DEBUG("\ntest: %p ", GameManager::Instance);
 
-	auto lua_state = ScriptsManager::Instance()->get_lua_state();
-	luabridge::getGlobalNamespace(lua_state)
-	.beginNamespace("game")
-	.deriveClass<GameManager, Singleton>("GameManager")
-	.addFunction("inst", GameManager::Instance)
-	.endClass()
-	.endNamespace();
+	// auto lua_state = ScriptsManager::Instance()->get_lua_state();
+	// luabridge::getGlobalNamespace(lua_state)
+	// .beginNamespace("game")
+	// .deriveClass<GameManager, Singleton>("GameManager")
+	// // .addFunction("inst", GameManager::Instance)
+	// .endClass()
+	// .endNamespace();
 
 
 }

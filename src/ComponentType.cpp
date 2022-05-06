@@ -4,6 +4,7 @@
 #include <IComponent.h>
 #include <PositionComponent.h>
 #include <RenderableComponent.h>
+#include <ScriptComponent.h>
 
 
 namespace NoxEngine {
@@ -19,10 +20,10 @@ void NoxEngine::initComponentTypes() {
 	kComponentTypeMap = {
 		{ typeid(IComponent),			AbstractType },
 		{ typeid(PositionComponent),	PositionType },
-		{ typeid(RenderableComponent),	RenderableType }
+		{ typeid(RenderableComponent),	RenderableType },
+		{ typeid(ScriptComponent),	ScriptType }
 		//{ typeid(LightSourceComponent),	LightSourceType },
 		//{ typeid(AudioSourceComponent),	AudioSourceType },
-		//{ typeid(ScriptComponent),	ScriptType },
 	};
 
 	kComponentTypeNames = {

@@ -3,6 +3,7 @@
 #include <IComponent.h>
 #include <IPosition.h>
 #include <Types.h>
+#include <Entity.h>
 
 /*
 * Position Component. Handles postion of the the entity in the 3D world
@@ -13,37 +14,20 @@ namespace NoxEngine {
 	class PositionComponent : public IPosition, public IComponent
 	{
 		public:
-
 			PositionComponent(f32 newx = 0.0f, f32 newy = 0.0f, f32 newz = 0.0f);
-
 			void displayUI() override;
+			static void exportLua() { };
 
-			static void exportLua()
-			{
-#if 0
-				auto lua_state = ScriptsManager::Instance()->get_lua_state();
-				luaL_openlibs(lua_state);
+			f32 get_x() const override { return x; }
+			f32 get_y() const override { return y; }
+			f32 get_z() const override { return z; }
 
-				luabridge::getGlobalNamespace(lua_state).
-					beginNamespace("game").
-					beginClass<IComponent>("IComponent").
-					addConstructor<void(*)(void)>().
-					addProperty("id", &IComponent::get_id, &IComponent::set_id).
-					endClass().
-					beginClass<IPosition>("IPosition").
-					addConstructor<void(*)(void)>().
-					addProperty("x", &IPosition::get_x, &IPosition::set_x).
-					addProperty("y", &IPosition::get_y, &IPosition::set_y).
-					addProperty("z", &IPosition::get_z, &IPosition::set_z).
-					endClass().
-					deriveClass <PositionComponent, IPosition>("PositionComponent").
-					addConstructor <void (*) (const f32&, const f32&, const f32&)>().
-					addProperty("id", &PositionComponent::get_id, &PositionComponent::set_id).
-					endClass().
-					endNamespace();
-			
-#endif		
-			};
+			void set_x(f32 value) override { x = value; }
+			void set_y(f32 value) override { y = value; }
+			void set_z(f32 value) override { z = value; }
+
+			virtual Entity* getParentEntity() override { return parent;};
+			virtual void attachedToEntity(Entity* ent) override { parent = ent;};
 
 	};
 
