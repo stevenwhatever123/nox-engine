@@ -1,10 +1,10 @@
 #include <EngineGUI/InspectorPanel.h>
 
-#include <Entity.h>
-#include <IComponent.h>
-#include <TransformComponent.h>
-#include <RenderableComponent.h>
-#include <AnimationComponent.h>
+#include <Core/Entity.h>
+#include <Components/IComponent.h>
+#include <Components/TransformComponent.h>
+#include <Components/RenderableComponent.h>
+#include <Components/AnimationComponent.h>
 
 using namespace NoxEngine;
 

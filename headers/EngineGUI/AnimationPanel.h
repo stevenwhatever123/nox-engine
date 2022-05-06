@@ -7,11 +7,11 @@
 // TODO: Add here
 
 // Other classes
-#include "Renderer.h"
-#include "MeshScene.h"
-#include <GameState.h>
-#include <IOManager.h>
-#include <Entity.h>
+#include "Core/Renderer.h"
+#include "Core/MeshScene.h"
+#include <Core/GameState.h>
+#include <Managers/IOManager.h>
+#include <Core/Entity.h>
 
 #include <EngineGUI/AnimationSequencer.h>
 

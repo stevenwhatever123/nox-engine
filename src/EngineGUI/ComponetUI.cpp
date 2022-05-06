@@ -4,8 +4,8 @@
 * 
 */
 
-#include "TransformComponent.h"
-#include "RenderableComponent.h"
+#include "Components/TransformComponent.h"
+#include "Components/RenderableComponent.h"
 
 using namespace NoxEngine;
 

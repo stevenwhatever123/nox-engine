@@ -1,7 +1,7 @@
 #include "EngineGUI/ScenePanel.h"
 
 // move to header
-#include "Entity.h"
+#include "Core/Entity.h"
 
 using namespace NoxEngine;
 

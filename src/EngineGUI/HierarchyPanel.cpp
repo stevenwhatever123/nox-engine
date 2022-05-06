@@ -2,11 +2,11 @@
 
 #include <EngineGUI/ImGuiWidgets.h>
 
-#include <Entity.h>
-#include <IComponent.h>
-#include <TransformComponent.h>
-#include <RenderableComponent.h>
-#include <GameManager.h>
+#include <Core/Entity.h>
+#include <Components/IComponent.h>
+#include <Components/TransformComponent.h>
+#include <Components/RenderableComponent.h>
+#include <Managers/GameManager.h>
 
 using namespace NoxEngine;
 

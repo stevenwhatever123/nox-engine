@@ -1,13 +1,13 @@
 #include "EngineGUI/AnimationPanel.h"
 
 #include <math.h>
-#include <FBXFileLoader.h>
-#include <EventManager.h>
-#include <EventNames.h>
+#include <Utils/FBXFileLoader.h>
+#include <Managers/EventManager.h>
+#include <Managers/EventNames.h>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-#include <MeshScene.h>
+#include <Core/MeshScene.h>
 
 #include <glm/gtx/string_cast.hpp>
 

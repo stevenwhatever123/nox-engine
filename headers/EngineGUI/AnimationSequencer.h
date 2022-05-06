@@ -7,11 +7,11 @@
 #include "imguizmo/ImCurveEdit.h"
 #include "imguizmo/GraphEditor.h"
 
-#include <MeshScene.h>
-#include <MeshNode2.h>
-#include <GameState.h>
-#include <Entity.h>
-#include <AnimationComponent.h>
+#include <Core/MeshScene.h>
+#include <Core/MeshNode.h>
+#include <Core/GameState.h>
+#include <Core/Entity.h>
+#include <Components/AnimationComponent.h>
 
 #include <math.h>
 #include <vector>

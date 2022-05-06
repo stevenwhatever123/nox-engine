@@ -15,15 +15,15 @@
 #include <imgui/backends/imgui_impl_opengl3.h>
 
 // Engine Headers
-#include <AudioManager.h>
-#include <Renderer.h>
-#include <Types.h>
-#include <Camera.h>
-#include <GameState.h>
+#include <Managers/AudioManager.h>
+#include <Core/Renderer.h>
+#include <Core/Types.h>
+#include <Core/Camera.h>
+#include <Core/GameState.h>
 
-#include <TransformComponent.h>
-#include <RenderableComponent.h>
-#include <SaveLoadManager.h>
+#include <Components/TransformComponent.h>
+#include <Components/RenderableComponent.h>
+#include <Managers/SaveLoadManager.h>
 
 
 

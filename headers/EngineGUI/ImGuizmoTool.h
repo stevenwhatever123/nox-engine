@@ -6,7 +6,7 @@
 // ImGuizmo classes
 #include <imguizmo/ImGuizmo.h>
 
-#include <GameState.h>
+#include <Core/GameState.h>
 
 
 namespace NoxEngineGUI {
