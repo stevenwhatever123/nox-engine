@@ -346,16 +346,16 @@ void AnimationComponent::insertFrameAfter(u32 animationIndex, u32 selectedFrame)
 	glm::mat4 lastFrameScaling = scalingMatrices[animationIndex][selectedFrame];
 
 	transformation[animationIndex].insert(
-		(transformation[animationIndex].begin() + (selectedFrame + 2))
+		(transformation[animationIndex].begin() + (selectedFrame + 1))
 		, lastFrameTransformation);
 	translationMatrices[animationIndex].insert(
-		(translationMatrices[animationIndex].begin() + (selectedFrame + 2))
+		(translationMatrices[animationIndex].begin() + (selectedFrame + 1))
 		, lastFrameTranslation);
 	rotationMatrices[animationIndex].insert(
-		(rotationMatrices[animationIndex].begin() + (selectedFrame + 2))
+		(rotationMatrices[animationIndex].begin() + (selectedFrame + 1))
 		, lastFrameRotation);
 	scalingMatrices[animationIndex].insert(
-		(scalingMatrices[animationIndex].begin() + (selectedFrame + 2))
+		(scalingMatrices[animationIndex].begin() + (selectedFrame + 1))
 		, lastFrameScaling);
 
 	setupEulerAngle();
