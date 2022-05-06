@@ -1,10 +1,9 @@
-#include "EngineGUI/ScenePanel.h"
-
-// move to header
-#include "Core/Entity.h"
+#include <EngineGUI/ScenePanel.h>
+#include <Core/Entity.h>
+#include <EngineGUI/EngineGUI.h>
+#include <EngineGUI/PresetObject.h>
 
 using namespace NoxEngine;
-
 
 void NoxEngineGUI::updateScenePanel(GameState* state) {
 

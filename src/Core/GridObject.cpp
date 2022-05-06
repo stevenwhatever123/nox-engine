@@ -1,4 +1,5 @@
 #include <Core/GridObject.h>
+#include <Utils/Utils.h>
 
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;

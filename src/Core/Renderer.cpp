@@ -1,11 +1,13 @@
 #define STB_IMAGE_IMPLEMENTATION
+#include <glm/glm.hpp>
+#include <iterator>
+
 #include <Core/Renderer.h>
 #include <Utils/Utils.h>
-#include <glm/glm.hpp>
-
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Components/IRenderable.h>
+#include <Core/Types.h>
 
 // TODO: update uniform submissions to use Shader class
 // TODO: fix drawing to default buffer
@@ -15,8 +17,6 @@
 
 using NoxEngineUtils::Logger;
 using namespace NoxEngine;
-
-GLenum NoxEngine::GLRenderTypes[] = { GL_TRIANGLES, GL_LINES, GL_POINTS };
 
 Renderer::~Renderer()
 {
@@ -185,7 +185,7 @@ void Renderer::addObject(Entity *ent)
 	createElementArray(mesh);
 
 	newObj.endInd = i32(elements.size());
-    newObj.transformation = glm::mat4(1.0f);
+    newObj.transformation = mat4(1.0f);
 	objects.push_back(newObj);
 
 	// Reset texture path for RenderableComponent as other object may use the same reference
@@ -363,7 +363,7 @@ void Renderer::updateProjection(int width, int height) {
     projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
 
     //int toProjectionLoc = shader->getUniformLocation("toProjection");
-    //glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    //glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, value_ptr(projection));
 
     program->set4Matrix("toProjection", projection);
 
@@ -488,21 +488,21 @@ void Renderer::createTangents(IRenderable* mesh)
         int el_ind2 = elem[i][1];
         int el_ind3 = elem[i][2];
 
-        glm::vec3 pos1 = v[el_ind1];
-        glm::vec3 pos2 = v[el_ind2];
-        glm::vec3 pos3 = v[el_ind3];
+        vec3 pos1 = v[el_ind1];
+        vec3 pos2 = v[el_ind2];
+        vec3 pos3 = v[el_ind3];
 
         // Texture coordinates
-        glm::vec2 uv1 = tc[el_ind1];
-        glm::vec2 uv2 = tc[el_ind2];
-        glm::vec2 uv3 = tc[el_ind3];;
+        vec2 uv1 = tc[el_ind1];
+        vec2 uv2 = tc[el_ind2];
+        vec2 uv3 = tc[el_ind3];;
 
-        glm::vec3 edge1 = pos2 - pos1;
-        glm::vec3 edge2 = pos3 - pos1;
-        glm::vec2 deltaUV1 = uv2 - uv1;
-        glm::vec2 deltaUV2 = uv3 - uv1;
+        vec3 edge1 = pos2 - pos1;
+        vec3 edge2 = pos3 - pos1;
+        vec2 deltaUV1 = uv2 - uv1;
+        vec2 deltaUV2 = uv3 - uv1;
 
-        glm::vec3 tangent;
+        vec3 tangent;
 
         float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
         tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
@@ -567,8 +567,8 @@ void Renderer::useProgram()
     program->set3Float("cameraPosition", camera->GetCameraPosition());
     // Set up light position
     program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
-    program->set4Matrix("toWorld", glm::mat4(1.0f));
-    program->set4Matrix("modelMatrix", glm::mat4(1.0f));
+    program->set4Matrix("toWorld", mat4(1.0f));
+    program->set4Matrix("modelMatrix", mat4(1.0f));
 }
 
 void Renderer::updateLightPos(float x, float y, float z) 

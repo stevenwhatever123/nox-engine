@@ -9,7 +9,6 @@ using namespace NoxEngine;
 using NoxEngineUtils::Logger;
 // using NoxEngine::PermanentMemAllocator;
 
-
 PermResourceData IOManager::ReadEntireFilePerm(std::string filename) {
 
 	HANDLE file = CreateFileA(

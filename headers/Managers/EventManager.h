@@ -4,19 +4,14 @@
 #include <Core/Types.h>
 
 #include <map>
-#include <string>
-#include <vector>
 #include <functional>
-
-#define SIGNAL_EVENT(name, ...) EventManager::Instance()->signal(name, __VA_ARGS__)
 
 namespace NoxEngine {
 
 	typedef std::function<void(va_list)> ListenFunc;
-	typedef std::map<std::string, std::vector<ListenFunc>> EventEntry;
-	typedef std::map<std::string, std::vector<ListenFunc>>::iterator EventEntryIt;
-	typedef std::map<std::string, std::vector<ListenFunc>>::reference EventEntryRef;
-
+	typedef std::map<String, Array<ListenFunc>> EventEntry;
+	typedef std::map<String, Array<ListenFunc>>::iterator EventEntryIt;
+	typedef std::map<String, Array<ListenFunc>>::reference EventEntryRef;
 
 	class EventManager: public Singleton<EventManager> {
 		friend class Singleton<EventManager>;
@@ -36,3 +31,5 @@ namespace NoxEngine {
 	};
 
 }
+
+#define SIGNAL_EVENT(name, ...) EventManager::Instance()->signal(name, __VA_ARGS__)

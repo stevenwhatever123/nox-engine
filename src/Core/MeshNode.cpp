@@ -1,6 +1,9 @@
 #include <Core/MeshNode.h>
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <fstream>
+
+using namespace NoxEngine;
 
 MeshNode::MeshNode(){ }
 
@@ -118,11 +121,6 @@ glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex, f32 ac
 
 	glm::mat4 defaultTransformation(1);
 
-	//if (getNumOfAnimations() < 1)
-	//{
-	//	getTransformation();
-	//}
-
 	// Interpolate between two keyframe
 	f32 ratio = (f32)(accumulator / timeStep);
 	if (accumulator == 0 || timeStep == 0)
@@ -130,42 +128,6 @@ glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex, f32 ac
 
 	glm::mat4 matrixFloor = nodeAnimTransformation[animationIndex][whichTickFloor];
 	glm::mat4 matrixCeil = nodeAnimTransformation[animationIndex][whichTickCeil];
-
-	//// Interpolate Translation
-	//glm::mat4 matrixFloorTranslation = nodeAnimTranslationMatrices[animationIndex][whichTickFloor];
-	//glm::mat4 matrixCeilTranslation = nodeAnimTranslationMatrices[animationIndex][whichTickCeil];
-	//glm::mat4 interpolatedTranslation(1);
-	//for (u32 i = 0; i < 4; i++)
-	//{
-	//	for (u32 j = 0; j < 4; j++)
-	//	{
-	//		interpolatedTranslation[i][j] = ((matrixFloorTranslation[i][j] * (1.0f - ratio))
-	//			+ (matrixCeilTranslation[i][j] * (float)ratio));
-	//	}
-	//}
-
-	//// Interpolate Rotation
-	//glm::mat4 matrixFloorRotation = nodeAnimRotationMatrices[animationIndex][whichTickFloor];
-	//glm::mat4 matrixCeilRotation= nodeAnimRotationMatrices[animationIndex][whichTickCeil];
-	//glm::quat qFloor = glm::quat(matrixFloorRotation);
-	//glm::quat qCeil = glm::quat(matrixCeilRotation);
-	//glm::quat q = glm::slerp(qFloor, qCeil, ratio);
-	//glm::mat4 interpolatedRotation = glm::mat4_cast(q);
-
-
-	//// Interpolate Scaling
-	//glm::mat4 matrixFloorScaling = nodeAnimScalingMatrices[animationIndex][whichTickFloor];
-	//glm::mat4 matrixCeilScaling= nodeAnimScalingMatrices[animationIndex][whichTickCeil];
-	//glm::mat4 interpolatedScale(1);
-	//// Turns out glm does not support scale matrix interpolation, so we're doing our own
-	//for(u32 i = 0; i < 4; i++)
-	//{
-	//	for (u32 j = 0; j < 4; j++)
-	//	{
-	//		interpolatedScale[i][j] = ((matrixFloorScaling[i][j] * (1.0f - ratio)) 
-	//			+ (matrixCeilScaling[i][j] * (float)ratio));
-	//	}
-	//}
 
 	// Linear interpolation
 	return ((float)ratio * matrixCeil) + (matrixFloor * (1.0f - (float)ratio));

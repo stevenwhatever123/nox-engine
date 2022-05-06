@@ -5,6 +5,7 @@
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Components/AnimationComponent.h>
+#include <Components/ScriptComponent.h>
 
 
 namespace NoxEngine {
@@ -21,10 +22,10 @@ void NoxEngine::initComponentTypes() {
 		{ typeid(IComponent),			AbstractType },
 		{ typeid(TransformComponent),	TransformType },
 		{ typeid(RenderableComponent),	RenderableType },
-		{ typeid(AnimationComponent),	AnimationType}
+		{ typeid(AnimationComponent),	AnimationType},
+		{ typeid(ScriptComponent),	ScriptType }
 		//{ typeid(LightSourceComponent),	LightSourceType },
 		//{ typeid(AudioSourceComponent),	AudioSourceType },
-		//{ typeid(ScriptComponent),	ScriptType },
 	};
 
 	kComponentTypeNames = {

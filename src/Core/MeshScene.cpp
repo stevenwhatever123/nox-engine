@@ -1,7 +1,9 @@
 #include <Core/MeshScene.h>
 #include <Core/Mesh.h>
+
 #include <iostream>
 #include <glm/gtx/string_cast.hpp>
+#include <Utils/Utils.h>
 
 
 using namespace NoxEngine;
@@ -28,8 +30,7 @@ MeshScene::MeshScene(const aiScene* scene) :
 	createNodeHierarchy(aiRootNode, rootNode);
 
 	// Animation Data
-	if (scene->mNumAnimations > 0)
-	{
+	if (scene->mNumAnimations > 0) {
 		extractAnimationInfo(scene);
 	}
 }
@@ -86,7 +87,7 @@ void MeshScene::printAllNodes()
 {
 	for (MeshNode *node : allNodes)
 	{
-		std::cout << node->name << "\n";
+		LOG_DEBUG("Node Name: %s", node->name.c_str());
 	}
 }
 
@@ -97,15 +98,10 @@ void MeshScene::printAllMeshNodes()
 	{
 		if (node->meshIndex.size() > 0)
 		{
-			std::cout << "Name: " << node->name << ": " << "\n";
-			std::cout << "Associated meshIndex: ";
-			for (u32 meshIndex : node->meshIndex)
-			{
-				std::cout << meshIndex << " ";
-			}
-			std::cout << "\n";
-			std::cout << glm::to_string(node->transformation) << "\n";
-			std::cout << "====================================================" << "\n";
+			LOG_DEBUG("Name: %s", node->name.c_str());
+			LOG_DEBUG("Associated MeshIndex: %s", node->name.c_str());
+			for (u32 meshIndex : node->meshIndex) { LOG_DEBUG("\t%d", meshIndex); }
+			LOG_DEBUG("Transform Mat:\n%s",  glm::to_string(node->transformation).c_str());
 		}
 	}
 }
@@ -116,7 +112,6 @@ void MeshScene::loopAllNodes(MeshNode node, std::vector<MeshNode>& list)
 	for (u32 i = 0; i < node.child.size(); ++i)
 	{
 		list.push_back(node.child[i]);
-
 		loopAllNodes(node.child[i], list);
 	}
 }
@@ -528,8 +523,7 @@ void MeshScene::extractTextureInfo(const aiScene* scene, Mesh* mesh) {
 			aiString path;
 			if (pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
 			{
-				//std::string fullPath = path.data;
-				//std::cout << fullPath << "\n";
+
 			}
 		}
 	}
@@ -544,29 +538,16 @@ void MeshScene::extractAnimationInfo(const aiScene* scene) {
 	// Resizing and reserving spaces
 	animations.resize(numAnimation);
 
-	// We probably don't want to resize it since not every node has animation data
-	//for (MeshNode2* node : allNodes)
-	//{
-	//	node->nodeAnimations.resize(numAnimation);
-	//	node->nodeAnimTransformation.resize(numAnimation);
-	//	node->nodeAnimTranslationMatrices.resize(numAnimation);
-	//	node->nodeAnimRotationMatrices.resize(numAnimation);
-	//	node->nodeAnimScalingMatrices.resize(numAnimation);
-	//}
-
 	numTicks.resize(numAnimation);
 	animationDuration.resize(numAnimation);
 
-	// Loop through every animation data/clip
 	for (u32 i = 0; i < numAnimation; i++)
 	{
 		//NOTE(sharo): we are keeping pointers to the insides of the scene around
 		//but not the scene itself
 
 		animations[i] = scene->mAnimations[i];
-
 		u32 numChannels = scene->mAnimations[i]->mNumChannels;
-
 		aiAnimation* scene_animation = scene->mAnimations[i];
 
 		// Loop through every node

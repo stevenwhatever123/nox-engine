@@ -1,10 +1,8 @@
 #pragma once
 
 #include <map>
-#include <typeindex>
-
 #include <Core/Types.h>
-
+#include <typeindex>
 
 namespace NoxEngine {
 

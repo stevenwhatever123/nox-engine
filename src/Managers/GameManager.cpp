@@ -7,6 +7,7 @@
 #include <Components/RenderableComponent.h>
 #include <Components/TransformComponent.h>
 #include <Components/AnimationComponent.h>
+#include <Components/ScriptComponent.h>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -38,6 +39,7 @@ void GameManager::init() {
 	init_gui();
 	init_animation();
 	init_renderer();
+	init_scripts();
 }
 
 void GameManager::update() {
@@ -54,7 +56,6 @@ void GameManager::update() {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)) {
 		should_close = true;
 	}
-
 
 	glfwSwapBuffers(window);
 }
@@ -173,9 +174,14 @@ void GameManager::init_events() {
 					file_name.c_str());
 
 				RenderableComponent* comp = meshScene.meshes[i];
+				
 				TransformComponent* pos = new TransformComponent(0.0, 0.0, 0.0);
+
+				ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
+
 				ent->addComp(comp);
 				ent->addComp(pos);
+				ent->addComp(script);
 
 				if (meshScene.hasAnimations())
 				{
@@ -257,7 +263,7 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(10.0f, 10.0f, 10.0f));
+	camera = new Camera(vec3(50.0f, 50.0f, 50.0f));
 }
 
 void GameManager::init_shaders() {
@@ -311,6 +317,40 @@ void GameManager::init_scene() {
 	game_state.activeScene = game_state.scenes[0];
 }
 
+void NoxEngine::GameManager::init_scripts()
+{
+	// scriptsManager = ScriptsManager::Instance();
+	// scriptsManager->Init();
+	// scriptsManager->DoLuaFile("assets/scripts/test.lua");
+
+
+
+	String file_name = "assets/meshes/card.fbx";
+
+	game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+	MeshScene &meshScene = game_state.meshScenes.find(file_name)->second;
+
+	i32 index = game_state.activeScene->entities.size();
+	// We're treating every mesh as an entity FOR NOW
+	for (u32 i = 0; i < meshScene.meshes.size(); i++)
+	{
+		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
+		//                 because the entity ID is managed by the scene
+		Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
+
+		RenderableComponent* comp = meshScene.meshes[i];
+		TransformComponent* pos = new TransformComponent(0.0, 0.0, 0.0);
+
+		ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
+
+		ent->addComp(comp);
+		ent->addComp(pos);
+		ent->addComp(script);
+
+		game_state.activeScene->addEntity(ent);
+	}
+
+}
 
 void GameManager::main_contex_ui() {
 
@@ -362,13 +402,22 @@ void GameManager::update_gui() {
 
 void GameManager::update_ecs() {
 
+	size_t nEntities = game_state.activeScene->entities.size();
+	// script update
+	const auto entities = game_state.activeScene->entities;
+	for (i32 i = 0; i < nEntities; i++)
+	{
+		entities[i]->tick(deltaTime);
+	}
+
+
 	if (!updateNeededECS) return;
 
 	//bool updateRenderer = false;
 	//bool updateAudioManager = false;
 
 	bool entityRemoved = false;
-	size_t nEntities = game_state.activeScene->entities.size();
+
 
 
 	// Check for entity removal. 

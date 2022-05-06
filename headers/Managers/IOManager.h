@@ -3,7 +3,6 @@
 #include <Core/Types.h>
 #include <Managers/Singleton.h>
 #include <Utils/MemAllocator.h>
-#include <string>
 
 
 namespace NoxEngine {
@@ -29,9 +28,9 @@ namespace NoxEngine {
 	class IOManager : public Singleton<IOManager> {
 		friend class Singleton<IOManager>;
 		public:
-			PermResourceData ReadEntireFilePerm(std::string filename);
-			TempResourceData ReadEntireFileTemp(std::string filename);
-			std::string PickFile(const char* extension_filters = "");
+			PermResourceData ReadEntireFilePerm(String filename);
+			TempResourceData ReadEntireFileTemp(String filename);
+			String PickFile(const char* extension_filters = "");
 
 		protected:
 			 IOManager(){};

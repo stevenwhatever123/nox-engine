@@ -42,5 +42,8 @@ namespace NoxEngine
 		void updateMaximumFrame(u32 animationIndex, u32 i);
 		void updateAnimationSize(u32 animationIndex, u32 num);
 		void insertFrameAfter(u32 animationIndex, u32 selectedFrame);
+
+		virtual Entity* getParentEntity() override { return parent; };
+		virtual void attachedToEntity(Entity* ent) override { parent = ent; };
 	};
 }

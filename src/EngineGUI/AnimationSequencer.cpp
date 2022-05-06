@@ -6,7 +6,7 @@ mFrameMax(animComp->numTicks[animComp->animationIndex] - 1),
 animComp(animComp),
 game_state(game_state)
 {
-   
+
 }
 
 AnimationSequencer::AnimationSequencer() :mFrameMin(0), mFrameMax(0) {};
@@ -75,40 +75,40 @@ void AnimationSequencer::Get(int index, int** start, int** end, int* type, unsig
 
 size_t AnimationSequencer::GetCustomHeight(int index)
 {
-    return 0;
-    // Every slot has to be the same size otherwise the bar will not be displayed
-    //if (scene->allNodes[index]->hasAnimations())
-    //    return 300;
+	return 0;
+	// Every slot has to be the same size otherwise the bar will not be displayed
+	//if (scene->allNodes[index]->hasAnimations())
+	//    return 300;
 
-    //return 0; 
+	//return 0; 
 }
 
 void AnimationSequencer::CustomDraw(int index, ImDrawList* draw_list, const ImRect& rc, const ImRect& legendRect,
-    const ImRect& clippingRect, const ImRect& legendClippingRect)
+		const ImRect& clippingRect, const ImRect& legendClippingRect)
 {
-    //static const char* labels[] = { "Translation", "Rotation", "Scale" };
+	//static const char* labels[] = { "Translation", "Rotation", "Scale" };
 
-    //bool hasAnimation = scene->allNodes[index]->hasAnimations();
+	//bool hasAnimation = scene->allNodes[index]->hasAnimations();
 
-    //if (hasAnimation)
-    //{
-    //    draw_list->PushClipRect(legendRect.Min, legendRect.Max, true);
-    //    for (int i = 0; i < 3; i++)
-    //    {
-    //        ImVec2 pta(legendRect.Min.x + 60, legendRect.Min.y + i * 20.0f);
-    //        // Label
-    //        draw_list->AddText(pta,
-    //            scene->allNodes[index]->hasAnimations() ? 0xFFFFFFFF : 0x80FFFFFF, labels[i]);
-    //    }
-    //    draw_list->PopClipRect();
+	//if (hasAnimation)
+	//{
+	//    draw_list->PushClipRect(legendRect.Min, legendRect.Max, true);
+	//    for (int i = 0; i < 3; i++)
+	//    {
+	//        ImVec2 pta(legendRect.Min.x + 60, legendRect.Min.y + i * 20.0f);
+	//        // Label
+	//        draw_list->AddText(pta,
+	//            scene->allNodes[index]->hasAnimations() ? 0xFFFFFFFF : 0x80FFFFFF, labels[i]);
+	//    }
+	//    draw_list->PopClipRect();
 
-    //    draw_list->PushClipRect(clippingRect.Min, clippingRect.Max, true);
-    //    for (int i = 0; i < 3; i++)
-    //    {
-    //        // The bar
-    //        draw_list->AddRectFilled(ImVec2(rc.Min.x - 1, (rc.Min.y + 2) + i * 20.0f),
-    //            ImVec2(rc.Max.x - 1, (rc.Min.y - 2) + (i + 1) * 20.0f), 0xFF80FF80, 4);
-    //    }
-    //    draw_list->PopClipRect();
-    //}
+	//    draw_list->PushClipRect(clippingRect.Min, clippingRect.Max, true);
+	//    for (int i = 0; i < 3; i++)
+	//    {
+	//        // The bar
+	//        draw_list->AddRectFilled(ImVec2(rc.Min.x - 1, (rc.Min.y + 2) + i * 20.0f),
+	//            ImVec2(rc.Max.x - 1, (rc.Min.y - 2) + (i + 1) * 20.0f), 0xFF80FF80, 4);
+	//    }
+	//    draw_list->PopClipRect();
+	//}
 }

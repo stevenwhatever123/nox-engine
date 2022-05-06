@@ -1,23 +1,20 @@
 #pragma once
 
 #include <Core/Types.h>
-#include <cstdarg>
-#include <iostream>
-#include <ctime>
-#include <chrono>
-
 
 namespace NoxEngineUtils {
 
 	class Logger {
-		enum {
-			MAX_TEMP_BUFFER = 1024
-		};
+		 enum {
+			 MAX_TEMP_BUFFER = 1024
+		 };
 
 		public:
 			static void debug(String fmt_str, ...);
+
 		private:
 			Logger(){};
+			~Logger();
 	};
 
 
@@ -32,10 +29,9 @@ namespace NoxEngineUtils {
 }
 
 
-#define LOG_DEBUG(str, ...) Logger::debug( "%s(%d) " str, __FILE__, __LINE__, __VA_ARGS__ )
+#define LOG_DEBUG(str, ...) NoxEngineUtils::Logger::debug( "%s(%d) " str, __FILE__, __LINE__, __VA_ARGS__ )
 #define print_cwd() _print_cwd(__FILE__, __LINE__)
 void _print_cwd(const char *str, i32 line);
-
 
 #define HEX_TO_FLOAT4(hex) {  ((hex >> 24) & 0xFF)/255.f, ((hex >> 16) & 0xFF)/255.0f, ((hex>>8) & 0xFF)/255.0f, (hex & 0xFF)/255.0f }
 #define FLOAT4_TO_HEX(float4) \

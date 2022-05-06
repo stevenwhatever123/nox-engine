@@ -1,6 +1,4 @@
 #pragma once
-#include <vector>
-#include <glm/glm.hpp>
 
 #include <Core/MeshNode.h>
 #include <Core/Mesh.h>
@@ -43,9 +41,9 @@ namespace NoxEngine {
 		// It contains all the child nodes
 		MeshNode nodeHierarchy;
 		// A reference to all the nodes
-		std::vector<MeshNode*> allNodes;
+		Array<MeshNode*> allNodes;
 		// List of mesh objects
-		std::vector<Mesh*> meshes;
+		Array<Mesh*> meshes;
 
 		u32 frameIndex;
 		u32 animationIndex;
@@ -78,6 +76,6 @@ namespace NoxEngine {
 		void searchThroughTree(MeshNode* targetNode);
 
 		// Just some function for printing
-		void loopAllNodes(MeshNode node, std::vector<MeshNode>& list);
+		void loopAllNodes(MeshNode node, Array<MeshNode>& list);
 	};
 }

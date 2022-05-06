@@ -1,19 +1,20 @@
-#include "Core/GLProgram.h"
+#include <glad/glad.h>
+#include <Core/GLProgram.h>
 #include <Managers/IOManager.h>
 #include <Utils/MemAllocator.h>
 #include <assert.h>
 
 using namespace NoxEngine;
 
-GLuint GLProgram::compileShader(std::string& filename, GLenum shaderType) {
-	GLuint id = glCreateShader(shaderType);
+u32 GLProgram::compileShader(std::string& filename, i32 shaderType) {
+	u32 id = glCreateShader(shaderType);
 	TempResourceData temp = IOManager::Instance()->ReadEntireFileTemp(filename);
 	const char *data = (const char*)temp.data;
 
 	glShaderSource(id, 1, &data, NULL);
 	glCompileShader(id);
 
-	GLint result = GL_FALSE;
+	i32 result = GL_FALSE;
 
 	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 
@@ -29,8 +30,8 @@ GLuint GLProgram::compileShader(std::string& filename, GLenum shaderType) {
 	return id;
 }
 
-GLuint GLProgram::makeProgram(std::vector<ShaderFile> shaders) {
-	GLuint id = glCreateProgram();
+u32 GLProgram::makeProgram(std::vector<ShaderFile> shaders) {
+	u32 id = glCreateProgram();
 	for(i32 i = 0; i < shaders.size(); i++) {
 		assert(shaders[i].id != 0);
 		glAttachShader(id, shaders[i].id);
@@ -40,8 +41,8 @@ GLuint GLProgram::makeProgram(std::vector<ShaderFile> shaders) {
 	glLinkProgram(id);
 
 	// Check the program
-	GLint result;
-	GLint length; 
+	i32 result;
+	i32 length; 
 	glGetProgramiv(id, GL_LINK_STATUS, &result);
 	if (result != GL_TRUE) {
 		glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
@@ -123,10 +124,10 @@ void GLProgram::printAttribInfo()
 
 	char *mem = (char*)StackMemAllocator::Instance()->allocate(1024);
 	i32 size;
-	GLenum type;
+	i32 type;
 	for (i32 i = 0; i < numActiveAttribs; i++)
 	{
-		glGetActiveAttrib(_id, i, 1024, NULL, &size, &type, mem);
+		glGetActiveAttrib(_id, i, 1024, NULL, &size, (GLenum*)&type, mem);
 		LOG_DEBUG("Attribute %s idx %d", mem, i);
 		StackMemAllocator::Instance()->free((u8*)mem);
 	}

@@ -1,23 +1,23 @@
 #pragma once
 
-#include <string>
 #include <vector>
-#include <Core/Renderer.h>
-#include <Core/Types.h>
-#include <Core/MeshScene.h>
-#include <Core/Scene.h>
+
+#include "Renderer.h"
+#include "Types.h"
+#include "MeshScene.h"
+#include "Scene.h"
 
 namespace NoxEngine {
 
 	struct AudioSource {
-		std::string name;
-		std::string file;
-		glm::vec3 position;
+		String name;
+		String file;
+		vec3 position;
 		f32 sourceVolume;
 	};
 
-	typedef std::map<std::string, AudioSource> AudioRepo;
-	typedef std::map<std::string, MeshScene> MeshSceneRepo;
+	typedef std::map<String, AudioSource> AudioRepo;
+	typedef std::map<String, MeshScene> MeshSceneRepo;
 
 	struct GameState {
 		AudioRepo audioSources;

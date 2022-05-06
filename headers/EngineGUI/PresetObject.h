@@ -1,10 +1,7 @@
 #pragma once
 
+#include <Core/Types.h>
 #include <map>
-#include <vector>
-#include <string>
-
-#include <cassert>
 
 
 // TODO: Move this to ECS
@@ -41,14 +38,12 @@ namespace NoxEngineGUI {
 		PresetObjectEND
 	};
 
-	extern std::map< PresetCategory, std::string > PRESET_CATEGORY_NAMES_MAP;
-	extern std::map< PresetObject, std::string > PRESET_OBJECT_NAMES_MAP;
-	extern std::vector< std::string > PRESET_CATEGORY_NAMES_LIST;
-	extern std::vector< std::string > PRESET_OBJECT_NAMES_LIST;
+	extern std::map< PresetCategory, String > PRESET_CATEGORY_NAMES_MAP;
+	extern std::map< PresetObject, String > PRESET_OBJECT_NAMES_MAP;
+	extern Array< String > PRESET_CATEGORY_NAMES_LIST;
+	extern Array< String > PRESET_OBJECT_NAMES_LIST;
 
 	// Objects contained in a category
-	extern std::map< PresetCategory, std::vector<PresetObject> > PRESET_OBJECTS;
-
-
+	extern std::map< PresetCategory, Array<PresetObject> > PRESET_OBJECTS;
 	void initPresetObjectVars();
 }

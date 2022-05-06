@@ -1,5 +1,6 @@
 #include <Managers/AudioManager.h>
 
+#include <Utils/Utils.h>
 
 using namespace NoxEngine;
 //////////////
@@ -30,7 +31,7 @@ void AudioManager::Destroy() {
 
 		it->second->getName(name, nameLen);
 
-		std::cout << "Unloading " << name << std::endl;
+		LOG_DEBUG("Unloading");
 		UnLoadSound(name);		
 	}
 
@@ -138,7 +139,7 @@ int AudioManager::PlaySounds(const std::string& strSoundName, const glm::vec3& v
 
 		// match this sound name with the channel id
 		mSoundChannelIds[strSoundName] = channelId;
-		std::cout << "Playing a sound in channel " << channelId << std::endl;
+		LOG_DEBUG("Playing a sound in channel: %d", channelId);
 
 		// Create a new channel for the sound and play it. 
 		// Start paused ("true") so we don't get a pop when we change the parameters
@@ -276,7 +277,7 @@ int AudioManager::errorCheck(FMOD_RESULT result, bool bPrint, bool bExit) {
 	if (FMOD_OK != result) {
 
 		if (bPrint) {
-			std::cout << "FMOD ERROR " << result << std::endl;
+			LOG_DEBUG("FMOD ERROR: %d", result);
 		}
 
 		if (bExit) {

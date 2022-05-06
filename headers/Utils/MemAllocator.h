@@ -7,8 +7,6 @@
 #define INITIAL_SCARTCH_MEM 2
 #define INITIAL_STACK_MEM 2
 
-#include <vector>
-
 #include <Core/Types.h>
 #include <Managers/Singleton.h>
 #include <Utils/Utils.h>
@@ -24,7 +22,6 @@
  *
  *
  */
-
 
 using NoxEngineUtils::Logger;
 
@@ -91,7 +88,7 @@ namespace NoxEngine {
 			i32 _size;
 			i32 _capacity;
 			uptr _last_alloc;
-			std::vector<StackAllocation> _allocs;
+			Array<StackAllocation> _allocs;
 
 	};
 

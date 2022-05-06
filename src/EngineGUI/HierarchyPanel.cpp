@@ -1,8 +1,6 @@
-#include <EngineGUI/HierarchyPanel.h>
-
-#include <EngineGUI/ImGuiWidgets.h>
-
 #include <Core/Entity.h>
+#include <EngineGUI/HierarchyPanel.h>
+#include <EngineGUI/ImGuiWidgets.h>
 #include <Components/IComponent.h>
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>

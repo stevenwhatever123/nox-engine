@@ -1,6 +1,7 @@
 #include "EngineGUI/AnimationPanel.h"
 
 #include <math.h>
+
 #include <Utils/FBXFileLoader.h>
 #include <Managers/EventManager.h>
 #include <Managers/EventNames.h>
@@ -9,7 +10,6 @@
 
 #include <Core/MeshScene.h>
 
-#include <glm/gtx/string_cast.hpp>
 
 using namespace NoxEngine;
 

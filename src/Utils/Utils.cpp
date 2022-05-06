@@ -1,6 +1,10 @@
 #include <Utils/Utils.h>
 #include <Utils/MemAllocator.h>
 #include <Windows.h>
+#include <chrono>
+#include <ctime>
+#include <iostream>
+#include <cstdarg>
 
 using namespace NoxEngineUtils;
 

@@ -41,7 +41,6 @@
 #define WINDOW_HEIGHT 720
 #define WINDOW_TITLE "Nox Engine"
 
-
 namespace NoxEngine {
 	
 	// usings
@@ -58,18 +57,20 @@ namespace NoxEngine {
 			void update();
 
 			void scheduleUpdateECS();
-
 			void addAudioSource(AudioSource audioSource);
+
 			inline Renderer* GetRenderer() { return renderer; };
-			i8 KeepRunning() { return !should_close; }
+
+			inline bool KeepRunning() { return !should_close; }
+
 			u32 win_height;
 			u32 win_width;
-			i8 should_close;
-			bool updateNeededECS;
-
 			time_type currentTime;
 			time_type deltaTime;
 			time_type lastTime;
+			Camera* camera;
+			bool updateNeededECS;
+			bool should_close;
 
 		protected:
 			// TODO (Vincent): initialize other fields as well to be on the safe side
@@ -88,6 +89,7 @@ namespace NoxEngine {
 			void init_renderer();
 			void init_gui();
 			void init_scene();
+			void init_scripts();
 
 			void asset_ui();
 			void main_contex_ui();
@@ -110,7 +112,6 @@ namespace NoxEngine {
 			// Audio
 			AudioManager* audioManager;
 			Renderer* renderer;
-			Camera* camera;
 			GameState game_state;
 			ImFont* font;
 			Array<GLProgram> programs;

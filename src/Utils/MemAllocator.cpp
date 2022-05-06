@@ -1,6 +1,5 @@
 #include <Utils/MemAllocator.h>
 #include <Utils/Utils.h>
-#include <cstdio>
 #include <cassert>
 
 using NoxEngineUtils::Logger;

@@ -1,5 +1,4 @@
 // System/std includes
-#include <iostream>
 #include <cassert>
 
 #include <Core/Entity.h>
@@ -9,6 +8,7 @@
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Components/AnimationComponent.h>
+#include <Components/ScriptComponent.h>
 
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
@@ -114,11 +114,11 @@ bool Entity::containsComps(HasCompBitMask mask) {
 void Entity::addComp(ComponentType type) {
 
 	switch (type) {
-
-	case TransformType:		addComp<TransformComponent>(); break;
-	case RenderableType:	addComp<RenderableComponent>(); break;
-	case AnimationType:		addComp<AnimationComponent>(); break;
-	default:				Logger::debug("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
+		case TransformType:		addComp<TransformComponent>(); break;
+		case RenderableType:	addComp<RenderableComponent>(); break;
+		case AnimationType:		addComp<AnimationComponent>(); break;
+		case ScriptType:		addComp<ScriptComponent>(); break;
+		default:				Logger::debug("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
 	}
 }
 
@@ -144,6 +144,7 @@ void Entity::addComp(T *comp) {
 
 	// Emit a signal to the event manager
 	addCompSignal<T>();
+	comp->attachedToEntity(this);
 }
 
 
@@ -170,6 +171,12 @@ bool Entity::isEnabled(u32 bit) {
 	return _isEnabled & (1 << (bit - 1));
 }
 
+void Entity::tick(time_type dt) {
+	const auto script = getComp<ScriptComponent>();
+	if(script) {
+		script->tick(dt);
+	}
+}
 
 // explicit template instantiation
 template void Entity::addComp<TransformComponent>(TransformComponent*);

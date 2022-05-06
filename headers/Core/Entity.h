@@ -31,6 +31,8 @@
 #include <Managers/EventManager.h>
 #include <Managers/EventNames.h>
 
+#include <Managers/EventNames.h>
+#include <Managers/EventManager.h>
 
 namespace NoxEngine {
 
@@ -86,6 +88,7 @@ namespace NoxEngine {
 		// Flag for removal
 		bool remove;
 
+		void tick(time_type dt);
 
 	protected:
 		// Constructors usable by Scene
@@ -200,5 +203,10 @@ namespace NoxEngine {
 			T* tmp = new T();
 			return isEnabled(tmp->id);
 		}
+			static void exportLua();
+			i32 get_id() { return id; }
+			i32 set_id(i32 value) { id = value; }
+
+
 	};
 }

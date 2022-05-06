@@ -5,9 +5,7 @@
 
 // Preset Object classes
 #include "PresetObject.h"
-
 #include <Core/GameState.h>
-
 
 namespace NoxEngineGUI {
 

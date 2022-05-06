@@ -1,4 +1,5 @@
 #include <EngineGUI/AudioPanel.h>
+#include <Managers/IOManager.h>
 
 
 void NoxEngineGUI::updateAudioPanel(NoxEngine::GameState* game_state) {
@@ -21,8 +22,8 @@ void NoxEngineGUI::updateAudioPanel(NoxEngine::GameState* game_state) {
 		std::string filename = file_path.substr(file_path.find_last_of("/\\") + 1);
 
 		game_state->audioSources.emplace(
-			file_path,
-			NoxEngine::AudioSource{ filename, file_path, glm::vec3{0, 0, 0}, 0.5 });
+				file_path,
+				NoxEngine::AudioSource{ filename, file_path, glm::vec3{0, 0, 0}, 0.5 });
 
 		NoxEngine::AudioManager::Instance()->LoadSound(file_path, true);
 

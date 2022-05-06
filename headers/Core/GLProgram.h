@@ -13,15 +13,15 @@ namespace NoxEngine {
 
 	struct ShaderFile {
 		String filename;
-		GLenum shader_type;
-		GLuint id;
+		u32 shader_type;
+		u32 id;
 	};
 
 
 	class GLProgram {
 		private:
-			GLuint compileShader(String& filename, GLenum shaderType);
-			GLuint makeProgram(Array<ShaderFile> shaders);
+			u32 compileShader(String& filename, i32 shaderType);
+			u32 makeProgram(Array<ShaderFile> shaders);
 			u32 _id;
 
 		public:
