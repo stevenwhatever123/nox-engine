@@ -23,7 +23,7 @@ void NoxEngine::initComponentTypes() {
 		{ typeid(TransformComponent),	TransformType },
 		{ typeid(RenderableComponent),	RenderableType },
 		{ typeid(AnimationComponent),	AnimationType},
-		{ typeid(ScriptComponent),	ScriptType }
+		{ typeid(ScriptComponent),		ScriptType }
 		//{ typeid(LightSourceComponent),	LightSourceType },
 		//{ typeid(AudioSourceComponent),	AudioSourceType },
 	};
@@ -33,9 +33,9 @@ void NoxEngine::initComponentTypes() {
 		{ TransformType,	"Transform Component" },
 		{ RenderableType,	"Renderable Component" },
 		{ AnimationType,	"Animation Component" },
+		{ ScriptType,		"Script Component" },
 		{ LightSourceType,	"Light Source Component" },
-		{ AudioSourceType,	"Audio Source Component" },
-		{ ScriptType,		"Script Component" }
+		{ AudioSourceType,	"Audio Source Component" }
 	};
 
 	// assert every type has a name
