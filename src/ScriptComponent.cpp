@@ -38,12 +38,10 @@ ScriptComponent::ScriptComponent(const char *script): script_file(script), inite
 
 		.beginClass<PositionComponent>("PositionComponent")
 		.addProperty("x", &PositionComponent::get_x, &PositionComponent::set_x)
-		// .addProperty("y", &PositionComponent::get_y, &PositionComponent::set_y)
-		// .addProperty("z", &PositionComponent::get_z, &PositionComponent::set_z)
+		.addProperty("y", &PositionComponent::get_y, &PositionComponent::set_y)
+		.addProperty("z", &PositionComponent::get_z, &PositionComponent::set_z)
 		.endClass()
 		.endNamespace();
-
-
 
 	
 }
