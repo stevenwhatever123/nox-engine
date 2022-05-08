@@ -39,7 +39,7 @@ void GameManager::init() {
 	init_gui();
 	init_animation();
 	init_renderer();
-	init_scripts();
+	//init_scripts();
 }
 
 void GameManager::update() {
@@ -177,11 +177,11 @@ void GameManager::init_events() {
 				
 				TransformComponent* pos = new TransformComponent(0.0, 0.0, 0.0);
 
-				ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
+				//ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
 
 				ent->addComp(comp);
 				ent->addComp(pos);
-				ent->addComp(script);
+				//ent->addComp(script);
 
 				if (meshScene.hasAnimations())
 				{
@@ -219,15 +219,6 @@ void GameManager::init_events() {
 
 				this->renderer->updateBuffers();
 			}
-
-			//if (!rend->registered) {
-			//	renderer->addObject(ent);
-			//	rend->registered = true;
-
-			//	// Update renderer
-			//	// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion
-			//	this->renderer->updateBuffers();
-			//}
 		}
 
 		// Audio

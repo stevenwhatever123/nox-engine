@@ -116,7 +116,7 @@ void AnimationComponent::update()
 // Semi-fixed time based update function
 void AnimationComponent::update(time_type dt)
 {
-	u32 numOfTicks = numTicks[animationIndex];
+	u32 numOfTicks = maximumFrame[animationIndex];
 
 	//reset if finish playing
 	if (frameIndex >= numOfTicks - 1)
@@ -147,8 +147,6 @@ void AnimationComponent::update(time_type dt)
 			// Remaining accumulated time
 			//const time_type alpha = accumulator / timeStep;
 			//frameIndex = frameIndex * alpha + frameIndex * (1.0 - alpha);
-
-			updateCeilAndFloor();
 		}
 	}
 
@@ -209,7 +207,7 @@ bool AnimationComponent::hasAnimations()
 void AnimationComponent::updateNumTicks(u32 animationIndex, u32 num)
 {
 	// Don't do anything if the number is the same
-	if (num == numTicks[animationIndex])
+	if (num <= numTicks[animationIndex])
 		return;
 
 	if (hasAnimations())
@@ -286,9 +284,15 @@ void AnimationComponent::updateTransformation()
 	}
 }
 
+mat4 AnimationComponent::getFrameTransformation()
+{
+	return transformation[animationIndex][frameIndex];
+}
+
 mat4 AnimationComponent::getTransformation()
 {
-	mat4 defaultTransformation(1);
+	if(editing)
+		return transformation[animationIndex][frameIndex];
 
 	// Interpolate between two keyframe
 	f32 ratio = (f32)(accumulator / timeStep);
@@ -356,7 +360,8 @@ void AnimationComponent::updateAnimationSize(u32 animationIndex, u32 num)
 void AnimationComponent::insertFrameAfter(u32 animationIndex, u32 selectedFrame)
 {
 	u32 animationSize = (u32)transformation[animationIndex].size();
-	updateMaximumFrame(animationIndex, animationSize + 1);
+	//updateMaximumFrame(animationIndex, animationSize + 1);
+	maximumFrame[animationIndex] = animationSize + 1;
 
 	glm::mat4 lastFrameTransformation = transformation[animationIndex][selectedFrame];
 	glm::mat4 lastFrameTranslation = translationMatrices[animationIndex][selectedFrame];

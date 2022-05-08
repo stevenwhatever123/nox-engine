@@ -12,6 +12,9 @@ namespace NoxEngine
 	class AnimationComponent: public IAnimation, public IComponent
 	{
 	public:
+		bool editing = false;
+
+	public:
 		AnimationComponent();
 		AnimationComponent(const MeshScene& scene, MeshNode* node);
 
@@ -37,6 +40,7 @@ namespace NoxEngine
 		void convertEulerAngleToMatrix();
 		void updateTransformation();
 
+		mat4 getFrameTransformation();
 		mat4 getTransformation();
 
 		void updateMaximumFrame(u32 animationIndex, u32 i);

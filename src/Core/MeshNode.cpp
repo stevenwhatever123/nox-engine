@@ -278,7 +278,7 @@ void MeshNode::updateMaximumFrame(u32 animationIndex, u32 i)
 	}
 	else
 	{
-		maximumFrame.resize(animationIndex + 1, 0);
+		maximumFrame.resize(animationIndex + 1);
 		nodeAnimTransformation.resize(i);
 		nodeAnimTranslationMatrices.resize(i);
 		nodeAnimRotationMatrices.resize(i);

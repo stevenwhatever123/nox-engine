@@ -115,8 +115,7 @@ void NoxEngine::saveScene(std::string file_path, NoxEngine::GameState& game_stat
 
 					// maximumFrame
 					outputStream.write((char*)&animComp->maximumFrame[0], numAnimation * sizeof(u32));
-
-					
+			
 					for (u32 i = 0; i < numAnimation; i++)
 					{
 						size_t numKeyFrame = animComp->transformation[i].size();
@@ -285,17 +284,26 @@ void NoxEngine::loadScene(std::string file_path, NoxEngine::GameState& game_stat
 						}
 					}
 
+					AnimationComponent* animComp = nullptr;
 					//AnimationComponent* animComp = new AnimationComponent(meshScene, meshnode);
-					AnimationComponent* animComp = new AnimationComponent();
+					//AnimationComponent* animComp = new AnimationComponent();
+
+					if (!meshScene.hasAnimations())
+						animComp = new AnimationComponent();
+					else
+						animComp = new AnimationComponent(meshScene, meshnode);
+				
 
 					size_t numAnimation;
 					inputStream.read((char*)&numAnimation, sizeof(numAnimation));
 
+					animComp->animationName.resize(numAnimation);
 					animComp->numTicks.resize(numAnimation);
 					animComp->animationDuration.resize(numAnimation);
 
 					animComp->transformation.resize(numAnimation);
 					animComp->translationMatrices.resize(numAnimation);
+					animComp->eulerAngleXYZ.resize(numAnimation);
 					animComp->rotationMatrices.resize(numAnimation);
 					animComp->scalingMatrices.resize(numAnimation);
 					animComp->maximumFrame.resize(numAnimation);

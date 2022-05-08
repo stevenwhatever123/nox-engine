@@ -21,5 +21,5 @@ namespace NoxEngineGUI {
 
 	void initAnimationPanel();
 	void updateAnimationPanel(NoxEngine::GameState *game_state, GUIParams* params);
-	void updateSequencer(NoxEngine::Entity *ent, NoxEngine::GameState* game_state);
+	void updateSequencer(NoxEngine::GameState* game_state, NoxEngine::AnimationComponent* animComp);
 };
