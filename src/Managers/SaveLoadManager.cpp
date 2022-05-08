@@ -285,7 +285,8 @@ void NoxEngine::loadScene(std::string file_path, NoxEngine::GameState& game_stat
 						}
 					}
 
-					AnimationComponent* animComp = new AnimationComponent(meshScene, meshnode);
+					//AnimationComponent* animComp = new AnimationComponent(meshScene, meshnode);
+					AnimationComponent* animComp = new AnimationComponent();
 
 					size_t numAnimation;
 					inputStream.read((char*)&numAnimation, sizeof(numAnimation));

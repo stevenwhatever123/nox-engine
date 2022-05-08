@@ -14,17 +14,35 @@ AnimationComponent::AnimationComponent()
 	whichTickCeil = 0;
 	playAnimation = false;
 
-	animationName.resize(0);
-	numTicks.resize(0);
-	animationDuration.resize(0);
+	animationName.resize(1);
+	animationName[0] = "animation";
+	numTicks.resize(1);
+	numTicks[0] = 1;
+	animationDuration.resize(1);
+	animationDuration[0] = 1;
 
-	transformation.resize(0);
-	translationMatrices.resize(0);
-	eulerAngleXYZ.resize(0);
-	rotationMatrices.resize(0);
-	scalingMatrices.resize(0);
+	transformation.resize(1);
+	transformation[0].resize(1);
+	transformation[0][0] = mat4(1);
 
-	maximumFrame.resize(0);
+	translationMatrices.resize(1);
+	translationMatrices[0].resize(1);
+	translationMatrices[0][0] = mat4(1);
+
+	eulerAngleXYZ.resize(1);
+	eulerAngleXYZ[0].resize(1);
+	eulerAngleXYZ[0][0] = vec3(0);
+
+	rotationMatrices.resize(1);
+	rotationMatrices[0].resize(1);
+	rotationMatrices[0][0] = mat4(1);
+
+	scalingMatrices.resize(1);
+	scalingMatrices[0].resize(1);
+	scalingMatrices[0][0] = mat4(1);
+
+	maximumFrame.resize(1);
+	maximumFrame[0] = 1;
 
 	//node = nullptr;
 }
