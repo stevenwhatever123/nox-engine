@@ -3,6 +3,22 @@ newaction {
 	description = "Clean up files gen",
 	execute = function()
 		os.rmdir('build')
+		os.rmdir('obj')
+		os.rmdir('project_files')
+		os.rmdir('x64')
+		os.rmdir('.vs')
+		os.remove('*.sln')
+		os.remove('*.vcxproj*')
+	end
+	
+}
+
+
+newaction {
+	trigger = 'clean_up_full',
+	description = "Clean up all files and libs",
+	execute = function()
+		os.rmdir('build')
 		os.rmdir('libs/compiled_libs')
 		os.rmdir('libs/build_assimp')
 		os.rmdir('libs/build_freetype')
@@ -14,7 +30,6 @@ newaction {
 		os.remove('*.sln')
 		os.remove('*.vcxproj*')
 	end
-	
 }
 
 workspace "NoxEngine"
@@ -42,6 +57,7 @@ workspace "NoxEngine"
 		language "C++"
 		cppdialect "C++20"
 		targetdir "build"
+		justmycode "Off"
 
 		includedirs {
 			"headers/",
