@@ -7,10 +7,8 @@
 // TODO: Add here
 
 // Other classes
-#include "Renderer.h"
-#include "MeshScene.h"
-#include <GameState.h>
-#include <IOManager.h>
+#include <Core/MeshScene.h>
+#include <Core/GameState.h>
 
 namespace NoxEngineGUI {
 	void updateAnimationPanel(NoxEngine::GameState *game_state);

@@ -1,17 +1,17 @@
-#include "EngineGUI/AnimationPanel.h"
-
 #include <math.h>
-#include <FBXFileLoader.h>
-#include <EventManager.h>
-#include <EventNames.h>
+
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/euler_angles.hpp>
-
-#include <MeshScene.h>
-
-#include <EngineGUI/AnimationSequencer.h>
-
 #include <glm/gtx/string_cast.hpp>
+
+#include <Utils/FBXFileLoader.h>
+#include <Core/MeshScene.h>
+#include <Managers/EventManager.h>
+#include <Managers/EventNames.h>
+#include <Managers/IOManager.h>
+#include <EngineGUI/AnimationSequencer.h>
+#include <EngineGUI/AnimationPanel.h>
+
 
 using namespace NoxEngine;
 
@@ -164,7 +164,7 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
 			if (selectedEntry < 0)
 				selectedEntry = -1;
 			if (selectedEntry > currentScene.allNodes.size() - 1)
-				selectedEntry = currentScene.allNodes.size() - 1;
+				selectedEntry = (i32)currentScene.allNodes.size() - 1;
 
 			Sequencer(&mySequence, &selectedFrame, &expanded, &selectedEntry,
 				&firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND

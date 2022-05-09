@@ -1,6 +1,5 @@
 #include "EngineGUI/PresetObject.h"
 
-
 namespace NoxEngineGUI {
 	// Give the extern maps/lists a definition in one compile unit
 	std::map< PresetCategory, std::string > PRESET_CATEGORY_NAMES_MAP;

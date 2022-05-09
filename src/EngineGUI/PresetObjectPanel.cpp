@@ -1,6 +1,5 @@
 #include "EngineGUI/PresetObjectPanel.h"
 
-
 namespace NoxEngineGUI {
 
 	/////////////////

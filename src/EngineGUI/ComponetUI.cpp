@@ -4,17 +4,9 @@
 * 
 */
 
-#include "PositionComponent.h"
-#include "RenderableComponent.h"
+#include <Components/PositionComponent.h>
+#include <Components/RenderableComponent.h>
 
 using namespace NoxEngine;
-
-
-void PositionComponent::displayUI() {
-
-}
-
-
-void RenderableComponent::displayUI() {
-
-}
+void PositionComponent::displayUI() { }
+void RenderableComponent::displayUI() { }

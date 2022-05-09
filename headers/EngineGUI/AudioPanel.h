@@ -4,9 +4,8 @@
 #include "EngineGUI.h"
 
 // Audio classes
-#include <AudioManager.h>
-#include <GameState.h>
-#include <IOManager.h>
+#include <Managers/AudioManager.h>
+#include <Core/GameState.h>
 
 namespace NoxEngineGUI {
 	void updateAudioPanel(NoxEngine::GameState *game_state);
