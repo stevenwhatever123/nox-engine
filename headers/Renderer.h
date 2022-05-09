@@ -25,6 +25,7 @@ namespace NoxEngine {
 	struct RendObj
 	{
 		Entity* ent;
+		IRenderable* meshSrc;	// Mesh data source (can be IRenderable, or IAudioGeometry)
 		GLuint renderType;
 		i32 has_texture;
 		i32 has_normal;
@@ -35,6 +36,7 @@ namespace NoxEngine {
 		glm::mat4 pos;
 
 		glm::mat4 transformation;
+		bool useAnimation;
 	};
 	
 	extern GLenum GLRenderTypes[3];
@@ -122,7 +124,7 @@ namespace NoxEngine {
 		~Renderer();
 
 		// Add object to renderer to render
-		void addObject(Entity *ent);
+		void addObject(Entity *ent, IRenderable *meshSrc, bool useAnimation = true);
 		void removeObject(Entity* ent);
 		void clearObject();
 		

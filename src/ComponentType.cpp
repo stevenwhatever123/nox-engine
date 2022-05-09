@@ -4,6 +4,7 @@
 #include <IComponent.h>
 #include <PositionComponent.h>
 #include <RenderableComponent.h>
+#include <AudioGeometryComponent.h>
 
 
 namespace NoxEngine {
@@ -19,19 +20,23 @@ void NoxEngine::initComponentTypes() {
 	kComponentTypeMap = {
 		{ typeid(IComponent),			AbstractType },
 		{ typeid(PositionComponent),	PositionType },
-		{ typeid(RenderableComponent),	RenderableType }
+		{ typeid(RenderableComponent),	RenderableType },
 		//{ typeid(LightSourceComponent),	LightSourceType },
 		//{ typeid(AudioSourceComponent),	AudioSourceType },
+		//{ typeid(AudioListenerComponent),	AudioListenerType },
+		{ typeid(AudioGeometryComponent),	AudioGeometryType }
 		//{ typeid(ScriptComponent),	ScriptType },
 	};
 
 	kComponentTypeNames = {
-		{ AbstractType,		"Abstract Component" },
-		{ PositionType,		"Position Component" },
-		{ RenderableType,	"Renderable Component" },
-		{ LightSourceType,	"Light Source Component" },
-		{ AudioSourceType,	"Audio Source Component" },
-		{ ScriptType,		"Script Component" }
+		{ AbstractType,			"Abstract Component" },
+		{ PositionType,			"Position Component" },
+		{ RenderableType,		"Renderable Component" },
+		{ LightSourceType,		"Light Source Component" },
+		{ AudioSourceType,		"Audio Source Component" },
+		{ AudioListenerType,	"Audio Listener Component" },
+		{ AudioGeometryType,	"Audio Geometry Component" },
+		{ ScriptType,			"Script Component" }
 	};
 
 	// assert every type has a name

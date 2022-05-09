@@ -5,7 +5,9 @@
 
 #include <PositionComponent.h>
 #include <RenderableComponent.h>
+#include <AudioGeometryComponent.h>
 #include <IRenderable.h>
+#include <IAudioGeometry.h>
 
 // TODO: update uniform submissions to use Shader class
 // TODO: fix drawing to default buffer
@@ -153,33 +155,35 @@ void Renderer::updateBuffers() {
 }
 
 
-void Renderer::addObject(Entity *ent)
+void Renderer::addObject(Entity *ent, IRenderable *meshSrc, bool useAnimation)
 {
 
     // Add a mesh to the container
     RendObj newObj;
     newObj.ent = ent;
+	newObj.meshSrc = meshSrc;
+	newObj.useAnimation = useAnimation;
 
-	IRenderable* mesh = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
-
-	newObj.renderType = mesh->glRenderType;
+	newObj.renderType = meshSrc->glRenderType;
     newObj.startInd = (i32)elements.size();
-	newObj.has_texture = mesh->has_texture;
-	newObj.has_normal = mesh->has_normal;
+	newObj.has_texture = meshSrc->has_texture;
+	newObj.has_normal = meshSrc->has_normal;
     
     // Generate textures for the object
-    newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
-    newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
+	if (meshSrc->has_texture) {
+		newObj.ambientTexture = setTexture(meshSrc->getAmbientTexture(), "AmbTexture", 1);
+		newObj.normalTexture = setTexture(meshSrc->getNormalTexture(), "NormTexture", 2);
+	}
 
 	// Generate the arrays
-	createVertexArray(mesh);
+	createVertexArray(meshSrc);
 
-	if(mesh->has_texture) createTexCoordArray(mesh);
-	if(mesh->has_normal)  createNormalsArray(mesh);
+	if(meshSrc->has_texture) createTexCoordArray(meshSrc);
+	if(meshSrc->has_normal)  createNormalsArray(meshSrc);
 
-	if(mesh->has_normal && mesh->has_texture) createTangents(mesh);
+	if(meshSrc->has_normal && meshSrc->has_texture) createTangents(meshSrc);
 
-	createElementArray(mesh);
+	createElementArray(meshSrc);
 
 	newObj.endInd = i32(elements.size());
     newObj.transformation = glm::mat4(1.0f);
@@ -226,7 +230,7 @@ GLuint Renderer::setTexture(const String texturePath, const char* uniName, int n
 	}
 	else
 	{
-		LOG_DEBUG("Failed to load file %s ", texturePath.c_str());
+		LOG_DEBUG("Failed to load texture %s ", texturePath.c_str());
 	}
 	stbi_image_free(data);
 
@@ -253,9 +257,19 @@ void Renderer::draw() {
 
 	for (u32 i = 0; i < objects.size(); i++)
 	{
-		// Skip if the entity/RenderableComponent is not enabled
-		if (!objects[i].ent->isEntityEnabled()) continue;
-		if (!objects[i].ent->isEnabled<RenderableComponent>()) continue;
+		Entity* ent = objects[i].ent;
+
+		// Skip if the entity is not enabled
+		if (!ent->isEntityEnabled()) continue;
+
+		// Renderable
+		if (objects[i].useAnimation) {
+			if (!ent->isEnabled<RenderableComponent>()) continue;
+		}
+		// AudioGeometry
+		else {
+			if (!ent->isEnabled<AudioGeometryComponent>() || !ent->getComp<AudioGeometryComponent>()->render) continue;
+		}
 
 		// If the object has a position and it's enabled, use it
 		glm::mat4 worldMat = glm::mat4(1.0f);
@@ -566,6 +580,27 @@ void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable*
 {
 	for (u32 i = 0; i < objects.size(); i++)
 	{
+		// After the introduction of AudioGeometryComponent, a RendObj does not necessarily have a RenderableComponent.
+		// 
+		// pRenderable is a Mesh2 (-> RenderableComponent -> IRenderable) from MeshScene
+		// MeshScene represents a .FBX file.
+		// For RenderableComponent:		Create an entity with a RenderableComponent per Mesh2 in MeshScene. RenderableComponent = Mesh2
+		//								We want to apply the local transformation matrix (for animation)
+		// For AudioGeometryComponent:	Directly load the MeshScene in AudioGeometryComponent, so the IRenderable* pointer is lost.
+		//								We can either:
+		//								1/ Use RenderableComponent's transformation (so that geometry aligns with mesh animation)
+		//								2/ Store MeshScene when flattening the Mesh2s, check against MeshScene * instead? 
+		//								3/ Ignore animation, meaning geometry is decoupled from animation and is always static
+		//								Current approach is 3, but (2) can be achieved with an extra flag
+		
+		// 1. Has Renderable, No  AudioGeoemtry: mesh with animation, use transformation
+		// Two cases with meshSource = AudioGeometry:
+		// 2. No  Renderable, Has AudioGeoemtry: mesh (potentially with animation), use approach (3), ignore
+		// 3. Has Renderable, Has AudioGeometry: mesh (potentially with animation), use approach (3), ignore
+		
+		// Ignore animation flag is set when adding a RendObj that uses AudioGeometry as meshSrc
+		if (!objects[i].useAnimation) continue;
+
 		IRenderable* rend = objects[i].ent->getComp<RenderableComponent>()->CastType<IRenderable>();
 		if (rend == pRenderable)
 		{
@@ -575,4 +610,3 @@ void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable*
 		}
 	}
 }
-

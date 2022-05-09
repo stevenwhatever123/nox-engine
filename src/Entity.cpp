@@ -8,6 +8,7 @@
 #include <IComponent.h>
 #include <PositionComponent.h>
 #include <RenderableComponent.h>
+#include <AudioGeometryComponent.h>
 
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
@@ -92,43 +93,19 @@ void Entity::addComp(ComponentType type) {
 
 	switch (type) {
 
-	case PositionType:		addComp<PositionComponent>(); break;
-	case RenderableType:	addComp<RenderableComponent>(); break;
-	default:				Logger::debug("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
+	case PositionType:			addComp<PositionComponent>();			break;
+	case RenderableType:		addComp<RenderableComponent>();			break;
+	case AudioGeometryType:		addComp<AudioGeometryComponent>();		break;
+	default:					LOG_DEBUG("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
 	}
 }
 
 
-template <typename T>
-void Entity::addComp(T *comp) {
-
-	assert(comp->id != ComponentType::AbstractType);
-
-	// Invalid type, don't add
-	if (kComponentTypeMap.find(typeid(T)) == kComponentTypeMap.end()) {
-		Logger::debug("Attempted to add invalid component type (%s), aborted", typeid(T).name());
-		return;
-	}
-
-	if (components.find(typeid(T)) != components.end()) {
-		Logger::debug("Component (ID: %d) already exists in Entity ", comp->id);
-		return;
-	}
-
-	components[typeid(T)] = comp;
-	hasComp |= ( 1 << (comp->id-1) );
-
-	// Emit a signal to the event manager
-	addCompSignal<T>();
-}
-
-
-template <typename T>
-T *Entity::getComp() {
+template <typename T> T* Entity::getComp() {
 
 	// Invalid type, return nullptr
 	if (kComponentTypeMap.find(typeid(T)) == kComponentTypeMap.end()) {
-		Logger::debug("Invalid component type requested (typeid = %s)", typeid(T).name());
+		//Logger::debug("Invalid component type requested (typeid = %s)", typeid(T).name());
 		return nullptr;
 	}
 
@@ -148,8 +125,10 @@ bool Entity::isEnabled(u32 bit) {
 
 
 // explicit template instantiation
-template void Entity::addComp<PositionComponent>(PositionComponent*);
-template void Entity::addComp<RenderableComponent>(RenderableComponent*);
-
+// Note: not needed anymore - moved template definition to header and removed logger
+//template void Entity::addComp<PositionComponent>(PositionComponent*);
+//template void Entity::addComp<RenderableComponent>(RenderableComponent*);
+//
 template PositionComponent* Entity::getComp<PositionComponent>();
 template RenderableComponent* Entity::getComp<RenderableComponent>();
+template AudioGeometryComponent* Entity::getComp<AudioGeometryComponent>();

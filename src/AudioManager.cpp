@@ -19,12 +19,17 @@
 /* ======================================================================================== */
 
 #include <AudioManager.h>
+#include <GameManager.h>
 
 #include <iostream>
 #include <fmod_common.h>
 #include <fmod_errors.h>
 
 #include "Mesh.h"
+#include "Entity.h"
+
+#include "AudioGeometryComponent.h"
+#include "PositionComponent.h"
 
 #include <Utils.h>
 
@@ -98,6 +103,8 @@ void AudioManager::destroy() {
 
 
 void AudioManager::update() {
+
+	// State of geometries (e.g. enable, transform, etc) is updated in GameManager
 
 	/*   Remove all stopped channels   */
 	std::vector<ChannelMap::iterator> pStoppedChannels;
@@ -323,8 +330,10 @@ bool AudioManager::isPlaying(int nChannelId) const {
 /*   Occlusion   */
 int AudioManager::createGeometry(int nMaxPolygons, int nMaxVertices, const vec3 &pos, const vec3 &forward, const vec3 &scale) {
 
-	FMOD::Geometry* geo;
-	ERRCHK( coreSystem->createGeometry(nMaxPolygons, nMaxVertices, &geo) );
+	FMOD::Geometry* geo = nullptr;
+	int err = ERRCHK( coreSystem->createGeometry(nMaxPolygons, nMaxVertices, &geo) );
+
+	if (err) return -1;
 
 	u32 geoId = geometries.size();
 	geometries.push_back(geo);
@@ -334,22 +343,38 @@ int AudioManager::createGeometry(int nMaxPolygons, int nMaxVertices, const vec3 
 	return geoId;
 }
 
-int AudioManager::createGeometry(const Mesh* mesh) {
+int AudioManager::createGeometry(Entity* ent) {
 
-	int nFaces = mesh->getNumOfVertices();
-	int nVertices = mesh->getNumOfVertices();
+	// Pass if the entity doesn't have AudioGeometryComponent
+	if (!ent->containsComps<AudioGeometryComponent>()) return -1;
+
+	// Get mesh data
+	AudioGeometryComponent* geoComp = ent->getComp<AudioGeometryComponent>();
+
+	int nFaces = geoComp->getNumOfFaces();
 	int nVertsPerFace = 3;	// Assume mesh contains triangles
+	int nVertices = nFaces * nVertsPerFace;	// number of face indices, not unique vertices
 	// Also assume winding order is CCW
 
-	// TODO: Pass in Entity* and get ITransform
+	// Default transform data
 	vec3 pos{ 0, 0, 0 };
-	vec3 forward{ 0, 0, 0 };
-	vec3 scale{ 0, 0, 0 };
+	vec3 forward{ 0, 0, 1 };
+	vec3 scale{ 1, 1, 1 };
+
+	// Get transform if the entity has one
+	if (ent->containsComps<PositionComponent>()) {
+		IPosition* ipos = ent->getComp<PositionComponent>()->CastType<IPosition>();
+		pos.x = ipos->x;
+		pos.y = ipos->y;
+		pos.z = ipos->z;
+
+		// TODO: Get rotation and scale after merging Steven's branch
+	}
 
 	int geoId = createGeometry(nFaces, nVertices, pos, forward, scale);
 
-	Array<vec3> vVertices = mesh->getVertices();
-	Array<ivec3> faceIndices = mesh->getFaces();
+	Array<vec3> vVertices = geoComp->getVertices();
+	Array<ivec3> faceIndices = geoComp->getFaces();
 
 	for (int f = 0; f < nFaces; f++) {
 
@@ -366,6 +391,9 @@ int AudioManager::createGeometry(const Mesh* mesh) {
 		// Add this face
 		addPolygon(geoId, fDirectOcclusion, fReverbOcclusion, false, nVertsPerFace, faceVertices);
 	}
+
+	// Set Geometry id on the component. For better separation, this should be done in GameManager
+	geoComp->geometryId = geoId;
 
 	return geoId;
 }
@@ -384,6 +412,8 @@ void AudioManager::addPolygon(int nGeometryId, float fDirectOcclusion, float fRe
 }
 
 void AudioManager::setGeometryActive(int nGeometryId, bool isActive) {
+
+	assert(nGeometryId >= 0 && nGeometryId < geometries.size());
 
 	FMOD::Geometry* geo = geometries[nGeometryId];
 	ERRCHK( geo->setActive(isActive) );

@@ -44,6 +44,9 @@
 
 
 namespace NoxEngine {
+
+	// forward declares
+	class IAudioGeometry;
 	
 	// usings
 	using NoxEngineGUI::GUIParams;
@@ -59,9 +62,10 @@ namespace NoxEngine {
 			void update();
 
 			void scheduleUpdateECS();
+			void createAudioGeometry(Entity* ent, IAudioGeometry* igeo);
 
 			void addAudioSource(AudioSource audioSource);
-			void addMesh(String str, Mesh m);
+			//void addMesh(String str, Mesh m);
 			inline Renderer* GetRenderer() { return renderer; };
 			i8 KeepRunning() { return !should_close; }
 			u32 win_height;

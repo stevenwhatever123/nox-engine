@@ -34,6 +34,7 @@ namespace NoxEngine {
 	
 	// Forward declares
 	class Mesh;
+	class Entity;
 
 	// Usings from FMOD
 	using AudioDSPType = FMOD_DSP_TYPE;
@@ -164,8 +165,8 @@ namespace NoxEngine {
 			const vec3 &scale = vec3{ 0, 0, 0 }
 		);
 
-		// Create an occlusion Geometry object from a mesh, return the id
-		int createGeometry(const Mesh* mesh);
+		// Create an occlusion Geometry object from an entity that contains a mesh, return the id
+		int createGeometry(Entity* ent);
 
 		// Add a polygon to the Geometry object
 		void addPolygon(int nGeometryId, float fDirectOcclusion, float fReverbOcclusion, bool isDoubleSided, int nVertices, const Array<vec3>& vVertices);

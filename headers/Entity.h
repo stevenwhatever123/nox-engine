@@ -122,7 +122,27 @@ namespace NoxEngine {
 
 		// Add an instantiated component to the entity
 		// hasComp is updated here
-		template <typename T> void addComp(T* comp);
+		template <typename T> void addComp(T* comp) {
+
+			assert(comp->id != ComponentType::AbstractType);
+
+			// Invalid type, don't add
+			if (kComponentTypeMap.find(typeid(T)) == kComponentTypeMap.end()) {
+				//Logger::debug("Attempted to add invalid component type (%s), aborted", typeid(T).name());
+				return;
+			}
+
+			if (components.find(typeid(T)) != components.end()) {
+				//Logger::debug("Component (ID: %d) already exists in Entity ", comp->id);
+				return;
+			}
+
+			components[typeid(T)] = comp;
+			hasComp |= (1 << (comp->id - 1));
+
+			// Emit a signal to the event manager
+			addCompSignal<T>();
+		}
 
 
 		// 0 component base case
@@ -163,7 +183,7 @@ namespace NoxEngine {
 
 
 		// Gets the component with the type provided. If no such comp -> through error and return
-		template <typename T> T *getComp();
+		template <typename T> T* getComp();
 
 
 		// Setter: entity-level enable
