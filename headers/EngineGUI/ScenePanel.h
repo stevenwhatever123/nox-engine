@@ -1,12 +1,8 @@
 #pragma once
 
 // Core GUI
-#include "EngineGUI.h"
-#include <Renderer.h>
-
-#include <GameState.h>
-#include "EngineGUI/PresetObject.h"
-
+#include <Core/Renderer.h>
+#include <Core/GameState.h>
 
 using NoxEngine::GameState;
 namespace NoxEngineGUI {

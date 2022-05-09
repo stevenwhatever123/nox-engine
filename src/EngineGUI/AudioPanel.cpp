@@ -1,4 +1,5 @@
 #include <EngineGUI/AudioPanel.h>
+#include <Managers/IOManager.h>
 
 using namespace NoxEngine;
 

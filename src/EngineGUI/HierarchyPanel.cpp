@@ -1,12 +1,10 @@
+#include <Core/Entity.h>
 #include <EngineGUI/HierarchyPanel.h>
-
 #include <EngineGUI/ImGuiWidgets.h>
-
-#include <Entity.h>
-#include <IComponent.h>
-#include <PositionComponent.h>
-#include <RenderableComponent.h>
-#include <GameManager.h>
+#include <Components/IComponent.h>
+#include <Components/PositionComponent.h>
+#include <Components/RenderableComponent.h>
+#include <Managers/GameManager.h>
 
 using namespace NoxEngine;
 

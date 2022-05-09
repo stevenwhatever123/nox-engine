@@ -1,13 +1,13 @@
 #include <EngineGUI/InspectorPanel.h>
 
-#include <IOManager.h>
-#include <EventNames.h>
+#include <Managers/IOManager.h>
+#include <Managers/EventNames.h>
 
-#include <Entity.h>
-#include <IComponent.h>
-#include <PositionComponent.h>
-#include <RenderableComponent.h>
-#include <AudioGeometryComponent.h>
+#include <Core/Entity.h>
+#include <Components/IComponent.h>
+#include <Components/PositionComponent.h>
+#include <Components/RenderableComponent.h>
+#include <Components/AudioGeometryComponent.h>
 
 using namespace NoxEngine;
 
@@ -62,11 +62,6 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 					// Begin: grey out
 					ImGui::BeginDisabled(!enable);
-
-					// TODO: Hook it up with RendObj in the renderer
-					// 1. create transform matrix
-					// 2. submit it to renderer updateTransformationMatrix(matrix, IRenderable)
-					//	  (impl: loop through rendObjs, check pointers match. O(N))
 
 					ImGui::DragFloat3("XYZ", &pos->x, 0.01f);
 					ImGui::TreePop();

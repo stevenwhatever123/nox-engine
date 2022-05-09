@@ -1,11 +1,11 @@
 #pragma once
 
 #include <EngineGUI/EngineGUI.h>
-#include "EngineGUI/AnimationPanel.h"
-#include "EngineGUI/AudioPanel.h"
-#include "EngineGUI/ScenePanel.h"
-#include "EngineGUI/PresetObjectPanel.h"
-#include "EngineGUI/ImGuizmoTool.h"
+#include <EngineGUI/AnimationPanel.h>
+#include <EngineGUI/AudioPanel.h>
+#include <EngineGUI/ScenePanel.h>
+#include <EngineGUI/PresetObjectPanel.h>
+#include <EngineGUI/ImGuizmoTool.h>
 
 using namespace NoxEngine;
 
