@@ -59,6 +59,9 @@ workspace "NoxEngine"
 		targetdir "build"
 		justmycode "Off"
 
+		defines { "NOMINMAX" }
+		disablewarnings { "4005" }
+
 		includedirs {
 			"headers/",
 			"libs/",
@@ -93,6 +96,7 @@ workspace "NoxEngine"
 			"user32",
 			"gdi32",
 			"opengl32",
+			"Shlwapi.lib",
 			"glfw",
 			"glm",
 			"glad",

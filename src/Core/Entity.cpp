@@ -148,10 +148,11 @@ bool Entity::isEnabled(u32 bit) {
 	return _isEnabled & (1 << (bit - 1));
 }
 
-void Entity::tick(time_type dt) {
+void Entity::tick(time_type dt, time_type currentTime) {
 	const auto script = getComp<ScriptComponent>();
+
 	if(script) {
-		script->tick(dt);
+		script->tick(dt, currentTime);
 	}
 }
 

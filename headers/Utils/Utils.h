@@ -1,5 +1,8 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+#include "NoxEngineWindows.h"
+
 #include <Core/Types.h>
 
 namespace NoxEngineUtils {
@@ -17,6 +20,10 @@ namespace NoxEngineUtils {
 			~Logger();
 	};
 
+	class FileUtils {
+		public:
+			static FILETIME getLastWriteTime(const String& file_path);
+	};
 
 	class MemUtils {
 		public:

@@ -411,7 +411,7 @@ void Renderer::createElementArray(IRenderable* mesh)
 	if(mesh->use_indices ) {
 		
 		const auto indices = mesh->getIndices();
-		numberOfElements += indices.size();
+		numberOfElements += (i32)indices.size();
 
 		i32 *data = elements.data();
 

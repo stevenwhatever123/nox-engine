@@ -53,7 +53,7 @@ namespace NoxEngine {
 
 	public:
 		// unique entity id
-		i32 id;
+		u32 id;
 
 		// A human-readable identifier - not necessarily unique
 		char* name;
@@ -82,7 +82,8 @@ namespace NoxEngine {
 		// Flag for removal
 		bool remove;
 
-		void tick(time_type dt);
+		void tick(time_type dt, time_type currentTime);
+		void updateComponents();
 
 	protected:
 		// Constructors usable by Scene

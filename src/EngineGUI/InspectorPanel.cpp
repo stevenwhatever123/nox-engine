@@ -1,9 +1,11 @@
 #include <EngineGUI/InspectorPanel.h>
 
 #include <Core/Entity.h>
+#include <Managers/IOManager.h>
 #include <Components/IComponent.h>
 #include <Components/PositionComponent.h>
 #include <Components/RenderableComponent.h>
+#include <Components/ScriptComponent.h>
 
 using namespace NoxEngine;
 
@@ -11,7 +13,7 @@ using namespace NoxEngine;
 void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *params) {
 
 	// Variables
-	std::string name = PANEL_NAME_MAP[PanelName::Inspector];
+	String name = PANEL_NAME_MAP[PanelName::Inspector];
 
 	// Window Begin
 	ImGui::Begin(name.c_str());
@@ -22,16 +24,15 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 	// No entity is selected - show text
 	if (params->selectedEntity < 0 || params->selectedEntity+1 > state->activeScene->entities.size()) {
 		ImGui::Text("No entity selected.");
-	}
+	} else {
 
-	// Otherwise, loop through the components of the selected entity
-	else {
+		// Otherwise, loop through the components of the selected entity
 		Entity* ent = state->activeScene->entities[params->selectedEntity];
 
 		// Entity name
 		if (ImGui::CollapsingHeader(ent->name)) {
 
-			int width = ImGui::GetContentRegionAvail().x;
+			f32 width = ImGui::GetContentRegionAvail().x;
 
 			// PositionComponent
 			if (ent->containsComps(PositionFlag)) {
@@ -107,8 +108,29 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				if (remove) {
 					ent->removeComp<RenderableComponent>();
 				}
+
 				ImGui::Separator();
 			}
+
+
+			if(ent->containsComps(ScriptFlag)) {
+
+				if(ImGui::TreeNode("Script")) {
+
+					ScriptComponent *script = ent->getComp<ScriptComponent>();
+
+					ImGui::Text("%s", script->getScript());
+					ImGui::SameLine();
+
+					if(ImGui::Button("Change")) {
+						String file = IOManager::Instance()->PickFile();
+						script->setScript(file.c_str());
+					}
+
+					ImGui::TreePop();
+				}
+			}
+
 
 			// LightSourceComponent
 			// TODO: implement

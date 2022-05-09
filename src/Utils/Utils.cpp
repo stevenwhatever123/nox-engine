@@ -1,6 +1,5 @@
 #include <Utils/Utils.h>
 #include <Utils/MemAllocator.h>
-#include <Windows.h>
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -29,6 +28,17 @@ void Logger::debug(std::string fmt_str, ...) {
 	fflush(stdout);
 
 }
+
+FILETIME FileUtils::getLastWriteTime(const String& file) {
+	WIN32_FILE_ATTRIBUTE_DATA file_attrib;
+	i32 success = GetFileAttributesExA(file.c_str(), GetFileExInfoStandard, &file_attrib);
+	if(success == 0) {
+		LOG_DEBUG("Couldn't get latest file write time: %s", file.c_str());
+	}
+	assert(success == 1);
+	return file_attrib.ftLastWriteTime;
+}
+
 
 void _print_cwd(const char *str, i32 line) {
 	static char buf[240];

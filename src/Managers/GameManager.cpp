@@ -1,4 +1,5 @@
 #include <Managers/GameManager.h>
+#include <Managers/LiveReloadManager.h>
 
 #include <filesystem>
 #include <Core/Entity.h>
@@ -44,13 +45,13 @@ void GameManager::init() {
 void GameManager::update() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	update_livereloads();
 	update_inputs();
 	update_ecs();
-	update_audio();
-	update_renderer();
 	update_gui();
-
+	update_audio();
 	update_animation();
+	update_renderer();
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)) {
 		should_close = true;
@@ -293,14 +294,12 @@ void NoxEngine::GameManager::init_scripts()
 	// scriptsManager->Init();
 	// scriptsManager->DoLuaFile("assets/scripts/test.lua");
 
-
-
 	String file_name = "assets/meshes/card.fbx";
 
 	game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
 	MeshScene &meshScene = game_state.meshScenes.find(file_name)->second;
 
-	i32 index = game_state.activeScene->entities.size();
+	i32 index = (i32)game_state.activeScene->entities.size();
 	// We're treating every mesh as an entity FOR NOW
 	for (u32 i = 0; i < meshScene.meshes.size(); i++)
 	{
@@ -342,32 +341,23 @@ void GameManager::main_contex_ui() {
 	ImGui::End();
 }
 
-void GameManager::update_gui() {
+void GameManager::update_livereloads() {
 
-	ImGuiIO& io = ImGui::GetIO();
-	
-	char windowTitle[64];
-	snprintf(windowTitle, 64, "%s - FPS %.3f", title.c_str(), io.Framerate);
-	glfwSetWindowTitle(window, windowTitle);
+	LiveReloadManager *lrManager = LiveReloadManager::Instance();
+	lrManager->checkFiles();
 
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-	ImGui::PushFont(font);
-	
-	NoxEngineGUI::updateGUI(&ui_params);
-	NoxEngineGUI::updateAudioPanel(&game_state);
-	NoxEngineGUI::updateAnimationPanel(&game_state);
-	NoxEngineGUI::updatePresetObjectPanel(&game_state);
-	NoxEngineGUI::updateScenePanel(&game_state);
-	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
-	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
+}
 
-	ImGui::PopFont();
-	ImGui::Render();
+void GameManager::update_inputs() {
+	glfwPollEvents();
 
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	if(keys['W']) { camera->moveFwdBy(0.1f); }
+	if(keys['S']) { camera->moveFwdBy(-0.1f); }
+	if(keys['D']) { camera->moveHorBy(-0.1f); }
+	if(keys['A']) { camera->moveHorBy(0.1f); }
+	if(keys[' ']) { camera->moveVerBy(0.1f); }
+	if(keys['K']) { camera->moveVerBy(-0.1f); }
+
 }
 
 void GameManager::update_ecs() {
@@ -377,7 +367,7 @@ void GameManager::update_ecs() {
 	const auto entities = game_state.activeScene->entities;
 	for (i32 i = 0; i < nEntities; i++)
 	{
-		entities[i]->tick(deltaTime);
+		entities[i]->tick(deltaTime, currentTime);
 	}
 
 
@@ -416,6 +406,35 @@ void GameManager::update_ecs() {
 	updateNeededECS = false;
 }
 
+void GameManager::update_gui() {
+
+	ImGuiIO& io = ImGui::GetIO();
+	
+	char windowTitle[64];
+	snprintf(windowTitle, 64, "%s - FPS %.3f", title.c_str(), io.Framerate);
+	glfwSetWindowTitle(window, windowTitle);
+
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+	ImGui::PushFont(font);
+	
+	NoxEngineGUI::updateGUI(&ui_params);
+	NoxEngineGUI::updateAudioPanel(&game_state);
+	NoxEngineGUI::updateAnimationPanel(&game_state);
+	NoxEngineGUI::updatePresetObjectPanel(&game_state);
+	NoxEngineGUI::updateScenePanel(&game_state);
+	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
+	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
+	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
+
+	ImGui::PopFont();
+	ImGui::Render();
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+
 void GameManager::update_audio() {
 	// Sync audio manager with the game state's audio repo
 	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
@@ -428,17 +447,6 @@ void GameManager::update_audio() {
 	audioManager->Update();
 }
 
-void GameManager::update_inputs() {
-	glfwPollEvents();
-
-	if(keys['W']) { camera->moveFwdBy(0.1f); }
-	if(keys['S']) { camera->moveFwdBy(-0.1f); }
-	if(keys['D']) { camera->moveHorBy(-0.1f); }
-	if(keys['A']) { camera->moveHorBy(0.1f); }
-	if(keys[' ']) { camera->moveVerBy(0.1f); }
-	if(keys['K']) { camera->moveVerBy(-0.1f); }
-
-}
 
 void GameManager::update_animation() {
 

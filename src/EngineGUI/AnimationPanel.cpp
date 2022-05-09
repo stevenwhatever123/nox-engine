@@ -164,7 +164,7 @@ void NoxEngineGUI::updateSequencer(NoxEngine::MeshScene& currentScene)
 			if (selectedEntry < 0)
 				selectedEntry = -1;
 			if (selectedEntry > currentScene.allNodes.size() - 1)
-				selectedEntry = currentScene.allNodes.size() - 1;
+				selectedEntry = (i32)currentScene.allNodes.size() - 1;
 
 			Sequencer(&mySequence, &selectedFrame, &expanded, &selectedEntry,
 				&firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND
