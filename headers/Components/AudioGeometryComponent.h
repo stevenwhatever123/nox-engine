@@ -23,7 +23,9 @@ namespace NoxEngine {
 
 		//void displayUI() override;
 
-		void loadMesh(const MeshScene* meshScene);
+		void clearMesh();
+
+		void loadMesh(MeshScene* meshScene);
 		void generateBoundingBox(const Array<vec3>& verts);
 		void generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4);
 

@@ -26,7 +26,15 @@ AudioGeometryComponent::AudioGeometryComponent() {
 	v4 = vec3(0);
 }
 
-void AudioGeometryComponent::loadMesh(const MeshScene* meshScene) {
+void AudioGeometryComponent::clearMesh() {
+	vertices.clear();
+	faces.clear();
+	indices.clear();
+}
+
+void AudioGeometryComponent::loadMesh(MeshScene* meshScene) {
+
+	clearMesh();
 
 	// Copy all vertices, faces, indices over
 	for (u32 i = 0; i < meshScene->meshes.size(); i++) {
@@ -44,12 +52,17 @@ void AudioGeometryComponent::loadMesh(const MeshScene* meshScene) {
 	// (Pattern as per GridObject)
 	texCoords.resize(vertices.size());
 	normals.resize(vertices.size());
+
+	// Get a reference of the MeshScene
+	this->meshScene = meshScene;
 }
 
 void AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts) {
 
 	// no vertices - cannot generate bounding box
 	if (verts.size() == 0) return;
+
+	clearMesh();
 
 	// find the min/max x,y,z respectively (more efficient to find both min and max in 1 pass)
 	vec3 l = verts[0], u = verts[0];
@@ -105,7 +118,9 @@ void AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts) {
 // TODO: planar test
 // TODO: cross product to ensure CCW
 void AudioGeometryComponent::generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4) {
-	
+
+	clearMesh();
+
 	vertices = { _v1, _v2, _v3, _v4 };
 	faces = {
 		{0, 1, 2},

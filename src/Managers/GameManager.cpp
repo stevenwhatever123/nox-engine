@@ -84,7 +84,12 @@ void GameManager::createAudioGeometry(Entity* ent, IAudioGeometry* igeo) {
 	igeo->geometryId = audioManager->createGeometry(ent);
 
 	// Add to renderer
-	renderer->addObject(ent, igeo, false);
+	renderer->addObject(ent, igeo, ComponentType::AudioGeometryType);
+
+	// Get the MeshScene reference, set the rendObjId of meshes to be the newly added object in the renderer
+	for (u32 i = 0; i < igeo->meshScene->meshes.size(); i++) {
+		igeo->meshScene->meshes[i]->rendObjId = igeo->rendObjId;
+	}
 
 	// Update renderer
 	// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion
@@ -201,7 +206,6 @@ void GameManager::init_events() {
 			String file_name = va_arg(args, char*);
 			Entity* ent = va_arg(args, Entity*); 
 			AudioGeometryComponent* geoComp = ent->getComp<AudioGeometryComponent>();
-			IAudioGeometry* igeo = geoComp->CastType<IAudioGeometry>();
 
 			game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
 			MeshScene& meshScene = game_state.meshScenes.find(file_name)->second;
@@ -232,7 +236,7 @@ void GameManager::init_events() {
 				IRenderable* rend = rendComp->CastType<IRenderable>();
 
 				if (!rend->registered) {
-					renderer->addObject(ent, rend);
+					renderer->addObject(ent, rend, ComponentType::RenderableType);
 					rend->registered = true;
 
 					// Update renderer
@@ -254,7 +258,7 @@ void GameManager::init_events() {
 			const std::type_index compTypeId = va_arg(args, std::type_index);
 
 			if (compTypeId == typeid(RenderableComponent)) {
-				renderer->removeObject(ent, true);
+				renderer->removeObject(ent, ComponentType::AudioGeometryType);
 				// TODO-OPTIMIZATION: Remove in batches every X ms, shift the still-valid indices to take the free space
 			}
 
@@ -267,7 +271,7 @@ void GameManager::init_events() {
 				// Disable the loaded geometry
 				// TODO: remove it
 				audioManager->setGeometryActive(igeo->geometryId, false);
-				renderer->removeObject(ent, false);
+				renderer->removeObject(ent, ComponentType::RenderableType);
 			}
 
 			// ...
@@ -315,7 +319,7 @@ void GameManager::init_renderer() {
 	renderer->setFrameBufferToTexture();
 
 	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
-	// renderer->addObject(obj);
+	//renderer->addObject(obj);
 	renderer->updateBuffers();
 }
 
@@ -556,6 +560,8 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
+
+	// Note (Vincent): Need to skip meshScenes or meshes that are removed from the renderer
 	auto meshSceneStart = game_state.meshScenes.begin();
 	auto meshSceneEnd = game_state.meshScenes.end();
 	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
@@ -568,19 +574,19 @@ void GameManager::update_renderer() {
 			if (node->meshIndex.size() > 0)
 			{
 				Mesh* mesh = currentMeshScene.meshes[node->meshIndex[0]];
+				glm::mat4 transformation(0);
 				if (node->hasAnimations())
 				{
-					glm::mat4 transformation = node->getGlobalTransformation(
+					transformation = node->getGlobalTransformation(
 						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
 						currentMeshScene.accumulator, currentMeshScene.timeStep,
 						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
-					renderer->updateObjectTransformation(transformation, mesh);
 				}
 				else
 				{
-					glm::mat4 transformation = node->transformation;
-					renderer->updateObjectTransformation(transformation, mesh);
+					transformation = node->transformation;
 				}
+				renderer->updateObjectTransformation(transformation, mesh->rendObjId);
 			}
 		}
 	}

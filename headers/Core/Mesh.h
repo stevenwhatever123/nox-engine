@@ -21,8 +21,6 @@ namespace NoxEngine {
 
 		String ambTexName;
 		String normTexName;
-		
-		void* CastType(const i32 castID);
 	
 	};
 }

@@ -48,5 +48,9 @@ namespace NoxEngine {
 			GLenum glRenderType;
 
 			bool registered;
+
+			// id of this IRenderable in the renderer
+			u32 rendObjId;
+	
 	};
 }

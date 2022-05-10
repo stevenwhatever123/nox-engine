@@ -1,10 +1,7 @@
 #pragma once
 
-// 3rd Party Include
-// #include <glm/gtc/matrix_transform.hpp>
-// #include <glm/gtc/type_ptr.hpp>
-
-// Engine Include
+#include <Core/Types.h>
+#include <Components/ComponentType.h>
 #include <Components/IRenderable.h>
 #include <Components/IPosition.h>
 #include <Managers/Singleton.h>
@@ -27,11 +24,11 @@ namespace NoxEngine {
 		i32 endInd; // Start and end indixes in the a united element array 
 		u32 normalTexture;
 		u32 ambientTexture; // Texture handlers
-		mat4 pos;
+		//mat4 pos;
 		mat4 transformation;
 
 		// Probably a better idea to store the type of the meshSrc, e.g. type_index meshType;
-		bool useAnimation;
+		ComponentType componentType;
 	};
 	
 	/*
@@ -54,8 +51,8 @@ namespace NoxEngine {
 		~Renderer();
 
 		// Add object to renderer to render
-		void addObject(Entity* ent, IRenderable* meshSrc, bool useAnimation = true);
-		void removeObject(Entity* ent, bool useAnimation);
+		void addObject(Entity* ent, IRenderable* meshSrc, ComponentType componentType);
+		void removeObject(Entity* ent, ComponentType componentType);
 		void clearObject();
 		
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
@@ -91,7 +88,7 @@ namespace NoxEngine {
 		void updateCamera();
 		void updateLightPos(f32 x, f32 y, f32 z);
 
-		void updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable);
+		void updateObjectTransformation(glm::mat4 transformation, u32 rendObjId);
 
 		private:
 		// The shaders
@@ -104,7 +101,7 @@ namespace NoxEngine {
 
 		// The cur camera
 		Camera* camera;
-		Array<RendObj> objects;
+		std::map<u32, RendObj> objects;
 
 
 		// Global buffers of attributes
@@ -151,6 +148,8 @@ namespace NoxEngine {
 		GLuint setTexture(const String texturePath, const char* uniName, i32 num);
 
 
+	private:
+		u32 nextObjectId;
 	};
 
 }

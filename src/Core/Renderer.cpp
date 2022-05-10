@@ -29,6 +29,8 @@ Renderer::~Renderer()
     texCoords.clear();
     elements.clear();
 
+	// TODO: clear objects map
+
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &NBO);
@@ -47,7 +49,7 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 	elements(0),
 	projection(0),
 	cam(0),
-	objects(0),
+	objects(),
 	VBO(0),
 	NBO(0),
 	TCBO(0),
@@ -66,7 +68,8 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 	textureToRenderTo(0),
 	tex(0),
 	curFBO(0),
-	color(0)
+	color(0),
+	nextObjectId(0)
 {
 
 	// Initialise OpenGl
@@ -157,14 +160,14 @@ void Renderer::updateBuffers() {
 }
 
 
-void Renderer::addObject(Entity *ent, IRenderable *meshSrc, bool useAnimation)
+void Renderer::addObject(Entity *ent, IRenderable *meshSrc, ComponentType componentType)
 {
 
     // Add a mesh to the container
     RendObj newObj;
     newObj.ent = ent;
 	newObj.meshSrc = meshSrc;
-	newObj.useAnimation = useAnimation;
+	newObj.componentType = componentType;
 
 	newObj.renderType = meshSrc->glRenderType;
     newObj.startInd = (i32)elements.size();
@@ -189,21 +192,31 @@ void Renderer::addObject(Entity *ent, IRenderable *meshSrc, bool useAnimation)
 
 	newObj.endInd = i32(elements.size());
     newObj.transformation = mat4(1.0f);
-	objects.push_back(newObj);
+	objects[nextObjectId] = newObj;
+
+	// give the IRenderable a reference to this rendObj
+	meshSrc->rendObjId = nextObjectId++;
 
     LOG_DEBUG("Renderer object count: %i\n", objects.size());
 }
 
-void Renderer::removeObject(Entity* ent, bool useAnimation) {
+void Renderer::removeObject(Entity* ent, ComponentType componentType) {
 
     // Note: This calls the destructor on RendObj
-    objects.erase(
-        std::remove_if(objects.begin(), objects.end(), 
-			[ent, useAnimation](RendObj obj) { 
-					return obj.ent == ent && obj.useAnimation == useAnimation; 
-			}),
-        objects.end()
-    );
+   // objects.erase(
+   //     std::remove_if(objects.begin(), objects.end(), 
+			//[ent, useAnimation](RendObj obj) { 
+			//		return obj.ent == ent && obj.useAnimation == useAnimation; 
+			//}),
+   //     objects.end()
+   // );
+
+	auto itr = objects.begin();
+	auto endItr = objects.end();
+	for (; itr != endItr;) {
+		if (itr->second.ent == ent && itr->second.componentType == componentType) objects.erase(itr);
+		else itr++;
+	}
     
     LOG_DEBUG("Renderer object count: %i\n", objects.size());
 }
@@ -268,11 +281,11 @@ void Renderer::draw() {
 		if (!ent->isEntityEnabled()) continue;
 
 		// Renderable
-		if (objects[i].useAnimation) {
+		if (objects[i].componentType == ComponentType::RenderableType) {
 			if (!ent->isEnabled<RenderableComponent>()) continue;
 		}
 		// AudioGeometry
-		else {
+		else if (objects[i].componentType == ComponentType::AudioGeometryType) {
 			if (!ent->isEnabled<AudioGeometryComponent>() || !ent->getComp<AudioGeometryComponent>()->render) continue;
 		}
 
@@ -581,37 +594,12 @@ void Renderer::updateLightPos(float x, float y, float z)
     program->set3Float("lightPosition",x, y, z);
 }
 
-void Renderer::updateObjectTransformation(mat4 transformation, IRenderable* pRenderable)
+void Renderer::updateObjectTransformation(mat4 transformation, u32 rendObjId)
 {
-	for (u32 i = 0; i < objects.size(); i++)
-	{
-		// After the introduction of AudioGeometryComponent, a RendObj does not necessarily have a RenderableComponent.
-		// 
-		// pRenderable is a Mesh2 (-> RenderableComponent -> IRenderable) from MeshScene
-		// MeshScene represents a .FBX file.
-		// For RenderableComponent:		Create an entity with a RenderableComponent per Mesh2 in MeshScene. RenderableComponent = Mesh2
-		//								We want to apply the local transformation matrix (for animation)
-		// For AudioGeometryComponent:	Directly load the MeshScene in AudioGeometryComponent, so the IRenderable* pointer is lost.
-		//								We can either:
-		//								1/ Use RenderableComponent's transformation (so that geometry aligns with mesh animation)
-		//								2/ Store MeshScene when flattening the Mesh2s, check against MeshScene * instead? 
-		//								3/ Ignore animation, meaning geometry is decoupled from animation and is always static
-		//								Current approach is 3, but (2) can be achieved with an extra flag
-		
-		// 1. Has Renderable, No  AudioGeoemtry: mesh with animation, use transformation
-		// Two cases with meshSource = AudioGeometry:
-		// 2. No  Renderable, Has AudioGeoemtry: mesh (potentially with animation), use approach (3), ignore
-		// 3. Has Renderable, Has AudioGeometry: mesh (potentially with animation), use approach (3), ignore
-		
-		// Ignore animation flag is set when adding a RendObj that uses AudioGeometry as meshSrc
-		if (!objects[i].useAnimation) continue;
-
-		IRenderable* rend = objects[i].ent->getComp<RenderableComponent>()->CastType<IRenderable>();
-		if (rend == pRenderable)
-		{
-			objects[i].transformation = transformation;
-			//program->set4Matrix("modelMatrix", transformation);
-			//std::cout << "Welcome to the Matrix" << "\n";
-		}
+	const auto obj = objects.find(rendObjId);
+	if (obj != objects.end()) {
+		obj->second.transformation = transformation;
 	}
+	//program->set4Matrix("modelMatrix", transformation);
+	//std::cout << "Welcome to the Matrix" << "\n";
 }
