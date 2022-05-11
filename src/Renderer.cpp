@@ -611,9 +611,9 @@ void Renderer::setupSkybox() {
 
 }
 
-void Renderer::setSkyBoxImages(const Array<String> &skyboxImages)
+void Renderer::setSkyBoxImages(const Array<String> &_skyboxImages)
 {
-	this->skyboxImages = skyboxImages;
+	skyboxImages = _skyboxImages;
 	skyBoxLoadTexture();
 }
 
@@ -691,8 +691,28 @@ void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable*
         if (objects[i].objPtr == pRenderable)
         {
             objects[i].transformation = transformation;
-            //program->set4Matrix("modelMatrix", transformation);
-            //std::cout << "Welcome to the Matrix" << "\n";
         }
     }
+}
+
+
+const char* Renderer::getSkyboxImagePath(u32 skyboxPosition) {
+	// positions are in this order: +x, -x, +y, -y, +z, -z
+	return skyboxImages[skyboxPosition].c_str();
+}
+
+void Renderer::setSkyboxImage(const String& image_path, u32 skyboxPosition) {
+	// positions are in this order: +x, -x, +y, -y, +z, -z
+
+	i32 width;
+	i32 height;
+	i32 channels;
+
+	skyboxImages[skyboxPosition] = image_path;
+
+	u8 *TextureData = stbi_load(image_path.c_str(), &width, &height, &channels, 0);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + skyboxPosition, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
+	stbi_image_free(TextureData);
+
+
 }

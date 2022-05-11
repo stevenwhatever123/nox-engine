@@ -183,12 +183,12 @@ void GameManager::init_camera() {
 
 void GameManager::init_shaders() {
 
-	programs.emplace_back(Array<ShaderFile>{
+	programs.push_back(Array<ShaderFile>{
 		{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
 	});
 
-	programs.emplace_back(Array<ShaderFile>{
+	programs.push_back(Array<ShaderFile>{
 		{"assets/shaders/vertexShader.vs", GL_VERTEX_SHADER, 0},
 		{ "assets/shaders/fragmentShader.fs", GL_FRAGMENT_SHADER, 0 }
 	});
@@ -208,9 +208,6 @@ void GameManager::init_renderer() {
 	renderer->setProgram(&programs[1]);
 	renderer->useProgram();
 	// programs[1].use();
-
-
-
 	//set images
 
 	/*
@@ -317,18 +314,17 @@ void GameManager::update_audio() {
 void GameManager::update_inputs() {
 	glfwPollEvents();
 
-	if(keys['W']) { camera->turnHorBy(0.1f); }
-	if(keys['S']) { camera->turnHorBy(-0.1f); }
-	if(keys['D']) { camera->turnVerBy(-0.1f); }
-	if(keys['A']) { camera->turnVerBy(0.1f); }
+	if(keys['W'])  { camera->turnHorBy(0.1f); }
+	if(keys['S'])  { camera->turnHorBy(-0.1f); }
+	if(keys['D'])  { camera->turnVerBy(-0.1f); }
+	if(keys['A'])  { camera->turnVerBy(0.1f); }
 	if(keys[' '])  { camera->moveHorBy(0.1f); }
 	if(keys['L'])  { camera->moveHorBy(-0.1f); }
 
-	
-	if (keys['G']) { camera->turndirUP(0.1f); }
-	if (keys['B']) { camera->turndirDOWN(0.1f); }
-	if (keys['N']) { camera->turndirRIGHT(0.1f); }
-	if (keys['V']) { camera->turndirLEFT(0.1f); }
+	// if (keys['G']) { camera->turndirUP(0.1f); }
+	// if (keys['B']) { camera->turndirDOWN(0.1f); }
+	// if (keys['N']) { camera->turndirRIGHT(0.1f); }
+	// if (keys['V']) { camera->turndirLEFT(0.1f); }
 
 }
 
@@ -364,7 +360,6 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
-	/*
 	auto meshSceneStart = game_state.meshScenes.begin();
 	auto meshSceneEnd = game_state.meshScenes.end();
 	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
@@ -394,22 +389,16 @@ void GameManager::update_renderer() {
 	 	}
 	}
 
-	*/
-
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
 	
-	// Skybox Shader
-	// current_program = &programs[1];
-	renderer->setProgram(current_program);
-	// renderer->useProgram();
+	renderer->setProgram(&programs[1]);
 	renderer->drawSkyBox();
 
 	// The normal shader
-	// current_program = &programs[0];
-	// renderer->setProgram(current_program);
-	// renderer->useProgram();
+	renderer->setProgram(&programs[0]);
+	renderer->useProgram();
 
-	// renderer->draw();
+	renderer->draw();
 }
 

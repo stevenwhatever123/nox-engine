@@ -42,29 +42,9 @@ void Camera::generateCameraParameters() {
 	lookingAt = glm::normalize(front);
 
 	cameraTransf = glm::lookAt(currCamPos, currCamPos + lookingAt, topPointingAt);
-	cameraTransf[3][0] = 0;
-	cameraTransf[3][1] = 0;
-	cameraTransf[3][2] = 0;
-
-	//std::cout << Pitch << "  " << Yaw << std::endl;
-
-	// Rotate cam matrix
-	
-	/*
-	mat4 translate_neg = glm::translate(cameraTransf, -currCamPos);
-	mat4 translate_pos = glm::translate(cameraTransf, currCamPos);
-
-	mat4 rotation = glm::rotate(mat4(1), glm::radians(user_rotate.x), vec3(1.0f, 0.0f, 0.0f) );
-	rotation = rotation * glm::rotate(mat4(1), glm::radians(user_rotate.y), vec3(0.0f, 1.0f, 0.0f) );
-	rotation = rotation * glm::rotate(mat4(1), glm::radians(user_rotate.z), vec3(0.0f, 0.0f, 1.0f) );
-	
-	
-	
-	// glm::mat4 rotation = glm::rotate( , glm::radians(user_rotate.x), glm::vec3(0.0f, 1.0f, 0.0f));
-	std::cout << Pitch << "  " << Yaw  << std::endl;
-	cameraTransf = cameraTransf * translate_neg * rotation * translate_pos;
-	*/
-
+	// cameraTransf[3][0] = 0;
+	// cameraTransf[3][1] = 0;
+	// cameraTransf[3][2] = 0;
 
 }
 
@@ -77,49 +57,36 @@ vec3 Camera::getLookingAt() {
 
 void Camera::moveHorBy(f32 shift) {
 	user_shift.x -= shift;
-	// generateCameraParameters();
 }
 
 void Camera::moveFwdBy(f32 shift) {
 	user_shift.z -= shift;
-	// generateCameraParameters();
 }
 
 void Camera::moveVerBy(f32 shift) {
 	user_shift.y -= shift;
-	// generateCameraParameters();
 }
 
 void Camera::turnHorBy(f32 shift) {
 	user_rotate.x += shift;
-	// generateCameraParameters();
 }
 
 void Camera::turnVerBy(f32 shift) {
 	user_rotate.y += shift;
-	// generateCameraParameters();
 }
-
-
-
-
 
 void Camera::turndirUP(f32 shift) {
 	Pitch += shift;
-	generateCameraParameters();
 }
 
 void Camera::turndirDOWN(f32 shift) {
 	Pitch -= shift;
-	generateCameraParameters();
 }
 
 void Camera::turndirLEFT(f32 shift) {
 	Yaw -= shift;
-	generateCameraParameters();
 }
 
 void Camera::turndirRIGHT(f32 shift) {
 	Yaw += shift;
-	generateCameraParameters();
 }

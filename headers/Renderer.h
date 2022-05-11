@@ -21,7 +21,6 @@
 
 
 namespace NoxEngine {
-
 	// The objects to render
 	struct RendObj
 	{
@@ -59,12 +58,9 @@ namespace NoxEngine {
 
 		u32 skyVAO;
 		u32 skyVBO;
-		float skyBoxVertices[108];
-
-		
 
 		// skybox images
-		std::vector<std::string> skyboxImages;
+		Array<String> skyboxImages;
 
 		i32 w;
 		i32 h; // Width and Height of the window/texture to render to
@@ -173,6 +169,8 @@ namespace NoxEngine {
 
 		void updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable);
 
+		void setSkyboxImage(const String& file_path, u32 skyboxPosition);
+		const char* getSkyboxImagePath(u32 skyboxPosition);
 		void setSkyBoxImages(const Array<String> &skyboxImages);
 		void skyBoxLoadTexture();
 		void drawSkyBox();
