@@ -48,6 +48,7 @@ namespace NoxEngine {
 
 	// forward declares
 	class IAudioGeometry;
+	class IAudioSource;
 	
 	// usings
 	using NoxEngineGUI::GUIParams;
@@ -66,7 +67,12 @@ namespace NoxEngine {
 			
 			void createAudioGeometry(Entity* ent, IAudioGeometry* igeo);
 			void addAudioSource(AudioSource audioSource);
+			bool playSound(Entity *ent, IAudioSource *);
+			bool stopSound(Entity* ent, IAudioSource *);
 
+			bool loadAudioSource(Entity* ent, IAudioSource *);
+			bool loadAudioGeometry(Entity* ent, IAudioGeometry *);
+			
 			inline Renderer* GetRenderer() { return renderer; };
 
 			inline bool KeepRunning() { return !should_close; }

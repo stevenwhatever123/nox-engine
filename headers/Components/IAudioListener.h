@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Types.h>
+#include <Core/Types.h>
 
 namespace NoxEngine {
 
@@ -8,7 +8,7 @@ namespace NoxEngine {
 	public:
 		//vec3 vPos;	// Attach ITransform and get position
 		vec3 vVel;
-		vec3 vForward;
-		vec3 vUp;
+		//vec3 vForward;// Attach ITransform and get euler angles rotation
+		//vec3 vUp;		// Attach ITransform and get euler angles rotation
 	};
 }

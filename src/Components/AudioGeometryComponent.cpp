@@ -2,6 +2,9 @@
 
 #include "Core/MeshScene.h"
 
+#include <algorithm>
+#include <iterator>
+
 using namespace NoxEngine;
 
 
@@ -24,6 +27,8 @@ AudioGeometryComponent::AudioGeometryComponent() {
 	v2 = vec3(0);
 	v3 = vec3(0);
 	v4 = vec3(0);
+
+	meshScene = nullptr;
 }
 
 void AudioGeometryComponent::clearMesh() {
@@ -32,20 +37,52 @@ void AudioGeometryComponent::clearMesh() {
 	indices.clear();
 }
 
-void AudioGeometryComponent::loadMesh(MeshScene* meshScene) {
+bool AudioGeometryComponent::loadMesh(MeshScene* meshScene) {
 
 	clearMesh();
 
-	// Copy all vertices, faces, indices over
-	for (u32 i = 0; i < meshScene->meshes.size(); i++) {
-		vertices.insert(vertices.end(), meshScene->meshes[i]->getVertices().begin(), meshScene->meshes[i]->getVertices().end());
-		faces.insert(faces.end(), meshScene->meshes[i]->getFaces().begin(), meshScene->meshes[i]->getFaces().end());
-		indices.insert(indices.end(), meshScene->meshes[i]->getIndices().begin(), meshScene->meshes[i]->getIndices().end());
-	}
+	// Store a reference to the MeshScene
+	this->meshScene = meshScene;
 
-	// Indices are never present using our FBX loader as of (2022-May-09), so we convert face indices to line indices here
-	if (indices.size() == 0) {
-		generateIndicesFromTriangles(faces);
+	// Copy all vertices over, reuse faces and indices
+	for (MeshNode *node : meshScene->allNodes) {
+
+		// No mesh in this node, skip
+		if (node->meshIndex.size() <= 0) continue;
+		
+		// Apply the first frame transformation to the vertices (one by one... quite bad)
+		const Mesh* mesh = meshScene->meshes[node->meshIndex[0]];
+		glm::mat4 transformation;
+		if (node->hasAnimations()) {
+			transformation = node->getGlobalTransformation(
+				meshScene->frameIndex, meshScene->animationIndex,
+				meshScene->accumulator, meshScene->timeStep,
+				meshScene->whichTickFloor, meshScene->whichTickCeil);
+		}
+		else {
+			transformation = node->getTransformation();
+		}
+		
+
+		// Deep copy over vertices and apply transformation
+		//u32 startIdx = vertices.size();
+		//Array<vec3> newVertices = mesh->getVertices();
+		//copy(newVertices.begin(), newVertices.end(), back_inserter(vertices));
+		//for (; startIdx < vertices.size(); startIdx++) {
+		//	vertices[startIdx] = transformation * vec4(vertices[startIdx], 1.0f);
+		//}
+
+		for (const vec3 vertex : mesh->getVertices()) {
+			vertices.push_back( transformation * vec4(vertex, 1.0f) );
+		}
+
+		// Reuse indices
+		faces.insert(faces.end(), mesh->getFaces().begin(), mesh->getFaces().end());
+		indices.insert(indices.end(), mesh->getIndices().begin(), mesh->getIndices().end());
+	
+		// Indicate there's no animation for this mesh node, and use identity transformation
+		node->nodeAnimTransformation.clear();
+		node->transformation = mat4(1.0f);
 	}
 
 	// Even though we don't use texcoords / normals, we still need to fill in dummy data?
@@ -53,14 +90,18 @@ void AudioGeometryComponent::loadMesh(MeshScene* meshScene) {
 	texCoords.resize(vertices.size());
 	normals.resize(vertices.size());
 
-	// Get a reference of the MeshScene
-	this->meshScene = meshScene;
+	// Indices are never present using our FBX loader as of (2022-May-09), so we convert face indices to line indices here
+	if (indices.size() == 0) {
+		return generateIndicesFromTriangles(faces);
+	}
+
+	return true;
 }
 
-void AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts) {
+bool AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts) {
 
 	// no vertices - cannot generate bounding box
-	if (verts.size() == 0) return;
+	if (verts.size() == 0) return false;
 
 	clearMesh();
 
@@ -111,13 +152,13 @@ void AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts) {
 		{4,0,7}
 	};
 
-	generateIndicesFromTriangles(faces);
+	return generateIndicesFromTriangles(faces);
 }
 
 // Assume the 4 vertices is in CCW, and is planar
 // TODO: planar test
 // TODO: cross product to ensure CCW
-void AudioGeometryComponent::generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4) {
+bool AudioGeometryComponent::generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4) {
 
 	clearMesh();
 
@@ -127,12 +168,12 @@ void AudioGeometryComponent::generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v
 		{0, 2, 3}
 	};
 
-	generateIndicesFromTriangles(faces);
+	return generateIndicesFromTriangles(faces);
 }
 
 
 
-void AudioGeometryComponent::generateIndicesFromTriangles(const Array<ivec3>& _faces) {
+bool AudioGeometryComponent::generateIndicesFromTriangles(const Array<ivec3>& _faces) {
 
 	u32 nExistingIndices = indices.size();
 	indices.resize(indices.size() + _faces.size() * 6);
@@ -146,4 +187,6 @@ void AudioGeometryComponent::generateIndicesFromTriangles(const Array<ivec3>& _f
 		indices[start + 1] = indices[start + 2] = face[1];
 		indices[start + 3] = indices[start + 4] = face[2];
 	}
+
+	return true;
 }

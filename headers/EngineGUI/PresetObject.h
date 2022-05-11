@@ -29,7 +29,7 @@ namespace NoxEngineGUI {
 		AreaLight,
 
 		// Audio
-		AudioSourceComponent,
+		AudioSource,
 
 		// UI
 		Text2D, Text3D,

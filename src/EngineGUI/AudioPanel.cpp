@@ -21,6 +21,7 @@ void NoxEngineGUI::updateAudioPanel(GameState* state, NoxEngineGUI::GUIParams *p
 	// Load audio
 	ImGui::Checkbox("Load as 3D Sound", &params->soundIs3d);
 
+	/*
 	if (ImGui::Button("Load")) {
 		std::string file_path = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
 
@@ -95,7 +96,8 @@ void NoxEngineGUI::updateAudioPanel(GameState* state, NoxEngineGUI::GUIParams *p
 		}
 
 		ImGui::TreePop();
-	}
+	//}
+	*/
 
 
 	// Window End

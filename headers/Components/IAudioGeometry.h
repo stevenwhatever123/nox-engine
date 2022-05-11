@@ -45,5 +45,13 @@ namespace NoxEngine {
 		bool render;
 
 		// registered flag is unused
+
+
+	public:
+		virtual void clearMesh() = 0;
+
+		virtual bool loadMesh(MeshScene* meshScene) = 0;
+		virtual bool generateBoundingBox(const Array<vec3>& verts) = 0;
+		virtual bool generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4) = 0;
 	};
 }

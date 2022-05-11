@@ -15,6 +15,9 @@
 /* Game Audio Programming 2, Chapter 8.                                                     */
 /* More information can be found in Chapter 17 and 18 (for further development).            */
 /*                                                                                          */
+/* Some low-level desirable functions:														*/
+/* https://github.com/Flix01/imgui/blob/imgui_with_addons/addons/imguiyesaddons/imguisoloud.h */
+/*                                                                                          */
 /* @author: Chan Wai Lou															        */
 /* ======================================================================================== */
 
@@ -24,6 +27,7 @@
 #include <fmod.hpp>
 #include <fmod_studio.hpp>
 #include <fmod_studio_common.h>
+#include <fmod_dsp_effects.h>	// include this for DSP effect enums
 
 #include "Singleton.h"
 
@@ -35,10 +39,8 @@ namespace NoxEngine {
 	// Forward declares
 	class Mesh;
 	class Entity;
-
-	// Usings from FMOD
-	using AudioDSPType = FMOD_DSP_TYPE;
-	using AudioDSPPitchShift = FMOD_DSP_PITCHSHIFT;
+	class IPosition;
+	class IAudioSource;
 
 
 	struct DSP {
@@ -130,17 +132,19 @@ namespace NoxEngine {
 		void destroy();
 
 		// check whether the result is FMOD_OK or not
-		static int ERRCHK(FMOD_RESULT result, bool bPrint = true, bool bExit = false);
+		static int ERRCHK(FMOD_RESULT result, bool bPrint = true, bool bExit = true);
 
 
 		////////////////////////////
 		/*   Core API Functions   */
 		////////////////////////////
+		void loadSound(const IAudioSource *src);
 		void loadSound(const String& strSoundName, bool is3d = true, bool isLooping = false, bool isStream = false);
 		void unLoadSound(const String& strSoundName);
 		void unLoadSound(const char* strSoundName);
 		int playSounds(const String& strSoundName, const vec3& vPos = vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
-
+		
+		void setChannel3dPosition(int nChannelId, IPosition *ipos);
 		void setChannel3dPosition(int nChannelId, const vec3& vPosition);
 		void setChannelVolume(int nChannelId, float fNormalizedVolume);
 
@@ -183,7 +187,7 @@ namespace NoxEngine {
 		
 
 		/*   DSP Filters   */ 
-		DspId createDSP(AudioDSPType type, int channelGroup = 0, int channel = 0, int chainPosition = 0);
+		DspId createDSP(FMOD_DSP_TYPE type, int channelGroup = 0, int channel = 0, int chainPosition = 0);
 		void addDSP();	// add to channel group
 		//void addDSP();  // add to DSP input
 		

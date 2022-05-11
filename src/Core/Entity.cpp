@@ -7,6 +7,7 @@
 #include <Components/IComponent.h>
 #include <Components/PositionComponent.h>
 #include <Components/RenderableComponent.h>
+#include <Components/AudioSourceComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 
@@ -95,6 +96,7 @@ void Entity::addComp(ComponentType type) {
 
 	case PositionType:			addComp<PositionComponent>();			break;
 	case RenderableType:		addComp<RenderableComponent>();			break;
+	case AudioSourceType:		addComp<AudioSourceComponent>();		break;
 	case AudioGeometryType:		addComp<AudioGeometryComponent>();		break;
 	case ScriptType:			addComp<ScriptComponent>(); 			break;
 	default:					LOG_DEBUG("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
@@ -140,5 +142,6 @@ void Entity::tick(time_type dt) {
 //
 template PositionComponent* Entity::getComp<PositionComponent>();
 template RenderableComponent* Entity::getComp<RenderableComponent>();
+template AudioSourceComponent* Entity::getComp<AudioSourceComponent>();
 template AudioGeometryComponent* Entity::getComp<AudioGeometryComponent>();
 template ScriptComponent* Entity::getComp<ScriptComponent>();

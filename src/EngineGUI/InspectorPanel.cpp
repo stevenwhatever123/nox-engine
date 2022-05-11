@@ -1,13 +1,15 @@
 #include <EngineGUI/InspectorPanel.h>
 
-#include <Managers/IOManager.h>
 #include <Managers/EventNames.h>
+#include <Managers/GameManager.h>
 
 #include <Core/Entity.h>
 #include <Components/IComponent.h>
 #include <Components/PositionComponent.h>
 #include <Components/RenderableComponent.h>
+#include <Components/AudioSourceComponent.h>
 #include <Components/AudioGeometryComponent.h>
+#include <Components/ScriptComponent.h>
 
 using namespace NoxEngine;
 
@@ -33,9 +35,11 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 		Entity* ent = state->activeScene->entities[params->selectedEntity];
 
 		// Retrieve all components (could be nullptr)
-		PositionComponent*		posComp		= ent->getComp<PositionComponent>();
-		RenderableComponent*	rendComp	= ent->getComp<RenderableComponent>();
-		AudioGeometryComponent* geoComp		= ent->getComp<AudioGeometryComponent>();
+		PositionComponent*		posComp			= ent->getComp<PositionComponent>();
+		RenderableComponent*	rendComp		= ent->getComp<RenderableComponent>();
+		AudioSourceComponent*	audioSrcComp	= ent->getComp<AudioSourceComponent>();
+		AudioGeometryComponent* geoComp			= ent->getComp<AudioGeometryComponent>();
+		ScriptComponent*		scriptComp		= ent->getComp<ScriptComponent>();
 
 		// Entity name
 		if (ImGui::CollapsingHeader(ent->name)) {
@@ -43,7 +47,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 			int width = ImGui::GetContentRegionAvail().x;
 
 			// PositionComponent
-			if (ent->containsComps<PositionComponent>()) {
+			if (posComp) {
 
 				bool enable = ent->isEnabled<PositionComponent>();
 				bool expand = ImGui::TreeNode("Position");		// TODO (Vincent): How to change the width of treenode?
@@ -77,7 +81,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 			}
 
 			// RenderableComponent
-			if (ent->containsComps<RenderableComponent>()) {
+			if (rendComp) {
 
 				bool enable = ent->isEnabled<RenderableComponent>();
 				bool expand = ImGui::TreeNode("Renderable");		// TODO (Vincent): How to change the width of treenode?
@@ -112,8 +116,93 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				ImGui::Separator();
 			}
 
+			// AudioSourceComponent
+			if (audioSrcComp) {
+
+				bool enable = ent->isEnabled<AudioSourceComponent>();
+				bool expand = ImGui::TreeNode("Audio Source");		// TODO (Vincent): How to change the width of treenode?
+
+				ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+				ImGui::Checkbox("##EnablePos", &enable);
+
+				ImGui::SameLine();
+				bool remove = ImGui::SmallButton("-##RemovePos");	//TODO: Use ImageButton?
+
+				ent->setEnabled<AudioSourceComponent>(enable);
+
+				if (expand) {
+
+					// Begin: grey out
+					ImGui::BeginDisabled(!enable);
+
+					// Show options to load audio
+					if (!audioSrcComp->loaded) {
+						ImGui::Checkbox("Load as 3D Audio?", &audioSrcComp->is3D);
+
+						if (ImGui::Button("Load##load_audio")) {
+
+							GameManager::Instance()->loadAudioSource(ent, audioSrcComp);
+
+						}
+					}
+
+					// Audio loaded, show changable parameters
+					else {
+
+						ImGui::Text("File path: %s", audioSrcComp->filePath.c_str());
+
+						if (ImGui::TreeNode("DSP Filter")) {
+
+							// Dropdown list of all DSP filter enums
+							//const char* filterNames[] = { "Pitch Shift", "Echo" };
+							//ImGui::BeginCombo()
+
+
+							if (ImGui::Button("Create and apply##audio_dsp_create_apply")) {
+
+							}
+
+							ImGui::TreePop();
+						}
+
+						ImGui::SameLine();
+						bool enableDSP;   ImGui::Checkbox("##enable_DSP", &enableDSP);
+
+						ImGui::SliderFloat("Volume", &audioSrcComp->volume, 0.0f, 1.0f, "%.1f");
+						if (ImGui::Button("Play")) {
+
+							GameManager::Instance()->playSound(ent, audioSrcComp);
+						}
+
+						ImGui::BeginDisabled();
+						ImGui::Checkbox("3D", &audioSrcComp->is3D);
+						ImGui::Checkbox("Looping", &audioSrcComp->isLooping);
+						ImGui::Checkbox("Stream", &audioSrcComp->isStream);
+						ImGui::EndDisabled();
+
+						ImGui::SameLine();
+
+						if (ImGui::Button("Stop")) {
+
+							GameManager::Instance()->stopSound(ent, audioSrcComp);
+						}
+
+					}
+
+					ImGui::TreePop();
+
+					// End: grey out
+					ImGui::EndDisabled();
+				}
+
+				if (remove) {
+					ent->removeComp<AudioSourceComponent>();
+				}
+				ImGui::Separator();
+			}
+
 			// AudioGeometryComponent
-			if (ent->containsComps<AudioGeometryComponent>()) {
+			if (geoComp) {
 
 				bool geometryGenerated = false;
 
@@ -135,7 +224,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 					IAudioGeometry* igeo = geoComp->CastType<IAudioGeometry>();
 
-					const char* shapeNames[] = {"##geometry_undefined", "Plane", "Box", "Custom"};
+					const char* shapeNames[] = {"##geometry_undefined", "Plane", "Bounding Box", "Custom"};
 
 					if (ImGui::BeginCombo("Shape", shapeNames[(int)igeo->shape])) {
 
@@ -162,6 +251,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					// 4. Set geometryId of the component
 					if (igeo->shape == IAudioGeometry::Shape::Plane) {
 
+						ImGui::NewLine();
+
 						ImGui::DragFloat3("v1##audio_plane_v1", &geoComp->v1.x);
 						ImGui::DragFloat3("v2##audio_plane_v2", &geoComp->v2.x);
 						ImGui::DragFloat3("v3##audio_plane_v3", &geoComp->v3.x);
@@ -169,8 +260,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 						if (ImGui::Button("Generate##gen_audio_plane")) {
 
-							geoComp->generatePlane(geoComp->v1, geoComp->v2, geoComp->v3, geoComp->v4);
-							geometryGenerated = true;
+							geometryGenerated = geoComp->generatePlane(geoComp->v1, geoComp->v2, geoComp->v3, geoComp->v4);
 						}
 					}
 					if (igeo->shape == IAudioGeometry::Shape::Box) {
@@ -180,8 +270,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 						if (ImGui::Button("Generate##gen_audio_box")) {
 
-							geoComp->generateBoundingBox( rendComp->getVertices() );
-							geometryGenerated = true;
+							// TODO: fix
+							//geometryGenerated = geoComp->generateBoundingBox( rendComp->getVertices() );
 						}
 
 						// End: No renderable component - grey out the Generate button
@@ -191,11 +281,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 						if (ImGui::Button("Load##load_audio_geometry")) {
 
-							String picked_file = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
-							if (picked_file.length() > 0) {
-								SIGNAL_EVENT(EventNames::audioGeometryLoaded, picked_file.c_str(), ent);
-							}
-							geometryGenerated = true;
+							geometryGenerated = GameManager::Instance()->loadAudioGeometry(ent, geoComp);
 						}
 					}
 

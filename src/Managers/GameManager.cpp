@@ -6,6 +6,7 @@
 // Components to hook up with event manager
 #include <Components/RenderableComponent.h>
 #include <Components/PositionComponent.h>
+#include <Components/AudioSourceComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 
@@ -79,6 +80,8 @@ void GameManager::createAudioGeometry(Entity* ent, IAudioGeometry* igeo) {
 
 	// TODO: First remove this object from audio engine & renderer first
 	// ...
+	// audioManager->removeGeometry(igeo->geometryId);
+	// renderer->removeObject(igeo->rendObjId);
 
 	// Create one Geometry object with all meshes in the meshScene
 	igeo->geometryId = audioManager->createGeometry(ent);
@@ -86,9 +89,12 @@ void GameManager::createAudioGeometry(Entity* ent, IAudioGeometry* igeo) {
 	// Add to renderer
 	renderer->addObject(ent, igeo, ComponentType::AudioGeometryType);
 
-	// Get the MeshScene reference, set the rendObjId of meshes to be the newly added object in the renderer
-	for (u32 i = 0; i < igeo->meshScene->meshes.size(); i++) {
-		igeo->meshScene->meshes[i]->rendObjId = igeo->rendObjId;
+	// Get the MeshScene reference (if it has one - creating plane / bounding box will not generate one), 
+	// set the rendObjId of meshes to be the newly added object in the renderer
+	if (igeo->meshScene) {
+		for (u32 i = 0; i < igeo->meshScene->meshes.size(); i++) {
+			igeo->meshScene->meshes[i]->rendObjId = igeo->rendObjId;
+		}
 	}
 
 	// Update renderer
@@ -201,28 +207,6 @@ void GameManager::init_events() {
 			}
 	});
 
-	EventManager::Instance()->addListener(EventNames::audioGeometryLoaded, [this](va_list args) {
-
-			String file_name = va_arg(args, char*);
-			Entity* ent = va_arg(args, Entity*); 
-			AudioGeometryComponent* geoComp = ent->getComp<AudioGeometryComponent>();
-
-			game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-			MeshScene& meshScene = game_state.meshScenes.find(file_name)->second;
-			
-			// Convert meshScene into vertices, face indices for Geometry triangles, and indices for renderer lines
-			geoComp->loadMesh(&meshScene);
-	});
-
-
-	EventManager::Instance()->addListener(EventNames::createAudioGeometry, [this](va_list args) {
-
-		Entity* ent = va_arg(args, Entity*);
-		IAudioGeometry* igeo = va_arg(args, IAudioGeometry*);
-
-		createAudioGeometry(ent, igeo);
-	});
-
 
 	EventManager::Instance()->addListener(EventNames::componentAdded, [this](va_list args) {
 
@@ -258,7 +242,7 @@ void GameManager::init_events() {
 			const std::type_index compTypeId = va_arg(args, std::type_index);
 
 			if (compTypeId == typeid(RenderableComponent)) {
-				renderer->removeObject(ent, ComponentType::AudioGeometryType);
+				renderer->removeObject(ent->getComp<RenderableComponent>()->rendObjId);
 				// TODO-OPTIMIZATION: Remove in batches every X ms, shift the still-valid indices to take the free space
 			}
 
@@ -270,8 +254,8 @@ void GameManager::init_events() {
 			
 				// Disable the loaded geometry
 				// TODO: remove it
-				audioManager->setGeometryActive(igeo->geometryId, false);
-				renderer->removeObject(ent, ComponentType::RenderableType);
+				audioManager->setGeometryActive(igeo->geometryId, false); 
+				renderer->removeObject(ent->getComp<AudioGeometryComponent>()->rendObjId);
 			}
 
 			// ...
@@ -476,39 +460,57 @@ void GameManager::update_ecs() {
 }
 
 void GameManager::update_audio() {
+
 	// Sync audio manager with the game state's audio repo
 	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
 	//       set the pos/volume in the appropriate ChannelGroup / ChannelControl
-	for (auto &itr : game_state.audioSources) {
-		audioManager->setChannel3dPosition(0, itr.second.position);
-		audioManager->setChannelVolume(0, itr.second.sourceVolume);
+	for (Entity* ent : game_state.activeScene->entities) {
 	}
 
 	// Update audio geometry states
 	for (Entity *ent : game_state.activeScene->entities) {
-		if (ent->isEntityEnabled() && ent->containsComps<AudioGeometryComponent>()) {
-			
-			AudioGeometryComponent* geoComp = ent->getComp<AudioGeometryComponent>();
+
+		if (!ent->isEntityEnabled()) continue;
+
+		// TODO: update IPosition to ITransform, then we can get rotation and scale as well
+		IPosition*		ipos = ent->getComp<PositionComponent>();
+		IAudioSource*	isrc = ent->getComp<AudioSourceComponent>();
+		IAudioGeometry* igeo = ent->getComp<AudioGeometryComponent>();
+
+		// TODO: fix handedness
+		vec3 pos{ 0 };
+		vec3 rot{ 0 };
+		vec3 scale{ 1 };
+		//vec3 rot = glm::vec3(transform->rotx, transform->roty, transform->rotz);
+		//vec3 scale = glm::vec3(transform->scalex, transform->scaley, transform->scalez);
+
+		if (ipos && ent->isEnabled<PositionComponent>()) {
+			pos = glm::vec3(ipos->x, ipos->y, ipos->z);
+		}
+
+		if (isrc) {
+
+			// TODO: stop audio if it's disabled
+			//if (!ent->isEnabled<AudioSourceComponent>()) audioManager->stopSound(0);
+
+			// TODO: check audio is playing
+			// TODO: set correct channel id (not 0)
+			audioManager->setChannel3dPosition(0, pos);
+			audioManager->setChannelVolume(0, isrc->volume);
+		}
+
+		if (igeo) {
 			
 			// Geometry component does not have a valid mesh (e.g. not yet loaded), don't do anything
-			if (geoComp->geometryId == -1) continue;
+			if (igeo->geometryId == -1) continue;
 
 			// Set active
-			audioManager->setGeometryActive(geoComp->geometryId, ent->isEnabled<AudioGeometryComponent>());
+			audioManager->setGeometryActive(igeo->geometryId, ent->isEnabled<AudioGeometryComponent>());
 		
 			// Orient geometry
 			if (ent->containsComps<PositionComponent>() && ent->isEnabled<PositionComponent>()) {
 
-				// TODO: update IPosition to ITransform, then we can get rotation and scale as well
-				IPosition* transform = ent->getComp<PositionComponent>()->CastType<IPosition>();
-
-				vec3 pos = glm::vec3(transform->x, transform->y, transform->z);
-				vec3 rot = glm::vec3(0, 0, 0);
-				vec3 scale = glm::vec3(1, 1, 1);
-				//vec3 rot = glm::vec3(transform->rotx, transform->roty, transform->rotz);
-				//vec3 scale = glm::vec3(transform->scalex, transform->scaley, transform->scalez);
-
-				audioManager->orientGeometry(geoComp->geometryId, pos, rot, scale);
+				audioManager->orientGeometry(igeo->geometryId, pos, rot, scale);
 			}
 		}
 	}
@@ -574,7 +576,8 @@ void GameManager::update_renderer() {
 			if (node->meshIndex.size() > 0)
 			{
 				Mesh* mesh = currentMeshScene.meshes[node->meshIndex[0]];
-				glm::mat4 transformation(0);
+				glm::mat4 transformation;
+
 				if (node->hasAnimations())
 				{
 					transformation = node->getGlobalTransformation(
@@ -600,3 +603,52 @@ void GameManager::update_renderer() {
 
 }
 
+
+////////////////////////////
+/*   Different managers   */
+////////////////////////////
+
+bool GameManager::loadAudioSource(Entity* ent, IAudioSource *isrc) {
+
+	String file_name = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
+	if (file_name.length() <= 0) return false;
+
+	isrc->filePath = file_name;
+
+	audioManager->loadSound(isrc);
+
+	isrc->loaded = true;
+
+	return true;
+}
+
+bool GameManager::loadAudioGeometry(Entity* ent, IAudioGeometry *igeo) {
+
+	String file_name = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
+	if (file_name.length() <= 0) return false;
+
+	game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+	MeshScene& meshScene = game_state.meshScenes.find(file_name)->second;
+
+	// Convert meshScene into vertices, face indices for Geometry triangles, and indices for renderer lines
+	return igeo->loadMesh(&meshScene);
+}
+
+bool GameManager::playSound(Entity* ent, IAudioSource* isrc) {
+
+	IPosition* ipos = ent->getComp<PositionComponent>();
+	vec3 pos{ ipos->x, ipos->y, ipos->z };
+
+	audioManager->loadSound(isrc);
+	audioManager->playSounds(isrc->filePath, pos, isrc->volume);
+
+	return true;
+}
+
+bool GameManager::stopSound(Entity* ent, IAudioSource* isrc) {
+
+	//audioManager->stopSound(isrc);
+	throw std::exception("impl");
+
+	return true;
+}

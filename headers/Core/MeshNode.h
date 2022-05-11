@@ -15,11 +15,11 @@ namespace NoxEngine {
 			~MeshNode();
 
 			// The idle transformation
-			mat4 getTransformation();
+			const mat4 getTransformation();
 			// Frame based transformation
-			mat4 getTransformation(u32 frameIndex, u32 animationIndex);
+			const mat4 getTransformation(u32 frameIndex, u32 animationIndex);
 			// Linear interpolated transformation
-			mat4 getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
+			const mat4 getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
 
 			// Global transformation by traversing all parent node and adding them up
 			mat4 getGlobalTransformation();
@@ -35,9 +35,9 @@ namespace NoxEngine {
 			void insertFrameAfter(u32 animationIndex, u32 selectedFrame);
 			void insertFrameBefore(u32 animationIndex, u32 selectedFrame);
 
-			u32 getNumOfAnimations();
-			bool hasAnimations();
-			bool hasMesh();
+			const u32 getNumOfAnimations();
+			const bool hasAnimations();
+			const bool hasMesh();
 
 		public:
 

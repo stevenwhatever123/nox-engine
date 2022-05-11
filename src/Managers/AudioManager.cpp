@@ -15,6 +15,9 @@
 /* Game Audio Programming 2, Chapter 8.                                                     */
 /* More information can be found in Chapter 17 and 18 (for further development).            */
 /*                                                                                          */
+/* Some low-level desirable functions:														*/
+/* https://github.com/Flix01/imgui/blob/imgui_with_addons/addons/imguiyesaddons/imguisoloud.h */
+/*                                                                                          */
 /* @author: Chan Wai Lou															        */
 /* ======================================================================================== */
 
@@ -28,6 +31,7 @@
 #include <Core/Mesh.h>
 #include <Core/Entity.h>
 
+#include "Components/AudioSourceComponent.h"
 #include "Components/AudioGeometryComponent.h"
 #include "Components/PositionComponent.h"
 
@@ -135,6 +139,12 @@ void AudioManager::update() {
 }
 
 
+void AudioManager::loadSound(const IAudioSource* src) {
+
+	loadSound(src->filePath, src->is3D, src->isLooping, src->isStream);
+}
+
+
 void AudioManager::loadSound(const String& fileName, bool is3d, bool isLooping, bool isStream) {
 
 	// first check that this sound hasn't been loaded into the sound map
@@ -155,7 +165,7 @@ void AudioManager::loadSound(const String& fileName, bool is3d, bool isLooping, 
 	// more flags: FMOD_NONBLOCKING, FMOD_OPENMEMORY_POINT
 
 	/*   create the sound and store it in the sound map   */
-	FMOD::Sound* sound = nullptr;		// sound object
+	FMOD::Sound* sound = nullptr;					// sound object
 	FMOD_CREATESOUNDEXINFO* exinfo = nullptr;		// extended info
 	ERRCHK( coreSystem->createSound(fileName.c_str(), eMode, exinfo, &sound) );
 	if (sound) {
@@ -447,7 +457,7 @@ int AudioManager::loadGeometry(const String& filePath) {
 //////////////////////////
 
 //
-//DspId AudioManager::createDSP(AudioDSPType type, int channel, int position) {
+//DspId AudioManager::createDSP(FMOD_DSP_TYPE type, int channel, int position) {
 //
 //	// Create the DSP
 //	FMOD::DSP* dsp;
@@ -502,6 +512,10 @@ void AudioManager::set3dSettings(float dopplerScale, float distanceFactor, float
 	ERRCHK(coreSystem->set3DSettings(dopplerScale, distanceFactor, rolloffScale));
 }
 
+
+void AudioManager::setChannel3dPosition(int nChannelId, IPosition *ipos) {
+	if (ipos) setChannel3dPosition(nChannelId, vec3{ipos->x, ipos->y, ipos->z});
+}
 
 void AudioManager::setChannel3dPosition(int nChannelId, const vec3& vPosition) {
 

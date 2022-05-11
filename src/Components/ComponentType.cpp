@@ -4,6 +4,7 @@
 #include <Components/IComponent.h>
 #include <Components/PositionComponent.h>
 #include <Components/RenderableComponent.h>
+#include <Components/AudioSourceComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 
@@ -22,7 +23,7 @@ void NoxEngine::initComponentTypes() {
 		{ typeid(PositionComponent),	PositionType },
 		{ typeid(RenderableComponent),	RenderableType },
 		//{ typeid(LightSourceComponent),	LightSourceType },
-		//{ typeid(AudioSourceComponent),	AudioSourceType },
+		{ typeid(AudioSourceComponent),	AudioSourceType },
 		//{ typeid(AudioListenerComponent),	AudioListenerType },
 		{ typeid(AudioGeometryComponent),	AudioGeometryType }
 		//{ typeid(ScriptComponent),	ScriptType },
@@ -32,9 +33,9 @@ void NoxEngine::initComponentTypes() {
 		{ AbstractType,			"Abstract Component" },
 		{ PositionType,			"Position Component" },
 		{ RenderableType,		"Renderable Component" },
-		{ LightSourceType,		"Light Source Component" },
+		{ LightSourceType,		"Light Source Component" },		// TODO: Implement
 		{ AudioSourceType,		"Audio Source Component" },
-		{ AudioListenerType,	"Audio Listener Component" },
+		{ AudioListenerType,	"Audio Listener Component" },	// TODO: Implement
 		{ AudioGeometryType,	"Audio Geometry Component" },
 		{ ScriptType,			"Script Component" }
 	};

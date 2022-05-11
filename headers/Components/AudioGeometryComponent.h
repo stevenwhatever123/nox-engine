@@ -23,11 +23,11 @@ namespace NoxEngine {
 
 		//void displayUI() override;
 
-		void clearMesh();
+		void clearMesh() override;
 
-		void loadMesh(MeshScene* meshScene);
-		void generateBoundingBox(const Array<vec3>& verts);
-		void generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4);
+		bool loadMesh(MeshScene* meshScene) override;
+		bool generateBoundingBox(const Array<vec3>& verts) override;
+		bool generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4) override;
 
 		inline const i32 getNumOfVertices() const { return vertices.size(); }
 		inline const i32 getNumOfFaces()	const { return faces.size(); }
@@ -51,6 +51,6 @@ namespace NoxEngine {
 
 
 	private:
-		void generateIndicesFromTriangles(const Array<ivec3>& _faces);
+		bool generateIndicesFromTriangles(const Array<ivec3>& _faces);
 	};
 }

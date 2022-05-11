@@ -8,13 +8,13 @@ MeshNode::MeshNode(){ }
 MeshNode::~MeshNode(){ }
 
 // The idle transformation
-glm::mat4 MeshNode::getTransformation()
+const glm::mat4 MeshNode::getTransformation()
 {
 	return transformation;
 }
 
 // Frame based transformation
-glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex)
+const glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex)
 {
 	if (!hasAnimations())
 		return getTransformation();
@@ -24,7 +24,7 @@ glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex)
 }
 
 // Linear interpolated transformation
-glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil)
+const glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil)
 {
 	if (!hasAnimations())
 		return getTransformation();
@@ -290,17 +290,17 @@ void MeshNode::insertFrameAfter(u32 animationIndex, u32 selectedFrame)
 	}
 }
 
-u32 MeshNode::getNumOfAnimations()
+const u32 MeshNode::getNumOfAnimations()
 {
 	return (u32)nodeAnimTransformation.size();
 }
 
-bool MeshNode::hasAnimations()
+const bool MeshNode::hasAnimations()
 {
 	return nodeAnimTransformation.size() > 0;
 }
 
-bool MeshNode::hasMesh()
+const bool MeshNode::hasMesh()
 {
 	return meshIndex.size() > 0;
 }

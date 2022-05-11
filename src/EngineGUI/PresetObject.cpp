@@ -34,7 +34,7 @@ void NoxEngineGUI::initPresetObjectVars() {
 		{ PresetObject::Deck,				"Deck" },
 		{ PresetObject::PointLight,			"Point Light" },
 		{ PresetObject::AreaLight,			"Area Light" },
-		{ PresetObject::AudioSourceComponent,"Audio Source Component" },
+		{ PresetObject::AudioSource,"Audio Source Component" },
 		{ PresetObject::Text2D,				"2D Text" },
 		{ PresetObject::Text3D,				"3D Text" },
 		{ PresetObject::Button,				"Button" },
@@ -67,7 +67,7 @@ void NoxEngineGUI::initPresetObjectVars() {
 			PresetObject::AreaLight }
 		},
 		{ PresetCategory::Audio, {
-			PresetObject::AudioSourceComponent
+			PresetObject::AudioSource
 		}},
 		{ PresetCategory::UI, {
 			PresetObject::Text2D,
