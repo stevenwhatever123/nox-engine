@@ -510,17 +510,19 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				// ScriptComponent
 				if (scriptComp) {
 
-					if (ImGui::TreeNode("Script")) {
+					bool enable = ent->isEnabled<AudioGeometryComponent>();
+					bool expand = ImGui::TreeNode("Script");
 
-						bool enable = ent->isEnabled<AudioGeometryComponent>();
-					
-						ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
-						ImGui::Checkbox("##EnableScript", &enable);
+					ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+					ImGui::Checkbox("##EnableScript", &enable);
 
-						bool remove = ImGui::SmallButton("-##RemoveScript");	// TODO: Use ImageButton?
+					ImGui::SameLine();
+					bool remove = ImGui::SmallButton("-##RemoveScript");	// TODO: Use ImageButton?
 
-						ImGui::Text("%s", scriptComp->getScript());
-						ImGui::SameLine();
+					ImGui::Text("%s", scriptComp->getScript());
+					ImGui::SameLine();
+
+					if (expand) {
 
 						if(ImGui::Button("Change")) {
 							String file = IOManager::Instance()->PickFile();

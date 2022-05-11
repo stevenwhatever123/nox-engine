@@ -21,6 +21,7 @@ Entity::Entity(i32 _id, char* _name)
 	id(_id), 
 	hasComp(0),
 	_isEnabled(~0),
+	remove(false),
 	entityEnabled(true) {
 
 	if (_name != nullptr) name = _name;
@@ -33,6 +34,7 @@ Entity::Entity(Scene* scene, char* _name)
 	:
 	hasComp(0),
 	_isEnabled(~0),
+	remove(false),
 	entityEnabled(true) {
 
 	assert(scene != nullptr);
