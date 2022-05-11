@@ -1,7 +1,10 @@
 #pragma once
 
-#include "IRenderable.h"
-#include "IComponent.h"
+#include <glm/glm.hpp>
+
+#include <Components/IRenderable.h>
+#include <Components/IComponent.h>
+#include <Core/Entity.h>
 #include <Core/Types.h>
 
 namespace NoxEngine {
@@ -14,8 +17,11 @@ namespace NoxEngine {
 
 			RenderableComponent(f32 trX = 0.0f, f32 trY = 0.0f, f32 trZ = 0.0f, const String texName = "");
 			RenderableComponent(const String texName);
+			
+			// copy constructor
+			RenderableComponent(const RenderableComponent& other);
 
-			void displayUI() override; 
+			//void displayUI() override; 
 
 			inline const i32 getNumOfVertices() const { return (i32)vertices.size(); }
 			inline const i32 getNumOfTexCoord() const { return (i32)texCoords.size(); }

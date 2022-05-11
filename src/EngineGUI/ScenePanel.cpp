@@ -7,7 +7,7 @@ using namespace NoxEngine;
 
 void NoxEngineGUI::updateScenePanel(GameState* state) {
 
-	String name = PANEL_NAME_MAP[ PanelName::Scene ];
+	String name = kPanelNameMap[ PanelName::Scene ];
 
 	ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
 

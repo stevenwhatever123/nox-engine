@@ -33,7 +33,7 @@
 
 #include "Components/AudioSourceComponent.h"
 #include "Components/AudioGeometryComponent.h"
-#include "Components/PositionComponent.h"
+#include "Components/TransformComponent.h"
 
 #include <Utils/Utils.h>
 
@@ -372,8 +372,8 @@ int AudioManager::createGeometry(Entity* ent) {
 	vec3 scale{ 1, 1, 1 };
 
 	// Get transform if the entity has one
-	if (ent->containsComps<PositionComponent>()) {
-		IPosition* ipos = ent->getComp<PositionComponent>()->CastType<IPosition>();
+	if (ent->containsComps<TransformComponent>()) {
+		ITransform* ipos = ent->getComp<TransformComponent>()->CastType<ITransform>();
 		pos.x = ipos->x;
 		pos.y = ipos->y;
 		pos.z = ipos->z;
@@ -513,7 +513,7 @@ void AudioManager::set3dSettings(float dopplerScale, float distanceFactor, float
 }
 
 
-void AudioManager::setChannel3dPosition(int nChannelId, IPosition *ipos) {
+void AudioManager::setChannel3dPosition(int nChannelId, ITransform *ipos) {
 	if (ipos) setChannel3dPosition(nChannelId, vec3{ipos->x, ipos->y, ipos->z});
 }
 

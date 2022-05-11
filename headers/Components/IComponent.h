@@ -7,9 +7,9 @@
 */
 #pragma once
 
-#include "ComponentType.h"
-#include <Core/Types.h>
+#include <Components/ComponentType.h>
 #include <Core/Entity.h>
+#include <Core/Types.h>
 
 namespace NoxEngine {
 

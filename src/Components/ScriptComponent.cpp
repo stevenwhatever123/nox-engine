@@ -1,5 +1,5 @@
 #include <Components/ScriptComponent.h>
-#include <Components/PositionComponent.h>
+#include <Components/TransformComponent.h>
 
 #include <Utils/Utils.h>
 #include <LuaBridge/LuaBridge.h>
@@ -22,13 +22,21 @@ ScriptComponent::ScriptComponent(const char *script): script_file(script), inite
 
 		.beginClass<Entity>("Entity")
 			.addProperty("id", &Entity::id)
-			.addFunction("GetPositionComponent", &Entity::getComp<PositionComponent>)
+			.addFunction("GetTransformComponent", &Entity::getComp<TransformComponent>)
 		.endClass()
 
-		.beginClass<PositionComponent>("PositionComponent")
-		.addProperty("x", &PositionComponent::get_x, &PositionComponent::set_x)
-		.addProperty("y", &PositionComponent::get_y, &PositionComponent::set_y)
-		.addProperty("z", &PositionComponent::get_z, &PositionComponent::set_z)
+		.beginClass<TransformComponent>("TransformComponent")
+		.addProperty("x", &TransformComponent::get_x, &TransformComponent::set_x)
+		.addProperty("y", &TransformComponent::get_y, &TransformComponent::set_y)
+		.addProperty("z", &TransformComponent::get_z, &TransformComponent::set_z)
+
+		.addProperty("rx", &TransformComponent::get_rx, &TransformComponent::set_rx)
+		.addProperty("ry", &TransformComponent::get_ry, &TransformComponent::set_ry)
+		.addProperty("rz", &TransformComponent::get_rz, &TransformComponent::set_rz)
+
+		.addProperty("sx", &TransformComponent::get_sx, &TransformComponent::set_sx)
+		.addProperty("sy", &TransformComponent::get_sy, &TransformComponent::set_sy)
+		.addProperty("sz", &TransformComponent::get_sz, &TransformComponent::set_sz)
 		.endClass()
 		.endNamespace();
 

@@ -24,9 +24,12 @@
 #include <typeindex>
 
 // Engine Includes
-#include "Types.h"
+#include <Core/Types.h>
 #include <Utils/Utils.h>
 #include <Components/ComponentType.h>
+
+#include <Managers/EventManager.h>
+#include <Managers/EventNames.h>
 
 #include <Managers/EventNames.h>
 #include <Managers/EventManager.h>
@@ -57,6 +60,9 @@ namespace NoxEngine {
 
 		// A human-readable identifier - not necessarily unique
 		char* name;
+
+		// The file path of the fbx file associate to this entity
+		char* filepath;
 
 		// The components that make the entity
 		// Note (Vincent): An entity can only contain one component of each type.
@@ -97,6 +103,7 @@ namespace NoxEngine {
 		// TODO: Change GameManager to Singleton, so it doesn't need a param
 		Entity(Scene *scene, char* _name = nullptr);
 		Entity(Scene* scene, const char* _name);
+		Entity(Scene* scene, const char* _name, const char* _filepath);
 
 		// Gotta be careful. When comp are destroyed the subsystem have to know
 		// TODO (Vincent): delete the components array and let the specialized component destroyer remove the reference in the subsystem?

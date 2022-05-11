@@ -4,14 +4,10 @@
 
 #include <Core/Renderer.h>
 #include <Utils/Utils.h>
-#include <Components/PositionComponent.h>
+#include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Components/AudioGeometryComponent.h>
-#include <Components/IRenderable.h>
-#include <Components/IAudioGeometry.h>
 #include <Core/Types.h>
-
-#include <3rdParty/stb/stb_image.h>
 
 // TODO: update uniform submissions to use Shader class
 // TODO: fix drawing to default buffer
@@ -22,14 +18,13 @@
 using NoxEngineUtils::Logger;
 using namespace NoxEngine;
 
+
 Renderer::~Renderer()
 {
     vertices.clear();
     normals.clear();
     texCoords.clear();
     elements.clear();
-
-	// TODO: clear objects map
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
@@ -160,8 +155,7 @@ void Renderer::updateBuffers() {
 }
 
 
-void Renderer::addObject(Entity *ent, IRenderable *meshSrc, ComponentType componentType)
-{
+void Renderer::addObject(Entity *ent, IRenderable *meshSrc, ComponentType componentType) {
 
     // Add a mesh to the container
     RendObj newObj;
@@ -173,7 +167,7 @@ void Renderer::addObject(Entity *ent, IRenderable *meshSrc, ComponentType compon
     newObj.startInd = (i32)elements.size();
 	newObj.has_texture = meshSrc->has_texture;
 	newObj.has_normal = meshSrc->has_normal;
-    
+
     // Generate textures for the object
 	if (meshSrc->has_texture) {
 		newObj.ambientTexture = setTexture(meshSrc->getAmbientTexture(), "AmbTexture", 1);
@@ -217,7 +211,7 @@ void Renderer::removeObject(Entity* ent, ComponentType componentType) {
 		if (itr->second.ent == ent && itr->second.componentType == componentType) objects.erase(itr);
 		else itr++;
 	}
-    
+
     LOG_DEBUG("Renderer object count: %i\n", objects.size());
 }
 
@@ -254,7 +248,7 @@ GLuint Renderer::setTexture(const String texturePath, const char* uniName, int n
 	}
 	else
 	{
-		LOG_DEBUG("Failed to load texture %s ", texturePath.c_str());
+		LOG_DEBUG("Failed to load file %s ", texturePath.c_str());
 	}
 	stbi_image_free(data);
 
@@ -279,8 +273,8 @@ void Renderer::draw() {
 
 	glBindVertexArray(VAO);
 
-	for (u32 i = 0; i < objects.size(); i++)
-	{
+	for (u32 i = 0; i < objects.size(); i++) {
+
 		Entity* ent = objects[i].ent;
 
 		// Skip if the entity is not enabled
@@ -296,10 +290,14 @@ void Renderer::draw() {
 		}
 
 		// If the object has a position and it's enabled, use it
-		mat4 worldMat = mat4(1.0f);
-		if (objects[i].ent->containsComps<PositionComponent>() && objects[i].ent->isEnabled<PositionComponent>()) {
-			IPosition* pos = objects[i].ent->getComp<PositionComponent>()->CastType<IPosition>();
-			worldMat = translate(mat4(1.0f), vec3(pos->x, pos->y, pos->z));
+		glm::mat4 worldMat = glm::mat4(1.0f);
+		if (objects[i].ent->containsComps<TransformComponent>() && objects[i].ent->isEnabled<TransformComponent>()) {
+			ITransform* pos = objects[i].ent->getComp<TransformComponent>()->CastType<ITransform>();
+			glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+			glm::mat4 rotation = glm::eulerAngleXYZ(pos->rx, pos->ry, pos->rz);
+			glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(pos->sx, pos->sy, pos->sz));
+			//worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+			worldMat = translation * rotation * scale;
 		}
 
 		program->set4Matrix("toWorld", worldMat);
@@ -454,6 +452,9 @@ void Renderer::createElementArray(IRenderable* mesh)
 		copy(indices.begin(), indices.end(), back_inserter(elements));
 
 	} else {
+		// REMEMBER TO MULTIPLY BY 3 !!!
+		// Steven: This line is causing problem as the number of elements is not the same as
+		// number of faces.
 		numberOfElements += mesh->getNumOfFaces() * 3;
 		const auto faces = mesh->getFaces();
 		for(i32 i = 0; i < faces.size(); i++) {
@@ -600,12 +601,35 @@ void Renderer::updateLightPos(float x, float y, float z)
     program->set3Float("lightPosition",x, y, z);
 }
 
-void Renderer::updateObjectTransformation(mat4 transformation, u32 rendObjId)
-{
+void Renderer::updateObjectTransformation(mat4 transformation, u32 rendObjId) {
+
 	const auto obj = objects.find(rendObjId);
 	if (obj != objects.end()) {
 		obj->second.transformation = transformation;
 	}
-	//program->set4Matrix("modelMatrix", transformation);
-	//std::cout << "Welcome to the Matrix" << "\n";
+}
+
+void Renderer::changeTexture(Entity* ent)
+{
+	for (u32 i = 0; i < objects.size(); i++)
+	{
+		if (objects[i].ent == ent)
+		{
+			RenderableComponent* rendComp = objects[i].ent->getComp<RenderableComponent>();
+			//rendComp->getAmbientTexture() doesn't return anything here atm, dunno why
+			//objects[i].ambientTexture = setTexture(rendComp->ambientTexture, "AmbTexture", 1);
+			objects[i].ambientTexture = setTexture(rendComp->getAmbientTexture(), "AmbTexture", 1);
+			objects[i].ambientTexturePath = rendComp->getAmbientTexture();
+			objects[i].normalTexturePath = rendComp->getNormalTexture();
+
+			// Reset texture path for RenderableComponent as other object may use the same reference
+			rendComp->ambientTexture = "";
+			rendComp->normalTexture = "";
+		}
+	}
+}
+
+bool Renderer::hasRendObj(u32 id)
+{
+	return objects.find(id) != objects.end();
 }

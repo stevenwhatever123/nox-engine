@@ -1,15 +1,18 @@
 #pragma once
 
 #include <Components/IRenderable.h>
-#include <Components/IPosition.h>
-#include "Types.h"
+#include <Components/IComponent.h>
+#include <Components/ITransform.h>
+#include <Core/Types.h>
+#include <Utils/Utils.h>
+
 
 namespace NoxEngine {
 
 	/*
 	 * A mock up class for Renderer to render a cube
 	 */
-	class GridObject: public IRenderable, public IPosition {
+	class GridObject: public IRenderable, public ITransform {
 		public:
 
 			~GridObject();

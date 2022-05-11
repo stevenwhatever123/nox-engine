@@ -1,9 +1,10 @@
 #include <EngineGUI/AnimationSequencer.h>
 
-AnimationSequencer::AnimationSequencer(MeshScene* scene) :
-	mFrameMin(0), 
-	mFrameMax(scene->numTicks[scene->animationIndex] - 1),
-	scene(scene)
+AnimationSequencer::AnimationSequencer(NoxEngine::AnimationComponent *animComp, NoxEngine::GameState* game_state) :
+mFrameMin(0), 
+mFrameMax(animComp->numTicks[animComp->animationIndex] - 1),
+animComp(animComp),
+game_state(game_state)
 {
 
 }
@@ -12,44 +13,64 @@ AnimationSequencer::AnimationSequencer() :mFrameMin(0), mFrameMax(0) {};
 
 int AnimationSequencer::GetItemTypeCount() const 
 {
-	return (i32)scene->allNodes.size();
+    return (i32) game_state->audioSources.size();
 }
 
 const char* AnimationSequencer::GetItemTypeName(int index) const
 {
-	//return "Animation";
-	return scene->allNodes[index]->name.c_str();
+    if (!game_state->audioSources.empty())
+    {
+        //return game_state->audioSources.
+        auto startItr = game_state->audioSources.begin();
+        auto endItr = game_state->audioSources.end();
+        for (u32 i = 0; i < index; i++)
+        {
+            startItr++;
+        }
+
+        return startItr->second.name.c_str();
+    }
+
+    return "hahaha";
 }
 
 const char* AnimationSequencer::GetItemLabel(int index) const
 {
-	//return "Animation"; 
-	return scene->allNodes[index]->name.c_str();
+    //return "Animation"; 
+    //if (index > scene->allNodes.size() - 1)
+    //{
+    //    u32 audioIndex = index - scene->allNodes.size();
+    //    if (!game_state->audioSources.empty())
+    //    {
+    //        return game_state->selectedAudio[audioIndex].c_str();
+    //    }
+    //    return "hahaha";
+    //}
+
+    //return scene->allNodes[index]->name.c_str();
+    return "";
 }
 
 void AnimationSequencer::Get(int index, int** start, int** end, int* type, unsigned int* color)
 {
-	// Every animation is starting at 0
-	static i32 items[] = { 0 };
+    // Every animation is starting at 0
+    static i32 items[] = { 0 };
 
-	static i32 items2[] = { scene->numTicks[scene->animationIndex] - 1 };
+    // I don't know why this code didn't work
+    //i32 items2[] = { (scene->allNodes[index]->hasAnimations() ? scene->numTicks[scene->animationIndex] - 1 : 1) };
 
-	if (!scene->allNodes[index]->hasAnimations())
-	{
-		items2[0] = 0;
-	}
-
-	// I don't know why this code didn't work
-	//i32 items2[] = { (scene->allNodes[index]->hasAnimations() ? scene->numTicks[scene->animationIndex] - 1 : 1) };
-
-	if (color)
-		*color = 0xFFAA8080; // same color for everyone, return color based on type
-	if (start)
-		*start = items;
-	if (end)
-		*end = items2;
-	if (type)
-		*type = index;
+    if (color)
+        *color = 0xFFAA8080; // same color for everyone, return color based on type
+    if (start)
+        *start = items;
+    if (end)
+    {
+        *end = &animComp->numTicks[animComp->animationIndex];
+    }
+    if (type)
+    {
+        *type = index;
+    }
 }
 
 size_t AnimationSequencer::GetCustomHeight(int index)

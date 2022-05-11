@@ -4,8 +4,9 @@
 #include <Core/Entity.h>
 
 // Components to hook up with event manager
+#include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
-#include <Components/PositionComponent.h>
+#include <Components/AnimationComponent.h>
 #include <Components/AudioSourceComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
@@ -40,7 +41,7 @@ void GameManager::init() {
 	init_gui();
 	init_animation();
 	init_renderer();
-	init_scripts();
+	//init_scripts();
 }
 
 void GameManager::update() {
@@ -101,6 +102,7 @@ void GameManager::createAudioGeometry(Entity* ent, IAudioGeometry* igeo) {
 	// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion
 	this->renderer->updateBuffers();
 }
+
 
 void callback(GLenum source,
 		GLenum type,
@@ -184,9 +186,14 @@ void GameManager::init_events() {
 			// Steven: That's how I would do it
 			// clean up: leaky mem
 			String file_name = va_arg(args, char*);
-			game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-			MeshScene &meshScene = game_state.meshScenes.find(file_name)->second;
 
+			// Add to hash map if it does not exist
+			if (game_state.meshScenes.find(file_name) == game_state.meshScenes.end()) {
+				game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+			}
+			MeshScene& meshScene = game_state.meshScenes.find(file_name)->second;
+
+			i32 index = game_state.activeScene->entities.size();
 			// We're treating every mesh as an entity FOR NOW
 			for (u32 i = 0; i < meshScene.meshes.size(); i++)
 			{
@@ -194,14 +201,28 @@ void GameManager::init_events() {
 				//                 because the entity ID is managed by the scene
 				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
 
-				RenderableComponent* comp = meshScene.meshes[i];
-				PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+				RenderableComponent* comp = new RenderableComponent(*meshScene.meshes[i]);
+				TransformComponent* trans = new TransformComponent(0.0, 0.0, 0.0);
 
 				ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
 
 				ent->addComp(comp);
-				ent->addComp(pos);
+				ent->addComp(trans);
 				ent->addComp(script);
+
+				if (meshScene.hasAnimations())
+				{
+					// Get the node associated to this mesh
+					for (MeshNode* node : meshScene.allNodes)
+					{
+						if (node->hasAnimations() && node->meshIndex[0] == i)
+						{
+							AnimationComponent* anim = new AnimationComponent(meshScene, node);
+							ent->addComp(anim);
+							break;
+						}
+					}
+				}
 
 				game_state.activeScene->addEntity(ent);
 			}
@@ -217,17 +238,15 @@ void GameManager::init_events() {
 			if (ent->containsComps<RenderableComponent>()) {
 
 				RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
-				IRenderable* rend = rendComp->CastType<IRenderable>();
 
-				if (!rend->registered) {
-					renderer->addObject(ent, rend, ComponentType::RenderableType);
-					rend->registered = true;
+				if (!renderer->hasRendObj(rendComp->rendObjId)) {
 
-					// Update renderer
-					// TODO-OPTIMIZATION: Set a flag inside GameManager, update buffers in a batch fashion
+					renderer->addObject(ent, rendComp, ComponentType::RenderableType);
+
 					this->renderer->updateBuffers();
 				}
 			}
+
 
 			// Audio
 			// We don't add the mesh to the audio engine when the geometry component is added, 
@@ -235,6 +254,7 @@ void GameManager::init_events() {
 
 			// ...
 	});
+
 
 	EventManager::Instance()->addListener(EventNames::componentRemoved, [this](va_list args) {
 
@@ -251,14 +271,13 @@ void GameManager::init_events() {
 
 				AudioGeometryComponent* geoComp = ent->getComp<AudioGeometryComponent>();
 				IAudioGeometry* igeo = geoComp->CastType<IAudioGeometry>();
-			
+
 				// Disable the loaded geometry
 				// TODO: remove it
-				audioManager->setGeometryActive(igeo->geometryId, false); 
+				audioManager->setGeometryActive(igeo->geometryId, false);
 				renderer->removeObject(ent->getComp<AudioGeometryComponent>()->rendObjId);
 			}
 
-			// ...
 	});
 }
 
@@ -303,7 +322,7 @@ void GameManager::init_renderer() {
 	renderer->setFrameBufferToTexture();
 
 	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
-	//renderer->addObject(obj);
+	// renderer->addObject(obj);
 	renderer->updateBuffers();
 }
 
@@ -350,8 +369,8 @@ void NoxEngine::GameManager::init_scripts()
 		//                 because the entity ID is managed by the scene
 		Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
 
-		RenderableComponent* comp = meshScene.meshes[i];
-		PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
+		RenderableComponent* comp = new RenderableComponent(*meshScene.meshes[i]);
+		TransformComponent* pos = new TransformComponent(0.0, 0.0, 0.0);
 
 		ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
 
@@ -396,10 +415,10 @@ void GameManager::update_gui() {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	ImGui::PushFont(font);
-	
-	NoxEngineGUI::updateGUI(&ui_params);
-	NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateAnimationPanel(&game_state);
+
+	NoxEngineGUI::updateGUI(game_state, &ui_params);
+	//NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
+	NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
 	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
@@ -439,7 +458,7 @@ void GameManager::update_ecs() {
 		std::remove_if(
 			game_state.activeScene->entities.begin(),
 			game_state.activeScene->entities.end(),
-			[](auto &&ent) { 
+			[](auto&& ent) {
 				bool rm = ent->remove;
 				if (rm) delete ent;
 				return rm;
@@ -464,18 +483,16 @@ void GameManager::update_audio() {
 	// Sync audio manager with the game state's audio repo
 	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
 	//       set the pos/volume in the appropriate ChannelGroup / ChannelControl
-	for (Entity* ent : game_state.activeScene->entities) {
-	}
 
 	// Update audio geometry states
-	for (Entity *ent : game_state.activeScene->entities) {
+	for (Entity* ent : game_state.activeScene->entities) {
 
 		if (!ent->isEntityEnabled()) continue;
 
-		// TODO: update IPosition to ITransform, then we can get rotation and scale as well
-		IPosition*		ipos = ent->getComp<PositionComponent>();
-		IAudioSource*	isrc = ent->getComp<AudioSourceComponent>();
-		IAudioGeometry* igeo = ent->getComp<AudioGeometryComponent>();
+		// TODO: update ITransform to ITransform, then we can get rotation and scale as well
+		ITransform*		itrans	= ent->getComp<TransformComponent>();
+		IAudioSource*	isrc	= ent->getComp<AudioSourceComponent>();
+		IAudioGeometry* igeo	= ent->getComp<AudioGeometryComponent>();
 
 		// TODO: fix handedness
 		vec3 pos{ 0 };
@@ -484,8 +501,8 @@ void GameManager::update_audio() {
 		//vec3 rot = glm::vec3(transform->rotx, transform->roty, transform->rotz);
 		//vec3 scale = glm::vec3(transform->scalex, transform->scaley, transform->scalez);
 
-		if (ipos && ent->isEnabled<PositionComponent>()) {
-			pos = glm::vec3(ipos->x, ipos->y, ipos->z);
+		if (itrans && ent->isEnabled<TransformComponent>()) {
+			pos = glm::vec3(itrans->x, itrans->y, itrans->z);
 		}
 
 		if (isrc) {
@@ -500,15 +517,15 @@ void GameManager::update_audio() {
 		}
 
 		if (igeo) {
-			
+
 			// Geometry component does not have a valid mesh (e.g. not yet loaded), don't do anything
 			if (igeo->geometryId == -1) continue;
 
 			// Set active
 			audioManager->setGeometryActive(igeo->geometryId, ent->isEnabled<AudioGeometryComponent>());
-		
+
 			// Orient geometry
-			if (ent->containsComps<PositionComponent>() && ent->isEnabled<PositionComponent>()) {
+			if (ent->containsComps<TransformComponent>() && ent->isEnabled<TransformComponent>()) {
 
 				audioManager->orientGeometry(igeo->geometryId, pos, rot, scale);
 			}
@@ -536,34 +553,20 @@ void GameManager::update_animation() {
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
 
-	//auto meshStart = game_state.meshes.begin();
-	//auto meshEnd = game_state.meshes.end();
-	auto meshSceneStart = game_state.meshScenes.begin();
-	auto meshSceneEnd = game_state.meshScenes.end();
+	for (Entity* ent : game_state.activeScene->entities) { 
 
-	for(; meshSceneStart != meshSceneEnd; meshSceneStart++) 
-	{
-		if (meshSceneStart->second.playAnimation)
-		{
-			if (meshSceneStart->second.hasAnimations())
-			{
-				if (meshSceneStart->second.frameIndex
-					== meshSceneStart->second.numTicks[meshSceneStart->second.animationIndex] - 1)
-				{
-					meshSceneStart->second.resetAnimation();
-					meshSceneStart->second.playAnimation = !meshSceneStart->second.playAnimation;
-				}
-			}
-			meshSceneStart->second.update(deltaTime);
+		AnimationComponent *animComp = ent->getComp<AnimationComponent>();
+
+		if (animComp) {
+			animComp->update(deltaTime);
 		}
-		// Because we're not updating frame index we still need tick floor and ceil to get our transform
-		meshSceneStart->second.updateCeilAndFloor();
 	}
 }
 
 void GameManager::update_renderer() {
 
-	// Note (Vincent): Need to skip meshScenes or meshes that are removed from the renderer
+	/*** old:
+	 * 
 	auto meshSceneStart = game_state.meshScenes.begin();
 	auto meshSceneEnd = game_state.meshScenes.end();
 	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
@@ -576,25 +579,35 @@ void GameManager::update_renderer() {
 			if (node->meshIndex.size() > 0)
 			{
 				Mesh* mesh = currentMeshScene.meshes[node->meshIndex[0]];
-				glm::mat4 transformation;
-
 				if (node->hasAnimations())
 				{
-					transformation = node->getGlobalTransformation(
+					glm::mat4 transformation = node->getGlobalTransformation(
 						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
 						currentMeshScene.accumulator, currentMeshScene.timeStep,
 						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
+					renderer->updateObjectTransformation(transformation, mesh);
 				}
 				else
 				{
-					transformation = node->transformation;
+					glm::mat4 transformation = node->transformation;
+					renderer->updateObjectTransformation(transformation, mesh);
 				}
-				renderer->updateObjectTransformation(transformation, mesh->rendObjId);
 			}
 		}
 	}
+	**/
 
+	for (Entity* ent : game_state.activeScene->entities) {
 
+		if (ent->containsComps<RenderableComponent, AnimationComponent>())
+		{
+			RenderableComponent *rendComp = ent->getComp<RenderableComponent>();
+			AnimationComponent* animComp = ent->getComp<AnimationComponent>();
+
+			mat4 transformation = animComp->getTransformation();
+			renderer->updateObjectTransformation(transformation, rendComp->rendObjId);
+		}
+	}
 
 	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
@@ -602,7 +615,6 @@ void GameManager::update_renderer() {
 	renderer->draw();
 
 }
-
 
 ////////////////////////////
 /*   Different managers   */
@@ -616,7 +628,6 @@ bool GameManager::loadAudioSource(Entity* ent, IAudioSource *isrc) {
 	isrc->filePath = file_name;
 
 	audioManager->loadSound(isrc);
-
 	isrc->loaded = true;
 
 	return true;
@@ -636,8 +647,8 @@ bool GameManager::loadAudioGeometry(Entity* ent, IAudioGeometry *igeo) {
 
 bool GameManager::playSound(Entity* ent, IAudioSource* isrc) {
 
-	IPosition* ipos = ent->getComp<PositionComponent>();
-	vec3 pos{ ipos->x, ipos->y, ipos->z };
+	ITransform* itrans = ent->getComp<TransformComponent>();
+	vec3 pos{ itrans->x, itrans->y, itrans->z };
 
 	audioManager->loadSound(isrc);
 	audioManager->playSounds(isrc->filePath, pos, isrc->volume);

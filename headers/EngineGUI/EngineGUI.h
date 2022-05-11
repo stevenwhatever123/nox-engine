@@ -14,6 +14,14 @@
 #include <Core/Renderer.h>
 #include <Core/Types.h>
 #include <Core/Camera.h>
+#include <Core/GameState.h>
+
+#include <Components/TransformComponent.h>
+#include <Components/RenderableComponent.h>
+#include <Managers/SaveLoadManager.h>
+
+
+
 
 namespace NoxEngineGUI {
 
@@ -50,7 +58,7 @@ namespace NoxEngineGUI {
 		Inspector,
 
 		// Animation
-		AnimationSettings,
+		AnimationSequencerPanel,
 
 		// Audio
 		AudioPanel
@@ -60,14 +68,14 @@ namespace NoxEngineGUI {
 
 	// Assign the panel name to the panel's enum
 	// TODO: Make this const?
-	static std::map< PanelName, String > PANEL_NAME_MAP {
+	static std::map< PanelName, String > kPanelNameMap {
 		{ PanelName::FileExplorer,      "File Explorer" },
 		{ PanelName::Scene,             "Scene" },
 		{ PanelName::PresetObjects,     "Preset Objects" },
 		{ PanelName::Hierarchy,         "Hierarchy" },
 		{ PanelName::Inspector,         "Inspector" },
-		{ PanelName::AnimationSettings, "Animation Settings" },
-		{ PanelName::AudioPanel,        "Audio Source" }
+		{ PanelName::AnimationSequencerPanel, "Animation Sequencer" },
+		{ PanelName::AudioPanel,        "Audio Editor" }
 	};
 
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -78,8 +86,8 @@ namespace NoxEngineGUI {
 	void setupFixedLayout();
 	void cleanupImGui();
 
-	void updateMenu(GUIParams*);
-	void updateGUI(GUIParams*);
+	void updateMenu(NoxEngine::GameState&, GUIParams*);
+	void updateGUI(NoxEngine::GameState&, GUIParams*);
 
 	// Functions that contain the logic for each sub-window ("tool")
 	// should belong in a separate header file.

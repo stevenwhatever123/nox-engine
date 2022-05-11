@@ -11,19 +11,17 @@
 #include <fmod_errors.h>
 
 // Engine Include
-#include "Singleton.h"
-#include "AudioManager.h"
-#include "IOManager.h"
-
-#include <Core/Mesh.h>
+#include <Managers/Singleton.h>
+#include <Managers/AudioManager.h>
 #include <Core/MeshScene.h>
 #include <Core/Types.h>
 #include <Core/Renderer.h>
+#include <Managers/IOManager.h>
 #include <Core/GameState.h>
 #include <Utils/Utils.h>
 #include <Utils/FBXFileLoader.h>
-#include "EventManager.h"
-#include "EventNames.h"
+#include <Managers/EventManager.h>
+#include <Managers/EventNames.h>
 
 #include <EngineGUI/EngineGUI.h>
 #include <EngineGUI/AudioPanel.h>
@@ -35,7 +33,7 @@
 #include <EngineGUI/ImGuizmoTool.h>
 
 #include <Components/RenderableComponent.h>
-#include <Components/PositionComponent.h>
+#include <Components/TransformComponent.h>
 #include <Core/GridObject.h>
 
 // TODO: move to a config file

@@ -39,7 +39,7 @@ namespace NoxEngine {
 	// Forward declares
 	class Mesh;
 	class Entity;
-	class IPosition;
+	class ITransform;
 	class IAudioSource;
 
 
@@ -144,7 +144,7 @@ namespace NoxEngine {
 		void unLoadSound(const char* strSoundName);
 		int playSounds(const String& strSoundName, const vec3& vPos = vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
 		
-		void setChannel3dPosition(int nChannelId, IPosition *ipos);
+		void setChannel3dPosition(int nChannelId, ITransform *ipos);
 		void setChannel3dPosition(int nChannelId, const vec3& vPosition);
 		void setChannelVolume(int nChannelId, float fNormalizedVolume);
 

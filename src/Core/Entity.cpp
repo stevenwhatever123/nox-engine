@@ -5,8 +5,9 @@
 #include <Core/GameState.h>
 #include <Components/ComponentType.h>
 #include <Components/IComponent.h>
-#include <Components/PositionComponent.h>
+#include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
+#include <Components/AnimationComponent.h>
 #include <Components/AudioSourceComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
@@ -24,6 +25,8 @@ Entity::Entity(i32 _id, char* _name)
 
 	if (_name != nullptr) name = _name;
 	else name = (char *)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
+
+	filepath = nullptr;
 }
 
 Entity::Entity(Scene* scene, char* _name)
@@ -43,6 +46,7 @@ Entity::Entity(Scene* scene, char* _name)
 		name = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
 		snprintf(name, ENTITY_NAME_MAX_LEN, "Entity %i", scene->nEntitiesAdded + 1);
 	}
+	filepath = nullptr;
 }
 
 Entity::Entity(Scene* scene, const char* _name)
@@ -58,6 +62,25 @@ Entity::Entity(Scene* scene, const char* _name)
 
 	name = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
 	memcpy(name, _name, ENTITY_NAME_MAX_LEN);
+
+	filepath = nullptr;
+}
+
+Entity::Entity(Scene* scene, const char* _name, const char* _filepath)
+	:
+	hasComp(0),
+	_isEnabled(~0),
+	entityEnabled(true) {
+
+	assert(scene != nullptr);
+
+	// Assign values to fields
+	id = scene->nEntitiesAdded;
+
+	name = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
+	filepath = (char*)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
+	memcpy(name, _name, ENTITY_NAME_MAX_LEN);
+	memcpy(filepath, _filepath, ENTITY_NAME_MAX_LEN);
 }
 
 Entity::Entity(Entity&& other) 
@@ -94,8 +117,9 @@ void Entity::addComp(ComponentType type) {
 
 	switch (type) {
 
-	case PositionType:			addComp<PositionComponent>();			break;
+	case TransformType:			addComp<TransformComponent>();			break;
 	case RenderableType:		addComp<RenderableComponent>();			break;
+	case AnimationType:			addComp<AnimationComponent>(); 			break;
 	case AudioSourceType:		addComp<AudioSourceComponent>();		break;
 	case AudioGeometryType:		addComp<AudioGeometryComponent>();		break;
 	case ScriptType:			addComp<ScriptComponent>(); 			break;
@@ -136,12 +160,9 @@ void Entity::tick(time_type dt) {
 
 
 // explicit template instantiation
-// Note: not needed anymore - moved template definition to header and removed logger
-//template void Entity::addComp<PositionComponent>(PositionComponent*);
-//template void Entity::addComp<RenderableComponent>(RenderableComponent*);
-//
-template PositionComponent* Entity::getComp<PositionComponent>();
+template TransformComponent* Entity::getComp<TransformComponent>();
 template RenderableComponent* Entity::getComp<RenderableComponent>();
+template AnimationComponent* Entity::getComp<AnimationComponent>();
 template AudioSourceComponent* Entity::getComp<AudioSourceComponent>();
 template AudioGeometryComponent* Entity::getComp<AudioGeometryComponent>();
 template ScriptComponent* Entity::getComp<ScriptComponent>();

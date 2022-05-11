@@ -7,7 +7,7 @@ using namespace NoxEngine;
 void NoxEngineGUI::updateAudioPanel(GameState* state, NoxEngineGUI::GUIParams *params) {
 
 	// Variables
-	std::string name = PANEL_NAME_MAP[PanelName::AudioPanel];
+	std::string name = kPanelNameMap[PanelName::AudioPanel];
 	AudioManager* am = AudioManager::Instance();
 
 	// Window Begin

@@ -9,8 +9,9 @@ namespace NoxEngine {
 	// Note (Vincent): This implies the developer cannot create new component types
 	enum ComponentType : i32 {
 		AbstractType = 0,
-		PositionType,		// TODO: change to Transform (pos, rot, scale)
+		TransformType,		// TODO: change to Transform (pos, rot, scale)
 		RenderableType,
+		AnimationType,
 		LightSourceType,
 		AudioSourceType,
 		AudioListenerType,
@@ -22,8 +23,9 @@ namespace NoxEngine {
 
 	enum ComponentTypeFlag : HasCompBitMask {
 		AbstractFlag			= 0,
-		PositionFlag			= 1 << (PositionType			- 1),
+		TransformFlag			= 1 << (TransformType			- 1),
 		RenderableFlag			= 1 << (RenderableType			- 1),
+		AnimationFlag			= 1 << (AnimationType			- 1),
 		LightSourceFlag			= 1 << (LightSourceType			- 1),
 		AudioSourceFlag			= 1 << (AudioSourceType			- 1),
 		AudioListenerFlag		= 1 << (AudioListenerType		- 1),

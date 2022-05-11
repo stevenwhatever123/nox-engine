@@ -1,11 +1,10 @@
 #pragma once
 
+#include <Core/MeshNode.h>
+#include <Core/Mesh.h>
 #include <assimp/scene.h>
+#include <Core/Types.h>
 #include <Utils/Utils.h>
-
-#include "MeshNode.h"
-#include "Mesh.h"
-#include "Types.h"
 
 namespace NoxEngine {
 
@@ -13,6 +12,7 @@ namespace NoxEngine {
 	public:
 
 		MeshScene(const aiScene* mesh);
+		MeshScene(std::istream& stream);
 		MeshScene();
 		~MeshScene();
 
@@ -30,7 +30,7 @@ namespace NoxEngine {
 		// Reset the play time
 		void resetAnimation();
 
-		u32 getNumOfAnimations();
+		u32 getNumOfAnimations() const;
 		bool hasAnimations();
 		
 		void updateNumTicks(u32 animationIndex, u32 num);
@@ -63,6 +63,8 @@ namespace NoxEngine {
 		Array<time_type> animationDuration;
 
 		bool playAnimation = false;
+
+		void serialize(std::ostream& stream);
 
 	private:
 		void extractGeometricInfo(const aiScene* scene);

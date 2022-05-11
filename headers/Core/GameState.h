@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "Renderer.h"
 #include "Types.h"
 #include "MeshScene.h"
@@ -25,6 +27,9 @@ namespace NoxEngine {
 		f32 light[3];
 		Array<Scene *> scenes;
 		Scene *activeScene;
+
+		// Active audio in sequencer
+		std::vector<std::string> selectedAudio;
 	};
 
 

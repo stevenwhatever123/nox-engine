@@ -18,7 +18,6 @@ AudioGeometryComponent::AudioGeometryComponent() {
 
 	geometryId = -1;
 	render = false;
-	registered = false;
 
 	shape = Shape::Undefined;
 	glRenderType = GL_LINES;

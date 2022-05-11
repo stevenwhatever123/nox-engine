@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Core/Types.h>
-#include "Singleton.h"
+#include <Managers/Singleton.h>
 #include <Utils/MemAllocator.h>
 
 
