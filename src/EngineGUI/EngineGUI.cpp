@@ -62,8 +62,7 @@ void NoxEngineGUI::setupFixedLayout() {
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::PresetObjects].c_str(), dock_left_id);
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::Hierarchy].c_str(), dock_left_down_id);
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::AnimationSequencerPanel].c_str(), dock_down_id);
-	//ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AudioPanel].c_str(), dock_down_right_id);
-	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::SkyboxSettings].c_str(), dock_down_right_right_id);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::SkyboxSettings].c_str(), dock_down_id);
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::FileExplorer].c_str(), dock_down_down_id);
 			
 	// Change node flags here

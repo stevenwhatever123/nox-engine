@@ -4,15 +4,15 @@
 #include <iostream>
 
 // 3rd Party Include
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/euler_angles.hpp>
-#include <glad/glad.h>
+#include <Core/Types.h>
+// #include <glm/glm.hpp>
+// #include <glm/gtc/matrix_transform.hpp>
+// #include <glm/gtc/type_ptr.hpp>
+// #include <glm/gtx/euler_angles.hpp>
+// #include <glad/glad.h>
 
-#include <stb_image.h>
-#include <stb_image_write.h>
-#include <string>
+#include <3rdParty/stb/stb_image.h>
+#include <3rdParty/stb/stb_image_write.h>
 
 // Engine Include
 #include <Core/Camera.h>

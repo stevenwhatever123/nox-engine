@@ -57,7 +57,7 @@ struct AnimationSequencer : public ImSequencer::SequenceInterface {
         {
             auto startItr = game_state->audioSources.begin();
             auto endItr = game_state->audioSources.end();
-            for (u32 i = 0; i < index; i++)
+            for (i32 i = 0; i < index; i++)
             {
                 startItr++;
             }

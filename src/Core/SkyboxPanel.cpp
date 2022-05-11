@@ -1,5 +1,7 @@
-#include "EngineGUI/SkyboxPanel.h"
-#include "Renderer.h"
+#include <EngineGUI/SkyboxPanel.h>
+#include <EngineGUI/EngineGUI.h>
+#include <Core/Renderer.h>
+#include <Managers/IOManager.h>
 
 using namespace NoxEngine;
 
@@ -14,7 +16,7 @@ const char* skyboxTextureNames[] = {
 
 void NoxEngineGUI::updateSkyboxPanel(NoxEngine::GameState* game_state) {
 
-	String name = PANEL_NAME_MAP[PanelName::SkyboxSettings];
+	String name = kPanelNameMap[PanelName::SkyboxSettings];
 	bool isplaying = false;
 
 	// Window Begin

@@ -174,7 +174,7 @@ bool AudioGeometryComponent::generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v
 
 bool AudioGeometryComponent::generateIndicesFromTriangles(const Array<ivec3>& _faces) {
 
-	u32 nExistingIndices = indices.size();
+	u32 nExistingIndices = (u32)indices.size();
 	indices.resize(indices.size() + _faces.size() * 6);
 
 	for (u32 f = 0; f < _faces.size(); f++) {

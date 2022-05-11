@@ -91,7 +91,7 @@ AnimationComponent::AnimationComponent(const MeshScene& scene, MeshNode *node)
 		rotationMatrices[i] = node->nodeAnimRotationMatrices[i];
 		scalingMatrices[i] = node->nodeAnimScalingMatrices[i];
 
-		maximumFrame[i] = node->nodeAnimTransformation[i].size();
+		maximumFrame[i] = (u32)node->nodeAnimTransformation[i].size();
 	}
 
 	numTicks = scene.numTicks;
@@ -207,7 +207,7 @@ bool AnimationComponent::hasAnimations()
 void AnimationComponent::updateNumTicks(u32 animationIndex, u32 num)
 {
 	// Don't do anything if the number is the same
-	if (num <= numTicks[animationIndex])
+	if (num <= (u32)numTicks[animationIndex])
 		return;
 
 	if (hasAnimations())

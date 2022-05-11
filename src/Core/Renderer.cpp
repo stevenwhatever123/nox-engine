@@ -7,7 +7,10 @@
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Components/AudioGeometryComponent.h>
-#include <Core/Types.h>
+
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
+
 
 // TODO: update uniform submissions to use Shader class
 // TODO: fix drawing to default buffer
