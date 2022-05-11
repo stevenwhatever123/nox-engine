@@ -25,14 +25,12 @@ public:
 	// Frame based transformation
 	glm::mat4 getTransformation(u32 frameIndex, u32 animationIndex);
 	// Linear interpolated transformation
-	glm::mat4 getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, f32 timeStep,
-		i32 whichTickFloor, i32 whichTickCeil);
+	glm::mat4 getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
 
 	// Global transformation by traversing all parent node and adding them up
 	glm::mat4 getGlobalTransformation();
 	glm::mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex);
-	glm::mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, f32 timeStep,
-		i32 whichTickFloor, i32 whichTickCeil);
+	glm::mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
 
 	void setupEulerAngle();
 	void convertEulerAngleToMatrix();

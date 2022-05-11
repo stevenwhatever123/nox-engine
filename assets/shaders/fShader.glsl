@@ -14,8 +14,6 @@ in Vertex {
 // The color of the fragment
 out vec4 FragmentColor;
 
-
-
 // Textures
 uniform sampler2D AmbTexture;
 uniform sampler2D NormTexture;
