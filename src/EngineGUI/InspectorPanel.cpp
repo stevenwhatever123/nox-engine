@@ -436,6 +436,9 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						// 2. Generate the selected geometry
 						// 3. Add to audio engine and renderer (TODO: for plane and box)
 						// 4. Set geometryId of the component
+
+						mat4 transformation = animComp ? animComp->getTransformation() : mat4(1.0f);
+
 						if (igeo->shape == IAudioGeometry::Shape::Plane) {
 
 							ImGui::NewLine();
@@ -447,7 +450,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 							if (ImGui::Button("Generate##gen_audio_plane")) {
 
-								geometryGenerated = geoComp->generatePlane(geoComp->v1, geoComp->v2, geoComp->v3, geoComp->v4);
+								geometryGenerated = geoComp->generatePlane( geoComp->v1, geoComp->v2, geoComp->v3, geoComp->v4, transformation );
 							}
 						}
 						if (igeo->shape == IAudioGeometry::Shape::Box) {
@@ -457,8 +460,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 							if (ImGui::Button("Generate##gen_audio_box")) {
 
-								// TODO: fix
-								//geometryGenerated = geoComp->generateBoundingBox( rendComp->getVertices() );
+								geometryGenerated = geoComp->generateBoundingBox( rendComp->getVertices(), transformation );
 							}
 
 							// End: No renderable component - grey out the Generate button

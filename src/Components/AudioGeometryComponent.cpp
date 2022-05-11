@@ -97,7 +97,7 @@ bool AudioGeometryComponent::loadMesh(MeshScene* meshScene) {
 	return true;
 }
 
-bool AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts) {
+bool AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts, mat4 transformation) {
 
 	// no vertices - cannot generate bounding box
 	if (verts.size() == 0) return false;
@@ -107,12 +107,12 @@ bool AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts) {
 	// find the min/max x,y,z respectively (more efficient to find both min and max in 1 pass)
 	vec3 l = verts[0], u = verts[0];
 	for (const vec3 v : verts) {
-		if (l.x > v.x) l.x = v.x;
-		if (l.y > v.y) l.y = v.y;
-		if (l.z > v.z) l.z = v.z;
-		if (u.x > v.x) u.x = v.x;
-		if (u.y > v.y) u.y = v.y;
-		if (u.z > v.z) u.z = v.z;
+		l.x = std::min(l.x, v.x);
+		l.y = std::min(l.y, v.y);
+		l.z = std::min(l.z, v.z);
+		u.x = std::max(u.x, v.x);
+		u.y = std::max(u.y, v.y);
+		u.z = std::max(u.z, v.z);
 	}
 
 	// Given min/max vertices, generate the 6 other corners and generate faces / indices for lines as follows:
@@ -136,6 +136,11 @@ bool AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts) {
 		{ l.x, u.y, l.z }
 	};
 
+	// scale vertices by transformation
+	for (auto &vertex : vertices) {
+		vertex = transformation * vec4(vertex, 1.0f);
+	}
+
 	faces = {
 		{1,2,3},
 		{7,6,5},
@@ -157,7 +162,7 @@ bool AudioGeometryComponent::generateBoundingBox(const Array<vec3>& verts) {
 // Assume the 4 vertices is in CCW, and is planar
 // TODO: planar test
 // TODO: cross product to ensure CCW
-bool AudioGeometryComponent::generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4) {
+bool AudioGeometryComponent::generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4, mat4 transformation) {
 
 	clearMesh();
 

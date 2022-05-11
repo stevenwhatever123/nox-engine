@@ -334,14 +334,14 @@ void Renderer::draw() {
 		else if (objects[i].componentType == ComponentType::AudioGeometryType) {
 			if (!ent->isEnabled<AudioGeometryComponent>() || !ent->getComp<AudioGeometryComponent>()->render) continue;
 		}
-		// If the object has a position and it's enabled, use it
+
+		// If the object has a transform and it's enabled, use it
 		glm::mat4 worldMat = glm::mat4(1.0f);
 		if (objects[i].ent->containsComps<TransformComponent>() && objects[i].ent->isEnabled<TransformComponent>()) {
 			ITransform* pos = objects[i].ent->getComp<TransformComponent>()->CastType<ITransform>();
 			glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
 			glm::mat4 rotation = glm::eulerAngleXYZ(pos->rx, pos->ry, pos->rz);
 			glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(pos->sx, pos->sy, pos->sz));
-			//worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
 			worldMat = translation * rotation * scale;
 		}
 
