@@ -59,6 +59,8 @@ namespace NoxEngine {
 		u32 skyVBO;
 		float skyBoxVertices[108];
 
+		
+
 		// skybox images
 		std::vector<std::string> skyboxImages;
 
@@ -168,6 +170,7 @@ namespace NoxEngine {
 		void updateLightPos(float x, float y, float z);
 
 		void updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable);
+
 		void setSkyBoxImages(const std::vector<std::string> skyboxImages);
 		void skyBoxLoadTexture();
 		void drawSkyBox();

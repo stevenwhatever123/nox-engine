@@ -41,10 +41,12 @@ void Camera::generateCameraParameters() {
 	front.z = sin(RadYaw) * cos(RadPitch);
 	lookingAt = glm::normalize(front);
 
-	glm::vec4 temp(1, 2, 3, 4);
 	cameraTransf = glm::lookAt(currCamPos, currCamPos + lookingAt, topPointingAt);
+	cameraTransf[3][0] = 0;
+	cameraTransf[3][1] = 0;
+	cameraTransf[3][2] = 0;
 
-	std::cout << Pitch << "  " << Yaw << std::endl;
+	//std::cout << Pitch << "  " << Yaw << std::endl;
 
 	// Rotate cam matrix
 	

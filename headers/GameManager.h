@@ -37,6 +37,7 @@
 #include <EngineGUI/ScenePanel.h>
 #include <EngineGUI/PresetObjectPanel.h>
 #include <EngineGUI/ImGuizmoTool.h>
+#include <EngineGUI/SkyboxPanel.h>
 
 
 #include <Scene.h>

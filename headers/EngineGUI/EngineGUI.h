@@ -58,9 +58,12 @@ namespace NoxEngineGUI {
 		AnimationSettings,
 
 		// Audio
-		AudioSource
+		AudioSource,
 
-			// Scripting
+		// Scripting
+
+		//Skybox
+		SkyboxSettings
 	};
 
 	// Assign the panel name to the panel's enum
@@ -71,12 +74,12 @@ namespace NoxEngineGUI {
 		{ PanelName::PresetObjects, "Preset Objects" },
 		{ PanelName::Hierarchy,		"Hierarchy" },
 		{ PanelName::AnimationSettings,		"Animation Settings" },
-		{ PanelName::AudioSource,	"Audio Source" }
+		{ PanelName::AudioSource,	"Audio Source" },
+		{ PanelName::SkyboxSettings, "Skybox Settings" }
 	};
 
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 	static bool* p_open = nullptr;
-
 
 	void init_imgui(GLFWwindow* win);
 	void loadTextures();

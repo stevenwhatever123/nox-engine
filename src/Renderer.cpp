@@ -148,7 +148,6 @@ void Renderer::updateBuffers() {
     glBindVertexArray(0);
 }
 
-
 void Renderer::addObject(IRenderable *mesh, IPosition *pos)
 {
 
@@ -226,8 +225,6 @@ void Renderer::clearObject()
 {
 	objects.clear();
 }
-
-
 
 void Renderer::draw() {
 
@@ -311,8 +308,6 @@ void Renderer::fillBackground(i32 hex) {
 
 }
 
-
-
 void Renderer::updateProjection(int width, int height) {
 
 	w = width;
@@ -354,8 +349,6 @@ void Renderer::updateProjection(int width, int height) {
 
 }
 
-
-
 void Renderer::createVertexArray(IRenderable* mesh)
 {
 	numberOfVertices += mesh->getNumOfVertices();
@@ -363,8 +356,6 @@ void Renderer::createVertexArray(IRenderable* mesh)
     mesh->getArrayOfVertices(&v);
     copy(&v.data()[0], &v.data()[3 * mesh->getNumOfVertices()], back_inserter(vertices));
 }
-
-
 
 void Renderer::createTexCoordArray(IRenderable* mesh)
 {
@@ -394,8 +385,6 @@ void Renderer::createNormalsArray(IRenderable* mesh)
     delete n;
 }
 
-
-
 void Renderer::createElementArray(IRenderable* mesh)
 {
 
@@ -419,10 +408,6 @@ void Renderer::createElementArray(IRenderable* mesh)
     }
 
 }
-
-
-
-
 
 void Renderer::createTangents(IRenderable* mesh)
 {
@@ -530,7 +515,6 @@ void Renderer::updateCamera()
 {
     program->set4Matrix("toCamera", camera->getCameraTransf());
 }
-
 
 void Renderer::updateCamera(Camera* cam)
 {
@@ -699,6 +683,7 @@ void Renderer::drawSkyBox()
     glBindVertexArray(0);
 
 }
+
 void Renderer::updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable)
 {
     for (u32 i = 0; i < objects.size(); i++)

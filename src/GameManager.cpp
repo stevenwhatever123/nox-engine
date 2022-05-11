@@ -212,7 +212,7 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(0.0f, 0.0f, 0.0f));
+	camera = new Camera(vec3(10.0f, 10.0f, 10.0f));
 	// camera->turnVerBy(35.0f);
 }
 
@@ -249,8 +249,7 @@ void GameManager::init_renderer() {
 	programs[1].use();
 
 	//set images
-	std::string texturenumber;
-	//texturenumber = "C:/Users/Steven/Gitlab/noxengine/assets/skybox/textures/picture/bak0";
+	/*std::string texturenumber;
 	texturenumber = "assets/skybox/textures/picture/bak0";
 	std::vector<std::string> images
 	{
@@ -261,15 +260,13 @@ void GameManager::init_renderer() {
 					  texturenumber + "/front.jpg",
 					  texturenumber + "/back.jpg"
 	};
-	renderer->setSkyBoxImages(images);
-
-
-
+	renderer->setSkyBoxImages(images);*/
 
 	game_state.renderer = renderer;
 
 	renderer->setFrameBufferToTexture();
-
+	
+	//renderer->setFrameBufferToDefault();
 
 	// GridObject obj(vec3(-500, 0, -500), vec3(1000, 0, 1000), 100);
 	// renderer->addObject(
@@ -350,6 +347,7 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateAnimationPanel(&game_state);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state);
+	NoxEngineGUI::updateSkyboxPanel(&game_state);
 
 	ImGui::PopFont();
 	ImGui::Render();
@@ -421,8 +419,11 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
-	renderer->setFrameBufferToTexture();
+
+	renderer->setFrameBufferToDefault();
+	//renderer->setFrameBufferToTexture();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 	// auto meshSceneStart = game_state.meshScenes.begin();
 	// auto meshSceneEnd = game_state.meshScenes.end();
 	// for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
@@ -454,7 +455,7 @@ void GameManager::update_renderer() {
 
 
 	// renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-
+	
 	
 	renderer->drawSkyBox();
 

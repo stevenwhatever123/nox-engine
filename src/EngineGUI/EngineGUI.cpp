@@ -54,14 +54,17 @@ void NoxEngineGUI::setupFixedLayout() {
 	ImGuiID dock_right_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Right, 0.2f, nullptr, &mainNodeID);
 	ImGuiID dock_left_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Left, 0.2f, nullptr, &mainNodeID);
 	ImGuiID dock_down_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Down, 0.2f, nullptr, &mainNodeID);
-	ImGuiID dock_down_right_id	= ImGui::DockBuilderSplitNode(dock_down_id, ImGuiDir_Right, 0.6f, nullptr, &dock_down_id);
+	ImGuiID dock_down_right_id	= ImGui::DockBuilderSplitNode(dock_down_id, ImGuiDir_Right, 0.3f, nullptr, &dock_down_id);
+	ImGuiID dock_down_right_right_id = ImGui::DockBuilderSplitNode(dock_down_id, ImGuiDir_Right, 0.5f, nullptr, &dock_down_id);
 	ImGuiID dock_down_down_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Up, 0.05f, nullptr, &mainNodeID);
+	
 
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Scene].c_str(), mainNodeID);
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Hierarchy].c_str(), dock_right_id);
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::PresetObjects].c_str(), dock_left_id);
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AnimationSettings].c_str(), dock_down_id);
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AudioSource].c_str(), dock_down_right_id);
+	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::SkyboxSettings].c_str(), dock_down_right_right_id);
 	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::FileExplorer].c_str(), dock_down_down_id);
 			
 	// Change node flags here
@@ -189,7 +192,6 @@ void NoxEngineGUI::updateGUI(GUIParams *params) {
 	ImGui::End();
 	// ImGui::ShowDemoWindow();
 	// ImGui::ShowMetricsWindow();
-
 
 	// First loop is over
 	params->firstLoop = false;
