@@ -21,30 +21,41 @@ Camera::Camera(vec3 stPos) :
 
 
 void Camera::generateCameraParameters() {
+
+	// // Update camera
+	// currCamPos = startCamPos + user_shift;
+	// // Calculate a matrix out of updated camera
+
+	// if (Pitch > 89.0) {
+	// 	Pitch = 89.0;
+	// }
+
+	// if (Pitch < -89.0) {
+	// 	Pitch = -89.0;
+	// }
+	
+	// glm::vec3 front;
+	// float RadYaw = glm::radians(Yaw);
+	// float RadPitch = glm::radians(Pitch);
+	// front.x = cos(RadYaw) * cos(RadPitch);
+	// front.y = sin(RadPitch);
+	// front.z = sin(RadYaw) * cos(RadPitch);
+	// lookingAt = glm::normalize(front);
+
+	// cameraTransf = glm::lookAt(currCamPos, currCamPos + lookingAt, topPointingAt);
+	// // cameraTransf[3][0] = 0;
+	// // cameraTransf[3][1] = 0;
+	// // cameraTransf[3][2] = 0;
+
 	// Update camera
 	currCamPos = startCamPos + user_shift;
+
 	// Calculate a matrix out of updated camera
+	cameraTransf = glm::lookAt(currCamPos, lookingAt, topPointingAt);
 
-	if (Pitch > 89.0) {
-		Pitch = 89.0;
-	}
-
-	if (Pitch < -89.0) {
-		Pitch = -89.0;
-	}
-	
-	glm::vec3 front;
-	float RadYaw = glm::radians(Yaw);
-	float RadPitch = glm::radians(Pitch);
-	front.x = cos(RadYaw) * cos(RadPitch);
-	front.y = sin(RadPitch);
-	front.z = sin(RadYaw) * cos(RadPitch);
-	lookingAt = glm::normalize(front);
-
-	cameraTransf = glm::lookAt(currCamPos, currCamPos + lookingAt, topPointingAt);
-	// cameraTransf[3][0] = 0;
-	// cameraTransf[3][1] = 0;
-	// cameraTransf[3][2] = 0;
+	// Rotate cam matrix
+	glm::mat4 rotation = glm::rotate(glm::rotate( glm::mat4(1.0f), glm::radians(user_rotate.y), glm::vec3(1.0f, 0.0f, 0.0f) ), glm::radians(user_rotate.x), glm::vec3(0.0f, 1.0f, 0.0f));
+	cameraTransf = rotation * cameraTransf;
 
 }
 

@@ -314,12 +314,12 @@ void GameManager::update_audio() {
 void GameManager::update_inputs() {
 	glfwPollEvents();
 
-	if(keys['W'])  { camera->turnHorBy(0.1f); }
-	if(keys['S'])  { camera->turnHorBy(-0.1f); }
-	if(keys['D'])  { camera->turnVerBy(-0.1f); }
-	if(keys['A'])  { camera->turnVerBy(0.1f); }
-	if(keys[' '])  { camera->moveHorBy(0.1f); }
-	if(keys['L'])  { camera->moveHorBy(-0.1f); }
+	if(keys['W'])  { camera->moveFwdBy(0.1f); }
+	if(keys['S'])  { camera->moveFwdBy(-0.1f); }
+	if(keys['D'])  { camera->moveHorBy(-0.1f); }
+	if(keys['A'])  { camera->moveHorBy(0.1f); }
+	if(keys[' '])  { camera->moveVerBy(0.1f); }
+	if(keys['K'])  { camera->moveVerBy(-0.1f); }
 
 	// if (keys['G']) { camera->turndirUP(0.1f); }
 	// if (keys['B']) { camera->turndirDOWN(0.1f); }

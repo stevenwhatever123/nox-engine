@@ -646,8 +646,14 @@ void Renderer::drawSkyBox()
     // draw scene
     glm::mat4 view;
     glm::mat4 projection;
-                                                                // Front                     //Up
-	view = camera->getCameraTransf();//glm::lookAt(camera->currCamPos, vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0, 1.0, 0.0f));
+
+
+	view = camera->getCameraTransf();
+
+	view[3][0] = 0;
+	view[3][1] = 0;
+	view[3][2] = 0;
+
 
 	projection = glm::perspective(glm::radians(camera->fov), (float)(w / h), 0.1f, 1000.0f);
 
