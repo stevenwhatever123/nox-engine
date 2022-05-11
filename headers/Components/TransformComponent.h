@@ -13,6 +13,7 @@ namespace NoxEngine {
 	class TransformComponent : public ITransform, public IComponent
 	{
 		public:
+			static const ComponentType id = ComponentType::TransformType;
 
 			TransformComponent(f32 newx = 0.0f, f32 newy = 0.0f, f32 newz = 0.0f);
 

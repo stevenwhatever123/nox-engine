@@ -4,7 +4,7 @@ using namespace NoxEngine;
 
 AnimationComponent::AnimationComponent()
 {
-	id = ComponentType::AnimationType;
+	//id = ComponentType::AnimationType;
 
 	frameIndex = 0;
 	animationIndex = 0;
@@ -49,7 +49,7 @@ AnimationComponent::AnimationComponent()
 
 AnimationComponent::AnimationComponent(const MeshScene& scene, MeshNode *node)
 {
-	id = ComponentType::AnimationType;
+	//id = ComponentType::AnimationType;
 
 	frameIndex = 0;
 	animationIndex = 0;

@@ -19,6 +19,8 @@ namespace NoxEngine {
 
 	class AudioGeometryComponent : public IAudioGeometry, public IComponent {
 	public:
+		static const ComponentType id = ComponentType::AudioGeometryType;
+
 		AudioGeometryComponent();
 
 		//void displayUI() override;

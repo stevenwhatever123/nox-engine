@@ -14,6 +14,7 @@ namespace NoxEngine {
 	 */
 	class RenderableComponent : public IRenderable, public IComponent {
 		public:
+			static const ComponentType id = ComponentType::RenderableType;
 
 			RenderableComponent(f32 trX = 0.0f, f32 trY = 0.0f, f32 trZ = 0.0f, const String texName = "");
 			RenderableComponent(const String texName);

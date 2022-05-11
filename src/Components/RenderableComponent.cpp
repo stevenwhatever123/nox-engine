@@ -6,7 +6,7 @@ RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const String
 	ambientTexture(texName),
 	normalTexture()
 {
-	id = ComponentType::RenderableType;
+	//id = ComponentType::RenderableType;
 
 	has_normal = 1;
 	has_texture = 1;
@@ -74,14 +74,14 @@ RenderableComponent::RenderableComponent(const String texName):
 	ambientTexture(texName),
 	normalTexture()
 {
-	id = ComponentType::RenderableType;
+	//id = ComponentType::RenderableType;
 }
 
 RenderableComponent::RenderableComponent(const RenderableComponent &other) :
 	ambientTexture(other.ambientTexture),
 	normalTexture(other.normalTexture)
 {
-	id = ComponentType::RenderableType;
+	//id = ComponentType::RenderableType;
 
 	vertices	= other.vertices;
 	texCoords	= other.texCoords;

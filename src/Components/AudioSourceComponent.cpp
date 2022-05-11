@@ -5,7 +5,7 @@ using namespace NoxEngine;
 
 AudioSourceComponent::AudioSourceComponent() {
 
-	id = ComponentType::AudioSourceType;
+	//id = ComponentType::AudioSourceType;
 
 	filePath = "";
 	volume = 1.0f;

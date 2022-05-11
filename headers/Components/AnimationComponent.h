@@ -15,6 +15,8 @@ namespace NoxEngine
 		bool editing = false;
 
 	public:
+		static const ComponentType id = ComponentType::AnimationType;
+
 		AnimationComponent();
 		AnimationComponent(const MeshScene& scene, MeshNode* node);
 

@@ -10,7 +10,7 @@ using namespace NoxEngine;
 
 AudioGeometryComponent::AudioGeometryComponent() {
 
-	id = ComponentType::AudioGeometryType;
+	//id = ComponentType::AudioGeometryType;
 
 	has_texture = 0;
 	has_normal = 0;

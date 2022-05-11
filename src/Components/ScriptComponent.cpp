@@ -8,11 +8,11 @@ using namespace NoxEngine;
 using luabridge::LuaRef;
 
 ScriptComponent::ScriptComponent() {
-	id = ComponentType::ScriptType;
+	//id = ComponentType::ScriptType;
 }
 
 ScriptComponent::ScriptComponent(const char *script): script_file(script), inited(false)  {
-	id = ComponentType::ScriptType;
+	//id = ComponentType::ScriptType;
 
 	script_state = luaL_newstate();
 	luaL_openlibs(script_state);

@@ -20,7 +20,8 @@ namespace NoxEngine {
 	class IComponent
 	{
 		public:
-			ComponentType id;
+			//ComponentType id;		// Need to rely on every component class to have a static id
+
 			Entity* parent;
 			// This function is implemented to be able to downcast classes stored as IComponent to their respective actual classes
 			// TODO (Vincent): fix this witchcraft
@@ -31,8 +32,8 @@ namespace NoxEngine {
 			// What's the representation of this component in the inspector?
 			// This function being virtual also allows dynamic_cast to be used in CastType()
 			virtual void displayUI() {};
-			ComponentType get_id() { return id; };
-			void set_id(ComponentType value) { id = value; };
+			virtual inline ComponentType id() { return ComponentType::AbstractType; };
+			//void set_id(ComponentType value) { id = value; };
 
 			virtual Entity* getParentEntity() { return parent; };
 			virtual void attachedToEntity(Entity* ent) { parent = ent; };

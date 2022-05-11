@@ -10,6 +10,8 @@ namespace NoxEngine {
 	 */
 	class ScriptComponent : public IComponent {
 		public:
+			static const ComponentType id = ComponentType::ScriptType;
+
 			ScriptComponent(const char *script);
 			ScriptComponent();
 

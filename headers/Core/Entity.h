@@ -116,9 +116,7 @@ namespace NoxEngine {
 			return true;
 		}
 		template <typename T, typename... U> bool containsComps__helper(sequence<T, U...>) {
-			// TODO (Vincent): Fix w/ auto component id
-			T* tmp = new T();
-			return containsComps(1 << (tmp->id - 1)) && containsComps__helper(sequence<U...>{});
+			return containsComps(1 << (T::id - 1)) && containsComps__helper(sequence<U...>{});
 		}
 		// func signature to call
 		template <typename... T> bool containsComps() { return containsComps__helper(sequence<T...>{}); }
@@ -175,9 +173,7 @@ namespace NoxEngine {
 		size_t removeComps__helper(sequence<>) { return 0; }
 		template <typename T, typename... U> size_t removeComps__helper(sequence<T, U...>) {
 			// Update bitmask
-			// TODO (Vincent): Fix w/ auto component id
-			T* tmp = new T();
-			hasComp &= ~(1 << (tmp->id - 1));
+			hasComp &= ~(1 << (T::id - 1));
 
 			removeCompSignal<T>();
 
@@ -201,9 +197,7 @@ namespace NoxEngine {
 		// 0 component base case
 		void setEnabled__helper(bool aEnabled, sequence<>) {}
 		template <typename T, typename... U> void setEnabled__helper(bool aEnabled, sequence<T, U...>) {
-			// TODO (Vincent): Fix w/ auto component id
-			T* tmp = new T();
-			HasCompBitMask mask = (1 << (tmp->id - 1));
+			HasCompBitMask mask = (1 << (T::id - 1));
 			if (aEnabled) _isEnabled |= mask;
 			else          _isEnabled &= ~mask;
 
@@ -219,14 +213,12 @@ namespace NoxEngine {
 		// Check whether a component is enabled. This does not take entity-level enabled-ness into account.
 		bool isEnabled(u32 bit);
 		template <typename T> bool isEnabled() {
-			// TODO (Vincent): Fix w/ auto component id
-			T* tmp = new T();
-			return isEnabled(tmp->id);
+			return isEnabled(T::id);
 		}
-			static void exportLua();
-			i32 get_id() { return id; }
-			i32 set_id(i32 value) { id = value; }
 
+		static void exportLua();
+		i32 get_id() { return id; }
+		i32 set_id(i32 value) { id = value; }
 
 	};
 }

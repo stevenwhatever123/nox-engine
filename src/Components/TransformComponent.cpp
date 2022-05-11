@@ -4,7 +4,7 @@ using namespace NoxEngine;
 
 TransformComponent::TransformComponent(f32 newx, f32 newy, f32 newz)
 {
-	id = ComponentType::TransformType;
+	//id = ComponentType::TransformType;
 	x = newx;
 	y = newy;
 	z = newz;

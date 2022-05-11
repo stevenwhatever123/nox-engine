@@ -13,6 +13,8 @@ namespace NoxEngine {
 
 	class AudioSourceComponent : public IAudioSource, public IComponent {
 	public:
+		static const ComponentType id = ComponentType::AudioSourceType;
+
 		AudioSourceComponent();
 
 		//void displayUI() override;
