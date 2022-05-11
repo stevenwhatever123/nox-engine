@@ -53,6 +53,7 @@ namespace NoxEngine {
 		// Add object to renderer to render
 		void addObject(Entity* ent, IRenderable* meshSrc, ComponentType componentType);
 		void removeObject(Entity* ent, ComponentType componentType);
+		void removeObject(u32 rendObjId);
 		void clearObject();
 		
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}

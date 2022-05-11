@@ -221,6 +221,12 @@ void Renderer::removeObject(Entity* ent, ComponentType componentType) {
     LOG_DEBUG("Renderer object count: %i\n", objects.size());
 }
 
+void Renderer::removeObject(u32 rendObjId) {
+
+	objects.erase(rendObjId);
+	LOG_DEBUG("Renderer object count: %i\n", objects.size());
+}
+
 GLuint Renderer::setTexture(const String texturePath, const char* uniName, int num) {
 
 	GLuint tex;
@@ -448,7 +454,7 @@ void Renderer::createElementArray(IRenderable* mesh)
 		copy(indices.begin(), indices.end(), back_inserter(elements));
 
 	} else {
-		numberOfElements += mesh->getNumOfFaces();
+		numberOfElements += mesh->getNumOfFaces() * 3;
 		const auto faces = mesh->getFaces();
 		for(i32 i = 0; i < faces.size(); i++) {
 			elements.push_back(faces[i][0]);
