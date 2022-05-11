@@ -97,8 +97,11 @@ Renderer::Renderer(int width, int height, Camera* cam) :
     glGenBuffers(1, &NBO);
     glGenBuffers(1, &TCBO);
     glGenBuffers(1, &TANBO);
-
     glGenBuffers(1, &EBO);
+
+
+	setupSkybox();
+
 }
 
 void Renderer::updateBuffers() {
@@ -536,72 +539,81 @@ void Renderer::updateLightPos(float x, float y, float z)
     program->set3Float("lightPosition",x, y, z);
 }
 
-void Renderer::setSkyBoxImages(const std::vector<std::string> skyboxImages)
+
+void Renderer::setupSkybox() {
+	//set vertex data
+	float vertices_temp[] = {
+
+		 -1.0, -1.0, -1.0,
+		  1.0, -1.0, -1.0,
+		  1.0, -1.0,  1.0,
+		 -1.0, -1.0, -1.0,
+		  1.0, -1.0,  1.0,
+		 -1.0, -1.0,  1.0,
+
+		 -1.0, -1.0, -1.0,
+		 -1.0,  1.0, -1.0,
+          1.0,  1.0, -1.0,
+		 -1.0, -1.0, -1.0,
+          1.0,  1.0, -1.0,
+          1.0, -1.0, -1.0,
+
+		 -1.0, -1.0, -1.0,
+		 -1.0, -1.0,  1.0,
+		 -1.0,  1.0,  1.0,
+		 -1.0, -1.0, -1.0,
+		 -1.0,  1.0,  1.0,
+		 -1.0,  1.0, -1.0,
+
+		  1.0, -1.0, -1.0,
+		  1.0,  1.0, -1.0,
+		  1.0, -1.0,  1.0,
+		  1.0,  1.0, -1.0,
+		  1.0,  1.0,  1.0,
+		  1.0, -1.0,  1.0,
+
+		 -1.0, -1.0,  1.0,
+		  1.0, -1.0,  1.0,
+		 -1.0,  1.0,  1.0,
+		  1.0, -1.0,  1.0,
+		  1.0,  1.0,  1.0,
+		 -1.0,  1.0,  1.0,
+
+		 -1.0,  1.0,  1.0,
+		  1.0,  1.0,  1.0,
+		  1.0,  1.0, -1.0,
+		 -1.0,  1.0,  1.0,
+		  1.0,  1.0, -1.0,
+		 -1.0,  1.0, -1.0
+	};
+
+	glGenVertexArrays(1, &skyVAO);
+	glBindVertexArray(skyVAO);
+
+	glGenBuffers(1, &skyVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*sizeof(vertices_temp)/sizeof(vertices_temp[0]), &vertices_temp, GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+
+	Array<String> images {
+		"assets/skybox/textures/picture/bak0/right.jpg",
+		"assets/skybox/textures/picture/bak0/left.jpg",
+		"assets/skybox/textures/picture/bak0/top.jpg",
+		"assets/skybox/textures/picture/bak0/down.jpg",
+		"assets/skybox/textures/picture/bak0/front.jpg",
+		"assets/skybox/textures/picture/bak0/back.jpg"
+	};
+
+	setSkyBoxImages(images);
+
+
+}
+
+void Renderer::setSkyBoxImages(const Array<String> &skyboxImages)
 {
-    this->skyboxImages = skyboxImages;
-
-    //set vertex data
-    float vertices_temp[] = {
-
-        -1.0, -1.0, -1.0,
-        1.0, -1.0, -1.0,
-        1.0, -1.0, 1.0,
-        -1.0, -1.0, -1.0,
-        1.0, -1.0, 1.0,
-        -1.0, -1.0, 1.0,
-
-        -1.0, -1.0, -1.0,
-        -1.0, 1.0, -1.0,
-        1.0, 1.0, -1.0,
-        -1.0, -1.0, -1.0,
-        1.0, 1.0, -1.0,
-        1.0, -1.0, -1.0,
-
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        -1.0, -1.0, -1.0,
-        -1.0, 1.0, 1.0,
-        -1.0, 1.0, -1.0,
-
-        1.0, -1.0, -1.0,
-        1.0, 1.0, -1.0,
-        1.0, -1.0, 1.0,
-        1.0, 1.0, -1.0,
-        1.0, 1.0, 1.0,
-        1.0, -1.0, 1.0,
-
-        -1.0, -1.0, 1.0,
-        1.0, -1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        1.0, -1.0, 1.0,
-        1.0, 1.0, 1.0,
-        -1.0, 1.0, 1.0,
-
-        -1.0, 1.0, 1.0,
-        1.0, 1.0, 1.0,
-        1.0, 1.0, -1.0,
-        -1.0, 1.0, 1.0,
-        1.0, 1.0, -1.0,
-        -1.0, 1.0, -1.0
-
-    };
-
-    for (i32 i = 0; i < (sizeof(vertices_temp) / sizeof(*vertices_temp)); i++)
-    {
-        skyBoxVertices[i] = vertices_temp[i];
-    }
-
-    glGenVertexArrays(1, &skyVAO);
-    glBindVertexArray(skyVAO);
-
-    glGenBuffers(1, &skyVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyBoxVertices), &skyBoxVertices, GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
-
+	this->skyboxImages = skyboxImages;
 	skyBoxLoadTexture();
 }
 
@@ -610,19 +622,16 @@ void Renderer::skyBoxLoadTexture()
     glGenTextures(1, &cubemapTexture);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
-    int width, height, channels;
-    unsigned char* TextureData = stbi_load(skyboxImages[0].c_str(), &width, &height, &channels, 0);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
-    TextureData = stbi_load(skyboxImages[1].c_str(), &width, &height, &channels, 0);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
-    TextureData = stbi_load(skyboxImages[2].c_str(), &width, &height, &channels, 0);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
-    TextureData = stbi_load(skyboxImages[3].c_str(), &width, &height, &channels, 0);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
-    TextureData = stbi_load(skyboxImages[4].c_str(), &width, &height, &channels, 0);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
-    TextureData = stbi_load(skyboxImages[5].c_str(), &width, &height, &channels, 0);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
+    i32 width;
+	i32 height;
+	i32 channels;
+	unsigned char* TextureData = NULL;
+
+	for(u32 i = 0; i < 6; i++ ) {
+		TextureData = stbi_load(skyboxImages[i].c_str(), &width, &height, &channels, 0);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
+		stbi_image_free(TextureData);
+	}
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -640,7 +649,7 @@ void Renderer::drawSkyBox()
                                                                 // Front                     //Up
 	view = camera->getCameraTransf();//glm::lookAt(camera->currCamPos, vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0, 1.0, 0.0f));
 
-	projection = glm::perspective(glm::radians(camera->fov), (float)(1920.0f / 1080.0f), 0.1f, 1000.0f);
+	projection = glm::perspective(glm::radians(camera->fov), (float)(w / h), 0.1f, 1000.0f);
 
     program->use();
 

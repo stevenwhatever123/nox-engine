@@ -119,6 +119,8 @@ namespace NoxEngine {
 		void createTangents(IRenderable* mesh); 
 		GLuint setTexture(const String texturePath, const char* uniName, int num);
 
+		void setupSkybox();
+
 		public:
 
 		/*
@@ -171,7 +173,7 @@ namespace NoxEngine {
 
 		void updateObjectTransformation(glm::mat4 transformation, IRenderable* pRenderable);
 
-		void setSkyBoxImages(const std::vector<std::string> skyboxImages);
+		void setSkyBoxImages(const Array<String> &skyboxImages);
 		void skyBoxLoadTexture();
 		void drawSkyBox();
 

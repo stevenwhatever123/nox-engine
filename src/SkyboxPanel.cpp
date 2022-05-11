@@ -4,6 +4,7 @@ using namespace NoxEngine;
 
 void NoxEngineGUI::updateSkyboxPanel(NoxEngine::GameState* game_state) {
 
+	/*
 	std::string name = PANEL_NAME_MAP[PanelName::SkyboxSettings];
 	bool isplaying = false;
 
@@ -40,5 +41,6 @@ void NoxEngineGUI::updateSkyboxPanel(NoxEngine::GameState* game_state) {
 	
 
 	ImGui::End();
+	*/
 
 }

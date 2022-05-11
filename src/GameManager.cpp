@@ -187,6 +187,7 @@ void GameManager::init_shaders() {
 		{ "assets/shaders/vShader.glsl", GL_VERTEX_SHADER, 0 },
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
 	});
+
 	programs.emplace_back(Array<ShaderFile>{
 		{"assets/shaders/vertexShader.vs", GL_VERTEX_SHADER, 0},
 		{ "assets/shaders/fragmentShader.fs", GL_FRAGMENT_SHADER, 0 }
@@ -202,28 +203,19 @@ void GameManager::init_animation() {
 }
 
 void GameManager::init_renderer() { 
-	renderer = new Renderer(win_width, win_height, camera);
-	//renderer->setProgram(current_program);
-	//renderer->useProgram();
 
+	renderer = new Renderer(win_width, win_height, camera);
 	renderer->setProgram(&programs[1]);
 	renderer->useProgram();
+	// programs[1].use();
 
-	programs[1].use();
+
 
 	//set images
-	/*std::string texturenumber;
-	texturenumber = "assets/skybox/textures/picture/bak0";
-	std::vector<std::string> images
-	{
-		texturenumber + "/right.jpg",
-					  texturenumber + "/left.jpg",
-					  texturenumber + "/top.jpg",
-					  texturenumber + "/down.jpg",
-					  texturenumber + "/front.jpg",
-					  texturenumber + "/back.jpg"
-	};
-	renderer->setSkyBoxImages(images);*/
+
+	/*
+	
+	*/
 
 	game_state.renderer = renderer;
 
@@ -372,6 +364,7 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
+	/*
 	auto meshSceneStart = game_state.meshScenes.begin();
 	auto meshSceneEnd = game_state.meshScenes.end();
 	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
@@ -401,22 +394,22 @@ void GameManager::update_renderer() {
 	 	}
 	}
 
-	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
+	*/
 
+	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
 	
 	// Skybox Shader
-	current_program = &programs[1];
+	// current_program = &programs[1];
 	renderer->setProgram(current_program);
-	renderer->useProgram();
-
+	// renderer->useProgram();
 	renderer->drawSkyBox();
 
 	// The normal shader
-	current_program = &programs[0];
-	renderer->setProgram(current_program);
-	renderer->useProgram();
+	// current_program = &programs[0];
+	// renderer->setProgram(current_program);
+	// renderer->useProgram();
 
-	renderer->draw();
+	// renderer->draw();
 }
 
