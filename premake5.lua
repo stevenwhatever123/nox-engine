@@ -1,8 +1,22 @@
-
-
 newaction {
 	trigger = "clean_up",
 	description = "Clean up files gen",
+	execute = function()
+		os.rmdir('build')
+		os.rmdir('obj')
+		os.rmdir('project_files')
+		os.rmdir('x64')
+		os.rmdir('.vs')
+		os.remove('*.sln')
+		os.remove('*.vcxproj*')
+	end
+	
+}
+
+
+newaction {
+	trigger = 'clean_up_full',
+	description = "Clean up all files and libs",
 	execute = function()
 		os.rmdir('build')
 		os.rmdir('libs/compiled_libs')
@@ -16,9 +30,7 @@ newaction {
 		os.remove('*.sln')
 		os.remove('*.vcxproj*')
 	end
-	
 }
-
 
 workspace "NoxEngine"
 	configurations {"Debug", "Release"}
@@ -28,7 +40,6 @@ workspace "NoxEngine"
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
-
 
 	include "premake_scripts/glfw.lua"
 	include "premake_scripts/glm_lib.lua"
@@ -46,6 +57,10 @@ workspace "NoxEngine"
 		language "C++"
 		cppdialect "C++20"
 		targetdir "build"
+		justmycode "Off"
+
+		defines { "NOMINMAX" }
+		disablewarnings { "4005" }
 
 		includedirs {
 			"headers/",
@@ -59,7 +74,8 @@ workspace "NoxEngine"
 			"libs/freetype/include/",
 			"libs/imguizmo/",
 			"libs/luabridge/Source/",
-			"libs/lua/"
+			"libs/lua/",
+			"libs/3rdParty/",
 		}
 
 		dependson {
@@ -80,6 +96,7 @@ workspace "NoxEngine"
 			"user32",
 			"gdi32",
 			"opengl32",
+			"Shlwapi.lib",
 			"glfw",
 			"glm",
 			"glad",
@@ -93,16 +110,21 @@ workspace "NoxEngine"
 		}
 
 		vpaths {
-			["Headers"] = {
-				"headers/**.h",
-			},
-			["Headers/imgui"] = {
-				"libs/imgui/*.h"
-			},
+			["Headers"]            = { "headers/*.h", },
+			["Headers/imgui"]      = { "libs/imgui/*.h" },
+			["Headers/Components"] = { "headers/Components/*.h" },
+			["Headers/Core"]       = { "headers/Core/*.h" },
+			["Headers/EngineGUI"]  = { "headers/EngineGUI/*.h" },
+			["Headers/Managers"]   = { "headers/Managers/*.h" },
+			["Headers/Utils"]      = { "headers/Utils/*.h" },
 
-			["Source Files"] = {
-				"src/**.cpp",
-			},
+			["Source Files"]            = { "src/*.cpp" },
+			["Source Files/Components"] = { "src/Components/*.cpp" },
+			["Source Files/EngineGUI"]  = { "src/EngineGUI/*.cpp" },
+			["Source Files/Managers"]   = { "src/Managers/*.cpp" },
+			["Source Files/Utils"]      = { "src/Utils/*.cpp" },
+			["Source Files/Core"]       = { "src/Core/*.cpp" },
+
 			["Source Files/imgui"] = {
 				"libs/imgui/*.cpp",
 				"libs/imgui/backends/imgui_impl_opengl3.cpp",
@@ -113,7 +135,7 @@ workspace "NoxEngine"
 		}
 
 		files {
-			"headers/*.h",
+			"headers/**.h",
 			"src/**.cpp",
 			"libs/imgui/*.h",
 			"libs/imgui/*.cpp",
@@ -124,6 +146,3 @@ workspace "NoxEngine"
 
 		postbuildcommands { '{COPYFILE} "%{wks.location}/libs/fmod/lib/fmod.dll" %{cfg.targetdir}'  }
 		postbuildcommands { '{COPYFILE} "%{wks.location}/libs/compiled_libs/assimp/Debug/assimp-vc143-mtd.dll" %{cfg.targetdir}'  }
-
-	
-

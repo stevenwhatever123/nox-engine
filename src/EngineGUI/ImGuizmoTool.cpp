@@ -1,6 +1,5 @@
 #include "EngineGUI/ImGuizmoTool.h"
 
-
 namespace NoxEngineGUI {
 
 	void Frustum(float left, float right, float bottom, float top, float znear, float zfar, float* m16)

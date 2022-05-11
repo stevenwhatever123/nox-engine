@@ -1,12 +1,7 @@
 #pragma once
 
-// hacky solution for 'byte' is ambiguous
-// see https://developercommunity.visualstudio.com/t/error-c2872-byte-ambiguous-symbol/93889
-// #define _HAS_STD_BYTE 0
-
 // std headers
 #include <map>
-#include <string>
 
 // 3rd Party Header
 #include <imgui/imgui_internal.h>	// for fixed-layout docking
@@ -15,30 +10,37 @@
 #include <imgui/backends/imgui_impl_opengl3.h>
 
 // Engine Headers
+#include <Managers/AudioManager.h>
+#include <Core/Renderer.h>
+#include <Core/Types.h>
+#include <Core/Camera.h>
+#include <Core/GameState.h>
 
-#include <AudioManager.h>
-#include <Renderer.h>
-#include <Types.h>
-#include <Camera.h>
+#include <Components/TransformComponent.h>
+#include <Components/RenderableComponent.h>
+#include <Managers/SaveLoadManager.h>
 
 
 
 
 namespace NoxEngineGUI {
 
-	// TODO: This is probably not a good idea in terms of code separation -
-	//       probably better if each new panel (.h/.cpp) contains whatever 
-	//		 classes they need. This is only used for the master updateGUI() function
 	struct GUIParams {
 		bool firstLoop = true;
 
-		// Used to detect change in window size
 		u32 locWidth;
 		u32 locHeight;
 		u32 prevWidth;
 		u32 prevHeight;
+
+		// the array index of the selected entity in the hierarchy window
+		i32 selectedEntity;		
+		
 		u32 sceneBackgroundColor;
 		NoxEngine::Camera *current_cam;
+
+		// TODO: make is3d a checkbox. if updated, unload and create a new sound
+		bool soundIs3d;
 	};
 
 	// Each panel should have an enum associated with it
@@ -46,35 +48,34 @@ namespace NoxEngineGUI {
 
 		// File I/O
 		FileExplorer,
-		// Rendering
 
+		// Rendering
 		Scene,
 
 		// Scene object manipulation
 		PresetObjects,
 		Hierarchy,
+		Inspector,
 
 		// Animation
-		AnimationSettings,
+		AnimationSequencerPanel,
 
 		// Audio
-		AudioSource,
+		AudioPanel
 
 		// Scripting
-
-		//Skybox
-		SkyboxSettings
 	};
 
 	// Assign the panel name to the panel's enum
 	// TODO: Make this const?
-	static std::map< PanelName, std::string > PANEL_NAME_MAP {
-		{ PanelName::FileExplorer,	"File Explorer" },
-		{ PanelName::Scene,			"Scene" },
-		{ PanelName::PresetObjects, "Preset Objects" },
-		{ PanelName::Hierarchy,		"Hierarchy" },
-		{ PanelName::AnimationSettings,		"Animation Settings" },
-		{ PanelName::AudioSource,	"Audio Source" },
+	static std::map< PanelName, String > kPanelNameMap {
+		{ PanelName::FileExplorer,      "File Explorer" },
+		{ PanelName::Scene,             "Scene" },
+		{ PanelName::PresetObjects,     "Preset Objects" },
+		{ PanelName::Hierarchy,         "Hierarchy" },
+		{ PanelName::Inspector,         "Inspector" },
+		{ PanelName::AnimationSequencerPanel, "Animation Sequencer" },
+		{ PanelName::AudioPanel,        "Audio Editor" },
 		{ PanelName::SkyboxSettings, "Skybox Settings" }
 	};
 
@@ -86,15 +87,13 @@ namespace NoxEngineGUI {
 	void setupFixedLayout();
 	void cleanupImGui();
 
-	void updateMenu(GUIParams*);
-	void updateGUI(GUIParams*);
+	void updateMenu(NoxEngine::GameState&, GUIParams*);
+	void updateGUI(NoxEngine::GameState&, GUIParams*);
 
 	// Functions that contain the logic for each sub-window ("tool")
 	// should belong in a separate header file.
 	// TODO: Remove the following - these are only here to show what 
 	//       other panels we could have
-	//void updateFileExplorerPanel();
-	//void updateHierarchyPanel();
 	//void updateConsolePanel();
 
 }

@@ -2,9 +2,9 @@
 
 // Core GUI
 #include "EngineGUI.h"
-#include <Renderer.h>
+#include <Core/Renderer.h>
+#include <Core/GameState.h>
 
-#include <GameState.h>
 #include "EngineGUI/PresetObject.h"
 
 
