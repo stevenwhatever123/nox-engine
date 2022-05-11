@@ -1,17 +1,28 @@
 #pragma once
 
+//System std lib include
+#include <iostream>
+
 // 3rd Party Include
-// #include <glm/gtc/matrix_transform.hpp>
-// #include <glm/gtc/type_ptr.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glad/glad.h>
+
+#include <stb_image.h>
+#include <stb_image_write.h>
 
 // Engine Include
-#include <Components/IRenderable.h>
-#include <Components/IPosition.h>
+#include <Core/Camera.h>
+#include <Core/GLProgram.h>
+#include <Core/Entity.h>
+
 #include <Managers/Singleton.h>
 
-#include "Camera.h"
-#include "GLProgram.h"
-#include "Entity.h"
+#include <Components/ComponentType.h>
+#include <Components/IRenderable.h>
+#include <Components/ITransform.h>
 
 namespace NoxEngine {
 
@@ -19,6 +30,7 @@ namespace NoxEngine {
 	struct RendObj
 	{
 		Entity* ent;
+		IRenderable* meshSrc;	// Mesh data source (can be IRenderable, or IAudioGeometry)
 		u32 renderType;
 		i32 has_texture;
 		i32 has_normal;
@@ -27,18 +39,29 @@ namespace NoxEngine {
 		u32 normalTexture;
 		u32 ambientTexture; // Texture handlers
 		f32 lineWidth = 1.0f;
-		mat4 pos;
+		//mat4 pos;
 		mat4 transformation;
+
+		String ambientTexturePath;
+		String normalTexturePath;
+
+		// Component type of the meshSrc
+		ComponentType componentType;
 	};
 	
+	extern GLenum GLRenderTypes[3];
+
+	// keep this insync with the IRenderable one, a map would be overkill
+
 	/*
 	 * A class that renders 3D using OpenGL
 	 * */
 	class Renderer : public Singleton<Renderer> {
 		friend class Singleton<Renderer>;
 
-		
+
 		public:
+
 		/*
 		 * Constructor.
 		 * param:
@@ -48,12 +71,14 @@ namespace NoxEngine {
 		 *        camera - a camera to render from
 		 */
 		Renderer(i32 width, i32 height, Camera* camera);
+
 		~Renderer();
 
 		// Add object to renderer to render
-		void addObject(Entity *ent);
-		void addPermObject(IRenderable *render, IPosition *pos = nullptr);
-		void removeObject(Entity* ent);
+		void addObject(Entity* ent, IRenderable* meshSrc, ComponentType componentType);
+		void addPermObject(IRenderable *render, ITransform *trans = nullptr);
+		void removeObject(Entity* ent, ComponentType componentType);
+		void removeObject(u32 rendObjId);
 		void clearObject();
 		
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
@@ -87,13 +112,18 @@ namespace NoxEngine {
 
 		// Updates the view transformation using the current camera
 		void updateCamera();
-		void updateLightPos(f32 x, f32 y, f32 z);
+		void updateLightPos(float x, float y, float z);
 
-		void updateObjectTransformation(mat4 transformation, IRenderable* pRenderable);
+		std::map<u32, RendObj> getObjects() { return objects; };
+
+		void updateObjectTransformation(glm::mat4 transformation, u32 rendObjId);
+		void changeTexture(Entity *ent);
+		bool hasRendObj(u32 id);
 
 		private:
+
 		// The shaders
-		GLProgram *program;
+		GLProgram* program;
 
 		i32 w;
 		i32 h; // Width and Height of the window/texture to render to
@@ -102,7 +132,7 @@ namespace NoxEngine {
 
 		// The cur camera
 		Camera* camera;
-		Array<RendObj> objects;
+		std::map<u32, RendObj> objects;
 		Array<RendObj> perm_objects;
 
 
@@ -153,6 +183,7 @@ namespace NoxEngine {
 		GLuint setTexture(const String texturePath, const char* uniName, i32 num);
 
 
+	private:
+		u32 nextObjectId;
 	};
-
 }

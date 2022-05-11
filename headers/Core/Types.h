@@ -26,6 +26,8 @@ typedef uintptr_t uptr;
 
 // animation typedef
 typedef double time_type;
+
+// ECS typedef
 typedef u16 HasCompBitMask;
 
 // Rename std libs for if we want to remove them
@@ -39,3 +41,7 @@ typedef glm::vec3 vec3;
 typedef glm::vec4 vec4;
 typedef glm::mat4 mat4;
 typedef glm::ivec3 ivec3;
+
+// Audio
+typedef u32 DspId;
+typedef u32 ChannelId;

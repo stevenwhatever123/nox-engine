@@ -1,7 +1,10 @@
 #pragma once
 
-#include "IRenderable.h"
-#include "IComponent.h"
+#include <glm/glm.hpp>
+
+#include <Components/IRenderable.h>
+#include <Components/IComponent.h>
+#include <Core/Entity.h>
 #include <Core/Types.h>
 
 namespace NoxEngine {
@@ -11,16 +14,20 @@ namespace NoxEngine {
 	 */
 	class RenderableComponent : public IRenderable, public IComponent {
 		public:
+			static const ComponentType id = ComponentType::RenderableType;
 
 			RenderableComponent(f32 trX = 0.0f, f32 trY = 0.0f, f32 trZ = 0.0f, const String texName = "");
 			RenderableComponent(const String texName);
+			
+			// copy constructor
+			RenderableComponent(const RenderableComponent& other);
 
-			void displayUI() override; 
+			//void displayUI() override; 
 
-			i32 getNumOfVertices() override { return (i32)vertices.size(); }
-			i32 getNumOfTexCoord() override { return (i32)texCoords.size(); }
-			i32 getNumOfNormals() override { return (i32)normals.size(); }
-			i32 getNumOfFaces()   override { return (i32)faces.size(); }
+			inline const i32 getNumOfVertices() const { return (i32)vertices.size(); }
+			inline const i32 getNumOfTexCoord() const { return (i32)texCoords.size(); }
+			inline const i32 getNumOfNormals()  const { return (i32)normals.size(); }
+			inline const i32 getNumOfFaces()	const { return (i32)faces.size(); }
 
 			// TODO: change to a parameter
 			const String getNormalTexture() override { return normalTexture; }
@@ -34,9 +41,6 @@ namespace NoxEngine {
 
 			String ambientTexture;
 			String normalTexture;
-
-			Entity* getParentEntity() override { return parent;};
-			void attachedToEntity(Entity* ent) override { parent = ent;};
 
 	};
 }

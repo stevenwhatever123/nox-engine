@@ -4,12 +4,10 @@
 
 #include <Core/Renderer.h>
 #include <Utils/Utils.h>
-#include <Components/PositionComponent.h>
+#include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
-#include <Components/IRenderable.h>
+#include <Components/AudioGeometryComponent.h>
 #include <Core/Types.h>
-
-#include <3rdParty/stb/stb_image.h>
 
 // TODO: update uniform submissions to use Shader class
 // TODO: fix drawing to default buffer
@@ -19,6 +17,7 @@
 
 using NoxEngineUtils::Logger;
 using namespace NoxEngine;
+
 
 Renderer::~Renderer()
 {
@@ -45,7 +44,7 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 	elements(0),
 	projection(0),
 	cam(0),
-	objects(0),
+	objects(),
 	VBO(0),
 	NBO(0),
 	TCBO(0),
@@ -64,7 +63,8 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 	textureToRenderTo(0),
 	tex(0),
 	curFBO(0),
-	color(0)
+	color(0),
+	nextObjectId(0)
 {
 
 	// Initialise OpenGl
@@ -164,6 +164,7 @@ void Renderer::updateBuffers() {
 RendObj Renderer::createRendObject(IRenderable *mesh) {
 
 	RendObj newObj;
+	newObj.meshSrc = mesh;
 
 	newObj.renderType = mesh->glRenderType;
 	newObj.startInd = (i32)elements.size();
@@ -172,17 +173,16 @@ RendObj Renderer::createRendObject(IRenderable *mesh) {
 	newObj.lineWidth = mesh->lineWidth;
 
 	// Generate textures for the object
-	newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
-	newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
+	if(mesh->has_texture) {
+		newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
+		newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
+	}
 
 	// Generate the arrays
 	createVertexArray(mesh);
 
-	if(mesh->has_texture)
-		createTexCoordArray(mesh);
-
-	if(mesh->has_normal)
-		createNormalsArray(mesh);
+	if(mesh->has_texture) createTexCoordArray(mesh);
+	if(mesh->has_normal) createNormalsArray(mesh);
 
 	if(mesh->has_normal && mesh->has_texture) createTangents(mesh);
 
@@ -194,34 +194,50 @@ RendObj Renderer::createRendObject(IRenderable *mesh) {
 	return newObj;
 }
 
-void Renderer::addObject(Entity *ent)
-{
+void Renderer::addObject(Entity *ent, IRenderable *meshSrc, ComponentType componentType) {
     // Add a mesh to the container
-	IRenderable* mesh = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
-	RendObj newObj = createRendObject(mesh);
+	RendObj newObj = createRendObject(meshSrc);
 	newObj.ent = ent;
-	objects.push_back(newObj);
+	newObj.componentType = componentType;
+
+	objects[nextObjectId] = newObj;
+
+	// give the IRenderable a reference to this rendObj
+	meshSrc->rendObjId = nextObjectId++;
 }
 
-
-
-
-void Renderer::addPermObject(IRenderable *mesh, IPosition *pos)
+void Renderer::addPermObject(IRenderable *mesh, ITransform *trans)
 {
     // Add a mesh to the container
     RendObj newObj = createRendObject(mesh);
 	perm_objects.push_back(newObj);
 }
 
-void Renderer::removeObject(Entity* ent) {
+void Renderer::removeObject(Entity* ent, ComponentType componentType) {
 
     // Note: This calls the destructor on RendObj
-    objects.erase(
-        std::remove_if(objects.begin(), objects.end(), [ent](RendObj obj) { return obj.ent == ent; }),
-        objects.end()
-    );
-    
+   // objects.erase(
+   //     std::remove_if(objects.begin(), objects.end(), 
+			//[ent, useAnimation](RendObj obj) { 
+			//		return obj.ent == ent && obj.useAnimation == useAnimation; 
+			//}),
+   //     objects.end()
+   // );
+
+	auto itr = objects.begin();
+	auto endItr = objects.end();
+	for (; itr != endItr;) {
+		if (itr->second.ent == ent && itr->second.componentType == componentType) objects.erase(itr);
+		else itr++;
+	}
+
     LOG_DEBUG("Renderer object count: %i\n", objects.size());
+}
+
+void Renderer::removeObject(u32 rendObjId) {
+
+	objects.erase(rendObjId);
+	LOG_DEBUG("Renderer object count: %i\n", objects.size());
 }
 
 GLuint Renderer::setTexture(const String texturePath, const char* uniName, int num) {
@@ -293,29 +309,40 @@ void Renderer::draw() {
 			glBindTexture(GL_TEXTURE_2D, perm_objects[i].normalTexture);
 		}
 
-		if(perm_objects[i].renderType == GL_LINES) {
-			glLineWidth(perm_objects[i].lineWidth);
-		}
+		//if(perm_objects[i].renderType == GL_LINES) {
+		//	glLineWidth(perm_objects[i].lineWidth);
+		//}
 
 		glDrawElements(perm_objects[i].renderType, (perm_objects[i].endInd - perm_objects[i].startInd), GL_UNSIGNED_INT, (void*)(perm_objects[i].startInd * sizeof(i32)));
 
 
-		glLineWidth(1.0f);
+		//glLineWidth(1.0f);
 	}
 
+	for (u32 i = 0; i < objects.size(); i++) {
 
+		Entity* ent = objects[i].ent;
 
-	for (u32 i = 0; i < objects.size(); i++)
-	{
-		// Skip if the entity/RenderableComponent is not enabled
-		if (!objects[i].ent->isEntityEnabled()) continue;
-		if (!objects[i].ent->isEnabled<RenderableComponent>()) continue;
+		// Skip if the entity is not enabled
+		if (!ent->isEntityEnabled()) continue;
 
+		// Renderable
+		if (objects[i].componentType == ComponentType::RenderableType) {
+			if (!ent->isEnabled<RenderableComponent>()) continue;
+		}
+		// AudioGeometry
+		else if (objects[i].componentType == ComponentType::AudioGeometryType) {
+			if (!ent->isEnabled<AudioGeometryComponent>() || !ent->getComp<AudioGeometryComponent>()->render) continue;
+		}
 		// If the object has a position and it's enabled, use it
-		mat4 worldMat = mat4(1.0f);
-		if (objects[i].ent->containsComps<PositionComponent>() && objects[i].ent->isEnabled<PositionComponent>()) {
-			IPosition* pos = objects[i].ent->getComp<PositionComponent>()->CastType<IPosition>();
-			worldMat = translate(mat4(1.0f), vec3(pos->x, pos->y, pos->z));
+		glm::mat4 worldMat = glm::mat4(1.0f);
+		if (objects[i].ent->containsComps<TransformComponent>() && objects[i].ent->isEnabled<TransformComponent>()) {
+			ITransform* pos = objects[i].ent->getComp<TransformComponent>()->CastType<ITransform>();
+			glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+			glm::mat4 rotation = glm::eulerAngleXYZ(pos->rx, pos->ry, pos->rz);
+			glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(pos->sx, pos->sy, pos->sz));
+			//worldMat = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+			worldMat = translation * rotation * scale;
 		}
 
 		program->set4Matrix("toWorld", worldMat);
@@ -471,7 +498,10 @@ void Renderer::createElementArray(IRenderable* mesh)
 		copy(indices.begin(), indices.end(), back_inserter(elements));
 
 	} else {
-		numberOfElements += mesh->getNumOfFaces();
+		// REMEMBER TO MULTIPLY BY 3 !!!
+		// Steven: This line is causing problem as the number of elements is not the same as
+		// number of faces.
+		numberOfElements += mesh->getNumOfFaces() * 3;
 		const auto faces = mesh->getFaces();
 		for(i32 i = 0; i < faces.size(); i++) {
 			elements.push_back(faces[i][0]);
@@ -617,17 +647,35 @@ void Renderer::updateLightPos(float x, float y, float z)
     program->set3Float("lightPosition",x, y, z);
 }
 
-void Renderer::updateObjectTransformation(mat4 transformation, IRenderable* pRenderable)
+void Renderer::updateObjectTransformation(mat4 transformation, u32 rendObjId) {
+
+	const auto obj = objects.find(rendObjId);
+	if (obj != objects.end()) {
+		obj->second.transformation = transformation;
+	}
+}
+
+void Renderer::changeTexture(Entity* ent)
 {
 	for (u32 i = 0; i < objects.size(); i++)
 	{
-		IRenderable* rend = objects[i].ent->getComp<RenderableComponent>()->CastType<IRenderable>();
-		if (rend == pRenderable)
+		if (objects[i].ent == ent)
 		{
-			objects[i].transformation = transformation;
-			//program->set4Matrix("modelMatrix", transformation);
-			//std::cout << "Welcome to the Matrix" << "\n";
+			RenderableComponent* rendComp = objects[i].ent->getComp<RenderableComponent>();
+			//rendComp->getAmbientTexture() doesn't return anything here atm, dunno why
+			//objects[i].ambientTexture = setTexture(rendComp->ambientTexture, "AmbTexture", 1);
+			objects[i].ambientTexture = setTexture(rendComp->getAmbientTexture(), "AmbTexture", 1);
+			objects[i].ambientTexturePath = rendComp->getAmbientTexture();
+			objects[i].normalTexturePath = rendComp->getNormalTexture();
+
+			// Reset texture path for RenderableComponent as other object may use the same reference
+			rendComp->ambientTexture = "";
+			rendComp->normalTexture = "";
 		}
 	}
 }
 
+bool Renderer::hasRendObj(u32 id)
+{
+	return objects.find(id) != objects.end();
+}

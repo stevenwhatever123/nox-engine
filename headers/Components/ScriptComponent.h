@@ -9,7 +9,10 @@ namespace NoxEngine {
 	/*
 	 * A mock up class for Renderer to render a cube
 	 */
-	class ScriptComponent : public IComponent, public IReloadableFile { public:
+	class ScriptComponent : public IComponent, public IReloadableFile {
+		public:
+			static const ComponentType id = ComponentType::ScriptType;
+
 			ScriptComponent(const char *script);
 			ScriptComponent();
 			~ScriptComponent();

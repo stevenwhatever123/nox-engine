@@ -1,10 +1,14 @@
-#include <Components/ComponentType.h>
+#include "Components/ComponentType.h"
 
 // Component classes
 #include <Components/IComponent.h>
-#include <Components/PositionComponent.h>
+#include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
+#include <Components/AnimationComponent.h>
+#include <Components/AudioSourceComponent.h>
+#include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
+
 
 namespace NoxEngine {
 
@@ -17,21 +21,27 @@ namespace NoxEngine {
 void NoxEngine::initComponentTypes() {
 	
 	kComponentTypeMap = {
-		{ typeid(IComponent),			AbstractType },
-		{ typeid(PositionComponent),	PositionType },
-		{ typeid(RenderableComponent),	RenderableType },
-		{ typeid(ScriptComponent),	ScriptType }
+		{ typeid(IComponent),				AbstractType },
+		{ typeid(TransformComponent),		TransformType },
+		{ typeid(RenderableComponent),		RenderableType },
+		{ typeid(AnimationComponent),		AnimationType},
 		//{ typeid(LightSourceComponent),	LightSourceType },
-		//{ typeid(AudioSourceComponent),	AudioSourceType },
+		{ typeid(AudioSourceComponent),		AudioSourceType },
+		//{ typeid(AudioListenerComponent),	AudioListenerType },
+		{ typeid(AudioGeometryComponent),	AudioGeometryType },
+		{ typeid(ScriptComponent),			ScriptType }
 	};
 
 	kComponentTypeNames = {
-		{ AbstractType,		"Abstract Component" },
-		{ PositionType,		"Position Component" },
-		{ RenderableType,	"Renderable Component" },
-		{ LightSourceType,	"Light Source Component" },
-		{ AudioSourceType,	"Audio Source Component" },
-		{ ScriptType,		"Script Component" }
+		{ AbstractType,			"Abstract Component" },
+		{ TransformType,		"Transform Component" },
+		{ RenderableType,		"Renderable Component" },
+		{ AnimationType,		"Animation Component" },
+		{ LightSourceType,		"Light Source Component" },		// TODO: Implement
+		{ AudioSourceType,		"Audio Source Component" },
+		{ AudioListenerType,	"Audio Listener Component" },	// TODO: Implement
+		{ AudioGeometryType,	"Audio Geometry Component" },
+		{ ScriptType,			"Script Component" }
 	};
 
 	// assert every type has a name

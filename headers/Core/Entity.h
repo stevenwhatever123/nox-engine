@@ -24,9 +24,12 @@
 #include <typeindex>
 
 // Engine Includes
-#include "Types.h"
+#include <Core/Types.h>
 #include <Utils/Utils.h>
 #include <Components/ComponentType.h>
+
+#include <Managers/EventManager.h>
+#include <Managers/EventNames.h>
 
 #include <Managers/EventNames.h>
 #include <Managers/EventManager.h>
@@ -57,6 +60,9 @@ namespace NoxEngine {
 
 		// A human-readable identifier - not necessarily unique
 		char* name;
+
+		// The file path of the fbx file associate to this entity
+		char* filepath;
 
 		// The components that make the entity
 		// Note (Vincent): An entity can only contain one component of each type.
@@ -98,6 +104,7 @@ namespace NoxEngine {
 		// TODO: Change GameManager to Singleton, so it doesn't need a param
 		Entity(Scene *scene, char* _name = nullptr);
 		Entity(Scene* scene, const char* _name);
+		Entity(Scene* scene, const char* _name, const char* _filepath);
 
 		// Gotta be careful. When comp are destroyed the subsystem have to know
 		// TODO (Vincent): delete the components array and let the specialized component destroyer remove the reference in the subsystem?
@@ -110,9 +117,7 @@ namespace NoxEngine {
 			return true;
 		}
 		template <typename T, typename... U> bool containsComps__helper(sequence<T, U...>) {
-			// TODO (Vincent): Fix w/ auto component id
-			T* tmp = new T();
-			return containsComps(1 << (tmp->id - 1)) && containsComps__helper(sequence<U...>{});
+			return containsComps(1 << (T::id - 1)) && containsComps__helper(sequence<U...>{});
 		}
 		// func signature to call
 		template <typename... T> bool containsComps() { return containsComps__helper(sequence<T...>{}); }
@@ -123,7 +128,27 @@ namespace NoxEngine {
 
 		// Add an instantiated component to the entity
 		// hasComp is updated here
-		template <typename T> void addComp(T* comp);
+		template <typename T> void addComp(T* comp) {
+
+			assert(comp->id != ComponentType::AbstractType);
+
+			// Invalid type, don't add
+			if (kComponentTypeMap.find(typeid(T)) == kComponentTypeMap.end()) {
+				//Logger::debug("Attempted to add invalid component type (%s), aborted", typeid(T).name());
+				return;
+			}
+
+			if (components.find(typeid(T)) != components.end()) {
+				//Logger::debug("Component (ID: %d) already exists in Entity ", comp->id);
+				return;
+			}
+
+			components[typeid(T)] = comp;
+			hasComp |= (1 << (comp->id - 1));
+
+			// Emit a signal to the event manager
+			addCompSignal<T>();
+		}
 
 
 		// 0 component base case
@@ -149,9 +174,7 @@ namespace NoxEngine {
 		size_t removeComps__helper(sequence<>) { return 0; }
 		template <typename T, typename... U> size_t removeComps__helper(sequence<T, U...>) {
 			// Update bitmask
-			// TODO (Vincent): Fix w/ auto component id
-			T* tmp = new T();
-			hasComp &= ~(1 << (tmp->id - 1));
+			hasComp &= ~(1 << (T::id - 1));
 
 			removeCompSignal<T>();
 
@@ -164,7 +187,7 @@ namespace NoxEngine {
 
 
 		// Gets the component with the type provided. If no such comp -> through error and return
-		template <typename T> T *getComp();
+		template <typename T> T* getComp();
 
 
 		// Setter: entity-level enable
@@ -175,9 +198,7 @@ namespace NoxEngine {
 		// 0 component base case
 		void setEnabled__helper(bool aEnabled, sequence<>) {}
 		template <typename T, typename... U> void setEnabled__helper(bool aEnabled, sequence<T, U...>) {
-			// TODO (Vincent): Fix w/ auto component id
-			T* tmp = new T();
-			HasCompBitMask mask = (1 << (tmp->id - 1));
+			HasCompBitMask mask = (1 << (T::id - 1));
 			if (aEnabled) _isEnabled |= mask;
 			else          _isEnabled &= ~mask;
 
@@ -193,14 +214,12 @@ namespace NoxEngine {
 		// Check whether a component is enabled. This does not take entity-level enabled-ness into account.
 		bool isEnabled(u32 bit);
 		template <typename T> bool isEnabled() {
-			// TODO (Vincent): Fix w/ auto component id
-			T* tmp = new T();
-			return isEnabled(tmp->id);
+			return isEnabled(T::id);
 		}
-			static void exportLua();
-			i32 get_id() { return id; }
-			i32 set_id(i32 value) { id = value; }
 
+		static void exportLua();
+		i32 get_id() { return id; }
+		i32 set_id(i32 value) { id = value; }
 
 	};
 }

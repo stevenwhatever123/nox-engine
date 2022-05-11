@@ -5,7 +5,9 @@
 
 #pragma once
 
-#include "Types.h"
+#include <glad/glad.h>
+#include <string>
+#include <Core/Types.h>
 
 namespace NoxEngine {
 

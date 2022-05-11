@@ -6,12 +6,12 @@ RenderableComponent::RenderableComponent(f32 trX, f32 trY, f32 trZ, const String
 	ambientTexture(texName),
 	normalTexture()
 {
-	id = ComponentType::RenderableType;
+	//id = ComponentType::RenderableType;
 
 	has_normal = 1;
 	has_texture = 1;
 	use_indices = 0;
-		// Init data
+	// Init data
 
 	vertices = {
 		{1.00f, -1.00f, -1.00f},
@@ -74,5 +74,30 @@ RenderableComponent::RenderableComponent(const String texName):
 	ambientTexture(texName),
 	normalTexture()
 {
-	id = ComponentType::RenderableType;
+	//id = ComponentType::RenderableType;
+}
+
+RenderableComponent::RenderableComponent(const RenderableComponent &other) :
+	ambientTexture(other.ambientTexture),
+	normalTexture(other.normalTexture)
+{
+	//id = ComponentType::RenderableType;
+
+	vertices	= other.vertices;
+	texCoords	= other.texCoords;
+	normals		= other.normals;
+	faces		= other.faces;
+	indices		= other.indices;
+
+	has_texture = other.has_texture;
+	has_normal	= other.has_normal;
+	use_indices = other.use_indices;
+
+	color[0] = other.color[0];
+	color[1] = other.color[1];
+	color[2] = other.color[2];
+
+	glRenderType = other.glRenderType;
+
+	rendObjId = -1;
 }

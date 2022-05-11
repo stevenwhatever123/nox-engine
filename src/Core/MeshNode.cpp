@@ -1,20 +1,110 @@
 #include <Core/MeshNode.h>
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <fstream>
 
 using namespace NoxEngine;
 
 MeshNode::MeshNode(){ }
+
+MeshNode::MeshNode(std::istream& stream)
+{
+	size_t nameSize;
+	stream.read((char*)&nameSize, sizeof(nameSize));
+	name.resize(nameSize);
+	stream.read((char*)&name[0], nameSize);
+
+	stream.read((char*)&parent, sizeof(parent));
+	if (parent != nullptr)
+		parent->deserialize(stream);
+
+	stream.read((char*)&transformation, sizeof(transformation));
+
+	size_t meshIndexSize;
+	stream.read((char*)&meshIndexSize, sizeof(meshIndexSize));
+	meshIndex.resize(meshIndexSize);
+	stream.read((char*)&meshIndex[0], meshIndexSize * sizeof(u32));
+
+	size_t childSize;
+	stream.read((char*)&childSize, sizeof(childSize));
+	child.resize(childSize);
+	for (u32 i = 0; i < childSize; i++)
+	{
+		child[i].deserialize(stream);
+	}
+
+	size_t nodeAnimSize;
+	stream.read((char*)&nodeAnimSize, sizeof(nodeAnimSize));
+	nodeAnimations.resize(nodeAnimSize);
+	if(nodeAnimSize > 0)
+		stream.read((char*)&nodeAnimations[0], nodeAnimSize * sizeof(aiNodeAnim*));
+
+	size_t animationSize;
+	stream.read((char*)&animationSize, sizeof(animationSize));
+	nodeAnimTransformation.resize(animationSize);
+	stream.read((char*)&nodeAnimTransformation[0], animationSize * sizeof(animationSize));
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		nodeAnimTransformation[i].resize(keyframeSize);
+		stream.read((char*)&nodeAnimTransformation[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	nodeAnimTranslationMatrices.resize(animationSize);
+	stream.read((char*)&nodeAnimTranslationMatrices[0], animationSize * sizeof(animationSize));
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		nodeAnimTranslationMatrices[i].resize(keyframeSize);
+		stream.read((char*)&nodeAnimTranslationMatrices[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	eulerAngleXYZ.resize(animationSize);
+	stream.read((char*)&eulerAngleXYZ[0], animationSize * sizeof(animationSize));
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		eulerAngleXYZ[i].resize(keyframeSize);
+		stream.read((char*)&eulerAngleXYZ[i][0], keyframeSize * sizeof(glm::vec3));
+	}
+
+	nodeAnimRotationMatrices.resize(animationSize);
+	stream.read((char*)&nodeAnimRotationMatrices[0], animationSize * sizeof(animationSize));
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		nodeAnimRotationMatrices[i].resize(keyframeSize);
+		stream.read((char*)&nodeAnimRotationMatrices[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	nodeAnimScalingMatrices.resize(animationSize);
+	stream.read((char*)&nodeAnimScalingMatrices[0], animationSize * sizeof(animationSize));
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		nodeAnimScalingMatrices[i].resize(keyframeSize);
+		stream.read((char*)&nodeAnimScalingMatrices[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	maximumFrame.resize(animationSize);
+	stream.read((char*)&maximumFrame[0], animationSize * sizeof(u32));
+}
+
 MeshNode::~MeshNode(){ }
 
 // The idle transformation
-glm::mat4 MeshNode::getTransformation()
+const glm::mat4 MeshNode::getTransformation()
 {
 	return transformation;
 }
 
 // Frame based transformation
-glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex)
+const glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex)
 {
 	if (!hasAnimations())
 		return getTransformation();
@@ -24,7 +114,7 @@ glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex)
 }
 
 // Linear interpolated transformation
-glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex, time_type accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil)
+const glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex, time_type accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil)
 {
 	if (!hasAnimations())
 		return getTransformation();
@@ -188,7 +278,7 @@ void MeshNode::updateMaximumFrame(u32 animationIndex, u32 i)
 	}
 	else
 	{
-		maximumFrame.resize(animationIndex + 1, 0);
+		maximumFrame.resize(animationIndex + 1);
 		nodeAnimTransformation.resize(i);
 		nodeAnimTranslationMatrices.resize(i);
 		nodeAnimRotationMatrices.resize(i);
@@ -290,17 +380,195 @@ void MeshNode::insertFrameAfter(u32 animationIndex, u32 selectedFrame)
 	}
 }
 
-u32 MeshNode::getNumOfAnimations()
+const u32 MeshNode::getNumOfAnimations()
 {
 	return (u32)nodeAnimTransformation.size();
 }
 
-bool MeshNode::hasAnimations()
+const bool MeshNode::hasAnimations()
 {
 	return nodeAnimTransformation.size() > 0;
 }
 
-bool MeshNode::hasMesh()
+const bool MeshNode::hasMesh()
 {
 	return meshIndex.size() > 0;
+}
+
+//MeshNode2* MeshNode2::parse(std::ostream& stream)
+//{
+//
+//}
+
+void MeshNode::serialize(std::ostream& stream)
+{
+	std::string nameStr(name);
+	size_t nameSize = nameStr.size();
+	stream.write((char*)&nameSize, sizeof(nameSize));
+	stream.write((char*)nameStr.c_str(), nameSize);
+	
+	// Whether the node has parent
+	bool hasParent = (parent != nullptr);
+	stream.write((char*)&hasParent, sizeof(bool));
+
+	if (hasParent)
+		stream.write((char*)&parent, sizeof(parent));
+
+	stream.write((char*)&transformation, sizeof(transformation));
+
+	size_t meshIndexSize = meshIndex.size();
+	stream.write((char*)&meshIndexSize, sizeof(meshIndexSize));
+	if(meshIndexSize > 0)
+		stream.write((char*)&meshIndex[0], meshIndexSize * sizeof(u32));
+
+	size_t childSize = child.size();
+	stream.write((char*)&childSize, sizeof(childSize));
+	for (u32 i = 0; i < childSize; i++)
+	{
+		child[i].serialize(stream);
+	}
+
+	size_t nodeAnimSize = nodeAnimations.size();
+	stream.write((char*)&nodeAnimSize, sizeof(nodeAnimSize));
+	if(nodeAnimSize > 0)
+		stream.write((char*)&nodeAnimations[0], nodeAnimSize * sizeof(aiNodeAnim*));
+
+	size_t animationSize = nodeAnimTransformation.size();
+	stream.write((char*)&animationSize, sizeof(animationSize));
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize = nodeAnimTransformation[i].size();
+		stream.write((char*)&keyframeSize, sizeof(keyframeSize));
+		if (keyframeSize > 0)
+			stream.write((char*)&nodeAnimTransformation[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize = nodeAnimTranslationMatrices[i].size();
+		stream.write((char*)&keyframeSize, sizeof(keyframeSize));
+		if (keyframeSize > 0)
+			stream.write((char*)&nodeAnimTranslationMatrices[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize = eulerAngleXYZ[i].size();
+		stream.write((char*)&keyframeSize, sizeof(keyframeSize));
+		if (keyframeSize > 0)
+			stream.write((char*)&eulerAngleXYZ[i][0], keyframeSize * sizeof(glm::vec3));
+	}
+
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize = nodeAnimRotationMatrices[i].size();
+		stream.write((char*)&keyframeSize, sizeof(keyframeSize));
+		if (keyframeSize > 0)
+			stream.write((char*)&nodeAnimRotationMatrices[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize = nodeAnimScalingMatrices[i].size();
+		stream.write((char*)&keyframeSize, sizeof(keyframeSize));
+		if (keyframeSize > 0)
+			stream.write((char*)&nodeAnimScalingMatrices[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	if(animationSize > 0)
+		stream.write((char*)&maximumFrame[0], animationSize * sizeof(u32));
+}
+
+void MeshNode::deserialize(std::istream& stream)
+{
+	std::string nameStr;
+	size_t nameSize;
+	stream.read((char*)&nameSize, sizeof(nameSize));
+	nameStr.resize(nameSize);
+	stream.read((char*)&nameStr[0], nameSize);
+	name = nameStr;
+
+	bool hasParent;
+	stream.read((char*)&hasParent, sizeof(bool));
+
+	if(hasParent)
+		stream.read((char*)&parent, sizeof(parent));
+
+	stream.read((char*)&transformation, sizeof(transformation));
+
+	size_t meshIndexSize;
+	stream.read((char*)&meshIndexSize, sizeof(meshIndexSize));
+	meshIndex.resize(meshIndexSize);
+	if(meshIndexSize > 0)
+		stream.read((char*)&meshIndex[0], meshIndexSize * sizeof(u32));
+
+	size_t childSize;
+	stream.read((char*)&childSize, sizeof(childSize));
+	child.resize(childSize);
+	for (u32 i = 0; i < childSize; i++)
+	{
+		child[i].deserialize(stream);
+	}
+
+	size_t nodeAnimSize;
+	stream.read((char*)&nodeAnimSize, sizeof(nodeAnimSize));
+	nodeAnimations.resize(nodeAnimSize);
+	if(nodeAnimSize > 0)
+		stream.read((char*)&nodeAnimations[0], nodeAnimSize * sizeof(aiNodeAnim*));
+
+	size_t animationSize;
+	stream.read((char*)&animationSize, sizeof(animationSize));
+	nodeAnimTransformation.resize(animationSize);
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		nodeAnimTransformation[i].resize(keyframeSize, mat4(1));
+		if(keyframeSize > 0)
+			stream.read((char*)&nodeAnimTransformation[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	nodeAnimTranslationMatrices.resize(animationSize);
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		nodeAnimTranslationMatrices[i].resize(keyframeSize, mat4(1));
+		if (keyframeSize > 0)
+			stream.read((char*)&nodeAnimTranslationMatrices[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	eulerAngleXYZ.resize(animationSize);
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		eulerAngleXYZ[i].resize(keyframeSize, vec3(0));
+		if (keyframeSize > 0)
+			stream.read((char*)&eulerAngleXYZ[i][0], keyframeSize * sizeof(glm::vec3));
+	}
+
+	nodeAnimRotationMatrices.resize(animationSize);
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		nodeAnimRotationMatrices[i].resize(keyframeSize, mat4(1));
+		if (keyframeSize > 0)
+			stream.read((char*)&nodeAnimRotationMatrices[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	nodeAnimScalingMatrices.resize(animationSize);
+	for (size_t i = 0; i < animationSize; i++)
+	{
+		size_t keyframeSize;
+		stream.read((char*)&keyframeSize, sizeof(keyframeSize));
+		nodeAnimScalingMatrices[i].resize(keyframeSize, mat4(1));
+		if (keyframeSize > 0)
+			stream.read((char*)&nodeAnimScalingMatrices[i][0], keyframeSize * sizeof(mat4));
+	}
+
+	maximumFrame.resize(animationSize);
+	if (nodeAnimSize > 0)
+		stream.read((char*)&maximumFrame[0], animationSize * sizeof(u32));
 }

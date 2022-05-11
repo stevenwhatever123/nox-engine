@@ -1,56 +1,92 @@
 #include <EngineGUI/AudioPanel.h>
 #include <Managers/IOManager.h>
 
+using namespace NoxEngine;
 
-void NoxEngineGUI::updateAudioPanel(NoxEngine::GameState* game_state) {
+
+void NoxEngineGUI::updateAudioPanel(GameState* state, NoxEngineGUI::GUIParams *params) {
 
 	// Variables
-	std::string name = PANEL_NAME_MAP[PanelName::AudioSource];
+	std::string name = kPanelNameMap[PanelName::AudioPanel];
+	AudioManager* am = AudioManager::Instance();
 
 	// Window Begin
 	ImGui::Begin(name.c_str());
 
 
 	/*   Logic   */
-	auto startItr = game_state->audioSources.begin();
-	auto endItr = game_state->audioSources.end();
+	auto startItr = state->audioSources.begin();
+	auto endItr = state->audioSources.end();
+	
+	// Load audio
+	ImGui::Checkbox("Load as 3D Sound", &params->soundIs3d);
 
-	// static bool show_demo_window = true;
+	/*
 	if (ImGui::Button("Load")) {
-		std::string file_path = NoxEngine::IOManager::Instance()->PickFile("All Files\0*.*\0\0");
+		std::string file_path = IOManager::Instance()->PickFile("All Files\0*.*\0\0");
 
 		std::string filename = file_path.substr(file_path.find_last_of("/\\") + 1);
 
-		game_state->audioSources.emplace(
-				file_path,
-				NoxEngine::AudioSource{ filename, file_path, glm::vec3{0, 0, 0}, 0.5 });
+		state->audioSources.emplace(
+			file_path,
+			AudioSource{ 
+				.name = filename, 
+				.file = file_path, 
+				.position = glm::vec3{0, 0, 0}, 
+				.sourceVolume = 0.5,
+				.is3d = params->soundIs3d
+			});
 
-		NoxEngine::AudioManager::Instance()->LoadSound(file_path, true);
+		am->loadSound(file_path, params->soundIs3d);
 
 	}
 
-	if (game_state->audioSources.size() > 0 && ImGui::TreeNode("Audios")) {
+	// Display list of loaded audios & manipulation
+	if (state->audioSources.size() > 0 && ImGui::TreeNode("Audios")) {
 
 		while (startItr != endItr) {
-			NoxEngine::AudioSource* audio_source = &startItr->second;
-			if (ImGui::TreeNode(audio_source->name.c_str())) {
-				ImGui::Text("File Name: %s", audio_source->file.c_str());
-				if (ImGui::TreeNode("Position")) {
-					ImGui::DragFloat3("Position", &audio_source->position[0], 0.0001f, -1.0f, 1.0f, "%.4f");
+			AudioSource* audioSource = &startItr->second;
+			if (ImGui::TreeNode(audioSource->name.c_str())) {
+
+				ImGui::Text("File Name: %s", audioSource->file.c_str());
+
+				if (ImGui::TreeNode("DSP Filter")) {
+
+					// Dropdown list of all DSP filter enums
+					//const char* filterNames[] = { "Pitch Shift", "Echo" };
+					//ImGui::BeginCombo()
+
+
+					if (ImGui::Button("Create and apply##audio_dsp_create_apply")) {
+
+					}
+
 					ImGui::TreePop();
 				}
 
-				ImGui::SliderFloat("Volume", &audio_source->sourceVolume, 0.0f, 1.0f, "%.1f");
-				if (ImGui::Button("Play")) {
-					//NoxEngine::AudioManager::Instance()->LoadSound(audio_source->file, true);
-					NoxEngine::AudioManager::Instance()->PlaySounds(audio_source->file);
+				ImGui::SameLine();	
+				bool enableDSP;   ImGui::Checkbox("##enable_DSP", &enableDSP);
+
+				if (ImGui::TreeNode("Position")) {
+					ImGui::DragFloat3("Position", &audioSource->position[0], 0.0001f, -1.0f, 1.0f, "%.4f");
+					ImGui::TreePop();
 				}
+
+				ImGui::SliderFloat("Volume", &audioSource->sourceVolume, 0.0f, 1.0f, "%.1f");
+				if (ImGui::Button("Play")) {
+					//am->LoadSound(audio_source->file, true);
+					am->playSounds(audioSource->file);
+				}
+
+				ImGui::BeginDisabled();
+				ImGui::Checkbox("Is 3D", &audioSource->is3d);
+				ImGui::EndDisabled();
 
 				ImGui::SameLine();
 
 				if (ImGui::Button("Stop")) {
 
-					NoxEngine::AudioManager::Instance()->UnLoadSound(audio_source->file);
+					am->unLoadSound(audioSource->file);
 				}
 
 				ImGui::TreePop();
@@ -60,7 +96,8 @@ void NoxEngineGUI::updateAudioPanel(NoxEngine::GameState* game_state) {
 		}
 
 		ImGui::TreePop();
-	}
+	//}
+	*/
 
 
 	// Window End

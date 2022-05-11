@@ -2,7 +2,7 @@
 #include <EngineGUI/HierarchyPanel.h>
 #include <EngineGUI/ImGuiWidgets.h>
 #include <Components/IComponent.h>
-#include <Components/PositionComponent.h>
+#include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Managers/GameManager.h>
 
@@ -12,7 +12,7 @@ using namespace NoxEngine;
 void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *params) {
 
 	// Variables
-	std::string name = PANEL_NAME_MAP[PanelName::Hierarchy];
+	std::string name = kPanelNameMap[PanelName::Hierarchy];
 	bool removedEntity = false;
 
 	// Window Begin
