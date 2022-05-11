@@ -46,7 +46,7 @@ namespace NoxEngine {
 
 			f32 color[3];
 			GLenum glRenderType;
-
+			f32 lineWidth = 1.0;
 			bool registered;
 	};
 }

@@ -12,6 +12,7 @@ namespace NoxEngine {
 	class ScriptComponent : public IComponent, public IReloadableFile { public:
 			ScriptComponent(const char *script);
 			ScriptComponent();
+			~ScriptComponent();
 
 			const char* getScript() const;
 			void setScript(const char *script_name);

@@ -43,15 +43,15 @@ void GameManager::init() {
 }
 
 void GameManager::update() {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	update_livereloads();
 	update_inputs();
 	update_ecs();
+	update_renderer();
 	update_gui();
 	update_audio();
 	update_animation();
-	update_renderer();
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)) {
 		should_close = true;
@@ -167,14 +167,15 @@ void GameManager::init_events() {
 				//                 because the entity ID is managed by the scene
 				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
 
-				RenderableComponent* comp = meshScene.meshes[i];
+				RenderableComponent *comp = meshScene.meshes[i];
+
 				PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
 
-				ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
+				// ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
 
 				ent->addComp(comp);
 				ent->addComp(pos);
-				ent->addComp(script);
+				// ent->addComp(script);
 
 				game_state.activeScene->addEntity(ent);
 			}
@@ -235,7 +236,7 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(50.0f, 50.0f, 50.0f));
+	camera = new Camera(vec3(100.0f, 100.0f, 100.0f));
 }
 
 void GameManager::init_shaders() {
@@ -261,8 +262,8 @@ void GameManager::init_renderer() {
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
 
-	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
-	// renderer->addObject(obj);
+	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(500, 0, 500), 50);
+	renderer->addPermObject(obj);
 	renderer->updateBuffers();
 }
 
@@ -290,34 +291,6 @@ void GameManager::init_scene() {
 
 void NoxEngine::GameManager::init_scripts()
 {
-	// scriptsManager = ScriptsManager::Instance();
-	// scriptsManager->Init();
-	// scriptsManager->DoLuaFile("assets/scripts/test.lua");
-
-	String file_name = "assets/meshes/card.fbx";
-
-	game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-	MeshScene &meshScene = game_state.meshScenes.find(file_name)->second;
-
-	i32 index = (i32)game_state.activeScene->entities.size();
-	// We're treating every mesh as an entity FOR NOW
-	for (u32 i = 0; i < meshScene.meshes.size(); i++)
-	{
-		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
-		//                 because the entity ID is managed by the scene
-		Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
-
-		RenderableComponent* comp = meshScene.meshes[i];
-		PositionComponent* pos = new PositionComponent(0.0, 0.0, 0.0);
-
-		ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
-
-		ent->addComp(comp);
-		ent->addComp(pos);
-		ent->addComp(script);
-
-		game_state.activeScene->addEntity(ent);
-	}
 
 }
 
@@ -480,6 +453,11 @@ void GameManager::update_animation() {
 }
 
 void GameManager::update_renderer() {
+
+	renderer->setFrameBufferToTexture();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 	auto meshSceneStart = game_state.meshScenes.begin();
 	auto meshSceneEnd = game_state.meshScenes.end();
 	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
@@ -510,10 +488,10 @@ void GameManager::update_renderer() {
 	}
 
 
-
 	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
+
 	renderer->draw();
 
 }

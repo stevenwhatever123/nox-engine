@@ -71,7 +71,8 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	glDepthFunc(GL_LESS);
+	// glEnable(GL_CULL_FACE);
 
 	// Create framebuffer  
 	glGenFramebuffers(1, &FBO);
@@ -79,21 +80,26 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
     // Gen texture for framebuffer    
     glGenTextures(1, &textureToRenderTo);
+
     glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-
     // Attach tex to framebuffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        printf("Troubles with creating a framebuffer\n");
+
+	glGenTextures(1, &depthStencilTexture);
+	glBindTexture(GL_TEXTURE_2D, depthStencilTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilTexture, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		LOG_DEBUG("Troubles with creating a framebuffer");
     }
 
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
     // Generate buffer handlers
     glGenVertexArrays(1, &VAO);
@@ -155,39 +161,56 @@ void Renderer::updateBuffers() {
 }
 
 
-void Renderer::addObject(Entity *ent)
-{
+RendObj Renderer::createRendObject(IRenderable *mesh) {
 
-    // Add a mesh to the container
-    RendObj newObj;
-    newObj.ent = ent;
-
-	IRenderable* mesh = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
+	RendObj newObj;
 
 	newObj.renderType = mesh->glRenderType;
-    newObj.startInd = (i32)elements.size();
+	newObj.startInd = (i32)elements.size();
 	newObj.has_texture = mesh->has_texture;
 	newObj.has_normal = mesh->has_normal;
-    
-    // Generate textures for the object
-    newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
-    newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
+	newObj.lineWidth = mesh->lineWidth;
+
+	// Generate textures for the object
+	newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
+	newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
 
 	// Generate the arrays
 	createVertexArray(mesh);
 
-	if(mesh->has_texture) createTexCoordArray(mesh);
-	if(mesh->has_normal)  createNormalsArray(mesh);
+	if(mesh->has_texture)
+		createTexCoordArray(mesh);
+
+	if(mesh->has_normal)
+		createNormalsArray(mesh);
 
 	if(mesh->has_normal && mesh->has_texture) createTangents(mesh);
 
 	createElementArray(mesh);
 
 	newObj.endInd = i32(elements.size());
-    newObj.transformation = mat4(1.0f);
-	objects.push_back(newObj);
+	newObj.transformation = mat4(1.0f);
 
-    LOG_DEBUG("Renderer object count: %i\n", objects.size());
+	return newObj;
+}
+
+void Renderer::addObject(Entity *ent)
+{
+    // Add a mesh to the container
+	IRenderable* mesh = ent->getComp<RenderableComponent>()->CastType<IRenderable>();
+	RendObj newObj = createRendObject(mesh);
+	newObj.ent = ent;
+	objects.push_back(newObj);
+}
+
+
+
+
+void Renderer::addPermObject(IRenderable *mesh, IPosition *pos)
+{
+    // Add a mesh to the container
+    RendObj newObj = createRendObject(mesh);
+	perm_objects.push_back(newObj);
 }
 
 void Renderer::removeObject(Entity* ent) {
@@ -216,7 +239,6 @@ GLuint Renderer::setTexture(const String texturePath, const char* uniName, int n
 	
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true); // flip loaded texture's on the y-axis.
-
 	unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
 
 	if (data)
@@ -253,6 +275,36 @@ void Renderer::draw() {
 
 	glBindVertexArray(VAO);
 
+	for (u32 i = 0; i < perm_objects.size(); i++)
+	{
+		// If the object has a position and it's enabled, use it
+		mat4 worldMat = mat4(1.0f);
+		program->set4Matrix("toWorld", worldMat);
+		program->set4Matrix("modelMatrix", perm_objects[i].transformation);
+
+		// Activate and bind textures of the object
+		if(perm_objects[i].has_texture) {
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, perm_objects[i].ambientTexture);
+		}
+
+		if(perm_objects[i].has_texture) {
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, perm_objects[i].normalTexture);
+		}
+
+		if(perm_objects[i].renderType == GL_LINES) {
+			glLineWidth(perm_objects[i].lineWidth);
+		}
+
+		glDrawElements(perm_objects[i].renderType, (perm_objects[i].endInd - perm_objects[i].startInd), GL_UNSIGNED_INT, (void*)(perm_objects[i].startInd * sizeof(i32)));
+
+
+		glLineWidth(1.0f);
+	}
+
+
+
 	for (u32 i = 0; i < objects.size(); i++)
 	{
 		// Skip if the entity/RenderableComponent is not enabled
@@ -273,9 +325,9 @@ void Renderer::draw() {
 		if(objects[i].has_texture) {
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
-		}
+		} 
 
-		if(objects[i].has_texture) {
+		if(objects[i].has_normal) {
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
 		}
@@ -285,6 +337,7 @@ void Renderer::draw() {
 	}
 
 
+	
 	glBindVertexArray(0);
 	setFrameBufferToDefault();
 }
@@ -300,7 +353,7 @@ void Renderer::fillBackground(f32 r, f32 g, f32 b) {
 
 	setFrameBufferToTexture();
 	glClearColor(r,g,b, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setFrameBufferToDefault();
 
 	glClearColor(

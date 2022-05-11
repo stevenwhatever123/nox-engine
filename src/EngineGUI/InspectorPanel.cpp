@@ -116,6 +116,13 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 			if(ent->containsComps(ScriptFlag)) {
 
 				if(ImGui::TreeNode("Script")) {
+					bool enabled = false;
+
+					ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+
+					ImGui::SameLine();
+					bool remove = ImGui::SmallButton("-##RemoveScript");	// TODO: Use ImageButton?
+
 
 					ScriptComponent *script = ent->getComp<ScriptComponent>();
 
@@ -125,6 +132,10 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					if(ImGui::Button("Change")) {
 						String file = IOManager::Instance()->PickFile();
 						script->setScript(file.c_str());
+					}
+
+					if(remove) {
+						ent->removeComp<ScriptComponent>();
 					}
 
 					ImGui::TreePop();
@@ -159,6 +170,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				// Draw
 				if (ImGui::Button(kComponentTypeNames[type].c_str(), ImVec2(ImGui::GetWindowContentRegionWidth(), 0))) {
 					ent->addComp(type);
+					ImGui::CloseCurrentPopup();
 				}
 
 				// Gray out: End

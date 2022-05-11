@@ -26,6 +26,7 @@ namespace NoxEngine {
 		i32 endInd; // Start and end indixes in the a united element array 
 		u32 normalTexture;
 		u32 ambientTexture; // Texture handlers
+		f32 lineWidth = 1.0f;
 		mat4 pos;
 		mat4 transformation;
 	};
@@ -51,6 +52,7 @@ namespace NoxEngine {
 
 		// Add object to renderer to render
 		void addObject(Entity *ent);
+		void addPermObject(IRenderable *render, IPosition *pos = nullptr);
 		void removeObject(Entity* ent);
 		void clearObject();
 		
@@ -101,6 +103,7 @@ namespace NoxEngine {
 		// The cur camera
 		Camera* camera;
 		Array<RendObj> objects;
+		Array<RendObj> perm_objects;
 
 
 		// Global buffers of attributes
@@ -126,6 +129,7 @@ namespace NoxEngine {
 
 		// Buffer and texture to render to.
 		GLuint textureToRenderTo;
+		GLuint depthStencilTexture;
 		GLuint tex;
 		GLuint curFBO;
 
@@ -136,6 +140,8 @@ namespace NoxEngine {
 		void createNormalsArray(IRenderable* mesh);
 		void createTexCoordArray(IRenderable* mesh);
 		void createElementArray(IRenderable* mesh);
+
+		RendObj createRendObject(IRenderable *mesh);
 
 		// This atribute is needed for Normal Mapping. 
 		// Basically, need to transform the normals in the map into tangent space (space of the primitive (triangle))

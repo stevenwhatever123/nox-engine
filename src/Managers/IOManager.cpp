@@ -112,9 +112,9 @@ TempResourceData IOManager::ReadEntireFileTemp(std::string filename) {
 	return TempResourceData{data, (i32)readBytes};
 }
 
-std::string IOManager::PickFile(const char* filters) {
+String IOManager::PickFile(const char* filters) {
 
-	std::string picked = "";
+	String picked = "";
 
 	// TODO(sharo): have multiple scratch memories
 
@@ -123,7 +123,6 @@ std::string IOManager::PickFile(const char* filters) {
 	u8 dir[1024];
 
 	u8 temp_file[260];
-	u8 temp_file2[260];
 
 	GetCurrentDirectoryA(1024, (LPSTR)dir);
 
@@ -146,7 +145,6 @@ std::string IOManager::PickFile(const char* filters) {
 	if(!opened) {
 		LOG_DEBUG("Failed to Open File Dialog: %x", CommDlgExtendedError() );
 	}
-
 
 	if(opened && PathRelativePathToA( (LPSTR)temp_file, (LPCSTR)dir, FILE_ATTRIBUTE_DIRECTORY, (LPCSTR)file_name, FILE_ATTRIBUTE_NORMAL)) {
 		return String((char*)temp_file);
