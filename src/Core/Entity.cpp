@@ -9,6 +9,7 @@
 #include <Components/RenderableComponent.h>
 #include <Components/AnimationComponent.h>
 #include <Components/AudioSourceComponent.h>
+#include <Components/AudioListenerComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 
@@ -123,6 +124,7 @@ void Entity::addComp(ComponentType type) {
 	case RenderableType:		addComp<RenderableComponent>();			break;
 	case AnimationType:			addComp<AnimationComponent>(); 			break;
 	case AudioSourceType:		addComp<AudioSourceComponent>();		break;
+	case AudioListenerType:		addComp<AudioListenerComponent>();		break;
 	case AudioGeometryType:		addComp<AudioGeometryComponent>();		break;
 	case ScriptType:			addComp<ScriptComponent>(); 			break;
 	default:					LOG_DEBUG("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
@@ -166,5 +168,6 @@ template TransformComponent* Entity::getComp<TransformComponent>();
 template RenderableComponent* Entity::getComp<RenderableComponent>();
 template AnimationComponent* Entity::getComp<AnimationComponent>();
 template AudioSourceComponent* Entity::getComp<AudioSourceComponent>();
+template AudioListenerComponent* Entity::getComp<AudioListenerComponent>();
 template AudioGeometryComponent* Entity::getComp<AudioGeometryComponent>();
 template ScriptComponent* Entity::getComp<ScriptComponent>();

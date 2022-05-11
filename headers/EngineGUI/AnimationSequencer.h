@@ -53,16 +53,16 @@ struct AnimationSequencer : public ImSequencer::SequenceInterface {
 
     void Add(int index) 
     {
-        if (!game_state->audioSources.empty())
-        {
-            auto startItr = game_state->audioSources.begin();
-            auto endItr = game_state->audioSources.end();
-            for (u32 i = 0; i < index; i++)
-            {
-                startItr++;
-            }
-            game_state->selectedAudio.push_back(startItr->second.name);
-        }
+        //if (!game_state->audioSources.empty())
+        //{
+        //    auto startItr = game_state->audioSources.begin();
+        //    auto endItr = game_state->audioSources.end();
+        //    for (u32 i = 0; i < index; i++)
+        //    {
+        //        startItr++;
+        //    }
+        //    game_state->selectedAudio.push_back(startItr->second.name);
+        //}
     }
 
     void Del(int index) {}

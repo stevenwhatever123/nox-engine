@@ -45,7 +45,6 @@ namespace NoxEngine {
 			void set_sx(f32 value) override { sx = value; }
 			void set_sy(f32 value) override { sy = value; }
 			void set_sz(f32 value) override { sz = value; }
-
 	};
 }
 

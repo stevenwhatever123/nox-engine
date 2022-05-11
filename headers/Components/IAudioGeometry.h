@@ -51,7 +51,7 @@ namespace NoxEngine {
 		virtual void clearMesh() = 0;
 
 		virtual bool loadMesh(MeshScene* meshScene) = 0;
-		virtual bool generateBoundingBox(const Array<vec3>& verts) = 0;
-		virtual bool generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4) = 0;
+		virtual bool generateBoundingBox(const Array<vec3>& verts, mat4 transformation) = 0;
+		virtual bool generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4, mat4 transformation) = 0;
 	};
 }

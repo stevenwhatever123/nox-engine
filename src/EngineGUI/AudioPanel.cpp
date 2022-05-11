@@ -15,11 +15,11 @@ void NoxEngineGUI::updateAudioPanel(GameState* state, NoxEngineGUI::GUIParams *p
 
 
 	/*   Logic   */
-	auto startItr = state->audioSources.begin();
-	auto endItr = state->audioSources.end();
+	//auto startItr = state->audioSources.begin();
+	//auto endItr = state->audioSources.end();
 	
 	// Load audio
-	ImGui::Checkbox("Load as 3D Sound", &params->soundIs3d);
+	//ImGui::Checkbox("Load as 3D Sound", &params->soundIs3d);
 
 	/*
 	if (ImGui::Button("Load")) {

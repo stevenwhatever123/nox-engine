@@ -6,6 +6,7 @@
 #include <Components/RenderableComponent.h>
 #include <Components/AnimationComponent.h>
 #include <Components/AudioSourceComponent.h>
+#include <Components/AudioListenerComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 
@@ -27,7 +28,7 @@ void NoxEngine::initComponentTypes() {
 		{ typeid(AnimationComponent),		AnimationType},
 		//{ typeid(LightSourceComponent),	LightSourceType },
 		{ typeid(AudioSourceComponent),		AudioSourceType },
-		//{ typeid(AudioListenerComponent),	AudioListenerType },
+		{ typeid(AudioListenerComponent),	AudioListenerType },
 		{ typeid(AudioGeometryComponent),	AudioGeometryType },
 		{ typeid(ScriptComponent),			ScriptType }
 	};

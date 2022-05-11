@@ -9,6 +9,7 @@
 #include <Components/RenderableComponent.h>
 #include <Components/AnimationComponent.h>
 #include <Components/AudioSourceComponent.h>
+#include <Components/AudioListenerComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 
@@ -61,14 +62,6 @@ void GameManager::update() {
 	}
 
 	glfwSwapBuffers(window);
-}
-
-void GameManager::addAudioSource(AudioSource audioSource) {
-
-	// TODO(sharo): handle duplicates better
-	game_state.audioSources.emplace(audioSource.name, audioSource);
-	audioManager->loadSound(audioSource.file);
-
 }
 
 // Whenever an entity is created, modified, or deleted, call this function
@@ -250,8 +243,13 @@ void GameManager::init_events() {
 
 
 			// Audio
-			// We don't add the mesh to the audio engine when the geometry component is added, 
+			// Geometry: We don't add the mesh to the audio engine when the geometry component is added, 
 			// because it's expected to be empty. We add to audio engine when mesh is loaded
+			// AudioSource: No need to do anything special
+			// AudioListener: first listener is set to active
+			if (game_state.activeAudioListener == nullptr && compTypeId == typeid(AudioListenerComponent)) {
+				game_state.activeAudioListener = ent->getComp<AudioListenerComponent>();
+			}
 
 			// ...
 	});
@@ -289,10 +287,11 @@ void GameManager::init_audio() {
 	audioManager->set3dListenerAttributes(
 			{ 0.0f, 0.0f, 0.0f },		// Position
 			{ 0.0f, 0.0f, 0.0f },		// velocity (TODO: calculate)
-			{ 0.0f, 0.0f, 1.0f },		// Forward
+			{ 0.0f, 0.0f, -1.0f },		// Forward
 			{ 0.0f, 1.0f, 0.0f }		// Up
 			);
 
+	game_state.activeAudioListener = nullptr;
 }
 
 void GameManager::init_camera() {

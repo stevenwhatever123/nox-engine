@@ -9,6 +9,7 @@
 #include <Components/RenderableComponent.h>
 #include <Components/AnimationComponent.h>
 #include <Components/AudioSourceComponent.h>
+#include <Components/AudioListenerComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 
@@ -36,10 +37,11 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 		Entity* ent = state->activeScene->entities[params->selectedEntity];
 
 		// Retrieve all components (could be nullptr)
-		TransformComponent*		transComp			= ent->getComp<TransformComponent>();
+		TransformComponent*		transComp		= ent->getComp<TransformComponent>();
 		RenderableComponent*	rendComp		= ent->getComp<RenderableComponent>();
 		AnimationComponent*		animComp 		= ent->getComp<AnimationComponent>();
 		AudioSourceComponent*	audioSrcComp	= ent->getComp<AudioSourceComponent>();
+		AudioListenerComponent* audioLisComp	= ent->getComp<AudioListenerComponent>();
 		AudioGeometryComponent* geoComp			= ent->getComp<AudioGeometryComponent>();
 		ScriptComponent*		scriptComp		= ent->getComp<ScriptComponent>();
 
@@ -148,6 +150,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 			}
 
 			// Display all components
+			// TODO: refactor each component's UI into functions
 			else {
 
 				// TransformComponent
@@ -386,6 +389,42 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						ent->removeComp<AudioSourceComponent>();
 					}
 					ImGui::Separator();
+				}
+
+				// AudioListenerComponent
+				if (audioLisComp) {
+
+					bool enable = ent->isEnabled<AudioListenerComponent>();
+					bool expand = ImGui::TreeNode("3D Audio Listener");
+
+					ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+					ImGui::Checkbox("##EnableListen", &enable);
+
+					ImGui::SameLine();
+					bool remove = ImGui::SmallButton("-##RemoveListen");	// TODO: Use ImageButton?
+
+					if (expand) {
+
+						if (ImGui::RadioButton("Set as active listener", state->activeAudioListener == audioLisComp)) {
+							state->activeAudioListener = audioLisComp;
+						}
+
+						ImGui::DragFloat3("Velocity##audio_listener_velocity", &audioLisComp->vVel.x);
+						ImGui::SameLine();
+						ImGui::TextDisabled("(?)");
+						if (ImGui::IsItemHovered()) {
+							ImGui::BeginTooltip();
+							ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+							ImGui::TextUnformatted("Velocity for Doppler effect");
+							ImGui::PopTextWrapPos();
+							ImGui::EndTooltip();
+						}
+
+						if (remove) {
+							ent->removeComp<AudioListenerComponent>();
+						}
+						ImGui::TreePop();
+					}
 				}
 
 				// AudioGeometryComponent

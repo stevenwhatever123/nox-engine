@@ -13,23 +13,24 @@ AnimationSequencer::AnimationSequencer() :mFrameMin(0), mFrameMax(0) {};
 
 int AnimationSequencer::GetItemTypeCount() const 
 {
-    return (i32) game_state->audioSources.size();
+    return 0;
+    //return (i32) game_state->audioSources.size();
 }
 
 const char* AnimationSequencer::GetItemTypeName(int index) const
 {
-    if (!game_state->audioSources.empty())
-    {
-        //return game_state->audioSources.
-        auto startItr = game_state->audioSources.begin();
-        auto endItr = game_state->audioSources.end();
-        for (u32 i = 0; i < index; i++)
-        {
-            startItr++;
-        }
+    //if (!game_state->audioSources.empty())
+    //{
+    //    //return game_state->audioSources.
+    //    auto startItr = game_state->audioSources.begin();
+    //    auto endItr = game_state->audioSources.end();
+    //    for (u32 i = 0; i < index; i++)
+    //    {
+    //        startItr++;
+    //    }
 
-        return startItr->second.name.c_str();
-    }
+    //    return startItr->second.name.c_str();
+    //}
 
     return "hahaha";
 }

@@ -64,7 +64,7 @@ namespace NoxEngine {
 			void scheduleUpdateECS();
 			
 			void createAudioGeometry(Entity* ent, IAudioGeometry* igeo);
-			void addAudioSource(AudioSource audioSource);
+			//void addAudioSource(AudioSource audioSource);
 			bool playSound(Entity *ent, IAudioSource *);
 			bool stopSound(Entity* ent, IAudioSource *);
 

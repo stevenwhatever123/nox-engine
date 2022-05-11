@@ -9,6 +9,9 @@
 
 namespace NoxEngine {
 
+	// forward declares
+	class IAudioListener;
+
 	struct AudioSource {
 		String name;
 		String file;
@@ -17,14 +20,13 @@ namespace NoxEngine {
 		bool is3d;
 	};
 
-	typedef std::map<String, AudioSource> AudioRepo;
 	typedef std::map<String, MeshScene> MeshSceneRepo;
 
 	struct GameState {
-		AudioRepo audioSources;
 		Renderer *renderer;
 		MeshSceneRepo meshScenes;
 		f32 light[3];
+		IAudioListener* activeAudioListener;
 		Array<Scene *> scenes;
 		Scene *activeScene;
 

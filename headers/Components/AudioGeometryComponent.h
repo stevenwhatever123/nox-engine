@@ -28,8 +28,8 @@ namespace NoxEngine {
 		void clearMesh() override;
 
 		bool loadMesh(MeshScene* meshScene) override;
-		bool generateBoundingBox(const Array<vec3>& verts) override;
-		bool generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4) override;
+		bool generateBoundingBox(const Array<vec3>& verts, mat4 transformation = mat4(1.0f)) override;
+		bool generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4, mat4 transformation) override;
 
 		inline const i32 getNumOfVertices() const { return vertices.size(); }
 		inline const i32 getNumOfFaces()	const { return faces.size(); }
