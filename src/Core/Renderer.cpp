@@ -71,7 +71,8 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	glDepthFunc(GL_LESS);
+	// glEnable(GL_CULL_FACE);
 
 	// Create framebuffer  
 	glGenFramebuffers(1, &FBO);
@@ -79,21 +80,26 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
     // Gen texture for framebuffer    
     glGenTextures(1, &textureToRenderTo);
+
     glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-
     // Attach tex to framebuffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        printf("Troubles with creating a framebuffer\n");
+
+	glGenTextures(1, &depthStencilTexture);
+	glBindTexture(GL_TEXTURE_2D, depthStencilTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilTexture, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		LOG_DEBUG("Troubles with creating a framebuffer");
     }
 
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
     // Generate buffer handlers
     glGenVertexArrays(1, &VAO);
@@ -155,43 +161,56 @@ void Renderer::updateBuffers() {
 }
 
 
-void Renderer::addObject(Entity *ent, IRenderable *meshSrc, ComponentType componentType) {
+RendObj Renderer::createRendObject(IRenderable *mesh) {
 
-    // Add a mesh to the container
-    RendObj newObj;
-    newObj.ent = ent;
-	newObj.meshSrc = meshSrc;
-	newObj.componentType = componentType;
+	RendObj newObj;
+	newObj.meshSrc = mesh;
 
-	newObj.renderType = meshSrc->glRenderType;
-    newObj.startInd = (i32)elements.size();
-	newObj.has_texture = meshSrc->has_texture;
-	newObj.has_normal = meshSrc->has_normal;
+	newObj.renderType = mesh->glRenderType;
+	newObj.startInd = (i32)elements.size();
+	newObj.has_texture = mesh->has_texture;
+	newObj.has_normal = mesh->has_normal;
+	newObj.lineWidth = mesh->lineWidth;
 
-    // Generate textures for the object
-	if (meshSrc->has_texture) {
-		newObj.ambientTexture = setTexture(meshSrc->getAmbientTexture(), "AmbTexture", 1);
-		newObj.normalTexture = setTexture(meshSrc->getNormalTexture(), "NormTexture", 2);
+	// Generate textures for the object
+	if(mesh->has_texture) {
+		newObj.ambientTexture = setTexture(mesh->getAmbientTexture(), "AmbTexture", 1);
+		newObj.normalTexture = setTexture(mesh->getNormalTexture(), "NormTexture", 2);
 	}
 
 	// Generate the arrays
-	createVertexArray(meshSrc);
+	createVertexArray(mesh);
 
-	if(meshSrc->has_texture) createTexCoordArray(meshSrc);
-	if(meshSrc->has_normal)  createNormalsArray(meshSrc);
+	if(mesh->has_texture) createTexCoordArray(mesh);
+	if(mesh->has_normal) createNormalsArray(mesh);
 
-	if(meshSrc->has_normal && meshSrc->has_texture) createTangents(meshSrc);
+	if(mesh->has_normal && mesh->has_texture) createTangents(mesh);
 
-	createElementArray(meshSrc);
+	createElementArray(mesh);
 
 	newObj.endInd = i32(elements.size());
-    newObj.transformation = mat4(1.0f);
+	newObj.transformation = mat4(1.0f);
+
+	return newObj;
+}
+
+void Renderer::addObject(Entity *ent, IRenderable *meshSrc, ComponentType componentType) {
+    // Add a mesh to the container
+	RendObj newObj = createRendObject(meshSrc);
+	newObj.ent = ent;
+	newObj.componentType = componentType;
+
 	objects[nextObjectId] = newObj;
 
 	// give the IRenderable a reference to this rendObj
 	meshSrc->rendObjId = nextObjectId++;
+}
 
-    LOG_DEBUG("Renderer object count: %i\n", objects.size());
+void Renderer::addPermObject(IRenderable *mesh, ITransform *trans)
+{
+    // Add a mesh to the container
+    RendObj newObj = createRendObject(mesh);
+	perm_objects.push_back(newObj);
 }
 
 void Renderer::removeObject(Entity* ent, ComponentType componentType) {
@@ -236,7 +255,6 @@ GLuint Renderer::setTexture(const String texturePath, const char* uniName, int n
 	
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true); // flip loaded texture's on the y-axis.
-
 	unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
 
 	if (data)
@@ -273,6 +291,34 @@ void Renderer::draw() {
 
 	glBindVertexArray(VAO);
 
+	for (u32 i = 0; i < perm_objects.size(); i++)
+	{
+		// If the object has a position and it's enabled, use it
+		mat4 worldMat = mat4(1.0f);
+		program->set4Matrix("toWorld", worldMat);
+		program->set4Matrix("modelMatrix", perm_objects[i].transformation);
+
+		// Activate and bind textures of the object
+		if(perm_objects[i].has_texture) {
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, perm_objects[i].ambientTexture);
+		}
+
+		if(perm_objects[i].has_texture) {
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, perm_objects[i].normalTexture);
+		}
+
+		//if(perm_objects[i].renderType == GL_LINES) {
+		//	glLineWidth(perm_objects[i].lineWidth);
+		//}
+
+		glDrawElements(perm_objects[i].renderType, (perm_objects[i].endInd - perm_objects[i].startInd), GL_UNSIGNED_INT, (void*)(perm_objects[i].startInd * sizeof(i32)));
+
+
+		//glLineWidth(1.0f);
+	}
+
 	for (u32 i = 0; i < objects.size(); i++) {
 
 		Entity* ent = objects[i].ent;
@@ -288,7 +334,6 @@ void Renderer::draw() {
 		else if (objects[i].componentType == ComponentType::AudioGeometryType) {
 			if (!ent->isEnabled<AudioGeometryComponent>() || !ent->getComp<AudioGeometryComponent>()->render) continue;
 		}
-
 		// If the object has a position and it's enabled, use it
 		glm::mat4 worldMat = glm::mat4(1.0f);
 		if (objects[i].ent->containsComps<TransformComponent>() && objects[i].ent->isEnabled<TransformComponent>()) {
@@ -307,9 +352,9 @@ void Renderer::draw() {
 		if(objects[i].has_texture) {
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, objects[i].ambientTexture);
-		}
+		} 
 
-		if(objects[i].has_texture) {
+		if(objects[i].has_normal) {
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, objects[i].normalTexture);
 		}
@@ -319,6 +364,7 @@ void Renderer::draw() {
 	}
 
 
+	
 	glBindVertexArray(0);
 	setFrameBufferToDefault();
 }
@@ -334,7 +380,7 @@ void Renderer::fillBackground(f32 r, f32 g, f32 b) {
 
 	setFrameBufferToTexture();
 	glClearColor(r,g,b, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	setFrameBufferToDefault();
 
 	glClearColor(
@@ -445,7 +491,7 @@ void Renderer::createElementArray(IRenderable* mesh)
 	if(mesh->use_indices ) {
 		
 		const auto indices = mesh->getIndices();
-		numberOfElements += indices.size();
+		numberOfElements += (i32)indices.size();
 
 		i32 *data = elements.data();
 

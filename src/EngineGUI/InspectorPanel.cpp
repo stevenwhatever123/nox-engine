@@ -397,7 +397,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					bool expand = ImGui::TreeNode("Audio Geometry");		// TODO (Vincent): How to change the width of treenode?
 
 					ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
-					ImGui::Checkbox("##EnableRend", &enable);
+					ImGui::Checkbox("##EnableGeometry", &enable);
 
 					ImGui::SameLine();
 					bool remove = ImGui::SmallButton("-##RemoveAudioObs");	// TODO: Use ImageButton?
@@ -506,6 +506,33 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 				// LightSourceComponent
 				// TODO: implement
+
+				// ScriptComponent
+				if (scriptComp) {
+
+					if (ImGui::TreeNode("Script")) {
+
+						bool enable = ent->isEnabled<AudioGeometryComponent>();
+					
+						ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+						ImGui::Checkbox("##EnableScript", &enable);
+
+						bool remove = ImGui::SmallButton("-##RemoveScript");	// TODO: Use ImageButton?
+
+						ImGui::Text("%s", scriptComp->getScript());
+						ImGui::SameLine();
+
+						if(ImGui::Button("Change")) {
+							String file = IOManager::Instance()->PickFile();
+							scriptComp->setScript(file.c_str());
+						}
+
+						if(remove) {
+							ent->removeComp<ScriptComponent>();
+						}
+						ImGui::TreePop();
+					}
+				}
 			
 			}
 

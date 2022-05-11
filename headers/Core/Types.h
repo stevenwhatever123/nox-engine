@@ -33,6 +33,7 @@ typedef u16 HasCompBitMask;
 // Rename std libs for if we want to remove them
 using String = std::string;
 template<class T> using Array = std::vector<T>;
+template<class T, class U> using Map = std::map<T, U>;
 
 // Math & GLM
 typedef glm::vec2 vec2;

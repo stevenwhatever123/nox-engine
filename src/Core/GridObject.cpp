@@ -17,6 +17,8 @@ GridObject::GridObject(vec3 start_point, vec3 end_point, const i32 count_point)
 	has_normal  = 1;
 	use_indices = 1;
 
+	lineWidth = 2.0f;
+
 	x = start_point.x;
 	y = start_point.y;
 	z = start_point.z;

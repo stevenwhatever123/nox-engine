@@ -1,7 +1,10 @@
+#include <NoxEngineWindows.h>
+#include <Shlwapi.h>
+
 #include <Managers/IOManager.h>
 #include <Utils/Utils.h>
 #include <Utils/MemAllocator.h>
-#include <Windows.h>
+#include <Core/Types.h>
 #include <assert.h>
 
 using namespace NoxEngine;
@@ -109,15 +112,18 @@ TempResourceData IOManager::ReadEntireFileTemp(std::string filename) {
 	return TempResourceData{data, (i32)readBytes};
 }
 
-std::string IOManager::PickFile(const char* filters) {
+String IOManager::PickFile(const char* filters) {
 
-	std::string picked = "";
+	String picked = "";
 
 	// TODO(sharo): have multiple scratch memories
 
 	u8 *file_name = ScratchMemAllocator::Instance()->allocate(1024);
 
 	u8 dir[1024];
+
+	u8 temp_file[260];
+
 	GetCurrentDirectoryA(1024, (LPSTR)dir);
 
 	HWND window_handle = (HWND)GetCurrentProcess();
@@ -135,10 +141,16 @@ std::string IOManager::PickFile(const char* filters) {
 		.Flags = OFN_DONTADDTORECENT|OFN_ENABLESIZING|OFN_HIDEREADONLY|OFN_NONETWORKBUTTON|OFN_NOCHANGEDIR,
 	};
 
-	if(!GetOpenFileNameA(&open_file)) {
+	bool opened = GetOpenFileNameA(&open_file);
+	if(!opened) {
 		LOG_DEBUG("Failed to Open File Dialog: %x", CommDlgExtendedError() );
 	}
 
-	return std::string((char*)file_name);
+	if(opened && PathRelativePathToA( (LPSTR)temp_file, (LPCSTR)dir, FILE_ATTRIBUTE_DIRECTORY, (LPCSTR)file_name, FILE_ATTRIBUTE_NORMAL)) {
+		return String((char*)temp_file);
+	}
+
+
+	return String((char*)file_name);
 }
 

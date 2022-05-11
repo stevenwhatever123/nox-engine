@@ -46,6 +46,7 @@ namespace NoxEngine {
 
 			f32 color[3];
 			GLenum glRenderType;
+			f32 lineWidth = 1.0;
 
 			// id of this IRenderable in the renderer
 			u32 rendObjId;

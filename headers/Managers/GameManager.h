@@ -106,10 +106,11 @@ namespace NoxEngine {
 			void asset_ui();
 			void main_contex_ui();
 
+			void update_livereloads();
+			void update_inputs();
 			void update_ecs();
 			void update_gui();
 			void update_audio();
-			void update_inputs();
 			void update_animation();
 			void update_renderer();
 			

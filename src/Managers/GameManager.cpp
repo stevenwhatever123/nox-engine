@@ -1,4 +1,5 @@
 #include <Managers/GameManager.h>
+#include <Managers/LiveReloadManager.h>
 
 #include <filesystem>
 #include <Core/Entity.h>
@@ -45,14 +46,14 @@ void GameManager::init() {
 }
 
 void GameManager::update() {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	update_livereloads();
 	update_inputs();
 	update_ecs();
-	update_audio();
 	update_renderer();
 	update_gui();
-
+	update_audio();
 	update_animation();
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)) {
@@ -204,11 +205,11 @@ void GameManager::init_events() {
 				RenderableComponent* comp = new RenderableComponent(*meshScene.meshes[i]);
 				TransformComponent* trans = new TransformComponent(0.0, 0.0, 0.0);
 
-				ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
+				// ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
 
 				ent->addComp(comp);
 				ent->addComp(trans);
-				ent->addComp(script);
+				// ent->addComp(script);
 
 				if (meshScene.hasAnimations())
 				{
@@ -295,7 +296,7 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(50.0f, 50.0f, 50.0f));
+	camera = new Camera(vec3(100.0f, 100.0f, 100.0f));
 }
 
 void GameManager::init_shaders() {
@@ -321,8 +322,8 @@ void GameManager::init_renderer() {
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
 
-	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(1000, 0, 1000), 1000);
-	// renderer->addObject(obj);
+	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(500, 0, 500), 50);
+	renderer->addPermObject(obj);
 	renderer->updateBuffers();
 }
 
@@ -350,36 +351,6 @@ void GameManager::init_scene() {
 
 void NoxEngine::GameManager::init_scripts()
 {
-	// scriptsManager = ScriptsManager::Instance();
-	// scriptsManager->Init();
-	// scriptsManager->DoLuaFile("assets/scripts/test.lua");
-
-
-
-	String file_name = "assets/meshes/card.fbx";
-
-	game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-	MeshScene &meshScene = game_state.meshScenes.find(file_name)->second;
-
-	i32 index = game_state.activeScene->entities.size();
-	// We're treating every mesh as an entity FOR NOW
-	for (u32 i = 0; i < meshScene.meshes.size(); i++)
-	{
-		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
-		//                 because the entity ID is managed by the scene
-		Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
-
-		RenderableComponent* comp = new RenderableComponent(*meshScene.meshes[i]);
-		TransformComponent* pos = new TransformComponent(0.0, 0.0, 0.0);
-
-		ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
-
-		ent->addComp(comp);
-		ent->addComp(pos);
-		ent->addComp(script);
-
-		game_state.activeScene->addEntity(ent);
-	}
 
 }
 
@@ -403,32 +374,23 @@ void GameManager::main_contex_ui() {
 	ImGui::End();
 }
 
-void GameManager::update_gui() {
+void GameManager::update_livereloads() {
 
-	ImGuiIO& io = ImGui::GetIO();
-	
-	char windowTitle[64];
-	snprintf(windowTitle, 64, "%s - FPS %.3f", title.c_str(), io.Framerate);
-	glfwSetWindowTitle(window, windowTitle);
+	LiveReloadManager *lrManager = LiveReloadManager::Instance();
+	lrManager->checkFiles();
 
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-	ImGui::PushFont(font);
+}
 
-	NoxEngineGUI::updateGUI(game_state, &ui_params);
-	//NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
-	NoxEngineGUI::updatePresetObjectPanel(&game_state);
-	NoxEngineGUI::updateScenePanel(&game_state);
-	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
-	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
+void GameManager::update_inputs() {
+	glfwPollEvents();
 
-	ImGui::PopFont();
-	ImGui::Render();
+	if(keys['W']) { camera->moveFwdBy(0.1f); }
+	if(keys['S']) { camera->moveFwdBy(-0.1f); }
+	if(keys['D']) { camera->moveHorBy(-0.1f); }
+	if(keys['A']) { camera->moveHorBy(0.1f); }
+	if(keys[' ']) { camera->moveVerBy(0.1f); }
+	if(keys['K']) { camera->moveVerBy(-0.1f); }
 
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void GameManager::update_ecs() {
@@ -439,7 +401,7 @@ void GameManager::update_ecs() {
 	const auto entities = game_state.activeScene->entities;
 	for (i32 i = 0; i < nEntities; i++)
 	{
-		entities[i]->tick(deltaTime);
+		entities[i]->tick(deltaTime, currentTime);
 	}
 
 
@@ -477,6 +439,35 @@ void GameManager::update_ecs() {
 	// Update done
 	updateNeededECS = false;
 }
+
+void GameManager::update_gui() {
+
+	ImGuiIO& io = ImGui::GetIO();
+	
+	char windowTitle[64];
+	snprintf(windowTitle, 64, "%s - FPS %.3f", title.c_str(), io.Framerate);
+	glfwSetWindowTitle(window, windowTitle);
+
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+	ImGui::PushFont(font);
+
+	NoxEngineGUI::updateGUI(game_state, &ui_params);
+	//NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
+	NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
+	NoxEngineGUI::updatePresetObjectPanel(&game_state);
+	NoxEngineGUI::updateScenePanel(&game_state);
+	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
+	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
+	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
+
+	ImGui::PopFont();
+	ImGui::Render();
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 
 void GameManager::update_audio() {
 
@@ -535,17 +526,6 @@ void GameManager::update_audio() {
 	audioManager->update();
 }
 
-void GameManager::update_inputs() {
-	glfwPollEvents();
-
-	if(keys['W']) { camera->moveFwdBy(0.1f); }
-	if(keys['S']) { camera->moveFwdBy(-0.1f); }
-	if(keys['D']) { camera->moveHorBy(-0.1f); }
-	if(keys['A']) { camera->moveHorBy(0.1f); }
-	if(keys[' ']) { camera->moveVerBy(0.1f); }
-	if(keys['K']) { camera->moveVerBy(-0.1f); }
-
-}
 
 void GameManager::update_animation() {
 
@@ -565,37 +545,9 @@ void GameManager::update_animation() {
 
 void GameManager::update_renderer() {
 
-	/*** old:
-	 * 
-	auto meshSceneStart = game_state.meshScenes.begin();
-	auto meshSceneEnd = game_state.meshScenes.end();
-	for (; meshSceneStart != meshSceneEnd; meshSceneStart++) 
-	{
-		MeshScene &currentMeshScene = meshSceneStart->second;
-		for (u32 i = 0; i < meshSceneStart->second.allNodes.size(); i++)
-		{
-			MeshNode* node = meshSceneStart->second.allNodes[i];
+	renderer->setFrameBufferToTexture();
 
-			if (node->meshIndex.size() > 0)
-			{
-				Mesh* mesh = currentMeshScene.meshes[node->meshIndex[0]];
-				if (node->hasAnimations())
-				{
-					glm::mat4 transformation = node->getGlobalTransformation(
-						currentMeshScene.frameIndex, currentMeshScene.animationIndex,
-						currentMeshScene.accumulator, currentMeshScene.timeStep,
-						currentMeshScene.whichTickFloor, currentMeshScene.whichTickCeil);
-					renderer->updateObjectTransformation(transformation, mesh);
-				}
-				else
-				{
-					glm::mat4 transformation = node->transformation;
-					renderer->updateObjectTransformation(transformation, mesh);
-				}
-			}
-		}
-	}
-	**/
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	for (Entity* ent : game_state.activeScene->entities) {
 
@@ -612,6 +564,7 @@ void GameManager::update_renderer() {
 	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
+	
 	renderer->draw();
 
 }

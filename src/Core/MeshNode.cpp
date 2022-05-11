@@ -114,7 +114,7 @@ const glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex)
 }
 
 // Linear interpolated transformation
-const glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil)
+const glm::mat4 MeshNode::getTransformation(u32 frameIndex, u32 animationIndex, time_type accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil)
 {
 	if (!hasAnimations())
 		return getTransformation();
@@ -191,7 +191,7 @@ glm::mat4 MeshNode::getGlobalTransformation(u32 frameIndex, u32 animationIndex)
 }
 
 // Linear interpolated global transformation
-glm::mat4 MeshNode::getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep,
+glm::mat4 MeshNode::getGlobalTransformation(u32 frameIndex, u32 animationIndex, time_type accumulator, time_type timeStep,
 	i32 whichTickFloor, i32 whichTickCeil)
 {
 	glm::mat4 transformatiom_temp(1);

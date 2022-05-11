@@ -1,4 +1,6 @@
-function tick(dt)
+function tick(dt, current_time)
 	obj_pos = self:GetPositionComponent();
-	print(obj_pos.x, obj_pos.y, obj_pos.z)
+
+	obj_pos.x = 100*math.cos(current_time);
+	obj_pos.z = 100*math.sin(current_time);
 end

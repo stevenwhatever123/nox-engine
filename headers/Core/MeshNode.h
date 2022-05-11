@@ -19,12 +19,12 @@ public:
 	// Frame based transformation
 	const mat4 getTransformation(u32 frameIndex, u32 animationIndex);
 	// Linear interpolated transformation
-	const mat4 getTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
+	const mat4 getTransformation(u32 frameIndex, u32 animationIndex, time_type accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
 
 	// Global transformation by traversing all parent node and adding them up
 	mat4 getGlobalTransformation();
 	mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex);
-	mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex, f32 accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
+	mat4 getGlobalTransformation(u32 frameIndex, u32 animationIndex, time_type accumulator, time_type timeStep, i32 whichTickFloor, i32 whichTickCeil);
 
 	void setupEulerAngle();
 	void convertEulerAngleToMatrix();
