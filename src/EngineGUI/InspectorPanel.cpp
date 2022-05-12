@@ -405,8 +405,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 					if (expand) {
 
-						if (ImGui::RadioButton("Set as active listener", state->activeAudioListener == audioLisComp)) {
-							state->activeAudioListener = audioLisComp;
+						if (ImGui::RadioButton("Set as active listener", state->activeAudioListener == ent)) {
+							state->activeAudioListener = ent;
 						}
 
 						ImGui::DragFloat3("Velocity##audio_listener_velocity", &audioLisComp->vVel.x);

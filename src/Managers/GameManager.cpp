@@ -248,7 +248,7 @@ void GameManager::init_events() {
 			// AudioSource: No need to do anything special
 			// AudioListener: first listener is set to active
 			if (game_state.activeAudioListener == nullptr && compTypeId == typeid(AudioListenerComponent)) {
-				game_state.activeAudioListener = ent->getComp<AudioListenerComponent>();
+				game_state.activeAudioListener = ent;
 			}
 
 			// ...
@@ -470,11 +470,33 @@ void GameManager::update_gui() {
 
 void GameManager::update_audio() {
 
-	// Sync audio manager with the game state's audio repo
-	// TODO: Add ChannelID to AudioSource, iterate through all of them and 
-	//       set the pos/volume in the appropriate ChannelGroup / ChannelControl
+	// Set listener attributes
+	vec3 pos{ 0 };
+	vec3 vel{ 0 };
+	vec3 forward(0.0f, 0.0f, -1.0f);
+	vec3 up(0.0f, 1.0f, 0.0f);
 
-	// Update audio geometry states
+	ITransform* itrans = nullptr;
+	IAudioListener* ilisten = nullptr;
+	if (game_state.activeAudioListener) {
+		itrans	= game_state.activeAudioListener->getComp<TransformComponent>();
+		ilisten	= game_state.activeAudioListener->getComp<AudioListenerComponent>();
+
+		if (itrans) {
+			mat4 rotation = glm::eulerAngleXYZ(itrans->rx, itrans->ry, itrans->rz);
+
+			pos		= vec3(itrans->x, itrans->y, itrans->z);
+			forward = rotation * vec4(forward, 1.0f);
+			up		= rotation * vec4(up, 1.0f);
+		}
+
+		if (ilisten) vel = ilisten->vVel;
+	} 
+
+	//audioManager->set3dListenerAttributes(itrans);
+	audioManager->set3dListenerAttributes(pos, vel, forward, up);
+
+	// Update geometry states & orientation
 	for (Entity* ent : game_state.activeScene->entities) {
 
 		if (!ent->isEntityEnabled()) continue;

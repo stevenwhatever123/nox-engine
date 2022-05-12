@@ -10,7 +10,7 @@
 namespace NoxEngine {
 
 	// forward declares
-	class IAudioListener;
+	class Entity;
 
 	struct AudioSource {
 		String name;
@@ -26,7 +26,7 @@ namespace NoxEngine {
 		Renderer *renderer;
 		MeshSceneRepo meshScenes;
 		f32 light[3];
-		IAudioListener* activeAudioListener;
+		Entity* activeAudioListener;	// Entity is needed because IAudioListener and ITransform are both needed
 		Array<Scene *> scenes;
 		Scene *activeScene;
 
