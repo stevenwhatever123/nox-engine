@@ -172,11 +172,6 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						// Begin: grey out
 						ImGui::BeginDisabled(!enable);
 
-						// TODO: Hook it up with RendObj in the renderer
-						// 1. create transform matrix
-						// 2. submit it to renderer updateTransformationMatrix(matrix, IRenderable)
-						//	  (impl: loop through rendObjs, check pointers match. O(N))
-
 						ImGui::DragFloat3("Position", &transComp->x, 0.01f);
 						ImGui::DragFloat3("Rotation", &transComp->rx, 0.01f);
 						ImGui::DragFloat3("Scale", &transComp->sx, 0.01f);
@@ -551,7 +546,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				// ScriptComponent
 				if (scriptComp) {
 
-					bool enable = ent->isEnabled<AudioGeometryComponent>();
+					bool enable = ent->isEnabled<ScriptComponent>();
 					bool expand = ImGui::TreeNode("Script");
 
 					ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
@@ -559,6 +554,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 					ImGui::SameLine();
 					bool remove = ImGui::SmallButton("-##RemoveScript");	// TODO: Use ImageButton?
+
+					ent->setEnabled<ScriptComponent>(enable);
 
 					if (expand) {
 
