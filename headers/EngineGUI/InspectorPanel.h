@@ -2,7 +2,8 @@
 
 // Core GUI
 #include "EngineGUI.h"
-#include <GameState.h>
+#include <Core/GameState.h>
+#include <Managers/IOManager.h>
 
 
 namespace NoxEngineGUI {

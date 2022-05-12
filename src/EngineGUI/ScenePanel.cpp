@@ -1,14 +1,13 @@
-#include "EngineGUI/ScenePanel.h"
-
-// move to header
-#include "Entity.h"
+#include <EngineGUI/ScenePanel.h>
+#include <Core/Entity.h>
+#include <EngineGUI/EngineGUI.h>
+#include <EngineGUI/PresetObject.h>
 
 using namespace NoxEngine;
 
-
 void NoxEngineGUI::updateScenePanel(GameState* state) {
 
-	String name = PANEL_NAME_MAP[ PanelName::Scene ];
+	String name = kPanelNameMap[ PanelName::Scene ];
 
 	ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
 
@@ -39,8 +38,7 @@ void NoxEngineGUI::updateScenePanel(GameState* state) {
 	}
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
-
-	ImGui::Image((ImTextureID)(u64)state->texture_used, wsize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)(u64)state->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	// Window end
 	ImGui::End();

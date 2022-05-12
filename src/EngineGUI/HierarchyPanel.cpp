@@ -1,12 +1,10 @@
+#include <Core/Entity.h>
 #include <EngineGUI/HierarchyPanel.h>
-
 #include <EngineGUI/ImGuiWidgets.h>
-
-#include <Entity.h>
-#include <IComponent.h>
-#include <PositionComponent.h>
-#include <RenderableComponent.h>
-#include <GameManager.h>
+#include <Components/IComponent.h>
+#include <Components/TransformComponent.h>
+#include <Components/RenderableComponent.h>
+#include <Managers/GameManager.h>
 
 using namespace NoxEngine;
 
@@ -14,7 +12,7 @@ using namespace NoxEngine;
 void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *params) {
 
 	// Variables
-	std::string name = PANEL_NAME_MAP[PanelName::Hierarchy];
+	std::string name = kPanelNameMap[PanelName::Hierarchy];
 	bool removedEntity = false;
 
 	// Window Begin
@@ -36,7 +34,7 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 		// TODO: revisit example if we want multi-selection
 
 		// Available panel width
-		int width = (int)ImGui::GetContentRegionAvail().x;
+		f32 width = ImGui::GetContentRegionAvail().x;
 
 		for (int i = 0; i < state->activeScene->entities.size(); i++) {
 			

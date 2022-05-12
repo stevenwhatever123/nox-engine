@@ -1,11 +1,11 @@
 #pragma once
 
 #include <EngineGUI/EngineGUI.h>
-#include "EngineGUI/AnimationPanel.h"
-#include "EngineGUI/AudioPanel.h"
-#include "EngineGUI/ScenePanel.h"
-#include "EngineGUI/PresetObjectPanel.h"
-#include "EngineGUI/ImGuizmoTool.h"
+#include <EngineGUI/AnimationPanel.h>
+#include <EngineGUI/AudioPanel.h>
+#include <EngineGUI/ScenePanel.h>
+#include <EngineGUI/PresetObjectPanel.h>
+#include <EngineGUI/ImGuizmoTool.h>
 
 using namespace NoxEngine;
 
@@ -55,16 +55,15 @@ void NoxEngineGUI::setupFixedLayout() {
 	ImGuiID dock_left_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Left, 0.2f, nullptr, &mainNodeID);
 	ImGuiID dock_left_down_id	= ImGui::DockBuilderSplitNode(dock_left_id, ImGuiDir_Down, 0.5f, nullptr, &dock_left_id);
 	ImGuiID dock_down_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Down, 0.2f, nullptr, &mainNodeID);
-	ImGuiID dock_down_right_id	= ImGui::DockBuilderSplitNode(dock_down_id, ImGuiDir_Right, 0.4f, nullptr, &dock_down_id);
 	ImGuiID dock_down_down_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Up, 0.05f, nullptr, &mainNodeID);
 
-	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Scene].c_str(), mainNodeID);
-	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Inspector].c_str(), dock_right_id);
-	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::PresetObjects].c_str(), dock_left_id);
-	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::Hierarchy].c_str(), dock_left_down_id);
-	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AnimationSettings].c_str(), dock_down_id);
-	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::AudioSource].c_str(), dock_down_right_id);
-	ImGui::DockBuilderDockWindow(PANEL_NAME_MAP[PanelName::FileExplorer].c_str(), dock_down_down_id);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::Scene].c_str(), mainNodeID);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::Inspector].c_str(), dock_right_id);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::PresetObjects].c_str(), dock_left_id);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::Hierarchy].c_str(), dock_left_down_id);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::AnimationSequencerPanel].c_str(), dock_down_id);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::SkyboxSettings].c_str(), dock_down_id);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::FileExplorer].c_str(), dock_down_down_id);
 			
 	// Change node flags here
 #if 0
@@ -90,12 +89,27 @@ void NoxEngineGUI::cleanupImGui() {
 }
 
 
-void NoxEngineGUI::updateMenu(GUIParams *params) {
+void NoxEngineGUI::updateMenu(NoxEngine::GameState& game_state, GUIParams *params) {
 
 	// Create menu bar
 	if (ImGui::BeginMenuBar()) {
 
 		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("Save"))
+			{
+				std::string file_path = "assets/blablabla.txt";
+
+				NoxEngine::saveScene(file_path, game_state);
+
+			}
+
+			if (ImGui::MenuItem("Load"))
+			{
+				std::string file_path = IOManager::Instance()->PickFile();
+
+				NoxEngine::loadScene(file_path, game_state);
+			}
+
 			if (ImGui::MenuItem("Close", NULL, false, p_open != NULL)) *p_open = false;
 			ImGui::EndMenu();
 		}
@@ -110,16 +124,6 @@ void NoxEngineGUI::updateMenu(GUIParams *params) {
 			static float backColor[] = HEX_TO_FLOAT4(params->sceneBackgroundColor);
 			ImGui::ColorPicker4("Scene Background", backColor);
 			params->sceneBackgroundColor = FLOAT4_TO_HEX(backColor);
-			// if (ImGui::MenuItem("Background Color", NULL, false, p_open != NULL)){
-				
-			// }
-
-			if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
-			if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
-			if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
-			if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
-			if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
-			ImGui::Separator();
 
 			ImGui::EndMenu();
 		}
@@ -129,7 +133,7 @@ void NoxEngineGUI::updateMenu(GUIParams *params) {
 }
 
 
-void NoxEngineGUI::updateGUI(GUIParams *params) {
+void NoxEngineGUI::updateGUI(NoxEngine::GameState& game_state, GUIParams *params) {
 
 	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 	// because it would be confusing to have two docking targets within each others.
@@ -164,7 +168,7 @@ void NoxEngineGUI::updateGUI(GUIParams *params) {
 	ImGui::PopStyleVar(2);
 
 	// Menu bar
-	updateMenu(params);
+	updateMenu(game_state, params);
 
 	// Setup dockspace only once
 	if (params->firstLoop) setupFixedLayout();
@@ -182,11 +186,10 @@ void NoxEngineGUI::updateGUI(GUIParams *params) {
 
 
 	// Placeholder / debug windows
-	ImGui::Begin(PANEL_NAME_MAP[PanelName::FileExplorer].c_str());    
+	ImGui::Begin(kPanelNameMap[PanelName::FileExplorer].c_str());    
 
-	ImGui::SliderFloat3("Camera ", glm::value_ptr(params->current_cam->user_shift), 0.0f, 100.0f);
+	ImGui::DragFloat3("Camera ", glm::value_ptr(params->current_cam->user_shift), 0.0f, 100.0f);
 	ImGui::End();
-
 
 	// First loop is over
 	params->firstLoop = false;
