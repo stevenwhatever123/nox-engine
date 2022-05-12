@@ -34,7 +34,6 @@ void Scene::addEntity(PresetObject obj) {
 	
 	// Empty components created before the switch/case, allocate memory with `new` inside
 	TransformComponent* transform;
-	RenderableComponent* rend;
 
 	// Check which preset object is needed, create components accordingly
 	switch (obj) {
