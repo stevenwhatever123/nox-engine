@@ -517,9 +517,20 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
 						ImGui::Checkbox("##EnableScript", &enable);
 
+						ImGui::SameLine();
 						bool remove = ImGui::SmallButton("-##RemoveScript");	// TODO: Use ImageButton?
 
-						ImGui::Text("%s", scriptComp->getScript());
+						ImGui::Text("Script File: ");
+						ImGui::SameLine();
+
+						ImGui::PushID("TextInput");
+
+						if(ImGui::GetActiveID() == ImGui::GetID("TextInput")) {
+							ImGui::ClearActiveID();
+						}
+
+						ImGui::InputText("", (char*)scriptComp->getScript(), 256, ImGuiInputTextFlags_ReadOnly);
+						ImGui::PopID();
 						ImGui::SameLine();
 
 						if(ImGui::Button("Change")) {

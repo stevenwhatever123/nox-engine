@@ -5,10 +5,6 @@
 
 // 3rd Party Include
 #include <Core/Types.h>
-// #include <glm/glm.hpp>
-// #include <glm/gtc/matrix_transform.hpp>
-// #include <glm/gtc/type_ptr.hpp>
-// #include <glm/gtx/euler_angles.hpp>
 // #include <glad/glad.h>
 
 #include <3rdParty/stb/stb_image.h>
@@ -120,20 +116,17 @@ namespace NoxEngine {
 		void updateObjectTransformation(glm::mat4 transformation, u32 rendObjId);
 		void changeTexture(Entity *ent);
 		bool hasRendObj(u32 id);
-		void setupSkybox();
+
 		void setSkyboxImage(const String& file_path, u32 skyboxPosition);
 		const char* getSkyboxImagePath(u32 skyboxPosition);
 		void setSkyBoxImages(const Array<String> &skyboxImages);
-		void skyBoxLoadTexture();
 		void drawSkyBox();
 
 		private:
 
-		// The shaders
 		GLProgram *program;
-		// The skybox shaders
-		u32 cubemapTexture;
 
+		u32 cubemapTexture;
 		u32 skyVAO;
 		u32 skyVBO;
 
@@ -197,8 +190,9 @@ namespace NoxEngine {
 		void createTangents(IRenderable* mesh); 
 		GLuint setTexture(const String texturePath, const char* uniName, i32 num);
 
+		void setupSkybox();
+		void skyboxLoadTexture();
 
-	private:
 		u32 nextObjectId;
 	};
 }

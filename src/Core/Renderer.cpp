@@ -758,10 +758,10 @@ void Renderer::setupSkybox() {
 void Renderer::setSkyBoxImages(const Array<String> &_skyboxImages)
 {
 	skyboxImages = _skyboxImages;
-	skyBoxLoadTexture();
+	skyboxLoadTexture();
 }
 
-void Renderer::skyBoxLoadTexture()
+void Renderer::skyboxLoadTexture()
 {
     glGenTextures(1, &cubemapTexture);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
@@ -807,7 +807,7 @@ void Renderer::drawSkyBox()
 
     // draw skybox 
     glDepthMask(GL_FALSE);
-    //glDepthFunc(GL_LEQUAL);
+    glDepthFunc(GL_LEQUAL);
     glDisable(GL_CULL_FACE);
 
     glBindVertexArray(skyVAO);
@@ -826,6 +826,7 @@ void Renderer::drawSkyBox()
 
     // Reset everything back to normal
     glEnable(GL_CULL_FACE);
+	glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
 
     setFrameBufferToDefault();
@@ -848,9 +849,14 @@ void Renderer::setSkyboxImage(const String& image_path, u32 skyboxPosition) {
 
 	skyboxImages[skyboxPosition] = image_path;
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+	stbi_set_flip_vertically_on_load(false); // flip loaded texture's on the y-axis.
 	u8 *TextureData = stbi_load(image_path.c_str(), &width, &height, &channels, 0);
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + skyboxPosition, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
 	stbi_image_free(TextureData);
 
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 }

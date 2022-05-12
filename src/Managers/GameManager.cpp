@@ -306,7 +306,12 @@ void GameManager::init_shaders() {
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
 	});
 
-	current_program = &programs.back();
+	programs.push_back(Array<ShaderFile>{
+		{"assets/shaders/vertexShader.vs", GL_VERTEX_SHADER, 0},
+		{ "assets/shaders/fragmentShader.fs", GL_FRAGMENT_SHADER, 0 }
+	});
+
+	current_program = &programs[0];
 }
 
 void GameManager::init_animation() {
@@ -460,6 +465,8 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateScenePanel(&game_state);
 	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
 	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
+	NoxEngineGUI::updateSkyboxPanel(&game_state);
+
 	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::PopFont();
@@ -564,7 +571,11 @@ void GameManager::update_renderer() {
 	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
-	
+
+	renderer->setProgram(&programs[1]);
+	renderer->drawSkyBox();
+
+	renderer->setProgram(current_program);
 	renderer->draw();
 
 }
