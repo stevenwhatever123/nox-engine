@@ -27,6 +27,8 @@ namespace NoxEngineGUI {
 		u32 prevWidth;
 		u32 prevHeight;
 
+		int imguizmoMode = 7; // Translation by default
+
 		// the array index of the selected entity in the hierarchy window
 		i32 selectedEntity;		
 		

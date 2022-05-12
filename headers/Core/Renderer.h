@@ -102,6 +102,7 @@ namespace NoxEngine {
 
 		inline mat4 getProjMatr() { return projection; }
 		inline mat4 getCameraMatr() { return camera->getCameraTransf(); }
+		inline mat4 getCameraView() { return cam; };
 
 		// Camera managment
 		// Updates Camera with new camera
@@ -121,6 +122,9 @@ namespace NoxEngine {
 		const char* getSkyboxImagePath(u32 skyboxPosition);
 		void setSkyBoxImages(const Array<String> &skyboxImages);
 		void drawSkyBox();
+
+		i32 getWidth() { return w; };
+		i32 getHeight() { return h; };
 
 		private:
 

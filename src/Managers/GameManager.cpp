@@ -444,6 +444,10 @@ void GameManager::update_inputs() {
 	if(keys[' ']) { camera->moveVerBy(0.1f); }
 	if(keys['K']) { camera->moveVerBy(-0.1f); }
 
+	if (keys['1']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::TRANSLATE; };
+	if (keys['2']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::ROTATE; };
+	if (keys['3']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::SCALE; };
+
 }
 
 void GameManager::update_ecs() {
@@ -504,18 +508,19 @@ void GameManager::update_gui() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 	ImGui::PushFont(font);
 
 	NoxEngineGUI::updateGUI(game_state, &ui_params);
 	//NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
 	NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
-	NoxEngineGUI::updateScenePanel(&game_state);
+	NoxEngineGUI::updateScenePanel(&game_state, &ui_params);
 	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
 	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
 	NoxEngineGUI::updateSkyboxPanel(&game_state);
 
-	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
+	//NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::PopFont();
 	ImGui::Render();
