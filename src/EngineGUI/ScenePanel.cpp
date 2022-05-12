@@ -3,6 +3,7 @@
 #include <EngineGUI/EngineGUI.h>
 #include <EngineGUI/PresetObject.h>
 
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 using namespace NoxEngine;
@@ -76,38 +77,30 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 				worldMat = translation * rotation * scale;
 			}
 
-			if ((ImGuizmo::OPERATION)params->imguizmoMode == ImGuizmo::OPERATION::TRANSLATE)
-			{
-				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-					(ImGuizmo::OPERATION)params->imguizmoMode, ImGuizmo::LOCAL, glm::value_ptr(translation));
-			}
-			if ((ImGuizmo::OPERATION)params->imguizmoMode == ImGuizmo::OPERATION::ROTATE)
-			{
-				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-					(ImGuizmo::OPERATION)params->imguizmoMode, ImGuizmo::LOCAL, glm::value_ptr(rotation));
-			}
-			if ((ImGuizmo::OPERATION)params->imguizmoMode == ImGuizmo::OPERATION::SCALE)
-			{
-				ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-					(ImGuizmo::OPERATION)params->imguizmoMode, ImGuizmo::LOCAL, glm::value_ptr(scale));
-			}
+			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+				(ImGuizmo::OPERATION)params->imguizmoMode, ImGuizmo::LOCAL, glm::value_ptr(worldMat));
 
 			if (ImGuizmo::IsUsing())
 			{
-				// Turns out glm decompose matrix sucks so we don't use it
+				glm::vec3 scale_temp;
+				glm::quat rotation_temp;
+				glm::vec3 translation_temp;
+				glm::vec3 skew_temp;
+				glm::vec4 perspective_temp;
+				glm::decompose(worldMat, scale_temp, rotation_temp, translation_temp, skew_temp, perspective_temp);
 
 				if (hasTransformAndisEnabled)
 				{
 					ITransform* pos = ent->getComp<TransformComponent>()->CastType<ITransform>();
-					pos->x = translation[3][0];
-					pos->y = translation[3][1];
-					pos->z = translation[3][2];
+					pos->x = translation_temp[0];
+					pos->y = translation_temp[1];
+					pos->z = translation_temp[2];
 
-					glm::extractEulerAngleXYZ(rotation, pos->rx, pos->ry, pos->rz);
+					glm::extractEulerAngleXYZ(glm::toMat4(rotation_temp), pos->rx, pos->ry, pos->rz);
 
-					pos->sx = scale[0][0];
-					pos->sy = scale[1][1];
-					pos->sz = scale[2][2];
+					pos->sx = scale_temp[0];
+					pos->sy = scale_temp[1];
+					pos->sz = scale_temp[2];
 				}
 			}
 		}
