@@ -164,8 +164,9 @@ namespace NoxEngine {
 		// Create a Geometry object, return the id
 		int createGeometry(
 			int nMaxPolygons, int nMaxVertices, 
-			const vec3 &pos = vec3{0, 0, 0}, 
-			const vec3 &forward = vec3{ 0, 0, 0 },
+			const vec3 &pos = vec3{ 0, 0, 0 }, 
+			const vec3 &forward = vec3{ 0, 0, 1 },
+			const vec3 &up = vec3{ 0, 1, 0 },
 			const vec3 &scale = vec3{ 0, 0, 0 }
 		);
 
@@ -179,7 +180,7 @@ namespace NoxEngine {
 		void setGeometryActive(int nGeometryId, bool isActive);
 
 		// Place Geometry in world space
-		void orientGeometry(int nGeometryId, const vec3& pos, const vec3& forward, const vec3& scale, const vec3& up = vec3{ 0, 0, 0 });
+		void orientGeometry(int nGeometryId, const vec3& pos, const vec3& forward, const vec3& up, const vec3& scale);
 
 		// Save/load Geoemtry object on disk
 		void saveGeometry(int nGeometryId, const String& filePath);

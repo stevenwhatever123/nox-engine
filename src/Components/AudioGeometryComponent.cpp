@@ -14,13 +14,13 @@ AudioGeometryComponent::AudioGeometryComponent() {
 
 	has_texture = 0;
 	has_normal = 0;
-	use_indices = 1;
+	use_indices = 0;
 
 	geometryId = -1;
 	render = false;
 
 	shape = Shape::Undefined;
-	glRenderType = GL_LINES;
+	glRenderType = GL_TRIANGLES;
 
 	v1 = vec3(0);
 	v2 = vec3(0);

@@ -322,7 +322,11 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 						// Show options to load audio
 						if (!audioSrcComp->loaded) {
-							ImGui::Checkbox("Load as 3D Audio?", &audioSrcComp->is3D);
+
+							ImGui::Text("Load Options");
+							ImGui::Checkbox("3D Audio", &audioSrcComp->is3D);
+							ImGui::Checkbox("Looping", &audioSrcComp->isLooping);
+							ImGui::Checkbox("Stream from disk", &audioSrcComp->isStream);
 
 							if (ImGui::Button("Load##load_audio")) {
 

@@ -523,51 +523,60 @@ void GameManager::update_gui() {
 
 void GameManager::update_audio() {
 
-	// Set listener attributes
-	vec3 pos{ 0 };
-	vec3 vel{ 0 };
-	vec3 forward(0.0f, 0.0f, -1.0f);
-	vec3 up(0.0f, 1.0f, 0.0f);
-
-	ITransform* itrans = nullptr;
+	ITransform*		itrans	= nullptr;
 	IAudioListener* ilisten = nullptr;
-	if (game_state.activeAudioListener) {
-		itrans	= game_state.activeAudioListener->getComp<TransformComponent>();
-		ilisten	= game_state.activeAudioListener->getComp<AudioListenerComponent>();
+	IAudioSource*	isrc	= nullptr;
+	IAudioGeometry* igeo	= nullptr;
 
-		if (itrans) {
-			mat4 rotation = glm::eulerAngleXYZ(itrans->rx, itrans->ry, itrans->rz);
+	// Set listener attributes
+	{
+		vec3 pos{ 0 };
+		vec3 vel{ 0 };
+		vec3 forward(0.0f, 0.0f, 1.0f);
+		vec3 up(0.0f, 1.0f, 0.0f);
 
-			pos		= vec3(itrans->x, itrans->y, itrans->z);
-			forward = rotation * vec4(forward, 1.0f);
-			up		= rotation * vec4(up, 1.0f);
+		if (game_state.activeAudioListener) {
+			itrans	= game_state.activeAudioListener->getComp<TransformComponent>();
+			ilisten = game_state.activeAudioListener->getComp<AudioListenerComponent>();
+
+			if (itrans) {
+				mat4 rotation = glm::eulerAngleXYZ(itrans->rx, itrans->ry, itrans->rz);
+
+				pos		= vec3(itrans->x, itrans->y, itrans->z);
+				forward = rotation * vec4(forward, 1.0f);
+				up		= rotation * vec4(up, 1.0f);
+			}
+
+			if (ilisten) vel = ilisten->vVel;
 		}
 
-		if (ilisten) vel = ilisten->vVel;
-	} 
-
-	//audioManager->set3dListenerAttributes(itrans);
-	audioManager->set3dListenerAttributes(pos, vel, forward, up);
+		//audioManager->set3dListenerAttributes(itrans);
+		audioManager->set3dListenerAttributes(pos, vel, forward, up);
+	}
 
 	// Update geometry states & orientation
 	for (Entity* ent : game_state.activeScene->entities) {
 
 		if (!ent->isEntityEnabled()) continue;
 
-		// TODO: update ITransform to ITransform, then we can get rotation and scale as well
-		ITransform*		itrans	= ent->getComp<TransformComponent>();
-		IAudioSource*	isrc	= ent->getComp<AudioSourceComponent>();
-		IAudioGeometry* igeo	= ent->getComp<AudioGeometryComponent>();
+		itrans	= ent->getComp<TransformComponent>();
+		isrc	= ent->getComp<AudioSourceComponent>();
+		igeo	= ent->getComp<AudioGeometryComponent>();
 
 		// TODO: fix handedness
-		vec3 pos{ 0 };
-		vec3 rot{ 0 };
-		vec3 scale{ 1 };
-		//vec3 rot = glm::vec3(transform->rotx, transform->roty, transform->rotz);
-		//vec3 scale = glm::vec3(transform->scalex, transform->scaley, transform->scalez);
+		vec3 pos( 0.0f );
+		vec3 forward( 0.0f, 0.0f, 1.0f );
+		vec3 up( 0.0f, 1.0f, 0.0f );
+		vec3 scale( 1.0f );
 
 		if (itrans && ent->isEnabled<TransformComponent>()) {
-			pos = glm::vec3(itrans->x, itrans->y, itrans->z);
+
+			mat4 rotation = glm::eulerAngleXYZ(itrans->rx, itrans->ry, itrans->rz);
+
+			pos		= vec3(itrans->x, itrans->y, itrans->z);
+			forward = rotation * vec4(forward, 1.0f);
+			up		= rotation * vec4(up, 1.0f);
+			scale	= vec3(itrans->sx, itrans->sy, itrans->sz);
 		}
 
 		if (isrc) {
@@ -592,7 +601,7 @@ void GameManager::update_audio() {
 			// Orient geometry
 			if (ent->containsComps<TransformComponent>() && ent->isEnabled<TransformComponent>()) {
 
-				audioManager->orientGeometry(igeo->geometryId, pos, rot, scale);
+				audioManager->orientGeometry(igeo->geometryId, pos, forward, up, scale);
 			}
 		}
 	}
