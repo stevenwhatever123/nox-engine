@@ -43,7 +43,9 @@ namespace NoxEngine {
 			// Flag to indicate whether or not to render this geometry
 			bool render;
 
-			// registered flag is unused
+			// For now, the entire geometry has the same direct/reverb occlusion
+			float directOcclusion;
+			float reverbOcclusion;
 
 
 		public:

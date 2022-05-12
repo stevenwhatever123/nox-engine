@@ -14,13 +14,13 @@ AudioGeometryComponent::AudioGeometryComponent() {
 
 	has_texture = 0;
 	has_normal = 0;
-	use_indices = 0;
+	use_indices = 1;
 
 	geometryId = -1;
 	render = false;
 
 	shape = Shape::Undefined;
-	glRenderType = GL_TRIANGLES;
+	glRenderType = GL_LINES;
 
 	v1 = vec3(0);
 	v2 = vec3(0);
@@ -83,11 +83,6 @@ bool AudioGeometryComponent::loadMesh(MeshScene* meshScene) {
 		node->nodeAnimTransformation.clear();
 		node->transformation = mat4(1.0f);
 	}
-
-	// Even though we don't use texcoords / normals, we still need to fill in dummy data?
-	// (Pattern as per GridObject)
-	texCoords.resize(vertices.size());
-	normals.resize(vertices.size());
 
 	// Indices are never present using our FBX loader as of (2022-May-09), so we convert face indices to line indices here
 	if (indices.size() == 0) {

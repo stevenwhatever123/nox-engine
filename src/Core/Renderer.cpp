@@ -7,6 +7,7 @@
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Components/AudioGeometryComponent.h>
+#include <Components/AudioListenerComponent.h>
 #include <Core/Types.h>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -340,6 +341,10 @@ void Renderer::draw() {
 		// AudioGeometry
 		else if (objects[i].componentType == ComponentType::AudioGeometryType) {
 			if (!ent->isEnabled<AudioGeometryComponent>() || !ent->getComp<AudioGeometryComponent>()->render) continue;
+		}
+		// AudioListener: only draw the active listener
+		else if (objects[i].componentType == ComponentType::AudioListenerType) {
+			if (!ent->isEnabled<AudioListenerComponent>() || !ent->getComp<AudioListenerComponent>()->active) continue;
 		}
 
 		// If the object has a transform and it's enabled, use it

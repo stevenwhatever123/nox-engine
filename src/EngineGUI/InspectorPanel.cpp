@@ -404,6 +404,9 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 					if (expand) {
 
+						// Begin: grey out
+						ImGui::BeginDisabled(!enable);
+
 						if (ImGui::RadioButton("Set as active listener", state->activeAudioListener == ent)) {
 							state->activeAudioListener = ent;
 						}
@@ -418,11 +421,14 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							ImGui::PopTextWrapPos();
 							ImGui::EndTooltip();
 						}
-
-						if (remove) {
-							ent->removeComp<AudioListenerComponent>();
-						}
 						ImGui::TreePop();
+
+						// End: grey out
+						ImGui::EndDisabled();
+					}
+
+					if (remove) {
+						ent->removeComp<AudioListenerComponent>();
 					}
 				}
 

@@ -228,10 +228,11 @@ void GameManager::init_events() {
 			Entity* ent = va_arg(args, Entity*);
 			const std::type_index compTypeId = va_arg(args, std::type_index);
 
-			// Renderer
-			if (ent->containsComps<RenderableComponent>()) {
+			RenderableComponent *rendComp	= ent->getComp<RenderableComponent>();
+			AudioListenerComponent *lisComp = ent->getComp<AudioListenerComponent>();
 
-				RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
+			// Renderer
+			if (rendComp) {
 
 				if (!renderer->hasRendObj(rendComp->rendObjId)) {
 
@@ -243,12 +244,26 @@ void GameManager::init_events() {
 
 
 			// Audio
-			// Geometry: We don't add the mesh to the audio engine when the geometry component is added, 
-			// because it's expected to be empty. We add to audio engine when mesh is loaded
-			// AudioSource: No need to do anything special
-			// AudioListener: first listener is set to active
-			if (game_state.activeAudioListener == nullptr && compTypeId == typeid(AudioListenerComponent)) {
-				game_state.activeAudioListener = ent;
+			// Geometry: 
+			//		We don't add the mesh to the audio engine when the geometry component is added, 
+			//		because it's expected to be empty. We add to audio engine when mesh is loaded
+			// AudioSource: 
+			//		No need to do anything special
+			// AudioListener: 
+			//		First listener is set to active;
+			//		Add fake mesh to renderer
+			if (compTypeId == typeid(AudioListenerComponent)) {
+
+				// First listener
+				if (game_state.activeAudioListener == nullptr) game_state.activeAudioListener = ent;
+
+				// Add mesh to renderer
+				if (!renderer->hasRendObj(lisComp->rendObjId)) {
+
+					renderer->addObject(ent, lisComp, ComponentType::AudioListenerType);
+
+					this->renderer->updateBuffers();
+				}
 			}
 
 			// ...
@@ -269,13 +284,25 @@ void GameManager::init_events() {
 			if (compTypeId == typeid(AudioGeometryComponent)) {
 
 				AudioGeometryComponent* geoComp = ent->getComp<AudioGeometryComponent>();
-				IAudioGeometry* igeo = geoComp->CastType<IAudioGeometry>();
-
+				
 				// Disable the loaded geometry
 				// TODO: remove it
-				audioManager->setGeometryActive(igeo->geometryId, false);
-				renderer->removeObject(ent->getComp<AudioGeometryComponent>()->rendObjId);
+				audioManager->setGeometryActive(geoComp->geometryId, false);
+				renderer->removeObject(geoComp->rendObjId);
 			}
+
+
+			if (compTypeId == typeid(AudioListenerComponent)) {
+
+				AudioListenerComponent* lisComp = ent->getComp<AudioListenerComponent>();
+				
+				// Remove the fake mesh from the renderer
+				renderer->removeObject(lisComp->rendObjId);
+
+				// TODO: Invalidate listener
+			}
+
+
 
 	});
 }
@@ -447,11 +474,15 @@ void GameManager::update_ecs() {
 
 	size_t nEntities = game_state.activeScene->entities.size();
 
-	// script update
 	const auto entities = game_state.activeScene->entities;
 	for (i32 i = 0; i < nEntities; i++)
 	{
+		// script update
 		entities[i]->tick(deltaTime, currentTime);
+
+		// synchronize audio listener's active state
+		AudioListenerComponent* lisComp = entities[i]->getComp<AudioListenerComponent>();
+		if (lisComp) lisComp->active = (game_state.activeAudioListener == entities[i]);
 	}
 
 
