@@ -1,8 +1,5 @@
 #pragma once
 
-// std headers
-#include <map>
-
 // 3rd Party Header
 #include <imgui/imgui_internal.h>	// for fixed-layout docking
 #include <imgui/imgui.h>
@@ -19,9 +16,6 @@
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Managers/SaveLoadManager.h>
-
-
-
 
 namespace NoxEngineGUI {
 
@@ -61,21 +55,23 @@ namespace NoxEngineGUI {
 		AnimationSequencerPanel,
 
 		// Audio
-		AudioPanel
+		AudioPanel,
 
-		// Scripting
+		// Skybox
+		SkyboxSettings
 	};
 
 	// Assign the panel name to the panel's enum
 	// TODO: Make this const?
-	static std::map< PanelName, String > kPanelNameMap {
+	static Map< PanelName, String > kPanelNameMap {
 		{ PanelName::FileExplorer,      "File Explorer" },
 		{ PanelName::Scene,             "Scene" },
 		{ PanelName::PresetObjects,     "Preset Objects" },
 		{ PanelName::Hierarchy,         "Hierarchy" },
 		{ PanelName::Inspector,         "Inspector" },
 		{ PanelName::AnimationSequencerPanel, "Animation Sequencer" },
-		{ PanelName::AudioPanel,        "Audio Editor" }
+		{ PanelName::AudioPanel,        "Audio Editor" },
+		{ PanelName::SkyboxSettings, "Skybox Settings" }
 	};
 
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;

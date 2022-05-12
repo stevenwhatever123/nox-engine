@@ -560,15 +560,26 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					ImGui::SameLine();
 					bool remove = ImGui::SmallButton("-##RemoveScript");	// TODO: Use ImageButton?
 
-					ImGui::Text("%s", scriptComp->getScript());
-					ImGui::SameLine();
-
 					if (expand) {
 
-						if(ImGui::Button("Change")) {
+						ImGui::Text("Script File: ");
+						ImGui::SameLine();
+
+						ImGui::PushID("TextInput");
+
+						if (ImGui::GetActiveID() == ImGui::GetID("TextInput")) {
+							ImGui::ClearActiveID();
+						}
+
+						ImGui::InputText("", (char*)scriptComp->getScript(), 256, ImGuiInputTextFlags_ReadOnly);
+						ImGui::PopID();
+						ImGui::SameLine();
+
+						if (ImGui::Button("Change")) {
 							String file = IOManager::Instance()->PickFile();
 							scriptComp->setScript(file.c_str());
 						}
+
 
 						if(remove) {
 							ent->removeComp<ScriptComponent>();

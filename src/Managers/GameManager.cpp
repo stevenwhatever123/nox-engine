@@ -43,7 +43,7 @@ void GameManager::init() {
 	init_gui();
 	init_animation();
 	init_renderer();
-	//init_scripts();
+	init_scripts();
 }
 
 void GameManager::update() {
@@ -305,7 +305,12 @@ void GameManager::init_shaders() {
 		{ "assets/shaders/fShader.glsl", GL_FRAGMENT_SHADER, 0 },
 	});
 
-	current_program = &programs.back();
+	programs.push_back(Array<ShaderFile>{
+		{"assets/shaders/vertexShader.vs", GL_VERTEX_SHADER, 0},
+		{ "assets/shaders/fragmentShader.fs", GL_FRAGMENT_SHADER, 0 }
+	});
+
+	current_program = &programs[0];
 }
 
 void GameManager::init_animation() {
@@ -350,6 +355,52 @@ void GameManager::init_scene() {
 
 void NoxEngine::GameManager::init_scripts()
 {
+
+
+	// Steven: That's how I would do it
+	// clean up: leaky mem
+	String file_name = "assets/meshes/card.fbx";
+
+	// Add to hash map if it does not exist
+	if (game_state.meshScenes.find(file_name) == game_state.meshScenes.end()) {
+		game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
+	}
+	MeshScene& meshScene = game_state.meshScenes.find(file_name)->second;
+
+	i32 index = game_state.activeScene->entities.size();
+	// We're treating every mesh as an entity FOR NOW
+	for (u32 i = 0; i < meshScene.meshes.size(); i++)
+	{
+		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
+		//                 because the entity ID is managed by the scene
+		Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
+
+		RenderableComponent* comp = new RenderableComponent(*meshScene.meshes[i]);
+		TransformComponent* trans = new TransformComponent(0.0, 0.0, 0.0);
+
+		ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
+
+		ent->addComp(comp);
+		ent->addComp(trans);
+		ent->addComp(script);
+
+		if (meshScene.hasAnimations())
+		{
+			// Get the node associated to this mesh
+			for (MeshNode* node : meshScene.allNodes)
+			{
+				if (node->hasAnimations() && node->meshIndex[0] == i)
+				{
+					AnimationComponent* anim = new AnimationComponent(meshScene, node);
+					ent->addComp(anim);
+					break;
+				}
+			}
+		}
+
+		game_state.activeScene->addEntity(ent);
+	}
+
 
 }
 
@@ -459,6 +510,8 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateScenePanel(&game_state);
 	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
 	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
+	NoxEngineGUI::updateSkyboxPanel(&game_state);
+
 	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::PopFont();
@@ -585,7 +638,11 @@ void GameManager::update_renderer() {
 	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
-	
+
+	renderer->setProgram(&programs[1]);
+	renderer->drawSkyBox();
+
+	renderer->setProgram(current_program);
 	renderer->draw();
 
 }

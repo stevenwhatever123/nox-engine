@@ -9,9 +9,7 @@ using namespace NoxEngine;
 using luabridge::LuaRef;
 
 ScriptComponent::ScriptComponent() {
-
 	//id = ComponentType::ScriptType;
-
 	script_state = luaL_newstate();
 	luaL_openlibs(script_state);
 	luabridge::getGlobalNamespace(script_state)
@@ -46,8 +44,8 @@ ScriptComponent::~ScriptComponent() {
 
 }
 
-ScriptComponent::ScriptComponent(const char *script): script_file(script), inited(false)  {
-	ScriptComponent();
+ScriptComponent::ScriptComponent(const char *script): ScriptComponent() {
+	script_file = script;
 	LiveReloadManager::Instance()->addLiveReloadEntry(script_file.c_str(), static_cast<IReloadableFile*>(this));
 }
 

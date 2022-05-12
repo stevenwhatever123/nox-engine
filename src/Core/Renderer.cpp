@@ -9,6 +9,9 @@
 #include <Components/AudioGeometryComponent.h>
 #include <Core/Types.h>
 
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
+
 // TODO: update uniform submissions to use Shader class
 // TODO: fix drawing to default buffer
 // TODO: get some light going
@@ -73,6 +76,7 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	// glEnable(GL_CULL_FACE);
+	// glDepthMask(GL_TRUE);
 
 	// Create framebuffer  
 	glGenFramebuffers(1, &FBO);
@@ -108,8 +112,9 @@ Renderer::Renderer(int width, int height, Camera* cam) :
     glGenBuffers(1, &NBO);
     glGenBuffers(1, &TCBO);
     glGenBuffers(1, &TANBO);
-
     glGenBuffers(1, &EBO);
+
+	setupSkybox();
 }
 
 void Renderer::updateBuffers() {
@@ -288,6 +293,8 @@ void Renderer::draw() {
 	// Render
 	program->use();
 	setFrameBufferToTexture();	
+
+    glDepthFunc(GL_LESS);
 
 	glBindVertexArray(VAO);
 
@@ -613,7 +620,6 @@ void Renderer::updateCamera()
     program->set4Matrix("toCamera", camera->getCameraTransf());
 }
 
-
 void Renderer::updateCamera(Camera* cam)
 {
     camera = cam;
@@ -678,4 +684,181 @@ void Renderer::changeTexture(Entity* ent)
 bool Renderer::hasRendObj(u32 id)
 {
 	return objects.find(id) != objects.end();
+}
+
+void Renderer::setupSkybox() {
+	//set vertex data
+	float vertices_temp[] = {
+
+		 -1.0, -1.0, -1.0,
+		  1.0, -1.0, -1.0,
+		  1.0, -1.0,  1.0,
+		 -1.0, -1.0, -1.0,
+		  1.0, -1.0,  1.0,
+		 -1.0, -1.0,  1.0,
+
+		 -1.0, -1.0, -1.0,
+		 -1.0,  1.0, -1.0,
+          1.0,  1.0, -1.0,
+		 -1.0, -1.0, -1.0,
+          1.0,  1.0, -1.0,
+          1.0, -1.0, -1.0,
+
+		 -1.0, -1.0, -1.0,
+		 -1.0, -1.0,  1.0,
+		 -1.0,  1.0,  1.0,
+		 -1.0, -1.0, -1.0,
+		 -1.0,  1.0,  1.0,
+		 -1.0,  1.0, -1.0,
+
+		  1.0, -1.0, -1.0,
+		  1.0,  1.0, -1.0,
+		  1.0, -1.0,  1.0,
+		  1.0,  1.0, -1.0,
+		  1.0,  1.0,  1.0,
+		  1.0, -1.0,  1.0,
+
+		 -1.0, -1.0,  1.0,
+		  1.0, -1.0,  1.0,
+		 -1.0,  1.0,  1.0,
+		  1.0, -1.0,  1.0,
+		  1.0,  1.0,  1.0,
+		 -1.0,  1.0,  1.0,
+
+		 -1.0,  1.0,  1.0,
+		  1.0,  1.0,  1.0,
+		  1.0,  1.0, -1.0,
+		 -1.0,  1.0,  1.0,
+		  1.0,  1.0, -1.0,
+		 -1.0,  1.0, -1.0
+	};
+
+	glGenVertexArrays(1, &skyVAO);
+	glBindVertexArray(skyVAO);
+
+	glGenBuffers(1, &skyVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*sizeof(vertices_temp)/sizeof(vertices_temp[0]), &vertices_temp, GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+
+	Array<String> images {
+		"assets/skybox/textures/picture/bak0/right.jpg",
+		"assets/skybox/textures/picture/bak0/left.jpg",
+		"assets/skybox/textures/picture/bak0/top.jpg",
+		"assets/skybox/textures/picture/bak0/down.jpg",
+		"assets/skybox/textures/picture/bak0/front.jpg",
+		"assets/skybox/textures/picture/bak0/back.jpg"
+	};
+
+	setSkyBoxImages(images);
+
+
+}
+
+void Renderer::setSkyBoxImages(const Array<String> &_skyboxImages)
+{
+	skyboxImages = _skyboxImages;
+	skyboxLoadTexture();
+}
+
+void Renderer::skyboxLoadTexture()
+{
+    glGenTextures(1, &cubemapTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+    i32 width;
+	i32 height;
+	i32 channels;
+	unsigned char* TextureData = NULL;
+
+	for(u32 i = 0; i < 6; i++ ) {
+		TextureData = stbi_load(skyboxImages[i].c_str(), &width, &height, &channels, 0);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
+		stbi_image_free(TextureData);
+	}
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+}
+
+void Renderer::drawSkyBox()
+{
+    // draw scene
+    glm::mat4 view;
+    glm::mat4 projection;
+
+
+	view = camera->getCameraTransf();
+
+	view[3][0] = 0;
+	view[3][1] = 0;
+	view[3][2] = 0;
+
+
+	projection = glm::perspective(glm::radians(camera->fov), (float)(w / h), 0.1f, 1000.0f);
+
+    program->use();
+
+    setFrameBufferToTexture();
+
+    // draw skybox 
+    glDepthMask(GL_FALSE);
+    glDepthFunc(GL_LEQUAL);
+    glDisable(GL_CULL_FACE);
+
+    glBindVertexArray(skyVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyVBO);
+
+    glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+    program->set4Matrix("view", view);
+    program->set4Matrix("projection", projection);
+
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    // Reset everything back to normal
+    glEnable(GL_CULL_FACE);
+	glDepthFunc(GL_LESS);
+    glDepthMask(GL_TRUE);
+
+    setFrameBufferToDefault();
+
+    glBindVertexArray(0);
+
+}
+
+const char* Renderer::getSkyboxImagePath(u32 skyboxPosition) {
+	// positions are in this order: +x, -x, +y, -y, +z, -z
+	return skyboxImages[skyboxPosition].c_str();
+}
+
+void Renderer::setSkyboxImage(const String& image_path, u32 skyboxPosition) {
+	// positions are in this order: +x, -x, +y, -y, +z, -z
+
+	i32 width;
+	i32 height;
+	i32 channels;
+
+	skyboxImages[skyboxPosition] = image_path;
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+	stbi_set_flip_vertically_on_load(false); // flip loaded texture's on the y-axis.
+	u8 *TextureData = stbi_load(image_path.c_str(), &width, &height, &channels, 0);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + skyboxPosition, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
+	stbi_image_free(TextureData);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
 }

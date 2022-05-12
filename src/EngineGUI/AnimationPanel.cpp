@@ -85,8 +85,8 @@ void NoxEngineGUI::updateSequencer(NoxEngine::GameState* game_state, AnimationCo
 	// Safe guard
 	if (selectedFrame < 0)
 		selectedFrame = 0;
-	if (selectedFrame > animComp->maximumFrame[animComp->animationIndex] - 1)
-		selectedFrame = animComp->maximumFrame[animComp->animationIndex] - 1;
+	if (selectedFrame > (i32)( animComp->maximumFrame[animComp->animationIndex] - 1 ))
+		selectedFrame = (i32)( animComp->maximumFrame[animComp->animationIndex] - 1 );
 
 	Sequencer(&mySequence, &selectedFrame, &expanded, &selectedEntry,
 		&firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND

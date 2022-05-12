@@ -149,6 +149,26 @@ template <typename T> T* Entity::getComp() {
 	return nullptr;
 }
 
+template<typename T>
+void Entity::addComp(T* comp) {
+
+	assert(comp->id != ComponentType::AbstractType);
+
+	if (kComponentTypeMap.find(typeid(T)) == kComponentTypeMap.end()) {
+		return;
+	}
+
+	if (components.find(typeid(T)) != components.end()) {
+		return;
+	}
+
+	components[typeid(T)] = comp;
+	hasComp |= (1 << (comp->id - 1));
+
+	addCompSignal<T>();
+	comp->attachedToEntity(this);
+}
+
 
 bool Entity::isEnabled(u32 bit) {
 	return _isEnabled & (1 << (bit - 1));

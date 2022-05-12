@@ -354,3 +354,5 @@ libs/compiled_libs/
 build
 *sublime-project
 *sublime-workspace
+
+premake5.exe

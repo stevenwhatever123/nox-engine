@@ -31,6 +31,7 @@
 #include <EngineGUI/HierarchyPanel.h>
 #include <EngineGUI/InspectorPanel.h>
 #include <EngineGUI/ImGuizmoTool.h>
+#include <EngineGUI/SkyboxPanel.h>
 
 #include <Components/RenderableComponent.h>
 #include <Components/TransformComponent.h>

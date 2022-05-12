@@ -4,7 +4,7 @@
 
 namespace NoxEngine {
 
-	struct IAudioSource {
+	class IAudioSource {
 	public:
 		//vec3 vPos;	// Attach ITransform and get position
 		String filePath;

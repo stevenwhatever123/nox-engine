@@ -31,25 +31,19 @@ namespace NoxEngine {
 		bool generateBoundingBox(const Array<vec3>& verts, mat4 transformation = mat4(1.0f)) override;
 		bool generatePlane(vec3 _v1, vec3 _v2, vec3 _v3, vec3 _v4, mat4 transformation) override;
 
-		inline const i32 getNumOfVertices() const { return vertices.size(); }
-		inline const i32 getNumOfFaces()	const { return faces.size(); }
-
-		inline const Array<vec3>&  getVertices() const { return vertices; }
-
-		// Faces are for creating FMOD geometry (expect triangles)
-		inline const Array<ivec3>& getFaces   () const { return faces; }
-
-		// Indices are for rendering (draw lines)
-		inline const Array<i32>&   getIndices () const { return indices; }
-
+		inline const Array<vec3>&  getVertices() const override { return vertices; }
+		inline const Array<vec2>& getTexCoords() const override { return texCoords; }
+		inline const Array<vec3>& getNormals()   const override { return normals; }
+		inline const Array<ivec3>& getFaces   () const override { return faces; } // Faces are for creating FMOD geometry (expect triangles)
+		inline const Array<i32>&   getIndices () const override { return indices; } // Indices are for rendering (draw lines)
 
 		// Unused
-		inline const i32 getNumOfTexCoord() const { return (i32)texCoords.size(); }
-		inline const i32 getNumOfNormals()  const { return (i32)normals.size(); }
-		inline const Array<vec2>& getTexCoords() const { return texCoords; }
-		inline const Array<vec3>& getNormals() const { return normals; }
-		inline const String getNormalTexture() { return ""; }
-		inline const String getAmbientTexture() { return ""; }
+		inline const i32 getNumOfVertices()      const override { return (i32)vertices.size(); }
+		inline const i32 getNumOfFaces()         const override { return (i32)faces.size(); }
+		inline const i32 getNumOfTexCoord()      const override { return (i32)texCoords.size(); }
+		inline const i32 getNumOfNormals()       const override { return (i32)normals.size(); }
+		inline const String getNormalTexture()         override { return ""; }
+		inline const String getAmbientTexture()        override { return ""; }
 
 
 	private:
