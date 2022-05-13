@@ -72,11 +72,9 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
 	// Initialise OpenGl
 
-	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
 	// glEnable(GL_CULL_FACE);
-	// glDepthMask(GL_TRUE);
+	glDepthMask(GL_TRUE);
 
 	// Create framebuffer  
 	glGenFramebuffers(1, &FBO);
@@ -84,13 +82,10 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
     // Gen texture for framebuffer    
     glGenTextures(1, &textureToRenderTo);
-
     glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Attach tex to framebuffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
 
 	glGenTextures(1, &depthStencilTexture);
@@ -102,7 +97,6 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 		LOG_DEBUG("Troubles with creating a framebuffer");
     }
 
-
 	glBindTexture(GL_TEXTURE_2D, 0);
 
     // Generate buffer handlers
@@ -113,7 +107,6 @@ Renderer::Renderer(int width, int height, Camera* cam) :
     glGenBuffers(1, &TCBO);
     glGenBuffers(1, &TANBO);
     glGenBuffers(1, &EBO);
-
 
 	setupSkybox();
 
@@ -292,10 +285,9 @@ void Renderer::draw() {
 
 	// Render
 	program->use();
+
 	setFrameBufferToTexture();	
-
     glDepthFunc(GL_LESS);
-
 	glBindVertexArray(VAO);
 
 	for (u32 i = 0; i < perm_objects.size(); i++)

@@ -90,6 +90,7 @@ TempResourceData IOManager::ReadEntireFileTemp(std::string filename) {
 				);
 		LOG_DEBUG("Couldn't Open file (%s): %s", filename.c_str(), buf);
 		LocalFree(buf);
+		return TempResourceData{0, 0};
 	}
 
 	LARGE_INTEGER size;
@@ -144,6 +145,7 @@ String IOManager::PickFile(const char* filters) {
 	bool opened = GetOpenFileNameA(&open_file);
 	if(!opened) {
 		LOG_DEBUG("Failed to Open File Dialog: %x", CommDlgExtendedError() );
+		return String("");
 	}
 
 	if(opened && PathRelativePathToA( (LPSTR)temp_file, (LPCSTR)dir, FILE_ATTRIBUTE_DIRECTORY, (LPCSTR)file_name, FILE_ATTRIBUTE_NORMAL)) {

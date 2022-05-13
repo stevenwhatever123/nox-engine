@@ -9,8 +9,8 @@ uniform float dt;
 
 void main() {
 
-	if(int(gl_FragCoord.y)%2 == 0)
-		fragColor = texture(texture1, vec2(texture_coords.x+dt/1000, texture_coords.y + int(dt)%60));
+	if(int(gl_FragCoord.y)%4 == 0)
+		fragColor = texture(texture1, vec2(texture_coords.x, texture_coords.y + sin((dt))));
 	else
 		fragColor = vec4(0, 0.1, 0, 1);
 

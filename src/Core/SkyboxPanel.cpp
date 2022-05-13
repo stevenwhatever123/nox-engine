@@ -4,7 +4,6 @@
 #include <Managers/IOManager.h>
 
 using namespace NoxEngine;
-
 const char* skyboxTextureNames[] = {
 	"Right",
 	"Left",
@@ -13,7 +12,6 @@ const char* skyboxTextureNames[] = {
 	"Front",
 	"Back"
 };
-
 char tempBuf[256];
 
 void NoxEngineGUI::updateSkyboxPanel(NoxEngine::GameState* game_state) {
@@ -23,7 +21,6 @@ void NoxEngineGUI::updateSkyboxPanel(NoxEngine::GameState* game_state) {
 
 	// Window Begin
 	ImGui::Begin(name.c_str());
-
 
 	for(u32 i = 0; i < 6; i++) {
 		ImGui::PushID(skyboxTextureNames[i]);

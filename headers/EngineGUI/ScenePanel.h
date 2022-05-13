@@ -10,5 +10,5 @@
 
 using NoxEngine::GameState;
 namespace NoxEngineGUI {
-	void updateScenePanel(GameState* game_state);
+	void updateScenePanel(GameState* game_state, GUIParams *ui_params);
 };

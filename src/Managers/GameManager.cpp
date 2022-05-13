@@ -12,6 +12,19 @@
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 
+// GUI
+#include <EngineGUI/AudioPanel.h>
+#include <EngineGUI/AnimationPanel.h>
+#include <EngineGUI/ScenePanel.h>
+#include <EngineGUI/PresetObjectPanel.h>
+#include <EngineGUI/HierarchyPanel.h>
+#include <EngineGUI/InspectorPanel.h>
+#include <EngineGUI/ImGuizmoTool.h>
+#include <EngineGUI/SkyboxPanel.h>
+#include <EngineGUI/FullscreenShaderPanel.h>
+
+#include <FullscreenShader.h>
+
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
 using NoxEngine::Entity;
@@ -20,14 +33,14 @@ using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
 GameManager::GameManager() :
-	win_width(WINDOW_WIDTH),
-	win_height(WINDOW_HEIGHT),
 	title(WINDOW_TITLE),
 	ui_params(),
 	should_close(false),
 	keys(),
 	game_state()
 {
+	game_state.win_width = WINDOW_WIDTH;
+	game_state.win_height = WINDOW_HEIGHT;
 }
 
 void GameManager::init() {
@@ -43,6 +56,7 @@ void GameManager::init() {
 	init_animation();
 	init_renderer();
 	init_scripts();
+	init_postprocess();
 }
 
 void GameManager::update() {
@@ -130,7 +144,7 @@ void GameManager::init_window() {
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	window = glfwCreateWindow(win_width, win_height, title.c_str(), nullptr, nullptr);
+	window = glfwCreateWindow(game_state.win_width, game_state.win_height, title.c_str(), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
 	glfwSetWindowPos(window, 100, 100);
@@ -321,11 +335,13 @@ void GameManager::init_animation() {
 }
 
 void GameManager::init_renderer() { 
-	renderer = new Renderer(win_width, win_height, camera);
+	renderer = new Renderer(game_state.win_width, game_state.win_height, camera);
 	renderer->setProgram(current_program);
 	renderer->useProgram();
+
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
+	game_state.texture_used = renderer->getTexture();
 
 	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(500, 0, 500), 50);
 	renderer->addPermObject(obj);
@@ -405,31 +421,50 @@ void NoxEngine::GameManager::init_scripts()
 
 }
 
-void GameManager::main_contex_ui() {
+void GameManager::init_postprocess() { 
 
-	ImGuiWindowFlags flags =
-		ImGuiWindowFlags_NoTitleBar  |
-		ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoCollapse;
+	i32 indices[6] = { 0, 2, 1, 0, 3, 2 };
 
-	ImGui::SetNextWindowPos(ImVec2( 100, 100 ), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2( 100, 100 ), ImGuiCond_FirstUseEver);
+	glGenVertexArrays(1, &post_process_vao);
+	glBindVertexArray(post_process_vao);
+	glGenBuffers(1, &post_process_quad_index);
 
-	ImGui::Begin("Player", NULL, flags);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, post_process_quad_index);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i32)*6, indices, GL_STATIC_DRAW);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	ImVec2 wsize = ImGui::GetWindowSize();
-	f32 locWidth = wsize.x;
-	f32 locHeight = wsize.y;
-	ImGui::Image((ImTextureID)(u64)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
-	ImGui::End();
+	game_state.post_processors.push_back(
+		FullscreenShader{
+			"assets/shaders/fullScreenShader.frag",
+			Array<TextureInput>{
+				{ renderer->getDepthTexture(), 0},
+			},
+			game_state.win_width,
+			game_state.win_height
+		}
+	);
+
+	// game_state.post_processors.push_back(
+	// 	FullscreenShader{
+	// 		"assets/shaders/fullScreenShader2.frag",
+	// 		Array<TextureInput>{
+	// 			{ game_state.post_processors.back().GetTexture(), 0},
+	// 		},
+	// 		game_state.win_width,
+	// 		game_state.win_height
+	// 	}
+	// );
+
+	game_state.current_post_processor = &game_state.post_processors.back();
 }
 
-void GameManager::update_livereloads() {
 
+void GameManager::update_livereloads() {
 	LiveReloadManager *lrManager = LiveReloadManager::Instance();
 	lrManager->checkFiles();
-
 }
 
 void GameManager::update_inputs() {
@@ -458,12 +493,7 @@ void GameManager::update_ecs() {
 
 	if (!updateNeededECS) return;
 
-	//bool updateRenderer = false;
-	//bool updateAudioManager = false;
-
 	bool entityRemoved = false;
-
-
 
 	// Check for entity removal. 
 	// Free resources explicitly (since `entities` contain raw `Entity*` pointers) and resize vector
@@ -481,7 +511,6 @@ void GameManager::update_ecs() {
 	);
 
 	entityRemoved = nEntities != game_state.activeScene->entities.size();
-
 
 	// update subsystems if needed
 	if (/*updateRenderer && */entityRemoved) renderer->updateBuffers();
@@ -502,20 +531,37 @@ void GameManager::update_gui() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
 	ImGui::PushFont(font);
 
 	NoxEngineGUI::updateGUI(game_state, &ui_params);
-	//NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
-	NoxEngineGUI::updatePresetObjectPanel(&game_state);
-	NoxEngineGUI::updateScenePanel(&game_state);
-	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateSkyboxPanel(&game_state);
 
+	if(!ui_params.full_screen) {
+		// NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
+		NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
+		NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
+		NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
+		NoxEngineGUI::updateSkyboxPanel(&game_state);
+	} else {
+		NoxEngineGUI::updatePostProcessorsPanel(&game_state, &ui_params);
+	}
+
+	NoxEngineGUI::updatePresetObjectPanel(&game_state);
+	NoxEngineGUI::updateScenePanel(&game_state, &ui_params);
+	NoxEngineGUI::updateFullscreenShaderPanel(&game_state, &ui_params);
+
+
+	// Make sure the scene panel is focused when we run
+	if(ui_params.firstLoop) {
+		ImGui::SetWindowFocus(kPanelNameMap[ PanelName::Scene ].c_str());
+		ui_params.firstLoop = false;
+		ui_params.full_screen = false;
+	}
 	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::PopFont();
+	ImGui::PopStyleVar();
 	ImGui::Render();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -616,13 +662,21 @@ void GameManager::update_renderer() {
 
 	renderer->updateCamera();
 	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-	renderer->fillBackground(ui_params.sceneBackgroundColor);
 
+	renderer->fillBackground(ui_params.sceneBackgroundColor);
 	renderer->setProgram(&programs[1]);
 	renderer->drawSkyBox();
 
 	renderer->setProgram(current_program);
 	renderer->draw();
+
+	if(ui_params.full_screen) {
+		glBindVertexArray(post_process_vao);
+		for(u32 i = 0; i < game_state.post_processors.size(); i++) {
+			if(game_state.post_processors[i].IsInit())
+				game_state.post_processors[i].draw(currentTime);
+		}
+	}
 
 }
 

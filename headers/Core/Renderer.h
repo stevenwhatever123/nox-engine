@@ -88,7 +88,8 @@ namespace NoxEngine {
 		void fillBackground(i32 hex);
 
 		// Get the texture the renderer rendered to
-		GLuint getTexture() { return textureToRenderTo; }
+		inline GLuint getTexture() { return textureToRenderTo; }
+		inline GLuint getDepthTexture() { return depthStencilTexture; }
 
 
 		// Functions updating parts of the shaders

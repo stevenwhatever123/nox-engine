@@ -5,7 +5,7 @@
 
 using namespace NoxEngine;
 
-void NoxEngineGUI::updateScenePanel(GameState* state) {
+void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *ui_params) {
 
 	String name = kPanelNameMap[ PanelName::Scene ];
 
@@ -38,7 +38,12 @@ void NoxEngineGUI::updateScenePanel(GameState* state) {
 	}
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
-	ImGui::Image((ImTextureID)(u64)state->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)(u64)state->texture_used, wsize, ImVec2(0, 1), ImVec2(1, 0));
+
+	if(ImGui::IsWindowFocused()) {
+		ui_params->full_screen = false;
+	}
+
 
 	// Window end
 	ImGui::End();

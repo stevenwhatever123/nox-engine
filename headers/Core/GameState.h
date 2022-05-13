@@ -1,11 +1,11 @@
 #pragma once
 
-#include <vector>
-
 #include "Renderer.h"
 #include "Types.h"
 #include "MeshScene.h"
 #include "Scene.h"
+
+#include <FullscreenShader.h>
 
 namespace NoxEngine {
 
@@ -27,9 +27,16 @@ namespace NoxEngine {
 		f32 light[3];
 		Array<Scene *> scenes;
 		Scene *activeScene;
+		u32 win_height;
+		u32 win_width;
 
 		// Active audio in sequencer
-		std::vector<std::string> selectedAudio;
+		Array<String> selectedAudio;
+
+		GLuint texture_used;
+		Array<FullscreenShader> post_processors;
+		FullscreenShader *current_post_processor;
+
 	};
 
 
