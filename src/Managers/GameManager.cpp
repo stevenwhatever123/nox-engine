@@ -440,7 +440,7 @@ void GameManager::init_postprocess() {
 		FullscreenShader{
 			"assets/shaders/fullScreenShader.frag",
 			Array<TextureInput>{
-				{ renderer->getDepthTexture(), 0},
+				{ renderer->getTexture(), 0},
 			},
 			game_state.win_width,
 			game_state.win_height
@@ -458,7 +458,7 @@ void GameManager::init_postprocess() {
 	// 	}
 	// );
 
-	game_state.current_post_processor = &game_state.post_processors.back();
+	// game_state.current_post_processor = NULL; &game_state.post_processors.back();
 }
 
 

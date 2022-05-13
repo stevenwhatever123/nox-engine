@@ -17,7 +17,8 @@ FullscreenShader::FullscreenShader(u32 frame_width, u32 frame_height, const char
 	current_bound_program(0),
 	current_bound_texture(0),
 	current_bound_framebuffer(0),
-	name(name)
+	name(name),
+	inited(false)
 {
 
 	saveState();
@@ -175,14 +176,14 @@ void FullscreenShader::liveReloadFile(const char* filename, LiveReloadEntry *ent
 
 
 void FullscreenShader::saveState() {
-	glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &current_bound_texture);
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &current_bound_framebuffer);
+	// glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &current_bound_texture);
+	// glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &current_bound_framebuffer);
 	glGetIntegerv(GL_CURRENT_PROGRAM, &current_bound_program);
 }
 
 void FullscreenShader::restoreState() {
-	glBindTexture(GL_TEXTURE_2D, current_bound_texture);
-	glBindFramebuffer(GL_FRAMEBUFFER, current_bound_framebuffer);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(current_bound_program);
 
 }

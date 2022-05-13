@@ -20,7 +20,10 @@ void NoxEngineGUI::updateFullscreenShaderPanel(GameState* state, GUIParams *ui_p
 	}
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
-	ImGui::Image((ImTextureID)(u64)state->current_post_processor->GetTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+	if(state->current_post_processor != NULL && state->current_post_processor->IsInit())
+		ImGui::Image((ImTextureID)(u64)state->current_post_processor->GetTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+	else
+		ImGui::Image((ImTextureID)(u64)state->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 
 	// Window end
@@ -101,9 +104,15 @@ void TextureView(const char *tree_name, const char *file_path, FullscreenShader&
 
 				if(ImGui::Button("Add Input")) {
 
-					if(selected_texture != 0) selected_texture -= 1;
+					if(selected_texture == 0) {
+						pp.AddInput(main_renderer_tex_id, selected_texture_unit);
+					} else {
+						selected_texture -= 1;
+						pp.AddInput(pps[selected_texture].GetTexture(), selected_texture_unit);
+					}
 
-					pp.AddInput(pps[selected_texture].GetTexture(), selected_texture_unit);
+
+
 					ImGui::CloseCurrentPopup();
 				}
 
@@ -154,10 +163,13 @@ void TextureView(const char *tree_name, const char *file_path, FullscreenShader&
 		ImVec2 wsize;
 		wsize.x = (i32)ImGui::GetContentRegionAvail().x;
 		wsize.y = wsize.x/ratio;
-		ImGui::Image((ImTextureID)(u64)pp.GetTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+		if(pp.IsInit())
+			ImGui::Image((ImTextureID)(u64)pp.GetTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+
 		if(ImGui::Button("Preview")) {
 			state->current_post_processor = &pp;
 		}
+
 		ImGui::TreePop();
 		ImGui::Unindent(padding_right);
 
