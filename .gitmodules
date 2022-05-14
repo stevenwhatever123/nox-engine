@@ -25,3 +25,6 @@
 [submodule "libs/harfbazz"]
 	path = libs/harfbazz
 	url = https://github.com/harfbuzz/harfbuzz.git
+[submodule "imgui-docking-f7f3047"]
+	path = imgui-docking-f7f3047
+	url = https://github.com/DoraMemo-x/imgui-docking-f7f3047.git
