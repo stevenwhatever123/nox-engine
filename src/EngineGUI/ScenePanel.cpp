@@ -32,7 +32,40 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 			printf("Dropped %s (%i)\n", PRESET_OBJECT_NAMES_MAP[payloadObject].c_str(), payloadObject);
 		
 			// TODO: Logic for translating 2D cursor position to 3D world coordinates
+			// On button release, get cursor position
+			ImGuiIO& io = ImGui::GetIO();
+			ImVec2 origin = ImGui::GetCursorScreenPos(); // Start pos of this window relative to the whole app window
+			const ImVec2 mouse_pos_in_canvas(io.MousePos.x - origin.x, io.MousePos.y - origin.y); // MousePos is mouse position relative to the whole window.
+			std::cout << "\nMouse pos in world " << io.MousePos.x << " " << io.MousePos.y << std::endl;
+			std::cout << "win pos relative to win " << origin.x << " " << origin.y << std::endl;
+			std::cout << "Mouse pos on canvas " << mouse_pos_in_canvas.x << " " << mouse_pos_in_canvas.y << std::endl;
 
+			// Transform cursor position to the world position with depth set to 5 (arbitary)
+			glm::vec3 mouse_pos_in_world = getPosOfMouseInWorldCoord(state, mouse_pos_in_canvas.x, mouse_pos_in_canvas.y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+
+			std::cout << "Mouse pos in w " << mouse_pos_in_world.x << " " << mouse_pos_in_world.y << " " << mouse_pos_in_world.z << std::endl;
+
+
+			// Crete entity
+			Entity* testCube = new Entity(state->activeScene);
+			// Create position of the entity based on the the world pos of the cursor
+
+			// Create a mesh for it
+			NoxEngine::RenderableComponent* geom = new NoxEngine::RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+
+			// Create its position
+			TransformComponent* pos = new TransformComponent(mouse_pos_in_world.x, mouse_pos_in_world.y, mouse_pos_in_world.z);
+
+			// Add components to the entity
+			testCube->addComp(geom);
+			testCube->addComp(pos);
+
+			if (!state->renderer->hasRendObj(geom->rendObjId)) {
+
+				state->renderer->addObject(testCube, geom, ComponentType::RenderableType);
+
+				state->renderer->updateBuffers();
+			}
 
 			// Add an entity to the active scene
 			state->activeScene->addEntity(payloadObject);
@@ -149,4 +182,44 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 	ImGui::PopStyleVar();
 }
 
+// A function transformitng screen space pixel coord of the point to the world coord
+// Param: point coordinates in pixels relative to the window it is in. Width and Height of the window
+glm::vec3 NoxEngineGUI::getPosOfMouseInWorldCoord(GameState* params, int pointX, int pointY, int width, int height)
+{
+	// x and y are coordinates of the pixel in the rendering window
 
+	// Convert x and y to 3d Normalised Device Coordinates
+	// The point lies on the "screen", the near plane of the normalised cube
+	glm::vec2 clickedPoint = glm::vec2((2.0f * pointX) / width - 1.0f, 1.0f - (2.0f * pointY) / height);
+
+
+	// Each point on the screen corresponds to a line in the 3d space
+	// To find that line define 2 points it goes through
+	glm::vec4 from(clickedPoint.x, clickedPoint.y, -1.0f, 1.0f);
+	glm::vec4 to(clickedPoint.x, clickedPoint.y, 1.0f, 1.0f);
+
+	// Multiply by reverse projection
+	from = glm::inverse(params->renderer->getProjMatr()) * from;
+	to = glm::inverse(params->renderer->getProjMatr()) * to;
+
+	from /= from.w;
+	to /= to.w;
+
+	from = glm::inverse(params->renderer->getCameraMatr()) * from;
+	to = glm::inverse(params->renderer->getCameraMatr()) * to;
+
+	glm::vec4 direction = to - from;
+	direction = glm::normalize(direction);
+
+	// Now we have a line in the world space coord, that is the original 2d point
+
+	// Pick prameter t (how far away from the camera the point will be)
+	// ASK THE TEAM HOW THEY WANT IT IMPLEMENTED
+	// For now just pick 5
+	float t = 10.0f;
+
+	// Knowing updated t and the line, find the new point in the world coord
+	glm::vec4 new_coord = from + t * direction;
+
+	return glm::vec3(new_coord.x, new_coord.y, new_coord.z);
+}
