@@ -21,7 +21,7 @@ void NoxEngineGUI::updateFullscreenShaderPanel(GameState* state, GUIParams *ui_p
 	}
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
-
+	state->renderer->updateProjection(wsize.x, wsize.y);
 	ImGui::Image((ImTextureID)(u64)state->texture_used, wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	// Window end

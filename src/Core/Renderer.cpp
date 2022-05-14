@@ -7,6 +7,7 @@
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Components/AudioGeometryComponent.h>
+#include <Managers/LiveReloadManager.h>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -20,7 +21,6 @@
 
 using NoxEngineUtils::Logger;
 using namespace NoxEngine;
-
 
 Renderer::~Renderer()
 {
@@ -418,45 +418,11 @@ void Renderer::fillBackground(i32 hex) {
 
 }
 
-void Renderer::updateProjection(int width, int height) {
-
+void Renderer::updateProjection(i32 width, i32 height) {
 	w = width;
 	h = height;
-
-	program->use();
-
-	glViewport(0, 0, w, h);
-
-    // Set up Projection matrix
-    projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
-
-    //int toProjectionLoc = shader->getUniformLocation("toProjection");
-    //glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, value_ptr(projection));
-
-    program->set4Matrix("toProjection", projection);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, curFBO);
-
-	// Gen texture for framebuffer
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-	// Attach tex to framebuffer
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
-
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		printf("Troubles with creating a framebuffer\n");
-	}
-
+	projection = glm::perspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f, 1000.0f);
+	program->set4Matrix("toProjection", projection);
 }
 
 void Renderer::createVertexArray(IRenderable* mesh)
@@ -623,19 +589,15 @@ void Renderer::useProgram()
 	// Set up Projection matrix
 	// int toProjectionLoc = program->getUniformLocation("toProjection");
     projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
-
 	program->set4Matrix("toProjection", projection);
 
 	updateCamera();
-	// Set up color for mesh
-	// glUniform3f(program->getUniformLocation("Color"), color.x, color.y, color.z);
 
-    // Set up camera position
     program->set3Float("cameraPosition", camera->GetCameraPosition());
-    // Set up light position
     program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
     program->set4Matrix("toWorld", mat4(1.0f));
     program->set4Matrix("modelMatrix", mat4(1.0f));
+
 }
 
 void Renderer::updateLightPos(float x, float y, float z) 
@@ -735,22 +697,60 @@ void Renderer::setupSkybox() {
 	glBindVertexArray(0);
 
 	Array<String> images {
-		"assets/skybox/textures/picture/bak0/right.jpg",
-		"assets/skybox/textures/picture/bak0/left.jpg",
-		"assets/skybox/textures/picture/bak0/top.jpg",
-		"assets/skybox/textures/picture/bak0/down.jpg",
-		"assets/skybox/textures/picture/bak0/front.jpg",
-		"assets/skybox/textures/picture/bak0/back.jpg"
+		"assets/skybox/1/right.jpg",
+		"assets/skybox/1/left.jpg",
+		"assets/skybox/1/top.jpg",
+		"assets/skybox/1/down.jpg",
+		"assets/skybox/1/front.jpg",
+		"assets/skybox/1/back.jpg"
 	};
 
 	setSkyBoxImages(images);
 
+}
 
+void Renderer::liveReloadFile(const char *file, LiveReloadEntry *entry) {
+
+	i32 image_index = -1;
+
+	for(u32 i = 0; i < skyboxImages.size(); i++) {
+		if(skyboxImages[i] == file) {
+			image_index = i;
+			break;
+		}
+	}
+
+	if(image_index > -1 && image_index < 6) {
+		i32 width;
+		i32 height;
+		i32 channels;
+
+		skyboxImages[image_index] = file;
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+		stbi_set_flip_vertically_on_load(false); // flip loaded texture's on the y-axis.
+		u8 *TextureData = stbi_load(file, &width, &height, &channels, 0);
+
+		if(TextureData) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + image_index, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
+			stbi_image_free(TextureData);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+			entry->changed = 0;
+		}
+
+	}
 }
 
 void Renderer::setSkyBoxImages(const Array<String> &_skyboxImages)
 {
 	skyboxImages = _skyboxImages;
+
+	for(u32 i = 0; i < skyboxImages.size(); i++) {
+		LiveReloadManager::Instance()->addLiveReloadEntry(skyboxImages[i].c_str(), static_cast<IReloadableFile*>(this));
+	}
+
 	skyboxLoadTexture();
 }
 
@@ -781,21 +781,13 @@ void Renderer::skyboxLoadTexture()
 void Renderer::drawSkyBox()
 {
     // draw scene
-    glm::mat4 view;
-    glm::mat4 projection;
-
-
-	view = camera->getCameraTransf();
+    glm::mat4 view = camera->getCameraTransf();;
 
 	view[3][0] = 0;
 	view[3][1] = 0;
 	view[3][2] = 0;
 
-
-	projection = glm::perspective(glm::radians(camera->fov), (float)(w / h), 0.1f, 1000.0f);
-
     program->use();
-
     setFrameBufferToTexture();
 
     // draw skybox 

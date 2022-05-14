@@ -27,10 +27,7 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *ui_params) {
 	
 			PresetObject payloadObject = *(const PresetObject*)payload->Data;
 			printf("Dropped %s (%i)\n", PRESET_OBJECT_NAMES_MAP[payloadObject].c_str(), payloadObject);
-		
 			// TODO: Logic for translating 2D cursor position to 3D world coordinates
-
-
 			// Add an entity to the active scene
 			state->activeScene->addEntity(payloadObject);
 		}
@@ -38,6 +35,9 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *ui_params) {
 	}
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
+
+	state->renderer->updateProjection(wsize.x, wsize.y);
+
 	ImGui::Image((ImTextureID)(u64)state->texture_used, wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	if(ImGui::IsWindowFocused()) {
