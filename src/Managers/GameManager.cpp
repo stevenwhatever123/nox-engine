@@ -185,10 +185,8 @@ void GameManager::init_ecs() {
 	initComponentTypes();
 
 	// cleanup all subsystems
-
 	// loop through all existing entities (loaded from a file?)
-		// add to subsystems
-
+	// add to subsystems
 	// prepare entities for subsystems
 	update_ecs();
 }
@@ -434,31 +432,6 @@ void GameManager::init_postprocess() {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-	game_state.post_processors.push_back(
-		FullscreenShader{
-			"assets/shaders/fullScreenShader.frag",
-			Array<TextureInput>{
-				{ renderer->getTexture(), 0},
-			},
-			game_state.win_width,
-			game_state.win_height
-		}
-	);
-
-	// game_state.post_processors.push_back(
-	// 	FullscreenShader{
-	// 		"assets/shaders/fullScreenShader2.frag",
-	// 		Array<TextureInput>{
-	// 			{ game_state.post_processors.back().GetTexture(), 0},
-	// 		},
-	// 		game_state.win_width,
-	// 		game_state.win_height
-	// 	}
-	// );
-
-	// game_state.current_post_processor = NULL; &game_state.post_processors.back();
 }
 
 
@@ -490,9 +463,7 @@ void GameManager::update_ecs() {
 		entities[i]->tick(deltaTime, currentTime);
 	}
 
-
 	if (!updateNeededECS) return;
-
 	bool entityRemoved = false;
 
 	// Check for entity removal. 
@@ -551,14 +522,12 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updateScenePanel(&game_state, &ui_params);
 	NoxEngineGUI::updateFullscreenShaderPanel(&game_state, &ui_params);
 
-
 	// Make sure the scene panel is focused when we run
 	if(ui_params.firstLoop) {
 		ImGui::SetWindowFocus(kPanelNameMap[ PanelName::Scene ].c_str());
 		ui_params.firstLoop = false;
 		ui_params.full_screen = false;
 	}
-	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
 
 	ImGui::PopFont();
 	ImGui::PopStyleVar();

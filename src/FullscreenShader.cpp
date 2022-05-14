@@ -18,7 +18,9 @@ FullscreenShader::FullscreenShader(u32 frame_width, u32 frame_height, const char
 	current_bound_texture(0),
 	current_bound_framebuffer(0),
 	name(name),
-	inited(false)
+	inited(false),
+	framebuffer_id(0),
+	texture_id(0)
 {
 
 	saveState();
@@ -49,6 +51,10 @@ FullscreenShader::~FullscreenShader() {
 	if(!fragment_shader.empty()) {
 		LiveReloadManager::Instance()->removeLiveReloadEntry(fragment_shader.c_str(), static_cast<IReloadableFile*>(this));
 	}
+	inited = false;
+	texture_id = 0;
+	_id = 0;
+	framebuffer_id = 0;
 
 }
 
@@ -64,12 +70,50 @@ FullscreenShader::FullscreenShader(const FullscreenShader& other)
 	current_bound_texture(0),
 	current_bound_framebuffer(0),
 	name(other.name),
-	framebuffer_id(other.framebuffer_id),
-	texture_id(other.texture_id)
+	framebuffer_id(0),
+	texture_id(0),
+	inited(false)
 {
+
+	saveState();
+
+	if(other.framebuffer_id == 0) {
+		glGenFramebuffers(1, &framebuffer_id);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+	} else {
+		framebuffer_id = other.framebuffer_id;
+	}
+
+
+	if(other.texture_id == 0) {
+
+		glGenTextures(1, &texture_id);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame_width, frame_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	} else {
+		texture_id = other.texture_id;
+	}
+
+	if(other.texture_id == 0)
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
+
+	if(other.framebuffer_id == 0) {
+		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+			LOG_DEBUG("Fullscreen post-processor successfully built");
+		} else {
+			LOG_DEBUG("Failed to build fullscreen post-processor");
+		}
+	}
+
+	restoreState();
+
 	if(!fragment_shader.empty()) {
 		ChangeShader(fragment_shader);
 		LiveReloadManager::Instance()->addLiveReloadEntry(fragment_shader.c_str(), static_cast<IReloadableFile*>(this));
+		inited = true;
 	}
 }
 
