@@ -18,11 +18,11 @@ AudioListenerComponent::AudioListenerComponent() {
 
 	vertices = {
 		{0.0f, 0.0f, 0.0f},		// Origin of listener
-		{0.0f, 0.0f, 10.0f},		// Forward
-		{0.0f, 3.0f, 7.0f},		// up
-		{0.0f, -3.0f, 7.0f},	// down
-		{-3.0f, 0.0f, 7.0f},	// left
-		{3.0f, 0.0f, 7.0f}		// right
+		{0.0f, 0.0f, 8.0f},		// Forward
+		{0.0f, 2.0f, 6.0f},		// up
+		{0.0f, -2.0f, 6.0f},	// down
+		{-2.0f, 0.0f, 6.0f},	// left
+		{2.0f, 0.0f, 6.0f}		// right
 	};
 
 	indices = {

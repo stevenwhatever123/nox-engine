@@ -48,7 +48,7 @@ void NoxEngineGUI::updateHierarchyPanel(NoxEngine::GameState* state, GUIParams *
 			ent->setEntityEnabled(enable);
 
 			char uniqueNameBuf[16];
-			snprintf(uniqueNameBuf, 16, "%i", i);
+			snprintf(uniqueNameBuf, 16, "##Entity%i", i);
 
 			// Apply grey out: Begin
 			ImGui::BeginDisabled(!enable);

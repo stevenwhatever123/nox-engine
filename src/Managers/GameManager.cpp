@@ -43,7 +43,7 @@ void GameManager::init() {
 	init_gui();
 	init_animation();
 	init_renderer();
-	init_scripts();
+	//init_scripts();
 }
 
 void GameManager::update() {
@@ -461,12 +461,13 @@ void GameManager::update_livereloads() {
 void GameManager::update_inputs() {
 	glfwPollEvents();
 
-	if(keys['W']) { camera->moveFwdBy(0.1f); }
-	if(keys['S']) { camera->moveFwdBy(-0.1f); }
-	if(keys['D']) { camera->moveHorBy(-0.1f); }
-	if(keys['A']) { camera->moveHorBy(0.1f); }
-	if(keys[' ']) { camera->moveVerBy(0.1f); }
-	if(keys['K']) { camera->moveVerBy(-0.1f); }
+	float unit = 0.25;
+	if(keys['W']) { camera->moveFwdBy( unit); }
+	if(keys['S']) { camera->moveFwdBy(-unit); }
+	if(keys['D']) { camera->moveHorBy(-unit); }
+	if(keys['A']) { camera->moveHorBy( unit); }
+	if(keys[' ']) { camera->moveVerBy( unit); }
+	if(keys['K']) { camera->moveVerBy(-unit); }
 
 }
 
@@ -610,15 +611,15 @@ void GameManager::update_audio() {
 			scale	= vec3(itrans->sx, itrans->sy, itrans->sz);
 		}
 
-		if (isrc) {
+		if (isrc && !isrc->stopped) {
 
 			// TODO: stop audio if it's disabled
 			//if (!ent->isEnabled<AudioSourceComponent>()) audioManager->stopSound(0);
 
 			// TODO: check audio is playing
 			// TODO: set correct channel id (not 0)
-			audioManager->setChannel3dPosition(0, pos);
-			audioManager->setChannelVolume(0, isrc->volume);
+			audioManager->setChannel3dPosition(isrc->channelId, pos);
+			audioManager->setChannelVolume(isrc->channelId, isrc->volume);
 		}
 
 		if (igeo) {
@@ -722,15 +723,17 @@ bool GameManager::playSound(Entity* ent, IAudioSource* isrc) {
 	vec3 pos{ itrans->x, itrans->y, itrans->z };
 
 	audioManager->loadSound(isrc);
-	audioManager->playSounds(isrc->filePath, pos, isrc->volume);
+	isrc->channelId = audioManager->playSounds(isrc->filePath, pos, isrc->volume);
 
 	return true;
 }
 
+bool GameManager::pauseUnpauseSound(Entity* ent, IAudioSource* isrc) {
+
+	return audioManager->pauseUnpauseSound(isrc);;
+}
+
 bool GameManager::stopSound(Entity* ent, IAudioSource* isrc) {
 
-	//audioManager->stopSound(isrc);
-	throw std::exception("impl");
-
-	return true;
+	return audioManager->stopSound(isrc);;
 }

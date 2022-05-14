@@ -9,8 +9,7 @@
 	url = https://github.com/assimp/assimp.git
 [submodule "libs/imgui"]
 	path = libs/imgui
-	url = https://github.com/ocornut/imgui.git
-	branch = docking
+	url = https://github.com/DoraMemo-x/imgui-docking-f7f3047.git
 [submodule "libs/freetype"]
 	path = libs/freetype
 	url = https://github.com/freetype/freetype.git

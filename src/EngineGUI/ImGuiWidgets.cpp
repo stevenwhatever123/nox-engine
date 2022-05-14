@@ -73,10 +73,10 @@ namespace ImGui {
 
         PushID(str_id);
         PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(g.Style.ItemSpacing.x, g.Style.FramePadding.y * 2.0f));
-        ret.selected = Selectable("##Selectable", selected, flags | ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_AllowItemOverlap);
+        ret.selected = Selectable("##SelectableInput_Selectable", selected, flags | ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_AllowItemOverlap);
         PopStyleVar();
 
-        ImGuiID id = window->GetID("##Input");
+        ImGuiID id = window->GetID("##SelectableInput_Input");
         ret.tempInputActive = TempInputIsActive(id);
         ret.tempInputStart = ret.selected ? IsMouseDoubleClicked(0) : false;
 
@@ -87,12 +87,12 @@ namespace ImGui {
         {
             ImVec2 pos_after = window->DC.CursorPos;
             window->DC.CursorPos = pos_before;
-            ret.selected = TempInputText(g.LastItemData.Rect, id, "##Input", buf, (int)buf_size, ImGuiInputTextFlags_None);
+            ret.selected = TempInputText(g.LastItemData.Rect, id, "##SelectableInput_Input", buf, (int)buf_size, ImGuiInputTextFlags_None);
             window->DC.CursorPos = pos_after;
         }
         else
         {
-            window->DrawList->AddText(pos_before, GetColorU32(ImGuiCol_Text), buf);
+            window->DrawList->AddText(pos_before + ImVec2(0.0f, g.Style.FramePadding.y), GetColorU32(ImGuiCol_Text), buf);
         }
 
         PopID();

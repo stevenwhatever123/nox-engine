@@ -324,6 +324,28 @@ int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float
 	return channelId;
 }
 
+
+bool AudioManager::pauseUnpauseSound(IAudioSource* src) {
+
+	// If this channel does not exist, then you can't pause
+	auto channel = mChannels.find(src->channelId);
+	if (channel == mChannels.end()) return false;
+
+	bool paused = false;	channel->second->getPaused(&paused);
+	ERRCHK( channel->second->setPaused(!paused) );
+	return !paused;		// return new state
+}
+
+
+bool AudioManager::stopSound(IAudioSource* src) {
+
+	// If this channel does not exist, then you can't stop
+	auto channel = mChannels.find(src->channelId);
+	if (channel == mChannels.end()) return false;
+
+	return !ERRCHK( channel->second->stop() );
+}
+
 bool AudioManager::isPlaying(int nChannelId) const {
 
 	// If this channel does not exist, then it's not playing

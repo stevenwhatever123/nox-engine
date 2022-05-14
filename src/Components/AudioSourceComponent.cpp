@@ -9,12 +9,14 @@ AudioSourceComponent::AudioSourceComponent() {
 
 	filePath = "";
 	volume = 1.0f;
-	is3D = false;
-	isLooping = false;
+	is3D = true;
+	isLooping = true;
 	isStream = false;
-	channelGroupId = -1;
+	channelId = -1;
 
 	loaded = false;
+	paused = false;
+	stopped = false;
 }
 
 void AudioSourceComponent::init(String aFilePath, bool aIs3D, bool aIsLooping, bool aIsStream, float aVolume) {

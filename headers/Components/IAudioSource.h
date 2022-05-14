@@ -12,9 +12,11 @@ namespace NoxEngine {
 		bool is3D;
 		bool isLooping;
 		bool isStream;
-		int channelGroupId;
+		int channelId;
 		Array<int> dspChain;
 
 		bool loaded;
+		bool paused;
+		bool stopped;
 	};
 }

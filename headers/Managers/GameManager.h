@@ -67,6 +67,7 @@ namespace NoxEngine {
 			void createAudioGeometry(Entity* ent, IAudioGeometry* igeo);
 			//void addAudioSource(AudioSource audioSource);
 			bool playSound(Entity *ent, IAudioSource *);
+			bool pauseUnpauseSound(Entity* ent, IAudioSource*);
 			bool stopSound(Entity* ent, IAudioSource *);
 
 			bool loadAudioSource(Entity* ent, IAudioSource *);

@@ -47,6 +47,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 		bool animationEditing = animComp ? animComp->editing : false;
 
+		ImGui::PushID("selected_entity");
+
 		// Entity name
 		if (ImGui::CollapsingHeader(ent->name)) {
 
@@ -172,7 +174,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						// Begin: grey out
 						ImGui::BeginDisabled(!enable);
 
-						ImGui::DragFloat3("Position", &transComp->x, 0.01f);
+						ImGui::DragFloat3("Position", &transComp->x, 0.1f);
 						ImGui::DragFloat3("Rotation", &transComp->rx, 0.01f);
 						ImGui::DragFloat3("Scale", &transComp->sx, 0.01f);
 
@@ -358,9 +360,20 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							bool enableDSP;   ImGui::Checkbox("##enable_DSP", &enableDSP);
 
 							ImGui::SliderFloat("Volume", &audioSrcComp->volume, 0.0f, 1.0f, "%.1f");
-							if (ImGui::Button("Play")) {
+							if (ImGui::Button(audioSrcComp->channelId == -1 ? "Play" : (audioSrcComp->paused ? "Unpause" : "Pause"))) {
 
-								GameManager::Instance()->playSound(ent, audioSrcComp);
+								// first play
+								if (audioSrcComp->channelId == -1) GameManager::Instance()->playSound(ent, audioSrcComp);
+
+								// pause state
+								else if (!audioSrcComp->stopped) audioSrcComp->paused = GameManager::Instance()->pauseUnpauseSound(ent, audioSrcComp);
+								//else // TODO: sync channelId to -1 when stopped (!am->isPlaying), so sound can be assigned a new channel
+							}
+
+							ImGui::SameLine();
+
+							if (ImGui::Button("Stop")) {
+								audioSrcComp->stopped = GameManager::Instance()->stopSound(ent, audioSrcComp);
 							}
 
 							ImGui::BeginDisabled();
@@ -368,13 +381,6 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							ImGui::Checkbox("Looping", &audioSrcComp->isLooping);
 							ImGui::Checkbox("Stream", &audioSrcComp->isStream);
 							ImGui::EndDisabled();
-
-							ImGui::SameLine();
-
-							if (ImGui::Button("Stop")) {
-
-								GameManager::Instance()->stopSound(ent, audioSrcComp);
-							}
 
 						}
 
@@ -599,6 +605,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 		}
 		ImGui::Separator();
+
+		ImGui::PopID();
 
 		// Add a button that allows the user to add new components
 		if (ImGui::Button("Add Component..."))

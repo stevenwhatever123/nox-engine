@@ -143,7 +143,10 @@ namespace NoxEngine {
 		void unLoadSound(const String& strSoundName);
 		void unLoadSound(const char* strSoundName);
 		int playSounds(const String& strSoundName, const vec3& vPos = vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
-		
+
+		bool pauseUnpauseSound(IAudioSource* src);
+		bool stopSound(IAudioSource* src);
+
 		void setChannel3dPosition(int nChannelId, ITransform *ipos);
 		void setChannel3dPosition(int nChannelId, const vec3& vPosition);
 		void setChannelVolume(int nChannelId, float fNormalizedVolume);
@@ -165,7 +168,7 @@ namespace NoxEngine {
 		int createGeometry(
 			int nMaxPolygons, int nMaxVertices, 
 			const vec3 &pos = vec3{ 0, 0, 0 }, 
-			const vec3 &forward = vec3{ 0, 0, 1 },
+			const vec3 &forward = vec3{ 0, 0, -1 },
 			const vec3 &up = vec3{ 0, 1, 0 },
 			const vec3 &scale = vec3{ 0, 0, 0 }
 		);
