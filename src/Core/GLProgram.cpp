@@ -6,7 +6,7 @@
 
 using namespace NoxEngine;
 
-u32 GLProgram::compileShader(std::string& filename, i32 shaderType) {
+u32 GLProgram::compileShader(String& filename, i32 shaderType) {
 	u32 id = glCreateShader(shaderType);
 	TempResourceData temp = IOManager::Instance()->ReadEntireFileTemp(filename);
 	const char *data = (const char*)temp.data;
@@ -25,15 +25,17 @@ u32 GLProgram::compileShader(std::string& filename, i32 shaderType) {
 		glGetShaderInfoLog(id, infoLogLength, NULL, temp_buf);
 		LOG_DEBUG("Error Compiling Shader: \n%s", temp_buf);
 		StackMemAllocator::Instance()->free((u8*)temp_buf);
+
+		return 0;
 	}
 
 	return id;
 }
 
-u32 GLProgram::makeProgram(std::vector<ShaderFile> shaders) {
+u32 GLProgram::makeProgram(Array<ShaderFile> shaders) {
 	u32 id = glCreateProgram();
 	for(i32 i = 0; i < shaders.size(); i++) {
-		assert(shaders[i].id != 0);
+		if(shaders[i].id == 0) continue;
 		glAttachShader(id, shaders[i].id);
 	}
 
@@ -52,15 +54,10 @@ u32 GLProgram::makeProgram(std::vector<ShaderFile> shaders) {
 		StackMemAllocator::Instance()->free((u8*)buffer);
 	}
 
-	for(i32 i = 0; i < shaders.size(); i++) {
-		glDetachShader(id, shaders[i].id);
-		glDeleteShader(shaders[i].id);
-		shaders[i].id = 0;
-	}
 	return id;
 }
 
-GLProgram::GLProgram(std::vector<ShaderFile> shaders)
+GLProgram::GLProgram(Array<ShaderFile> shaders)
 {
 	for(i32 i = 0; i < shaders.size(); i++) {
 		shaders[i].id = compileShader(shaders[i].filename, shaders[i].shader_type);

@@ -19,7 +19,7 @@ namespace NoxEngine {
 
 
 	class GLProgram {
-		private:
+		protected:
 			u32 compileShader(String& filename, i32 shaderType);
 			u32 makeProgram(Array<ShaderFile> shaders);
 			u32 _id;
@@ -27,6 +27,8 @@ namespace NoxEngine {
 		public:
 			GLProgram(Array<ShaderFile> shaders);
 			void use();
+
+			inline u32 getProgramId() { return _id; };
 
 			void setBool(const String& name, bool value) const;
 			void setInt(const String& name, i32 value) const;

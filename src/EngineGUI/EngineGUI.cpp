@@ -51,20 +51,22 @@ void NoxEngineGUI::setupFixedLayout() {
 	ImGui::DockBuilderSetNodePos(mainNodeID, ImGui::GetMainViewport()->WorkPos);
 
 	// Design the layout here with DockBuilderSplitNode
-	ImGuiID dock_right_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Right, 0.2f, nullptr, &mainNodeID);
-	ImGuiID dock_left_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Left, 0.2f, nullptr, &mainNodeID);
-	ImGuiID dock_left_down_id	= ImGui::DockBuilderSplitNode(dock_left_id, ImGuiDir_Down, 0.5f, nullptr, &dock_left_id);
-	ImGuiID dock_down_id		= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Down, 0.2f, nullptr, &mainNodeID);
-	ImGuiID dock_down_down_id	= ImGui::DockBuilderSplitNode(mainNodeID, ImGuiDir_Up, 0.05f, nullptr, &mainNodeID);
+	ImGuiID dock_right_id		= ImGui::DockBuilderSplitNode(mainNodeID,   ImGuiDir_Right, 0.2f, nullptr, &mainNodeID);
+	ImGuiID dock_left_id		= ImGui::DockBuilderSplitNode(mainNodeID,   ImGuiDir_Left,  0.2f, nullptr, &mainNodeID);
+	ImGuiID dock_left_down_id	= ImGui::DockBuilderSplitNode(dock_left_id, ImGuiDir_Down,  0.5f, nullptr, &dock_left_id);
+	ImGuiID dock_down_id		= ImGui::DockBuilderSplitNode(mainNodeID,   ImGuiDir_Down,  0.2f, nullptr, &mainNodeID);
+	ImGuiID dock_down_down_id	= ImGui::DockBuilderSplitNode(mainNodeID,   ImGuiDir_Up,    0.05f, nullptr, &mainNodeID);
 
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::Scene].c_str(), mainNodeID);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::FullscreenShader].c_str(), mainNodeID);
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::Inspector].c_str(), dock_right_id);
+	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::PostPorcessors].c_str(), dock_right_id);
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::PresetObjects].c_str(), dock_left_id);
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::Hierarchy].c_str(), dock_left_down_id);
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::AnimationSequencerPanel].c_str(), dock_down_id);
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::SkyboxSettings].c_str(), dock_down_id);
 	ImGui::DockBuilderDockWindow(kPanelNameMap[PanelName::FileExplorer].c_str(), dock_down_down_id);
-			
+
 	// Change node flags here
 #if 0
 	mainNode = ImGui::DockBuilderGetNode(dock_main_id);
@@ -183,14 +185,4 @@ void NoxEngineGUI::updateGUI(NoxEngine::GameState& game_state, GUIParams *params
 	}
 
 	ImGui::End();	// End to "Invisible Window"
-
-
-	// Placeholder / debug windows
-	ImGui::Begin(kPanelNameMap[PanelName::FileExplorer].c_str());    
-
-	ImGui::DragFloat3("Camera ", glm::value_ptr(params->current_cam->user_shift), 0.0f, 100.0f);
-	ImGui::End();
-
-	// First loop is over
-	params->firstLoop = false;
 }

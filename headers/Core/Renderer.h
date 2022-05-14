@@ -20,6 +20,7 @@
 #include <Components/ComponentType.h>
 #include <Components/IRenderable.h>
 #include <Components/ITransform.h>
+#include <Managers/IReloadableFile.h>
 
 
 namespace NoxEngine {
@@ -53,9 +54,8 @@ namespace NoxEngine {
 	/*
 	 * A class that renders 3D using OpenGL
 	 * */
-	class Renderer : public Singleton<Renderer> {
+	class Renderer : public Singleton<Renderer>, public IReloadableFile {
 		friend class Singleton<Renderer>;
-
 
 		public:
 
@@ -88,7 +88,8 @@ namespace NoxEngine {
 		void fillBackground(i32 hex);
 
 		// Get the texture the renderer rendered to
-		GLuint getTexture() { return textureToRenderTo; }
+		inline GLuint getTexture() { return textureToRenderTo; }
+		inline GLuint getDepthTexture() { return depthStencilTexture; }
 
 
 		// Functions updating parts of the shaders
@@ -121,6 +122,7 @@ namespace NoxEngine {
 		const char* getSkyboxImagePath(u32 skyboxPosition);
 		void setSkyBoxImages(const Array<String> &skyboxImages);
 		void drawSkyBox();
+		void liveReloadFile(const char *file, LiveReloadEntry *entry);
 
 		private:
 
