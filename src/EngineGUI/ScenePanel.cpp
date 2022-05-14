@@ -68,13 +68,31 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 			glm::mat4 scale(1);
 
 			bool hasTransformAndisEnabled = ent->containsComps<TransformComponent>() && ent->isEnabled<TransformComponent>();
+			bool hasAnimationCompAndIsEnabled = ent->containsComps<AnimationComponent>() && ent->isEnabled<AnimationComponent>();
+
+			AnimationComponent* animComp = nullptr;
 
 			if (hasTransformAndisEnabled) {
-				ITransform* pos = ent->getComp<TransformComponent>()->CastType<ITransform>();
-				translation = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
-				rotation = glm::eulerAngleXYZ(pos->rx, pos->ry, pos->rz);
-				scale = glm::scale(glm::mat4(1.0f), glm::vec3(pos->sx, pos->sy, pos->sz));
-				worldMat = translation * rotation * scale;
+				if (hasAnimationCompAndIsEnabled)
+				{
+					animComp = ent->getComp<AnimationComponent>();
+				}
+
+				if (animComp != nullptr && animComp->editing)
+				{
+					translation = animComp->translationMatrices[animComp->animationIndex][animComp->frameIndex];
+					rotation = animComp->rotationMatrices[animComp->animationIndex][animComp->frameIndex];
+					scale = animComp->scalingMatrices[animComp->animationIndex][animComp->frameIndex];
+					worldMat = translation * rotation * scale;
+				}
+				else
+				{
+					ITransform* pos = ent->getComp<TransformComponent>()->CastType<ITransform>();
+					translation = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+					rotation = glm::eulerAngleXYZ(pos->rx, pos->ry, pos->rz);
+					scale = glm::scale(glm::mat4(1.0f), glm::vec3(pos->sx, pos->sy, pos->sz));
+					worldMat = translation * rotation * scale;
+				}
 			}
 
 			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
@@ -91,16 +109,36 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 
 				if (hasTransformAndisEnabled)
 				{
-					ITransform* pos = ent->getComp<TransformComponent>()->CastType<ITransform>();
-					pos->x = translation_temp[0];
-					pos->y = translation_temp[1];
-					pos->z = translation_temp[2];
+					if (animComp != nullptr && animComp->editing)
+					{
+						animComp->translationMatrices[animComp->animationIndex][animComp->frameIndex][3][0] = translation_temp[0];
+						animComp->translationMatrices[animComp->animationIndex][animComp->frameIndex][3][1] = translation_temp[1];
+						animComp->translationMatrices[animComp->animationIndex][animComp->frameIndex][3][2] = translation_temp[2];
 
-					glm::extractEulerAngleXYZ(glm::toMat4(rotation_temp), pos->rx, pos->ry, pos->rz);
+						glm::extractEulerAngleXYZ(glm::toMat4(rotation_temp), 
+							animComp->eulerAngleXYZ[animComp->animationIndex][animComp->frameIndex][0], 
+							animComp->eulerAngleXYZ[animComp->animationIndex][animComp->frameIndex][1], 
+							animComp->eulerAngleXYZ[animComp->animationIndex][animComp->frameIndex][2]);
 
-					pos->sx = scale_temp[0];
-					pos->sy = scale_temp[1];
-					pos->sz = scale_temp[2];
+						animComp->scalingMatrices[animComp->animationIndex][animComp->frameIndex][0][0] = scale_temp[0];
+						animComp->scalingMatrices[animComp->animationIndex][animComp->frameIndex][1][1] = scale_temp[1];
+						animComp->scalingMatrices[animComp->animationIndex][animComp->frameIndex][2][2] = scale_temp[2];
+					
+						animComp->updateTransformation();
+					}
+					else
+					{
+						ITransform* pos = ent->getComp<TransformComponent>()->CastType<ITransform>();
+						pos->x = translation_temp[0];
+						pos->y = translation_temp[1];
+						pos->z = translation_temp[2];
+
+						glm::extractEulerAngleXYZ(glm::toMat4(rotation_temp), pos->rx, pos->ry, pos->rz);
+
+						pos->sx = scale_temp[0];
+						pos->sy = scale_temp[1];
+						pos->sz = scale_temp[2];
+					}
 				}
 			}
 		}
