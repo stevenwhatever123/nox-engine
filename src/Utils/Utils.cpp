@@ -34,8 +34,9 @@ FILETIME FileUtils::getLastWriteTime(const String& file) {
 	i32 success = GetFileAttributesExA(file.c_str(), GetFileExInfoStandard, &file_attrib);
 	if(success == 0) {
 		LOG_DEBUG("Couldn't get latest file write time: %s", file.c_str());
+		return FILETIME{};
 	}
-	assert(success == 1);
+
 	return file_attrib.ftLastWriteTime;
 }
 

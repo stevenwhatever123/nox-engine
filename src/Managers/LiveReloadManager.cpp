@@ -25,15 +25,10 @@ void LiveReloadManager::removeLiveReloadEntry(const char *file_name, IReloadable
 	auto itr = reload_files.find(file_name);
 
 	if(itr != reload_files.end()) {
-
 		auto& informed_objects = itr->second.inform_objects;
-
-
 		auto found = std::find(informed_objects.begin(), informed_objects.end(), informed_object);
-
 		if(found != informed_objects.end()) {
 			informed_objects.erase(found);
-
 			if(informed_objects.size() == 0) {
 				reload_files.erase(itr);
 			}

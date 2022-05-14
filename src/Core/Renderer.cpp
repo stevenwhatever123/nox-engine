@@ -832,16 +832,26 @@ void Renderer::setSkyboxImage(const String& image_path, u32 skyboxPosition) {
 	i32 height;
 	i32 channels;
 
-	skyboxImages[skyboxPosition] = image_path;
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
 	stbi_set_flip_vertically_on_load(false); // flip loaded texture's on the y-axis.
 	u8 *TextureData = stbi_load(image_path.c_str(), &width, &height, &channels, 0);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + skyboxPosition, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
-	stbi_image_free(TextureData);
 
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	if(TextureData) {
 
+		if(skyboxPosition >= 0 && skyboxPosition < 6 && skyboxImages[skyboxPosition] != image_path) {
+			LiveReloadManager::Instance()->removeLiveReloadEntry(skyboxImages[skyboxPosition].c_str(), static_cast<IReloadableFile*>(this));
+			LiveReloadManager::Instance()->addLiveReloadEntry(image_path.c_str(), static_cast<IReloadableFile*>(this));
+		}
+
+		skyboxImages[skyboxPosition] = image_path;
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + skyboxPosition, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
+		stbi_image_free(TextureData);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	}
+	
 }
