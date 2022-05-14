@@ -47,7 +47,7 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 
 
 			// Crete entity
-			Entity* testCube = new Entity(state->activeScene);
+			Entity* testCube = new Entity(state->activeScene, PRESET_OBJECT_NAMES_MAP[payloadObject].c_str());
 			// Create position of the entity based on the the world pos of the cursor
 
 			// Create a mesh for it
@@ -60,15 +60,8 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 			testCube->addComp(geom);
 			testCube->addComp(pos);
 
-			if (!state->renderer->hasRendObj(geom->rendObjId)) {
-
-				state->renderer->addObject(testCube, geom, ComponentType::RenderableType);
-
-				state->renderer->updateBuffers();
-			}
-
 			// Add an entity to the active scene
-			state->activeScene->addEntity(payloadObject);
+			state->activeScene->addEntity(testCube);
 		}
 		ImGui::EndDragDropTarget();
 	}
