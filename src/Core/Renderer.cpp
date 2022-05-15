@@ -305,6 +305,10 @@ void Renderer::draw() {
 
 	for (u32 i = 0; i < objects.size(); i++) {
 
+		// We don't want to render something that has been removed or doesn't exist
+		if (objects[i].ent == nullptr)
+			continue;
+
 		Entity* ent = objects[i].ent;
 
 		// Skip if the entity is not enabled

@@ -14,6 +14,31 @@ Mesh::Mesh() : RenderableComponent()
 	use_indices = false;
 }
 
+Mesh::Mesh(const Mesh& other)
+{
+	glRenderType = other.glRenderType;
+	has_normal = other.has_normal;
+	has_texture = other.has_texture;
+	use_indices = other.use_indices;
+
+	name = other.name;
+	hasBones = other.hasBones;
+
+	vertices = other.vertices;
+	texCoords = other.texCoords;
+	normals = other.normals;
+	faces = other.faces;
+	indices = other.indices;
+
+	color[0] = other.color[0];
+	color[1] = other.color[1];
+	color[2] = other.color[2];
+
+	glRenderType = other.glRenderType;
+
+	rendObjId = other.rendObjId;
+}
+
 Mesh::Mesh(std::istream& stream)
 {
 	size_t nameSize;

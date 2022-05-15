@@ -224,9 +224,11 @@ void GameManager::init_events() {
 			{
 				// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
 				//                 because the entity ID is managed by the scene
-				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
+				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str(),
+					file_name.c_str());
 
-				RenderableComponent* comp = new RenderableComponent(*meshScene.meshes[i]);
+				Mesh* mesh = new Mesh(*meshScene.meshes[i]);
+				RenderableComponent* comp = mesh;
 				TransformComponent* trans = new TransformComponent(0.0, 0.0, 0.0);
 
 				// ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
