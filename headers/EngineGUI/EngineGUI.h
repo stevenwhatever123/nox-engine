@@ -21,7 +21,7 @@ namespace NoxEngineGUI {
 
 	struct GUIParams {
 		bool firstLoop = true;
-
+		int imguizmoMode = 7; // Translation by default
 		// the array index of the selected entity in the hierarchy window
 		i32 selectedEntity;		
 		
@@ -29,6 +29,7 @@ namespace NoxEngineGUI {
 		NoxEngine::Camera *current_cam;
 
 		bool full_screen = false;
+		bool scene_active = true;
 
 		// TODO: make is3d a checkbox. if updated, unload and create a new sound
 		bool soundIs3d;

@@ -59,16 +59,7 @@ namespace NoxEngine {
 
 		public:
 
-		/*
-		 * Constructor.
-		 * param:
-		 *        width - the width of the window to render to
-		 *        height - the height of the window to render to
-		 *        type - the type of promitive this renderer handles.
-		 *        camera - a camera to render from
-		 */
 		Renderer(i32 width, i32 height, Camera* camera);
-
 		~Renderer();
 
 		// Add object to renderer to render
@@ -78,6 +69,7 @@ namespace NoxEngine {
 		void removeObject(u32 rendObjId);
 		void clearObject();
 		
+		// Program handle
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
 		void useProgram();
 		void updateBuffers();
@@ -87,14 +79,13 @@ namespace NoxEngine {
 		void fillBackground(f32 r, f32 g, f32 b);
 		void fillBackground(i32 hex);
 
-		// Get the texture the renderer rendered to
+		// Get the texture of the framebuffer the renderer uses
 		inline GLuint getTexture() { return textureToRenderTo; }
 		inline GLuint getDepthTexture() { return depthStencilTexture; }
-
+		void updateTextureSizes(u32 width, u32 height);
 
 		// Functions updating parts of the shaders
 
-		//void updateLocalTransf(int frame_index);
 		void updateProjection(i32 w, i32 h);
 
 		inline void setFrameBufferToDefault() { curFBO = 0; setRenderTarget(); }
@@ -103,6 +94,10 @@ namespace NoxEngine {
 
 		inline mat4 getProjMatr() { return projection; }
 		inline mat4 getCameraMatr() { return camera->getCameraTransf(); }
+		inline mat4 getCameraView() { return cam; };
+
+		inline void setCamera(Camera *cam) { camera = cam; };
+		inline Camera* getCamera() { return camera; };
 
 		// Camera managment
 		// Updates Camera with new camera
@@ -112,7 +107,7 @@ namespace NoxEngine {
 		void updateCamera();
 		void updateLightPos(float x, float y, float z);
 
-		std::map<u32, RendObj> getObjects() { return objects; };
+		inline const Map<u32, RendObj>& getObjects() const { return objects; };
 
 		void updateObjectTransformation(glm::mat4 transformation, u32 rendObjId);
 		void changeTexture(Entity *ent);
@@ -123,6 +118,9 @@ namespace NoxEngine {
 		void setSkyBoxImages(const Array<String> &skyboxImages);
 		void drawSkyBox();
 		void liveReloadFile(const char *file, LiveReloadEntry *entry);
+
+		i32 getWidth() { return w; };
+		i32 getHeight() { return h; };
 
 		private:
 
@@ -135,16 +133,15 @@ namespace NoxEngine {
 		// skybox images
 		Array<String> skyboxImages;
 
-		i32 w;
-		i32 h; // Width and Height of the window/texture to render to
+		u32 w;
+		u32 h; // Width and Height of the window/texture to render to
 		mat4 projection; // The matrix used for projection
 		mat4 cam; // The matrix used for camera
 
 		// The cur camera
 		Camera* camera;
-		std::map<u32, RendObj> objects;
+		Map<u32, RendObj> objects;
 		Array<RendObj> perm_objects;
-
 
 		// Global buffers of attributes
 		GLuint VBO;

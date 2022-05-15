@@ -117,7 +117,7 @@ namespace NoxEngineGUI {
 				for (auto& obj : PRESET_OBJECTS[selectedCategory]) {
 
 					if (ImGui::ImageButtonWithText(allTextures[std::get<0>(textureMap[obj])], PRESET_OBJECT_NAMES_MAP[obj].c_str(),
-						ImVec2(iconWidth, iconHeight), 
+						ImVec2((f32)iconWidth, (f32)iconHeight), 
 						ImVec2(std::get<1>(textureMap[obj]).x, std::get<1>(textureMap[obj]).y),
 						ImVec2(std::get<2>(textureMap[obj]).x, std::get<2>(textureMap[obj]).y)))
 					{
@@ -136,7 +136,7 @@ namespace NoxEngineGUI {
 
 					// Detect click
 					if (ImGui::ImageButtonWithText(allTextures[std::get<0>(textureMap[itr.first])], PRESET_OBJECT_NAMES_MAP[itr.first].c_str(),
-						ImVec2(iconWidth, iconHeight),
+						ImVec2((f32)iconWidth, (f32)iconHeight),
 						ImVec2(std::get<1>(textureMap[itr.first]).x, std::get<1>(textureMap[itr.first]).y),
 						ImVec2(std::get<2>(textureMap[itr.first]).x, std::get<2>(textureMap[itr.first]).y)))
 					{

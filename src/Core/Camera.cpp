@@ -1,103 +1,118 @@
 #include <Core/Camera.h>
+#include <glm/gtx/euler_angles.hpp>
+#include <Utils/Utils.h>
 
 using namespace NoxEngine;
 
 Camera::Camera(vec3 stPos, vec3 lookAt) :
 	startCamPos(stPos),
-	currCamPos(stPos),
-	lookingAt(lookAt),
-	topPointingAt(vec3(0.0f, 1.0f, 0.0f)),
-	user_shift(vec3(0.0f)),
+	pos(stPos),
+	forward(glm::normalize(lookAt - stPos)),
+	up(vec3(0.0f, 1.0f, 0.0f)),
 	user_rotate(vec3(0.0f)),
-	fov(50)
+	yaw_pitch_roll(0),
+	fov(50),
+	user_shift(0)
 {	
-
-	Yaw = 0.0;
-	Pitch = -30.0;
-
-	user_rotate.y = 0;
+	cameraTransf = glm::lookAt(pos, lookAt, up);
 	generateCameraParameters();
 }
 
-
 void Camera::generateCameraParameters() {
-
-	// // Update camera
-	// currCamPos = startCamPos + user_shift;
-	// // Calculate a matrix out of updated camera
-
-	// if (Pitch > 89.0) {
-	// 	Pitch = 89.0;
-	// }
-
-	// if (Pitch < -89.0) {
-	// 	Pitch = -89.0;
-	// }
-	
-	// glm::vec3 front;
-	// float RadYaw = glm::radians(Yaw);
-	// float RadPitch = glm::radians(Pitch);
-	// front.x = cos(RadYaw) * cos(RadPitch);
-	// front.y = sin(RadPitch);
-	// front.z = sin(RadYaw) * cos(RadPitch);
-	// lookingAt = glm::normalize(front);
-
-	// cameraTransf = glm::lookAt(currCamPos, currCamPos + lookingAt, topPointingAt);
-	// // cameraTransf[3][0] = 0;
-	// // cameraTransf[3][1] = 0;
-	// // cameraTransf[3][2] = 0;
-
-	// Update camera
-	currCamPos = startCamPos + user_shift;
-
 	// Calculate a matrix out of updated camera
-	cameraTransf = glm::lookAt(currCamPos, lookingAt, topPointingAt);
 
-	// Rotate cam matrix
-	glm::mat4 rotation = glm::rotate(glm::rotate( glm::mat4(1.0f), glm::radians(user_rotate.y), glm::vec3(1.0f, 0.0f, 0.0f) ), glm::radians(user_rotate.x), glm::vec3(0.0f, 1.0f, 0.0f));
-	cameraTransf = rotation * cameraTransf;
+	// mat4 rotation = glm::eulerAngleXYZ(yaw_pitch_roll.x, yaw_pitch_roll.y, yaw_pitch_roll.z);
+	// cameraTransf = glm::translate(cameraTransf, -startCamPos);
+	// cameraTransf = cameraTransf*rotation;
+	// cameraTransf = glm::translate(cameraTransf, startCamPos);
+	// cameraTransf = glm::translate(cameraTransf, user_shift);
 
+
+	cameraTransf = glm::lookAt(pos, pos + forward, up);
+
+	pos += user_shift;
+
+	user_shift.x = 0;
+	user_shift.z = 0;
+	user_shift.y = 0;
+
+	yaw_pitch_roll_shift.x = 0;
+	yaw_pitch_roll_shift.z = 0;
+	yaw_pitch_roll_shift.y = 0;
 }
 
 
 vec3 Camera::getLookingAt() {
-	glm::vec4 res = glm::vec4(lookingAt, 1.0f);
-	res = res * cameraTransf;
-	return glm::normalize(glm::vec3(res.x, res.y, res.z));
+	return glm::normalize(forward);
 }
 
 void Camera::moveHorBy(f32 shift) {
-	user_shift.x -= shift;
+	vec3 v = glm::normalize(
+		glm::cross(
+			glm::normalize(forward),
+			glm::normalize(up)
+		)
+	)*shift;
+	user_shift += v;
 }
 
 void Camera::moveFwdBy(f32 shift) {
-	user_shift.z -= shift;
+	user_shift += forward*shift;
 }
 
 void Camera::moveVerBy(f32 shift) {
-	user_shift.y -= shift;
+	user_shift += up*shift;
 }
 
-void Camera::turnHorBy(f32 shift) {
-	user_rotate.x += shift;
+void Camera::moveToMousePos(f32 pitch, f32 yaw) {
+	yaw_pitch_roll.x += yaw;
+	yaw_pitch_roll.y += pitch;
+
+	yaw_pitch_roll_shift.x = yaw;
+	yaw_pitch_roll_shift.y = pitch;
+
+
+	mat3 rotation = glm::rotate(
+		mat4(1.0f),
+		yaw_pitch_roll_shift.x,
+		glm::normalize(glm::cross(glm::normalize(forward), glm::normalize(up)))
+	);
+	forward = rotation*forward;
+
+	rotation = glm::eulerAngleY(yaw_pitch_roll_shift.y);
+	forward = rotation*forward;
+
 }
 
-void Camera::turnVerBy(f32 shift) {
-	user_rotate.y += shift;
+void Camera::changeYaw(f32 amount) {
+	yaw_pitch_roll.x += amount;
+	yaw_pitch_roll_shift.x = amount;
+	mat3 rotation = glm::rotate(mat4(1.0f), yaw_pitch_roll_shift.x, glm::normalize(glm::cross(glm::normalize(forward), glm::normalize(up))));
+	forward = rotation*forward;
 }
 
-void Camera::turndirUP(f32 shift) {
-	Pitch += shift;
+void Camera::changePitch(f32 amount) {
+	yaw_pitch_roll.y += amount;
+	yaw_pitch_roll_shift.y = amount;
+	mat3 rotation = glm::eulerAngleY(yaw_pitch_roll_shift.y);
+	forward = rotation*forward;
 }
 
-void Camera::turndirDOWN(f32 shift) {
-	Pitch -= shift;
+void Camera::changeRoll(f32 amount) {
+	yaw_pitch_roll.z += amount;
+	yaw_pitch_roll_shift.z = amount;
+	mat3 rotation = glm::eulerAngleZ(yaw_pitch_roll_shift.z);
+	up = rotation*up;
 }
 
-void Camera::turndirLEFT(f32 shift) {
-	Yaw -= shift;
+void Camera::setYaw(f32 amount) {
+	f32 change_by = glm::abs(yaw_pitch_roll.x - amount);
+	if(amount < yaw_pitch_roll.x) change_by *= -1;
+	changeYaw(change_by);
 }
 
-void Camera::turndirRIGHT(f32 shift) {
-	Yaw += shift;
+void Camera::setPitch(f32 amount) {
+	f32 change_by = glm::abs(yaw_pitch_roll.y - amount);
+	if(amount < yaw_pitch_roll.y) change_by *= -1;
+	changePitch(change_by);
 }

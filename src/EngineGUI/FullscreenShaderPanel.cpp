@@ -21,8 +21,8 @@ void NoxEngineGUI::updateFullscreenShaderPanel(GameState* state, GUIParams *ui_p
 	}
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
-	state->renderer->updateProjection(wsize.x, wsize.y);
-	ImGui::Image((ImTextureID)(u64)state->texture_used, wsize, ImVec2(0, 1), ImVec2(1, 0));
+	state->renderer->updateProjection((i32)wsize.x, (i32)wsize.y);
+	ImGui::Image((ImTextureID)(u64)state->fullscreen_shader_texture_used, wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	// Window end
 	ImGui::End();
@@ -172,13 +172,13 @@ void TextureView(const char *tree_name, const char *file_path, FullscreenShader&
 
 
 		ImVec2 wsize;
-		wsize.x = (i32)ImGui::GetContentRegionAvail().x;
+		wsize.x = ImGui::GetContentRegionAvail().x;
 		wsize.y = wsize.x/ratio;
 		if(pp.IsInit())
 			ImGui::Image((ImTextureID)(u64)pp.GetTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 		if(ImGui::Button("Preview")) {
-			state->texture_used = pp.GetTexture();
+			state->fullscreen_shader_texture_used = pp.GetTexture();
 		}
 
 		ImGui::TreePop();

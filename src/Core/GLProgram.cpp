@@ -74,27 +74,32 @@ void GLProgram::use()
 
 void GLProgram::setBool(const std::string& name, bool value) const
 {
-	glUniform1i(glGetUniformLocation(_id, name.c_str()), (int)value);
+	glProgramUniform1i(_id, glGetUniformLocation(_id, name.c_str()), (int)value);
 }
 
 void GLProgram::setInt(const std::string& name, int value) const
 {
-	glUniform1i(glGetUniformLocation(_id, name.c_str()), value);
+	glProgramUniform1i(_id, glGetUniformLocation(_id, name.c_str()), value);
 }
 
 void GLProgram::setFloat(const std::string& name, float value) const
 {
-	glUniform1f(glGetUniformLocation(_id, name.c_str()), value);
+	glProgramUniform1f(_id, glGetUniformLocation(_id, name.c_str()), value);
 }
 
 void GLProgram::set3Float(const std::string& name, float x, float y, float z) const
 {
-    glUniform3f(glGetUniformLocation(_id, name.c_str()), x, y, z);
+    glProgramUniform3f(_id, glGetUniformLocation(_id, name.c_str()), x, y, z);
 }
 
 void GLProgram::set4Float(const std::string& name, float x, float y, float z, float w) const
 {
-	glUniform4f(glGetUniformLocation(_id, name.c_str()), x, y, z, w);
+	glProgramUniform4f(_id, glGetUniformLocation(_id, name.c_str()), x, y, z, w);
+}
+
+void GLProgram::set4Matrix(const std::string &name, glm::mat4 mat) const
+{
+  glProgramUniformMatrix4fv(_id, glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 int GLProgram::getUniformLocation(const std::string& name)
@@ -105,11 +110,6 @@ int GLProgram::getUniformLocation(const std::string& name)
 int GLProgram::getAtrributeLocation(const std::string& name)
 {
 	return glGetAttribLocation(_id, name.c_str());
-}
-
-void GLProgram::set4Matrix(const std::string &name, glm::mat4 mat) const
-{
-  glUniformMatrix4fv(glGetUniformLocation(_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void GLProgram::printAttribInfo()

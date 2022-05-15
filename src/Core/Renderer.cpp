@@ -78,27 +78,12 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
 	// Create framebuffer  
 	glGenFramebuffers(1, &FBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-    // Gen texture for framebuffer    
-    glGenTextures(1, &textureToRenderTo);
-    glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
-
 	glGenTextures(1, &depthStencilTexture);
-	glBindTexture(GL_TEXTURE_2D, depthStencilTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilTexture, 0);
+    glGenTextures(1, &textureToRenderTo);
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		LOG_DEBUG("Troubles with creating a framebuffer");
-    }
-
+	updateTextureSizes(width, height);
+    
 	glBindTexture(GL_TEXTURE_2D, 0);
-
     // Generate buffer handlers
     glGenVertexArrays(1, &VAO);
 
@@ -271,7 +256,7 @@ GLuint Renderer::setTexture(const String texturePath, const char* uniName, int n
 	stbi_image_free(data);
 
 	GLuint textureLoc = program->getUniformLocation(uniName);
-	glUniform1i(textureLoc, num);
+	glProgramUniform1i(program->getProgramId(), textureLoc, num);
 
 	return tex;
 }
@@ -376,23 +361,9 @@ void Renderer::draw() {
 void Renderer::fillBackground(f32 r, f32 g, f32 b) {
 
 	// Set background color
-	
 	program->use();
-
-	f32 current_clear_color[4];
-	glGetFloatv(GL_COLOR_CLEAR_VALUE, current_clear_color);
-
-	setFrameBufferToTexture();
 	glClearColor(r,g,b, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	setFrameBufferToDefault();
-
-	glClearColor(
-			current_clear_color[0],
-			current_clear_color[1],
-			current_clear_color[2],
-			current_clear_color[3] );
-
+	
 }
 
 void Renderer::fillBackground(i32 hex) {
@@ -401,31 +372,19 @@ void Renderer::fillBackground(i32 hex) {
 	
 	program->use();
 
-	f32 current_clear_color[4];
-	glGetFloatv(GL_COLOR_CLEAR_VALUE, current_clear_color);
-
 	f32 red =   (f32)((hex & 0xFF000000) >> 24)/255.0f;
 	f32 green = (f32)((hex & 0x00FF0000) >> 16)/255.0f;
 	f32 blue =  (f32)((hex & 0x0000FF00) >>  8)/255.0f;
 	f32 alpha = (f32)((hex & 0x000000FF) >>  0)/255.0f;
 
-	setFrameBufferToTexture();
+	// setFrameBufferToTexture();
 	glClearColor(red , green , blue, alpha);
-	glClear(GL_COLOR_BUFFER_BIT);
-	setFrameBufferToDefault();
-
-	glClearColor(
-			current_clear_color[0],
-			current_clear_color[1],
-			current_clear_color[2],
-			current_clear_color[3] );
-
 }
 
 void Renderer::updateProjection(i32 width, i32 height) {
 	w = width;
 	h = height;
-	projection = glm::perspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f, 1000.0f);
+	projection = glm::infinitePerspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f);
 	program->set4Matrix("toProjection", projection);
 }
 
@@ -604,10 +563,9 @@ void Renderer::useProgram()
 
 }
 
-void Renderer::updateLightPos(float x, float y, float z) 
+void Renderer::updateLightPos(f32 x, f32 y, f32 z) 
 {
-    program->use();
-    program->set3Float("lightPosition",x, y, z);
+    program->set3Float("lightPosition", x, y, z);
 }
 
 void Renderer::updateObjectTransformation(mat4 transformation, u32 rendObjId) {
@@ -792,7 +750,6 @@ void Renderer::drawSkyBox()
 	view[3][2] = 0;
 
     program->use();
-    setFrameBufferToTexture();
 
     // draw skybox 
     glDepthMask(GL_FALSE);
@@ -805,7 +762,7 @@ void Renderer::drawSkyBox()
     glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
     program->set4Matrix("view", view);
@@ -818,10 +775,38 @@ void Renderer::drawSkyBox()
 	glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
 
-    setFrameBufferToDefault();
-
     glBindVertexArray(0);
 
+}
+
+
+void Renderer::updateTextureSizes(u32 width, u32 height) {
+	
+	w = width;
+	h = height;
+
+    // Gen texture for framebuffer    
+    glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, depthStencilTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilTexture, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		LOG_DEBUG("Troubles with creating a framebuffer");
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glViewport(0, 0, width, height);
 }
 
 const char* Renderer::getSkyboxImagePath(u32 skyboxPosition) {
