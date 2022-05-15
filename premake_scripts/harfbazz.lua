@@ -7,7 +7,7 @@ externalproject "harfbazz"
 
 	includedirs {"../libs/harfbazz/src/"}
 
-	if _ACTION ~= 'clean_up' then
+	if _ACTION ~= 'clean_up' and _ACTION ~= 'clean_up_full'  then
 		os.executef('cmake --log-level NOTICE -G %q -B%s -S%s',
 		"Visual Studio 17 2022",
 		"../libs/build_harfbuzz/",

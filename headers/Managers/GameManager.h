@@ -73,8 +73,6 @@ namespace NoxEngine {
 			u32 post_process_quad_index;
 			u32 post_process_vao;
 
-
-			Camera* camera;
 			bool updateNeededECS;
 			bool should_close;
 
@@ -101,12 +99,12 @@ namespace NoxEngine {
 			void update_livereloads();
 			void update_inputs();
 			void update_ecs();
-			void update_gui();
-			void update_audio();
 			void update_animation();
+			void update_audio();
 			void update_renderer();
+			void update_postprocessors();
+			void update_gui();
 			
-
 			void keyboard_callback(GLFWwindow *, i32 key, i32 scan, i32 action, i32 mods);
 
 			// Window

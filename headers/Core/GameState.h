@@ -17,25 +17,39 @@ namespace NoxEngine {
 		bool is3d;
 	};
 
-	typedef std::map<String, AudioSource> AudioRepo;
-	typedef std::map<String, MeshScene> MeshSceneRepo;
+	typedef Map<String, AudioSource> AudioRepo;
+	typedef Map<String, MeshScene> MeshSceneRepo;
 
 	struct GameState {
-		AudioRepo audioSources;
+		FullscreenShader *current_post_processor;
 		Renderer *renderer;
-		MeshSceneRepo meshScenes;
-		f32 light[3];
-		Array<Scene *> scenes;
 		Scene *activeScene;
-		u32 win_height;
-		u32 win_width;
+		AudioRepo audioSources;
+		MeshSceneRepo meshScenes;
+		Array<Scene *> scenes;
 
 		// Active audio in sequencer
 		Array<String> selectedAudio;
 
-		GLuint texture_used;
 		Array<FullscreenShader> post_processors;
-		FullscreenShader *current_post_processor;
+		Array<Camera*> cameras;
+
+		// u32 texture_used;
+		u32 fullscreen_shader_texture_used;
+		f32 light[3];
+		u32 prev_win_height;
+		u32 prev_win_width;
+		u32 win_height;
+		u32 win_width;
+
+		i8 mouse_left;
+		i8 mouse_right;
+
+		f64 mouse_x_delta;
+		f64 mouse_y_delta;
+		f64 mouse_x;
+		f64 mouse_y;
+
 
 	};
 

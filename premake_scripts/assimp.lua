@@ -21,7 +21,7 @@ externalproject "Assimp"
 
   targetdir "../libs/compiled_libs/assimp"
 
-  if _ACTION ~= 'clean_up' then
+  if _ACTION ~= 'clean_up' and _ACTION ~= 'clean_up_full'  then
 	  os.executef('cmake --log-level NOTICE -G %q -B%s -S%s -D %s -D %s -D %s -D %s -D %s',
 		  "Visual Studio 17 2022",
 		  "../libs/build_assimp/",

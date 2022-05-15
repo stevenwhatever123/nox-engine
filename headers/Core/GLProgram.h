@@ -35,6 +35,7 @@ namespace NoxEngine {
 			void setFloat(const String& name, f32 value) const;
 			void set3Float(const String& name, f32 x, f32 y, f32 z) const;
 			inline void set3Float(const String& name, vec3& v) const { set3Float(name, v.x, v.y, v.z);};
+			inline void set3Float(const String& name, const vec3& v) const { set3Float(name, v.x, v.y, v.z);};
 			void set4Float(const String& name, f32 x, f32 y, f32 z, f32 w) const;
 			void set4Matrix(const String& name, mat4 mat) const;
 

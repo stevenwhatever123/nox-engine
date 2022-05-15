@@ -1,6 +1,9 @@
 function tick(dt, current_time)
-	obj_pos = self:GetTransformComponent();
+	obj_pos = self:GetCameraComponent();
+	cam = obj_pos:camera();
+	cam_pos = cam:pos();
 
-	obj_pos.x = 100*math.cos(current_time);
-	obj_pos.z = 20*math.sin(current_time);
+	cam.yaw = math.sin(current_time);
+	cam.pitch = math.sin(current_time);
+
 end

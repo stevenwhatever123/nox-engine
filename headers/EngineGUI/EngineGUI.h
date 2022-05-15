@@ -29,6 +29,7 @@ namespace NoxEngineGUI {
 		NoxEngine::Camera *current_cam;
 
 		bool full_screen = false;
+		bool scene_active = true;
 
 		// TODO: make is3d a checkbox. if updated, unload and create a new sound
 		bool soundIs3d;

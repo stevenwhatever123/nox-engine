@@ -36,14 +36,25 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *ui_params) {
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
 
-	state->renderer->updateProjection(wsize.x, wsize.y);
+	state->renderer->updateProjection((i32)wsize.x, (i32)wsize.y);
 
-	ImGui::Image((ImTextureID)(u64)state->texture_used, wsize, ImVec2(0, 1), ImVec2(1, 0));
+	state->prev_win_width  = state->win_width;
+	state->prev_win_height = state->win_height;
+
+	state->win_width  = (u32)wsize.x;
+	state->win_height = (u32)wsize.y;
 
 	if(ImGui::IsWindowFocused()) {
 		ui_params->full_screen = false;
+		ui_params->scene_active = true;
+	} else {
+		ui_params->scene_active = false;
 	}
 
+
+	ImGui::Image((ImTextureID)(u64)state->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
+
+	
 
 	// Window end
 	ImGui::End();
