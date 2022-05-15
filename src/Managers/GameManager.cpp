@@ -560,7 +560,7 @@ void GameManager::update_gui() {
 
 	NoxEngineGUI::updateGUI(game_state, &ui_params);
 
-	f(!ui_params.full_screen) {
+	if(!ui_params.full_screen) {
 		// NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
 		NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
 		NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
