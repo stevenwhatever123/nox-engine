@@ -19,7 +19,7 @@ namespace NoxEngine {
 
 
 	class GLProgram {
-		private:
+		protected:
 			u32 compileShader(String& filename, i32 shaderType);
 			u32 makeProgram(Array<ShaderFile> shaders);
 			u32 _id;
@@ -28,11 +28,14 @@ namespace NoxEngine {
 			GLProgram(Array<ShaderFile> shaders);
 			void use();
 
+			inline u32 getProgramId() { return _id; };
+
 			void setBool(const String& name, bool value) const;
 			void setInt(const String& name, i32 value) const;
 			void setFloat(const String& name, f32 value) const;
 			void set3Float(const String& name, f32 x, f32 y, f32 z) const;
 			inline void set3Float(const String& name, vec3& v) const { set3Float(name, v.x, v.y, v.z);};
+			inline void set3Float(const String& name, const vec3& v) const { set3Float(name, v.x, v.y, v.z);};
 			void set4Float(const String& name, f32 x, f32 y, f32 z, f32 w) const;
 			void set4Matrix(const String& name, mat4 mat) const;
 

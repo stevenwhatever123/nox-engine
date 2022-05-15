@@ -21,22 +21,19 @@ namespace NoxEngineGUI {
 
 	struct GUIParams {
 		bool firstLoop = true;
-
-		u32 locWidth;
-		u32 locHeight;
-		u32 prevWidth;
-		u32 prevHeight;
-
 		int imguizmoMode = 7; // Translation by default
-
 		// the array index of the selected entity in the hierarchy window
 		i32 selectedEntity;		
 		
 		u32 sceneBackgroundColor;
 		NoxEngine::Camera *current_cam;
 
+		bool full_screen = false;
+		bool scene_active = true;
+
 		// TODO: make is3d a checkbox. if updated, unload and create a new sound
 		bool soundIs3d;
+
 	};
 
 	// Each panel should have an enum associated with it
@@ -53,6 +50,7 @@ namespace NoxEngineGUI {
 		Hierarchy,
 		Inspector,
 
+
 		// Animation
 		AnimationSequencerPanel,
 
@@ -60,7 +58,13 @@ namespace NoxEngineGUI {
 		AudioPanel,
 
 		// Skybox
-		SkyboxSettings
+		SkyboxSettings,
+
+
+		// FullScreen Shader
+		FullscreenShader,
+		PostPorcessors,
+
 	};
 
 	// Assign the panel name to the panel's enum
@@ -73,7 +77,9 @@ namespace NoxEngineGUI {
 		{ PanelName::Inspector,         "Inspector" },
 		{ PanelName::AnimationSequencerPanel, "Animation Sequencer" },
 		{ PanelName::AudioPanel,        "Audio Editor" },
-		{ PanelName::SkyboxSettings, "Skybox Settings" }
+		{ PanelName::SkyboxSettings, "Skybox Settings" },
+		{ PanelName::FullscreenShader,  "Fullscreen Shader" },
+		{ PanelName::PostPorcessors,  "Post Processors" },
 	};
 
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;

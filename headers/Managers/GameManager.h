@@ -23,18 +23,10 @@
 #include <Managers/EventManager.h>
 #include <Managers/EventNames.h>
 
-#include <EngineGUI/EngineGUI.h>
-#include <EngineGUI/AudioPanel.h>
-#include <EngineGUI/AnimationPanel.h>
-#include <EngineGUI/ScenePanel.h>
-#include <EngineGUI/PresetObjectPanel.h>
-#include <EngineGUI/HierarchyPanel.h>
-#include <EngineGUI/InspectorPanel.h>
-#include <EngineGUI/ImGuizmoTool.h>
-#include <EngineGUI/SkyboxPanel.h>
 
 #include <Components/RenderableComponent.h>
 #include <Components/TransformComponent.h>
+#include <EngineGUI/EngineGUI.h>
 #include <Core/GridObject.h>
 
 // TODO: move to a config file
@@ -68,20 +60,19 @@ namespace NoxEngine {
 			void addAudioSource(AudioSource audioSource);
 			bool playSound(Entity *ent, IAudioSource *);
 			bool stopSound(Entity* ent, IAudioSource *);
-
 			bool loadAudioSource(Entity* ent, IAudioSource *);
 			bool loadAudioGeometry(Entity* ent, IAudioGeometry *);
-			
-			inline Renderer* GetRenderer() { return renderer; };
 
+			inline Renderer* GetRenderer() { return renderer; };
 			inline bool KeepRunning() { return !should_close; }
 
-			u32 win_height;
-			u32 win_width;
 			time_type currentTime;
 			time_type deltaTime;
 			time_type lastTime;
-			Camera* camera;
+			i32 postprocess_framebuffer;
+			u32 post_process_quad_index;
+			u32 post_process_vao;
+
 			bool updateNeededECS;
 			bool should_close;
 
@@ -103,19 +94,17 @@ namespace NoxEngine {
 			void init_gui();
 			void init_scene();
 			void init_scripts();
-
-			void asset_ui();
-			void main_contex_ui();
+			void init_postprocess();
 
 			void update_livereloads();
 			void update_inputs();
 			void update_ecs();
-			void update_gui();
-			void update_audio();
 			void update_animation();
+			void update_audio();
 			void update_renderer();
+			void update_postprocessors();
+			void update_gui();
 			
-
 			void keyboard_callback(GLFWwindow *, i32 key, i32 scan, i32 action, i32 mods);
 
 			// Window

@@ -36,7 +36,7 @@ Mesh::Mesh(const Mesh& other)
 
 	glRenderType = other.glRenderType;
 
-	rendObjId = -1;
+	rendObjId = other.rendObjId;
 }
 
 Mesh::Mesh(std::istream& stream)

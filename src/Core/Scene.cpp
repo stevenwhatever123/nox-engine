@@ -44,13 +44,10 @@ void Scene::addEntity(PresetObject obj) {
 		ent->addComp<TransformComponent>(transform);
 		break;
 
-	// No need to add any component
-	case EmptyEntity:
-	default:
-		break;
+		case EmptyEntity:
+		default:
+			break;
 
 	}
-
-	// Finally add the entity to the scene
 	this->addEntity(ent);
 }

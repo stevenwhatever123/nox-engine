@@ -16,14 +16,14 @@ int AnimationSequencer::GetItemTypeCount() const
     return (i32) game_state->audioSources.size();
 }
 
-const char* AnimationSequencer::GetItemTypeName(int index) const
+const char* AnimationSequencer::GetItemTypeName(i32 index) const
 {
     if (!game_state->audioSources.empty())
     {
         //return game_state->audioSources.
         auto startItr = game_state->audioSources.begin();
         auto endItr = game_state->audioSources.end();
-        for (u32 i = 0; i < index; i++)
+        for (i32 i = 0; i < index; i++)
         {
             startItr++;
         }

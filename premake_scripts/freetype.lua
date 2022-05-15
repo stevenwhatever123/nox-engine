@@ -24,7 +24,7 @@ externalproject "freetype"
 		"harfbazz"
 	}
 
-	if _ACTION ~= 'clean_up' then
+	if _ACTION ~= 'clean_up' and _ACTION ~= 'clean_up_full'  then
 
 		current_dir = os.getcwd();
 		os.chdir("../libs/build_harfbuzz")

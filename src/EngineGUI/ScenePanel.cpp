@@ -8,7 +8,7 @@
 
 using namespace NoxEngine;
 
-void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
+void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *ui_params) {
 
 	String name = kPanelNameMap[ PanelName::Scene ];
 
@@ -30,7 +30,6 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 	
 			PresetObject payloadObject = *(const PresetObject*)payload->Data;
 			printf("Dropped %s (%i)\n", PRESET_OBJECT_NAMES_MAP[payloadObject].c_str(), payloadObject);
-		
 			// TODO: Logic for translating 2D cursor position to 3D world coordinates
 			// On button release, get cursor position
 			ImGuiIO& io = ImGui::GetIO();
@@ -73,6 +72,23 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 	}
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
+
+	state->renderer->updateProjection((i32)wsize.x, (i32)wsize.y);
+
+	state->prev_win_width  = state->win_width;
+	state->prev_win_height = state->win_height;
+
+	state->win_width  = (u32)wsize.x;
+	state->win_height = (u32)wsize.y;
+
+	if(ImGui::IsWindowFocused()) {
+		ui_params->full_screen = false;
+		ui_params->scene_active = true;
+	} else {
+		ui_params->scene_active = false;
+	}
+
+
 	ImGui::Image((ImTextureID)(u64)state->renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGuizmo::SetOrthographic(false);

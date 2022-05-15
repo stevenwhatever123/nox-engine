@@ -1,6 +1,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS     // might not be the best idea
 
 #include <EngineGUI/ImGuiWidgets.h>
+#include <Core/Types.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui.h>
 
@@ -15,7 +16,7 @@ namespace ImGui {
         if (window->SkipItems)
             return false;
 
-        int width = ImGui::GetContentRegionAvail().x;
+        i32 width = (i32)ImGui::GetContentRegionAvail().x;
 
         ImVec2 size = imageSize;
         if (size.x <= 0 && size.y <= 0) { size.x = size.y = ImGui::GetTextLineHeightWithSpacing(); }
