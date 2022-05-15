@@ -8,7 +8,7 @@
 
 using namespace NoxEngine;
 
-void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *ui_params) {
+void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 
 	String name = kPanelNameMap[ PanelName::Scene ];
 
@@ -82,10 +82,10 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *ui_params) {
 	state->win_height = (u32)wsize.y;
 
 	if(ImGui::IsWindowFocused()) {
-		ui_params->full_screen = false;
-		ui_params->scene_active = true;
+		params->full_screen = false;
+		params->scene_active = true;
 	} else {
-		ui_params->scene_active = false;
+		params->scene_active = false;
 	}
 
 
