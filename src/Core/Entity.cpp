@@ -21,7 +21,8 @@ Entity::Entity(i32 _id, char* _name)
 	id(_id), 
 	hasComp(0),
 	_isEnabled(~0),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 
 	if (_name != nullptr) name = _name;
 	else name = (char *)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
@@ -33,7 +34,8 @@ Entity::Entity(Scene* scene, char* _name)
 	:
 	hasComp(0),
 	_isEnabled(~0),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 
 	assert(scene != nullptr);
 
@@ -53,7 +55,8 @@ Entity::Entity(Scene* scene, const char* _name)
 	:
 	hasComp(0),
 	_isEnabled(~0),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 
 	assert(scene != nullptr);
 
@@ -70,7 +73,8 @@ Entity::Entity(Scene* scene, const char* _name, const char* _filepath)
 	:
 	hasComp(0),
 	_isEnabled(~0),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 
 	assert(scene != nullptr);
 
@@ -90,7 +94,8 @@ Entity::Entity(Entity&& other)
 	components(other.components), 
 	name(other.name), 
 	_isEnabled(other._isEnabled),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 }
 
 Entity::~Entity() {

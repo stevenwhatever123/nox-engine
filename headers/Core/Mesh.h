@@ -8,6 +8,7 @@ namespace NoxEngine {
 	class Mesh : public RenderableComponent {
 	public:
 		Mesh();
+		Mesh(const Mesh& other);
 		Mesh(std::istream& stream);
 		~Mesh();
 
