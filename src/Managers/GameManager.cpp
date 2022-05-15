@@ -496,6 +496,10 @@ void GameManager::update_inputs() {
 		renderer->getCamera()->moveToMousePos((f32)game_state.mouse_x_delta*deltaTime, (f32)game_state.mouse_y_delta*deltaTime);
 	}
 
+	if (keys['1']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::TRANSLATE; };
+	if (keys['2']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::ROTATE; };
+	if (keys['3']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::SCALE; };
+
 }
 
 void GameManager::update_ecs() {
@@ -549,8 +553,9 @@ void GameManager::update_gui() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
+	
 	ImGui::PushFont(font);
 
 	NoxEngineGUI::updateGUI(game_state, &ui_params);
@@ -560,6 +565,7 @@ void GameManager::update_gui() {
 		NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
 		NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
 		NoxEngineGUI::updateSkyboxPanel(&game_state);
+		NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
 	} else {
 		NoxEngineGUI::updatePostProcessorsPanel(&game_state, &ui_params);
 	}
@@ -567,14 +573,14 @@ void GameManager::update_gui() {
 	NoxEngineGUI::updatePresetObjectPanel(&game_state);
 	NoxEngineGUI::updateScenePanel(&game_state, &ui_params);
 	NoxEngineGUI::updateFullscreenShaderPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
-
+	
 	// Make sure the scene panel is focused when we run
 	if(ui_params.firstLoop) {
 		ImGui::SetWindowFocus(kPanelNameMap[ PanelName::Scene ].c_str());
 		ui_params.firstLoop = false;
 		ui_params.full_screen = false;
 	}
+
 
 	ImGui::PopFont();
 	ImGui::PopStyleVar();

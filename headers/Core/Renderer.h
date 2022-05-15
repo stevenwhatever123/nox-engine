@@ -94,6 +94,7 @@ namespace NoxEngine {
 
 		inline mat4 getProjMatr() { return projection; }
 		inline mat4 getCameraMatr() { return camera->getCameraTransf(); }
+		inline mat4 getCameraView() { return cam; };
 
 		inline void setCamera(Camera *cam) { camera = cam; };
 		inline Camera* getCamera() { return camera; };
@@ -117,6 +118,9 @@ namespace NoxEngine {
 		void setSkyBoxImages(const Array<String> &skyboxImages);
 		void drawSkyBox();
 		void liveReloadFile(const char *file, LiveReloadEntry *entry);
+
+		i32 getWidth() { return w; };
+		i32 getHeight() { return h; };
 
 		private:
 

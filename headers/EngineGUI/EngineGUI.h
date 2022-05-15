@@ -21,7 +21,7 @@ namespace NoxEngineGUI {
 
 	struct GUIParams {
 		bool firstLoop = true;
-
+		int imguizmoMode = 7; // Translation by default
 		// the array index of the selected entity in the hierarchy window
 		i32 selectedEntity;		
 		
