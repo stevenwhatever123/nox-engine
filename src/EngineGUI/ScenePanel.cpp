@@ -36,32 +36,38 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams* params) {
 			ImGuiIO& io = ImGui::GetIO();
 			ImVec2 origin = ImGui::GetCursorScreenPos(); // Start pos of this window relative to the whole app window
 			const ImVec2 mouse_pos_in_canvas(io.MousePos.x - origin.x, io.MousePos.y - origin.y); // MousePos is mouse position relative to the whole window.
-			std::cout << "\nMouse pos in world " << io.MousePos.x << " " << io.MousePos.y << std::endl;
-			std::cout << "win pos relative to win " << origin.x << " " << origin.y << std::endl;
-			std::cout << "Mouse pos on canvas " << mouse_pos_in_canvas.x << " " << mouse_pos_in_canvas.y << std::endl;
 
 			// Transform cursor position to the world position with depth set to 5 (arbitary)
 			glm::vec3 mouse_pos_in_world = getPosOfMouseInWorldCoord(state, mouse_pos_in_canvas.x, mouse_pos_in_canvas.y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
-			std::cout << "Mouse pos in w " << mouse_pos_in_world.x << " " << mouse_pos_in_world.y << " " << mouse_pos_in_world.z << std::endl;
+			// Create entity
+			Entity* ent = new Entity(state->activeScene, PRESET_OBJECT_NAMES_MAP[payloadObject].c_str());
 
+			for (auto it = PRESET_OBJECT_COMPONENTS[payloadObject].begin();
+				it != PRESET_OBJECT_COMPONENTS[payloadObject].end(); it++)
+			{
+				ComponentType type = it->first;
+				IComponent* comp = it->second;
 
-			// Crete entity
-			Entity* testCube = new Entity(state->activeScene, PRESET_OBJECT_NAMES_MAP[payloadObject].c_str());
-			// Create position of the entity based on the the world pos of the cursor
+				if (type == TransformType)
+				{
+					// Create position of the entity based on the world pos of the cursor
+					TransformComponent* pos = new TransformComponent(mouse_pos_in_world.x, mouse_pos_in_world.y, mouse_pos_in_world.z);
+				
+					ent->addComp(pos);
+				}
 
-			// Create a mesh for it
-			NoxEngine::RenderableComponent* geom = new NoxEngine::RenderableComponent(0.0f, 0.0f, 0.0f, "assets/meshes/textures/Terracotta_Tiles_002_Base_Color.jpg");
+				if (type == RenderableType)
+				{
+					RenderableComponent* rendComp 
+						= new RenderableComponent( *(RenderableComponent*)comp);
 
-			// Create its position
-			TransformComponent* pos = new TransformComponent(mouse_pos_in_world.x, mouse_pos_in_world.y, mouse_pos_in_world.z);
-
-			// Add components to the entity
-			testCube->addComp(geom);
-			testCube->addComp(pos);
+					ent->addComp(rendComp);
+				}
+			}
 
 			// Add an entity to the active scene
-			state->activeScene->addEntity(testCube);
+			state->activeScene->addEntity(ent);
 		}
 		ImGui::EndDragDropTarget();
 	}

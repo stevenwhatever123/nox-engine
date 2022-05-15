@@ -1,6 +1,12 @@
 #pragma once
 
 #include <Core/Types.h>
+#include <Components/IComponent.h>
+#include <Components/RenderableComponent.h>
+#include <Core/Mesh.h>
+#include <Components/TransformComponent.h>
+#include <Utils/FBXFileLoader.h>
+#include <Core/MeshScene.h>
 #include <map>
 
 
@@ -47,7 +53,12 @@ namespace NoxEngineGUI {
 	extern Array< String > PRESET_CATEGORY_NAMES_LIST;
 	extern Array< String > PRESET_OBJECT_NAMES_LIST;
 
+	extern std::map< PresetObject, std::map<NoxEngine::ComponentType, NoxEngine::IComponent *>> PRESET_OBJECT_COMPONENTS;
+
 	// Objects contained in a category
 	extern std::map< PresetCategory, Array<PresetObject> > PRESET_OBJECTS;
 	void initPresetObjectVars();
+
+	void loadPresetModels();
+	void initPresetObject();
 }
