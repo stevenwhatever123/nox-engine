@@ -36,7 +36,7 @@ namespace NoxEngine {
 
 		// u32 texture_used;
 		u32 fullscreen_shader_texture_used;
-		f32 light[3];
+		Array<vec3> lightSources;
 		u32 prev_win_height;
 		u32 prev_win_width;
 		u32 win_height;

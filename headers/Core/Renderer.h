@@ -2,6 +2,7 @@
 
 //System std lib include
 #include <iostream>
+#include <format>
 
 // 3rd Party Include
 #include <Core/Types.h>
@@ -68,6 +69,8 @@ namespace NoxEngine {
 		void removeObject(Entity* ent, ComponentType componentType);
 		void removeObject(u32 rendObjId);
 		void clearObject();
+
+		void addLights(const vec3 light);
 		
 		// Program handle
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
@@ -105,7 +108,7 @@ namespace NoxEngine {
 
 		// Updates the view transformation using the current camera
 		void updateCamera();
-		void updateLightPos(float x, float y, float z);
+		void updateLightPos(int lightInd, f32 x, f32 y, f32 z);
 
 		inline const Map<u32, RendObj>& getObjects() const { return objects; };
 
@@ -164,6 +167,8 @@ namespace NoxEngine {
 		Array<vec3> tangents;
 		Array<i32> elements;
 
+		Array<vec3> lightSources;
+
 		// Buffer and texture to render to.
 		GLuint textureToRenderTo;
 		GLuint depthStencilTexture;
@@ -190,7 +195,7 @@ namespace NoxEngine {
 		GLuint setTexture(const String texturePath, const char* uniName, i32 num);
 
 		void setupSkybox();
-		void skyboxLoadTexture();
+		void skyboxLoadTexture(); 
 
 		u32 nextObjectId;
 	};

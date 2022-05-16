@@ -1,23 +1,38 @@
 #version 450 core
 
+#define NUM_OF_LIGHTS 1
+
 in vec3 position;
 in vec3 normal;
 in vec2 texCoord;
 in vec3 tangent;
+
+struct LightSource
+{
+	vec3 tanPos;
+};
+
+
+
 
 
 out Vertex {
 	vec3 thePosition;
 	vec2 theTexCoord;
 	vec3 theNormal;
-	vec3 tangentLightPos;
-	vec3 tangentCamPos;
 	vec3 tangentPos;
 } v;
 
 
+out LightSource lS[NUM_OF_LIGHTS];
+
+
+out vec3 tanCamPos;
+
+
 // Uniforms
-uniform vec3 lightPosition;
+uniform LightSource lightPosition[NUM_OF_LIGHTS];
+
 uniform vec3 cameraPosition;
 
 uniform mat4 toCamera = mat4(1);
@@ -36,13 +51,18 @@ void main(void)
 
 	// For normal mapping
 	vec3 T = normalize(vec3(toWorld * modelMatrix * vec4(tangent, 0.0f)));
-	vec3 N = normalize(vec3(toWorld * modelMatrix * vec4(normal, 0.0f)));
-
+	vec3 N = v.theNormal;
 	vec3 B = cross(N, T);
 
 	mat3 TBN = transpose(mat3(T, B, N));
 
-	v.tangentLightPos = TBN * lightPosition;
-	v.tangentCamPos   = TBN * cameraPosition;
+	tanCamPos         = TBN * cameraPosition;
 	v.tangentPos      = TBN * vec3(toWorld * modelMatrix * vec4(position, 1.0f));
+
+
+	// Translate light
+	for(int i = 0; i < NUM_OF_LIGHTS; i++)
+        	lS[i].tanPos = TBN * lightPosition[i].tanPos; 
+
+	
 };  

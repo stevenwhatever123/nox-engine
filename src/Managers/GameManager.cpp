@@ -363,6 +363,13 @@ void GameManager::init_renderer() {
 	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(500, 0, 500), 50);
 	renderer->addPermObject(obj);
 	renderer->updateBuffers();
+
+	// MULTIPLE LIGHTS Init lights. Will be removed when light will be added dinamically
+	for (int i = 0; i < 1; i++)
+	{
+		game_state.lightSources.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+		renderer->addLights(game_state.lightSources[i]);
+	}
 }
 
 void GameManager::init_gui() {
@@ -492,13 +499,13 @@ void GameManager::update_inputs() {
 	game_state.mouse_y = y;
 
 	// full_screen is set to false when ScenePanel is focused
-	if(game_state.mouse_left && ui_params.scene_active) {
+	if(game_state.mouse_right && ui_params.scene_active) {
 		renderer->getCamera()->moveToMousePos((f32)game_state.mouse_x_delta*deltaTime, (f32)game_state.mouse_y_delta*deltaTime);
 	}
 
-	if (keys['1']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::TRANSLATE; };
-	if (keys['2']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::ROTATE; };
-	if (keys['3']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::SCALE; };
+	if (keys['Z']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::TRANSLATE; };
+	if (keys['X']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::ROTATE; };
+	if (keys['C']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::SCALE; };
 
 }
 
@@ -693,7 +700,10 @@ void GameManager::update_renderer() {
 	renderer->drawSkyBox();
 
 	renderer->setProgram(current_program);
-	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
+
+	// Update lights
+	for(int i = 0; i < game_state.lightSources.size(); i++)
+		renderer->updateLightPos(i, game_state.lightSources[i][0], game_state.lightSources[i][1], game_state.lightSources[i][2]);
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
 	renderer->draw();
 

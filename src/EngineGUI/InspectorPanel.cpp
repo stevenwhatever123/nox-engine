@@ -597,7 +597,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 		ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth());
 		if (ImGui::BeginPopup("Component List Popup")) {
-
+			ImGui::Text("                          ");
 			// Loop through all available components,
 			// gray out the ones that this entity has
 			for (int i = 1; i < ComponentType::ComponentTypeCount; i++) {

@@ -3,6 +3,8 @@
 #include <Core/Renderer.h>
 #include <Managers/IOManager.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace NoxEngine;
 const char* skyboxTextureNames[] = {
 	"Right",
@@ -21,6 +23,14 @@ void NoxEngineGUI::updateSkyboxPanel(NoxEngine::GameState* game_state) {
 
 	// Window Begin
 	ImGui::Begin(name.c_str());
+
+	for (int i = 0; i < game_state->lightSources.size(); i++)
+	{
+		ImGui::PushID(i);
+		const char* text = "Light " + i;
+		ImGui::SliderFloat3(text, glm::value_ptr(game_state->lightSources[i]), -100.0f, 100.0f);
+		ImGui::PopID();
+	}
 
 	for(u32 i = 0; i < 6; i++) {
 		ImGui::PushID(skyboxTextureNames[i]);

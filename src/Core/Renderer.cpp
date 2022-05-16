@@ -266,6 +266,11 @@ void Renderer::clearObject()
 	objects.clear();
 }
 
+void Renderer::addLights(const vec3 light)
+{
+	lightSources.push_back(light);
+}
+
 void Renderer::draw() {
 
 	// Render
@@ -561,9 +566,16 @@ void Renderer::useProgram()
 
 }
 
-void Renderer::updateLightPos(f32 x, f32 y, f32 z) 
+void Renderer::updateLightPos(int lightInd, f32 x, f32 y, f32 z) 
 {
-    program->set3Float("lightPosition", x, y, z);
+	lightSources[lightInd][0] = x;
+	lightSources[lightInd][1] = y;
+	lightSources[lightInd][2] = z;
+
+	// Get the light position
+	String attr = std::format("lightPosition[{}].tanPos", lightInd);
+
+    program->set3Float(attr, x, y, z);
 }
 
 void Renderer::updateObjectTransformation(mat4 transformation, u32 rendObjId) {
