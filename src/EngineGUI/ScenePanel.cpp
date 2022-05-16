@@ -29,7 +29,6 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 	if (!ImGui::IsWindowFocused() &&
 		ImGui::IsMouseDown(ImGuiMouseButton_Right) &&
 		ImGui::IsMouseHoveringRect(bb.GetTL(), bb.GetBR())) {
-		ImGui::SetActiveID(id, ImGui::GetCurrentWindow());
 		ImGui::SetWindowFocus();
 	}
 

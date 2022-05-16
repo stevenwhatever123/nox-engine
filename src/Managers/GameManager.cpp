@@ -73,6 +73,11 @@ void GameManager::update() {
 	update_postprocessors();
 	update_gui();
 
+	// Support closing via close button again
+	if (glfwWindowShouldClose(window)) {
+		should_close = true;
+	}
+
 	glfwSwapBuffers(window);
 }
 
