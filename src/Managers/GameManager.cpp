@@ -354,7 +354,7 @@ void GameManager::init_renderer() {
 	renderer = new Renderer(game_state.win_width, game_state.win_height, game_state.cameras[0]);
 	renderer->setCamera(game_state.cameras[0]);
 	renderer->setProgram(current_program);
-	renderer->useProgram();
+	renderer->updateProgram();
 
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
@@ -365,14 +365,14 @@ void GameManager::init_renderer() {
 	renderer->updateBuffers();
 
 	// MULTIPLE LIGHTS Init lights. Will be removed when light will be added dinamically
-	for (u32 i = 0; i < 3; i++)
-	{
-		game_state.lightSources.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
-		renderer->addLights(game_state.lightSources[i]);
-	}
+	//for (u32 i = 0; i < 3; i++)
+	//{
+	//	game_state.lightSources.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+	//	renderer->addLights(game_state.lightSources[i]);
+	//}
 
-	renderer->_change_num_of_light(3);
-	renderer->useProgram();
+	//renderer->_change_num_of_light(3);
+	//renderer->updateProgram();
 }
 
 void GameManager::init_gui() {

@@ -47,12 +47,6 @@ namespace NoxEngine {
 		// Component type of the meshSrc
 		ComponentType componentType;
 	};
-
-	struct Material
-	{
-
-
-	};
 	
 	extern GLenum GLRenderTypes[3];
 
@@ -80,7 +74,8 @@ namespace NoxEngine {
 		
 		// Program handle
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
-		void useProgram();
+		// If the program has been changed -> call this function to update all the variables set up for the program
+		void updateProgram();
 		void updateBuffers();
 
 		// Draw functions

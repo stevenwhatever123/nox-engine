@@ -549,18 +549,17 @@ void Renderer::updateCamera(Camera* cam)
     program->set4Matrix("toCamera", camera->getCameraTransf());
 }
 
-void Renderer::useProgram()
+void Renderer::updateProgram()
 {
 	program->use();
 	// Set up Projection matrix
-	// int toProjectionLoc = program->getUniformLocation("toProjection");
     projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
 	program->set4Matrix("toProjection", projection);
 
 	updateCamera();
 
     program->set3Float("cameraPosition", camera->GetCameraPosition());
-    //program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
+	// Default transformation matrices
     program->set4Matrix("toWorld", mat4(1.0f));
     program->set4Matrix("modelMatrix", mat4(1.0f));
 
@@ -576,7 +575,6 @@ void Renderer::useProgram()
 	// Reload lights
 	for (int i = 0; i < program->numOfLights; i++)
 		updateLightPos(i, 0.0f, 0.0f, 0.0f);
-
 }
 
 void Renderer::updateLightPos(int lightInd, f32 x, f32 y, f32 z) 
