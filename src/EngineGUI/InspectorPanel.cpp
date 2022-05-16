@@ -358,11 +358,48 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						// Audio loaded, show changable parameters
 						else {
 
+							if (ImGui::Button(audioSrcComp->channelId == -1 ? "Play" : (audioSrcComp->paused ? "Unpause" : "Pause"))) {
+
+								// first play after creation or stopped
+								if (audioSrcComp->channelId == -1) GameManager::Instance()->playSound(ent, audioSrcComp);
+
+								// pause state
+								else if (!audioSrcComp->stopped) audioSrcComp->paused = GameManager::Instance()->pauseUnpauseSound(ent, audioSrcComp);
+							}
+
+							ImGui::SameLine();
+
+							if (ImGui::Button("Stop")) {
+								GameManager::Instance()->stopSound(ent, audioSrcComp);
+							}
+
+							// Read-only fields
 							ImGui::Text("File path: %s", audioSrcComp->filePath.c_str());
 
-							bool editDSP = ImGui::TreeNode("DSP Filter");
-							ImGui::SameLine();
-							bool enableDSP;   ImGui::Checkbox("##enable_DSP", &enableDSP);
+							ImGui::BeginDisabled();
+							ImGui::Checkbox("3D", &audioSrcComp->is3D);
+							ImGui::Checkbox("Looping", &audioSrcComp->isLooping);
+							ImGui::Checkbox("Stream", &audioSrcComp->isStream);
+							ImGui::EndDisabled();
+
+							// Volume
+							ImGui::Text("Volume");	
+							//ImGui::SameLine(50.f);	
+							//ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+							int volume = audioSrcComp->volume * 100.f;
+							ImGui::SliderInt("##audio_source_volume", &volume, 0, 100, "%d %%");
+							audioSrcComp->volume = (float)volume / 100.f;
+
+
+							ImGui::Spacing();
+
+
+							// Playing state forbids changing parameters: begin
+							ImGui::BeginDisabled(audioSrcComp->channelId != -1 && !audioSrcComp->paused && !audioSrcComp->stopped);
+
+							bool editDSP = ImGui::TreeNode("DSP Filter Chain");
+							//ImGui::SameLine();
+							//bool enableDSP;   ImGui::Checkbox("##enable_DSP", &enableDSP);
 
 							if (editDSP) {
 
@@ -380,6 +417,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 								if (ImGui::Button("Add to filter chain")) {
 									int dspID = GameManager::Instance()->createDSP(static_cast<DSP_TYPE>(audioSrcComp->selectedDspFilter));
 									audioSrcComp->dspChain.emplace_back(dspID);
+									audioSrcComp->dspBypass.emplace_back(false);
 								}
 
 								Array<bool> dspRemoveFlags(audioSrcComp->dspChain.size(), false);
@@ -396,8 +434,21 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 									// Unique header
 									ImGui::PushID(f);
-									dspRemoveFlags[f] = ImGui::SmallButton("-##RemoveDSP");		ImGui::SameLine();
-									bool expandDSP = ImGui::CollapsingHeader(name);
+
+										// Remove button
+										dspRemoveFlags[f] = ImGui::SmallButton("-##RemoveDSP");			ImGui::SameLine();
+
+										// Enable checkbox
+										bool enableDSP = !audioSrcComp->dspBypass[f];		
+										ImGui::Checkbox("##EnableDSP", &enableDSP);
+										audioSrcComp->dspBypass[f] = !enableDSP;
+										ImGui::SameLine();
+
+										// Bypassing this filter: begin
+										ImGui::BeginDisabled(audioSrcComp->dspBypass[f]);
+
+										bool expandDSP = ImGui::CollapsingHeader(name);
+
 									ImGui::PopID();
 
 									// Header is a drag source: define payload
@@ -602,66 +653,25 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 									}
 									ImGui::PopID();
 
-#if 0
-									// TODO: Reorder logic
-									ImVec2 itemRectMin = ImGui::GetItemRectMin();
-									ImVec2 itemRectMax = ImGui::GetItemRectMax();
-									ImVec2 itemRectMaxWithSpacing = ImVec2(itemRectMax.x, itemRectMax.y + itemSpacing.y);
 
-									bool isHovering = ImGui::IsMouseHoveringRect(itemRectMin, itemRectMaxWithSpacing);
-									bool isActive = ImGui::IsMouseDown(0) && isHovering;
-
-									printf("%d active=%d ; hover=%d\n", f, isActive, isHovering);
-
-									if (isActive && !isHovering) {
-
-										int n_next = audioSrcComp->dspChain.size() + (ImGui::GetMouseDragDelta(0).y < 0.f ? -1 : 1);
-										if (n_next >= 0 && n_next < audioSrcComp->dspChain.size()) {
-
-											std::swap(audioSrcComp->dspChain[f], audioSrcComp->dspChain[n_next]);
-											//filterNames[f] = filterNames[n_next];
-											//filterNames[n_next] = filterName;
-											ImGui::ResetMouseDragDelta();
-										}
-									}
-#endif
+									// Bypass filter: end
+									ImGui::EndDisabled();
 
 								}
 
-
+								// Removing filters
 								for (int f = audioSrcComp->dspChain.size() - 1; f >= 0; f--) {
 									if (dspRemoveFlags[f]) audioSrcComp->dspChain.erase(audioSrcComp->dspChain.begin() + f);
 								}
 
+								// Social distancing
+								ImGui::Spacing();	ImGui::Spacing();
+
 								ImGui::TreePop();
 							}
 
-							ImGui::Spacing();
-
-							ImGui::SliderFloat("Volume##audio_source_volume", &audioSrcComp->volume, 0.0f, 1.0f, "%.1f");
-							if (ImGui::Button(audioSrcComp->channelId == -1 ? "Play" : (audioSrcComp->paused ? "Unpause" : "Pause"))) {
-
-								// first play
-								if (audioSrcComp->channelId == -1) GameManager::Instance()->playSound(ent, audioSrcComp);
-
-								// pause state
-								else if (!audioSrcComp->stopped) audioSrcComp->paused = GameManager::Instance()->pauseUnpauseSound(ent, audioSrcComp);
-								
-								//else // TODO: sync channelId to -1 when stopped (!am->isPlaying), so sound can be assigned a new channel
-							}
-
-							ImGui::SameLine();
-
-							if (ImGui::Button("Stop")) {
-								GameManager::Instance()->stopSound(ent, audioSrcComp);
-							}
-
-							ImGui::BeginDisabled();
-							ImGui::Checkbox("3D", &audioSrcComp->is3D);
-							ImGui::Checkbox("Looping", &audioSrcComp->isLooping);
-							ImGui::Checkbox("Stream", &audioSrcComp->isStream);
+							// Playing state forbids changing params: end
 							ImGui::EndDisabled();
-
 						}
 
 						ImGui::TreePop();

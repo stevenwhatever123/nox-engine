@@ -125,7 +125,7 @@ namespace NoxEngine {
 		void unLoadSound(const String& strSoundName);
 		void unLoadSound(const char* strSoundName);
 		int playSounds(const IAudioSource* src, const vec3& vPos = vec3{ 0, 0, 0 });
-		int playSounds(const String& strSoundName, const vec3& vPos = vec3{ 0, 0, 0 }, float fVolumedB = 0.0f, const Array<int>& dspChain = {});
+		int playSounds(const String& strSoundName, const vec3& vPos = vec3{ 0, 0, 0 }, float fVolumedB = 0.0f, const Array<int>& dspChain = {}, const Array<bool>& dspBypass = {});
 
 		bool pauseUnpauseSound(IAudioSource* src);
 		bool stopSound(IAudioSource* src);

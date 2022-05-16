@@ -14,6 +14,7 @@ namespace NoxEngine {
 		bool isStream;
 		int channelId;
 		Array<int> dspChain;
+		Array<bool> dspBypass;
 
 		int selectedDspFilter;
 

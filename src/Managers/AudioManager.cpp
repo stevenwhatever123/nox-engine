@@ -170,14 +170,6 @@ void AudioManager::update() {
 	}
 
 	for (auto& it : pStoppedChannels) {
-		int nDSPs = 0;		 
-		it->second->getNumDSPs(&nDSPs);
-
-		for (int i = 0; i < nDSPs; i++) {
-			FMOD::DSP* dsp = nullptr;	
-			it->second->getDSP(i, &dsp);
-			it->second->removeDSP(dsp);
-		}
 		mChannels.erase(it);
 	}
 
@@ -240,10 +232,10 @@ void AudioManager::unLoadSound(const char *strSoundName) {
 
 
 int AudioManager::playSounds(const IAudioSource* src, const vec3 &pos) {
-	return playSounds(src->filePath, pos, src->volume, src->dspChain);
+	return playSounds(src->filePath, pos, src->volume, src->dspChain, src->dspBypass);
 }
 
-int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float fVolumedB, const Array<int> &dspChain) {
+int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float fVolumedB, const Array<int> &dspChain, const Array<bool>& dspBypass) {
 
 	// Has this sound been loaded?
 	auto sound = mSounds.find(strSoundName);
@@ -328,6 +320,11 @@ int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float
 							ERRCHK(dsp->setParameterFloat(itr.first, itr.second));
 						}
 					}
+
+					// Yes, we can choose to not add the DSP if it's not enabled
+					// However, you can interact with the DSPs in FMOD's profiler, so the proper way
+					// is still to add the DSP and bypass it.
+					dsp->setBypass(dspBypass[pos]);
 
 					// Add DSP to this channel
 					// TODO: option to add to channel group
