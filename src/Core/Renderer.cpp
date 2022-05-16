@@ -384,7 +384,7 @@ void Renderer::fillBackground(i32 hex) {
 void Renderer::updateProjection(i32 width, i32 height) {
 	w = width;
 	h = height;
-	projection = glm::infinitePerspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f);
+	projection = glm::perspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f, 1000.0f);
 	program->set4Matrix("toProjection", projection);
 }
 
