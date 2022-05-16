@@ -70,7 +70,7 @@ namespace NoxEngine {
 		void removeObject(u32 rendObjId);
 		void clearObject();
 
-		void addLights(const vec3 light);
+		void addLights(Entity *ent);
 		
 		// Program handle
 		inline void setProgram(GLProgram *programIncome) { program = programIncome;}
@@ -207,5 +207,6 @@ namespace NoxEngine {
 
 		void updateLightPos(u32 lightInd);
 		void updateLightMaterial(u32 lightInd);
+		u32 getNumLights() { return lightSources.size(); }
 	};
 }

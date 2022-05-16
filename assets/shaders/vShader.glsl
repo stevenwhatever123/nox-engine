@@ -62,7 +62,7 @@ void main(void)
 
 	// Translate light
 	for(int i = 0; i < NUM_OF_LIGHTS; i++)
-        	lS[i].tanPos = TBN * lightPosition[i].tanPos; 
-
+        	//lS[i].tanPos = vec3(toProjection * toCamera * toWorld * vec4(lightPosition[i].tanPos, 1.0f)); 
+        	lS[i].tanPos = TBN * lightPosition[i].tanPos;
 	
 };  

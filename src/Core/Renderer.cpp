@@ -282,6 +282,18 @@ void Renderer::clearObject()
 	objects.clear();
 }
 
+void Renderer::addLights(Entity *ent)
+{
+	if (std::find(lightSources.begin(), lightSources.end(), ent) == lightSources.end())
+	{
+		lightSources.push_back(ent);
+
+		program->changeLightNum(lightSources.size());
+		// Update the program
+		updateProgram();
+	}
+}
+
 void Renderer::draw() {
 
 	// Render
@@ -593,6 +605,9 @@ void Renderer::updateProgram()
 
 void Renderer::updateLightPos(u32 lightInd) 
 {
+	if (lightSources.size() - 1 < lightInd)
+		return;
+
 	// Get position 
 	ITransform* pos = lightSources[lightInd]->getComp<TransformComponent>();
 
@@ -600,7 +615,7 @@ void Renderer::updateLightPos(u32 lightInd)
 	String attr = std::format("lightPosition[{}].tanPos", lightInd);
 
 	program->use();
-	program->set3Float(attr, pos->get_x(), pos->get_y(), pos->get_z());
+	program->set3Float(attr, pos->get_x(), pos->get_y(), -pos->get_z());
 }
 
 void Renderer::updateObjectTransformation(mat4 transformation, u32 rendObjId) {

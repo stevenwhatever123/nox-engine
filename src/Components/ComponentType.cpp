@@ -9,6 +9,7 @@
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 #include <Components/CameraComponent.h>
+#include <Components/EmissionComponent.h>
 
 
 namespace NoxEngine {
@@ -26,7 +27,7 @@ void NoxEngine::initComponentTypes() {
 		{ typeid(TransformComponent),		TransformType },
 		{ typeid(RenderableComponent),		RenderableType },
 		{ typeid(AnimationComponent),		AnimationType},
-		//{ typeid(LightSourceComponent),	LightSourceType },
+		{ typeid(EmissionComponent),		LightSourceType },
 		{ typeid(AudioSourceComponent),		AudioSourceType },
 		//{ typeid(AudioListenerComponent),	AudioListenerType },
 		{ typeid(AudioGeometryComponent),	AudioGeometryType },
@@ -39,7 +40,7 @@ void NoxEngine::initComponentTypes() {
 		{ TransformType,		"Transform Component" },
 		{ RenderableType,		"Renderable Component" },
 		{ AnimationType,		"Animation Component" },
-		{ LightSourceType,		"Light Source Component" },		// TODO: Implement
+		{ LightSourceType,		"Light Source Component" },
 		{ AudioSourceType,		"Audio Source Component" },
 		{ AudioListenerType,	"Audio Listener Component" },	// TODO: Implement
 		{ AudioGeometryType,	"Audio Geometry Component" },

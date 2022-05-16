@@ -12,6 +12,7 @@
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 #include <Components/CameraComponent.h>
+#include <Components/EmissionComponent.h>
 
 using namespace NoxEngine;
 
@@ -37,13 +38,14 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 		Entity* ent = state->activeScene->entities[params->selectedEntity];
 
 		// Retrieve all components (could be nullptr)
-		TransformComponent*		transComp			= ent->getComp<TransformComponent>();
+		TransformComponent*		transComp		= ent->getComp<TransformComponent>();
 		RenderableComponent*	rendComp		= ent->getComp<RenderableComponent>();
 		AnimationComponent*		animComp 		= ent->getComp<AnimationComponent>();
 		AudioSourceComponent*	audioSrcComp	= ent->getComp<AudioSourceComponent>();
 		AudioGeometryComponent* geoComp			= ent->getComp<AudioGeometryComponent>();
 		ScriptComponent*		scriptComp		= ent->getComp<ScriptComponent>();
 		CameraComponent*		cameraComp		= ent->getComp<CameraComponent>();
+		EmissionComponent*		emissionComp	= ent->getComp<EmissionComponent>();
 
 		bool animationEditing = animComp ? animComp->editing : false;
 
@@ -585,7 +587,23 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					}
 				}
 
-			
+				if (emissionComp)
+				{
+					bool tree_open = ImGui::TreeNode("Emission Component");
+					ImGui::SameLine();
+					bool remove = ImGui::SmallButton("-##RemoveEmission");
+
+					if (tree_open) {
+
+						ImGui::Text("Hello");
+
+						if (remove) {
+							ent->removeComp<CameraComponent>();
+						}
+
+						ImGui::TreePop();
+					}
+				}
 			}
 
 		}

@@ -12,6 +12,7 @@
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 #include <Components/CameraComponent.h>
+#include <Components/EmissionComponent.h>
 
 // GUI
 #include <EngineGUI/AudioPanel.h>
@@ -274,6 +275,11 @@ void GameManager::init_events() {
 				}
 			}
 
+			// Light/Emission
+			if (ent->containsComps<EmissionComponent>())
+			{
+				renderer->addLights(ent);
+			}
 
 			// Audio
 			// We don't add the mesh to the audio engine when the geometry component is added, 
@@ -693,6 +699,10 @@ void GameManager::update_renderer() {
 		}
 	}
 
+	for (u32 i = 0; i < renderer->getNumLights(); i++)
+	{
+		renderer->updateLightPos(i);
+	}
 
 	renderer->setFrameBufferToTexture();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
