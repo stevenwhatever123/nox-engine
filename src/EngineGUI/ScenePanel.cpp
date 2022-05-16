@@ -138,7 +138,21 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 			bool hasTransformAndisEnabled = ent->containsComps<TransformComponent>() && ent->isEnabled<TransformComponent>();
 			bool hasAnimationCompAndIsEnabled = ent->containsComps<AnimationComponent>() && ent->isEnabled<AnimationComponent>();
 
+			bool hasCameraAndIsEnabled = ent->containsComps<CameraComponent>() && ent->isEnabled<CameraComponent>();
+
 			AnimationComponent* animComp = nullptr;
+
+			// Override everything if it has a camera component
+			if (hasCameraAndIsEnabled) {
+				hasTransformAndisEnabled = false;
+				hasAnimationCompAndIsEnabled = false;
+
+				CameraComponent* camComp = ent->getComp<CameraComponent>();
+				translation = glm::translate(mat4(1), vec3(camComp->get_x(), camComp->get_y(), camComp->get_z()));
+				rotation = glm::eulerAngleXYZ(camComp->getCamera()->GetCameraYawPitchRoll()[0], 
+					camComp->getCamera()->GetCameraYawPitchRoll()[1], camComp->getCamera()->GetCameraYawPitchRoll()[2]);
+				worldMat = translation * rotation;
+			}
 
 			if (hasTransformAndisEnabled) {
 				if (hasAnimationCompAndIsEnabled)
@@ -156,9 +170,9 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 				else
 				{
 					ITransform* pos = ent->getComp<TransformComponent>()->CastType<ITransform>();
-					translation = glm::translate(glm::mat4(1.0f), glm::vec3(pos->x, pos->y, pos->z));
+					translation = glm::translate(mat4(1.0f), vec3(pos->x, pos->y, pos->z));
 					rotation = glm::eulerAngleXYZ(pos->rx, pos->ry, pos->rz);
-					scale = glm::scale(glm::mat4(1.0f), glm::vec3(pos->sx, pos->sy, pos->sz));
+					scale = glm::scale(mat4(1.0f), vec3(pos->sx, pos->sy, pos->sz));
 					worldMat = translation * rotation * scale;
 				}
 			}
@@ -174,6 +188,19 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 				glm::vec3 skew_temp;
 				glm::vec4 perspective_temp;
 				glm::decompose(worldMat, scale_temp, rotation_temp, translation_temp, skew_temp, perspective_temp);
+
+				if (hasCameraAndIsEnabled)
+				{
+					CameraComponent* camComp = ent->getComp<CameraComponent>();
+					camComp->set_x(translation_temp[0]);
+					camComp->set_y(translation_temp[1]);
+					camComp->set_z(translation_temp[2]);
+
+					glm::extractEulerAngleXYZ(glm::toMat4(rotation_temp), 
+						camComp->getCamera()->GetCameraYawPitchRoll()[0], 
+						camComp->getCamera()->GetCameraYawPitchRoll()[1], 
+						camComp->getCamera()->GetCameraYawPitchRoll()[2]);
+				}
 
 				if (hasTransformAndisEnabled)
 				{

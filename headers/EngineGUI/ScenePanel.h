@@ -8,6 +8,8 @@
 #include <Core/Renderer.h>
 #include <Core/GameState.h>
 
+#include <Components/CameraComponent.h>
+
 #include "EngineGUI/PresetObject.h"
 
 
