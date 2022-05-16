@@ -937,9 +937,13 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						ImGui::Text("Pitch");
 						ImGui::SameLine();
 						ImGui::DragFloat("##Pitch", &vals[1]);
+						ImGui::Text("Row");
+						ImGui::SameLine();
+						ImGui::DragFloat("##Row", &vals[2]);
 						auto& m = cameraComp->getCamera()->GetCameraYawPitchRoll();
 						cameraComp->getCamera()->setYaw(vals.x);
 						cameraComp->getCamera()->setPitch(vals.y);
+						cameraComp->getCamera()->GetCameraYawPitchRoll()[2] = vals.z;
 
 						ImGui::Text("	X");
 						ImGui::SameLine();
