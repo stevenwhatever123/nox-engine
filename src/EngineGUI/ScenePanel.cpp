@@ -24,15 +24,6 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 	ImRect bb = ImGui::GetCurrentWindow()->WorkRect;
 	ImGuiID id;		ImGui::GetCurrentWindow()->GetID(&id);
 
-	// RMB while hovering over the scene window should make the scene the active window,
-	// so you don't need to LMB in the scene then RMB to look around
-	if (!ImGui::IsWindowFocused() &&
-		ImGui::IsMouseDown(ImGuiMouseButton_Right) &&
-		ImGui::IsMouseHoveringRect(bb.GetTL(), bb.GetBR())) {
-		ImGui::SetWindowFocus();
-	}
-
-
 	if (ImGui::BeginDragDropTargetCustom(bb, id)) {
 	
 		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("PRESET_OBJECT_DND")) {
@@ -120,19 +111,10 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 
 	if(ImGui::IsWindowFocused()) {
 		params->full_screen = false;
+	}
+
+	if(ImGui::IsWindowHovered()) {
 		params->scene_active = true;
-
-
-		// LOG_DEBUG("a: cur: (%d %d), prev: (%d %d), new: (%f, %f)",
-		// 	state->win_width, state->win_height,
-		// 	state->prev_win_width, state->prev_win_height,
-		// 	wsize.x, wsize.y
-		// );
-
-
-
-	} else {
-		params->scene_active = false;
 	}
 
 

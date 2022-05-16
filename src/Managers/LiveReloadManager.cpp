@@ -42,7 +42,12 @@ void LiveReloadManager::removeLiveReloadEntry(const char *file_name, IReloadable
 void LiveReloadManager::checkFiles() {
 	auto file = reload_files.begin();
 	for(;file != reload_files.end(); file++) {
-		if(file->second.changed) continue;
+		if(file->second.changed) {
+			for(u32 i = 0; i < file->second.inform_objects.size(); i++) {
+				IReloadableFile *reload_inform = file->second.inform_objects[i];
+				reload_inform->liveReloadFile(file->first, &file->second);
+			}
+		}
 
 		FILETIME currentTimeStamp = NoxEngineUtils::FileUtils::getLastWriteTime(file->first);
 

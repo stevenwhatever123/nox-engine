@@ -37,7 +37,7 @@ namespace NoxEngine {
 			void AddInput(u32 texture_id, u32 texture_unit);
 			void RemoveInput(i32 input_index);
 
-			void ChangeShader(String& shader_path);
+			bool ChangeShader(String& shader_path);
 			void changeTextureSize(i32 width, i32 height);
 
 			void liveReloadFile(const char *file, LiveReloadEntry *entry) override;

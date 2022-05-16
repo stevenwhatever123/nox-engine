@@ -7,9 +7,13 @@
 using namespace NoxEngine;
 
 u32 GLProgram::compileShader(String& filename, i32 shaderType) {
-	u32 id = glCreateShader(shaderType);
+
 	TempResourceData temp = IOManager::Instance()->ReadEntireFileTemp(filename);
 	const char *data = (const char*)temp.data;
+
+	if(data == nullptr) return 0;
+
+	u32 id = glCreateShader(shaderType);
 
 	glShaderSource(id, 1, &data, NULL);
 	glCompileShader(id);

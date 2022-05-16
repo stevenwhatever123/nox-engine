@@ -16,13 +16,15 @@ void NoxEngineGUI::updateFullscreenShaderPanel(GameState* state, GUIParams *ui_p
 	
 	ImGui::Begin(name.c_str(), NULL, flags);
 
-	
-
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
 	if(ImGui::IsWindowFocused()) {
 		ui_params->full_screen = true;
-		
 	}
+
+	if(ImGui::IsWindowHovered()) {
+		ui_params->scene_active = true;
+	}
+
 
 
 	if(ui_params->full_screen) {
@@ -32,7 +34,6 @@ void NoxEngineGUI::updateFullscreenShaderPanel(GameState* state, GUIParams *ui_p
 		state->win_width  = (u32)wsize.x;
 		state->win_height = (u32)wsize.y;
 	}
-
 
 	
 	state->renderer->updateProjection((i32)wsize.x, (i32)wsize.y);

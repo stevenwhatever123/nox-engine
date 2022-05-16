@@ -130,6 +130,11 @@ u8* StackMemAllocator::allocate(i32 size) {
 
 void StackMemAllocator::free(u8 *allocated_mem) {
 
+	if(allocated_mem == nullptr) {
+		LOG_DEBUG("nullptr passed for free");
+		return;
+	}
+
 	uptr data_to_free = (uptr)allocated_mem;
 
 	if(data_to_free != _last_alloc) {

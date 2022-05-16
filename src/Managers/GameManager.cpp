@@ -140,7 +140,7 @@ void GameManager::init_window() {
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	window = glfwCreateWindow(game_state.win_width, game_state.win_height, title.c_str(), glfwGetPrimaryMonitor(), nullptr);
+	window = glfwCreateWindow(game_state.win_width, game_state.win_height, title.c_str(), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
 	glfwSetWindowPos(window, 100, 100);
@@ -481,11 +481,13 @@ void GameManager::update_inputs() {
 	game_state.mouse_y = y;
 
 	// full_screen is set to false when ScenePanel is focused
-	if(game_state.mouse_right && ui_params.scene_active) {
+	if(game_state.mouse_right && (ui_params.scene_active)) {
 		renderer->getCamera()->moveToMousePos(
 			game_state.mouse_x_delta*deltaTime,
 			game_state.mouse_y_delta*deltaTime
 		);
+
+		ui_params.scene_active = false;
 	}
 
 	if (keys['Z']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::TRANSLATE; };
@@ -694,7 +696,6 @@ void GameManager::update_renderer() {
 	if(game_state.prev_win_width != game_state.win_width ||
 	   game_state.prev_win_height != game_state.win_height)
 	{
-		LOG_DEBUG("hello");
 		renderer->updateTextureSizes(game_state.win_width, game_state.win_height);
 	}
 

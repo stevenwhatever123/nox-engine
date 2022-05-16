@@ -169,10 +169,12 @@ void FullscreenShader::RemoveInput(i32 input_index) {
 	texture_inputs.erase(texture_inputs.begin() + input_index);
 }
 
-void FullscreenShader::ChangeShader(String& shader_path) {
+bool FullscreenShader::ChangeShader(String& shader_path) {
 	u32 shader = compileShader(shader_path, GL_FRAGMENT_SHADER);
-	u32 shaders_attached[2];
 
+	if(shader == 0) return false;
+
+	u32 shaders_attached[2];
 
 	if(inited) {
 		glGetAttachedShaders(_id, 2, NULL, shaders_attached);
@@ -201,6 +203,7 @@ void FullscreenShader::ChangeShader(String& shader_path) {
 		glGetProgramInfoLog(_id, length, NULL, buffer);
 		LOG_DEBUG("Error Linking program: \n%s", buffer);
 		StackMemAllocator::Instance()->free((u8*)buffer);
+		return false;
 	} else {
 		if(shader_path != fragment_shader) {
 			LiveReloadManager::Instance()->removeLiveReloadEntry(fragment_shader.c_str(), static_cast<IReloadableFile*>(this));
@@ -211,13 +214,15 @@ void FullscreenShader::ChangeShader(String& shader_path) {
 		inited = true;
 	}
 
+	return true;
 }
 
 
 void FullscreenShader::liveReloadFile(const char* filename, LiveReloadEntry *entry) {
 	String f(filename);
-	ChangeShader(f);
-	entry->changed = 0;
+	if(ChangeShader(f)) {
+		entry->changed = 0;
+	}
 }
 
 
