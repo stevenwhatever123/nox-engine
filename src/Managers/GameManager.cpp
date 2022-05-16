@@ -733,7 +733,14 @@ bool GameManager::pauseUnpauseSound(Entity* ent, IAudioSource* isrc) {
 }
 
 bool GameManager::stopSound(Entity* ent, IAudioSource* isrc) {
-	return audioManager->stopSound(isrc);
+	bool success = audioManager->stopSound(isrc);
+	if (success) {
+		isrc->channelId = -1;
+		isrc->paused = false;
+		isrc->stopped = false;
+	}
+
+	return success;
 }
 
 int GameManager::createDSP(DSP_TYPE type) {

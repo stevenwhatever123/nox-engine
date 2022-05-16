@@ -367,6 +367,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							if (editDSP) {
 
 								// Dropdown list of all DSP filter enums
+								// TODO: use kDSPNamesMap and ImGui::BeginCombo()
 								const char* filterNames[] = { "Echo", "Flange", "Pitch Shift", "Tremolo" };
 								u32 nFilterNames = IM_ARRAYSIZE(filterNames);
 
@@ -597,7 +598,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							ImGui::SameLine();
 
 							if (ImGui::Button("Stop")) {
-								audioSrcComp->stopped = GameManager::Instance()->stopSound(ent, audioSrcComp);
+								GameManager::Instance()->stopSound(ent, audioSrcComp);
 							}
 
 							ImGui::BeginDisabled();

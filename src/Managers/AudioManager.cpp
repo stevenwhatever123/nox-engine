@@ -127,12 +127,28 @@ void AudioManager::update() {
 
 	// State of geometries (e.g. enable, transform, etc) is updated in GameManager
 
-	/*   Remove all stopped channels   */
+	/*   If a sound is stopped, remove it from the SoundMap so that it can be played again   */
+	std::vector<SoundChannelIdMap::iterator> pStoppedSoundChannelIds;
+	for (auto it = mSoundChannelIds.begin(), itEnd = mSoundChannelIds.end(); it != itEnd; ++it) {
+
+		int channelId = it->second;
+		bool bIsPlaying = false;	 mChannels[channelId]->isPlaying(&bIsPlaying);
+
+		if (!bIsPlaying) {
+			pStoppedSoundChannelIds.push_back(it);
+		}
+	}
+
+	for (auto& it : pStoppedSoundChannelIds) {
+		mSoundChannelIds.erase(it);
+	}
+
+
+	/*   Mark stopped channels for removal   */
 	std::vector<ChannelMap::iterator> pStoppedChannels;
 	for (auto it = mChannels.begin(), itEnd = mChannels.end(); it != itEnd; ++it) {
 
-		bool bIsPlaying = false;
-		it->second->isPlaying(&bIsPlaying);
+		bool bIsPlaying = false;	it->second->isPlaying(&bIsPlaying);
 		if (!bIsPlaying) {
 			pStoppedChannels.push_back(it);
 		}
@@ -151,7 +167,7 @@ void AudioManager::update() {
 		mChannels.erase(it);
 	}
 
-	// fmod needs to be updated at once once per game tick
+	// fmod needs to be updated at least once per game tick
 	ERRCHK( coreSystem->update() );
 }
 
@@ -223,8 +239,7 @@ int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float
 		loadSound(strSoundName);
 		sound = mSounds.find(strSoundName);
 
-		// if not successfully loaded, return the next available channel ID
-		// TODO: ?? doesn't make sense
+		// if not successfully loaded, return error code
 		if (sound == mSounds.end()) {
 			return -1;
 		}
@@ -236,20 +251,20 @@ int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float
 	int channelId = -1;
 
 	// If the sound hasn't been allocated a channel, do so 
-	if (channelIdItr == mSoundChannelIds.end()) {
+	if (/* channelIdItr == mSoundChannelIds.end() */ true) {
 
 		// get the next available channel id
 		channelId = mnNextChannelId++;
 
 		// match this sound name with the channel id
 		mSoundChannelIds[strSoundName] = channelId;
-		LOG_DEBUG("Playing a sound in channel %i\n", channelId);
+		LOG_DEBUG("Play sound: %s housed in channel %i\n", strSoundName.c_str(), channelId);
 
 		// Create a new channel for the sound and play it. 
 		// Start paused ("true") so we don't get a pop when we change the parameters
 		// TODO: Differentiate type of sound with an enum and allocate it to the appropriate channel group
 		FMOD::Channel* channel = nullptr;
-		FMOD::ChannelGroup* channelGroup = nullptr;
+		FMOD::ChannelGroup* channelGroup = nullptr;		// master channel group
 		ERRCHK( coreSystem->playSound(sound->second, channelGroup, true, &channel) );
 
 		// Channel successfully allocated
@@ -267,7 +282,7 @@ int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float
 			}
 
 			// update parameters 
-			ERRCHK(channel->setVolume(dbToVolume(fVolumedB)));
+			ERRCHK(channel->setVolume(fVolumedB));
 
 			// Connect DSP chain
 			// TODO: restructure
@@ -290,7 +305,7 @@ int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float
 
 					// Add DSP to this channel
 					// TODO: option to add to channel group
-					ERRCHK( channel->addDSP(f, dsp) );
+					ERRCHK( channel->addDSP(0, dsp) );
 				}
 			}
 

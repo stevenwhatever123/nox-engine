@@ -104,7 +104,7 @@ namespace NoxEngine {
 		void init(
 			float maxChannels = MAX_CHANNELS, 
 			float maxWorldSize = 500.0f, 
-			FMOD_INITFLAGS flags = FMOD_INIT_NORMAL
+			FMOD_INITFLAGS flags = FMOD_INIT_NORMAL | FMOD_INIT_PROFILE_ENABLE
 		);
 
 		// update loop
