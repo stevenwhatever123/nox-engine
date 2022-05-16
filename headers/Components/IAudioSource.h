@@ -15,6 +15,8 @@ namespace NoxEngine {
 		int channelId;
 		Array<int> dspChain;
 
+		int selectedDspFilter;
+
 		bool loaded;
 		bool paused;
 		bool stopped;

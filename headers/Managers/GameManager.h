@@ -15,6 +15,7 @@
 #include <Managers/AudioManager.h>
 #include <Core/MeshScene.h>
 #include <Core/Types.h>
+#include <Core/AudioTypes.h>
 #include <Core/Renderer.h>
 #include <Managers/IOManager.h>
 #include <Core/GameState.h>
@@ -73,6 +74,9 @@ namespace NoxEngine {
 			bool loadAudioSource(Entity* ent, IAudioSource *);
 			bool loadAudioGeometry(Entity* ent, IAudioGeometry *);
 			
+			int createDSP(DSP_TYPE);
+			DSP* getDSP(int dspId);
+
 			inline Renderer* GetRenderer() { return renderer; };
 
 			inline bool KeepRunning() { return !should_close; }

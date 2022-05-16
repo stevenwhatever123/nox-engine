@@ -33,8 +33,8 @@ namespace NoxEngineGUI {
 		u32 sceneBackgroundColor;
 		NoxEngine::Camera *current_cam;
 
-		// TODO: make is3d a checkbox. if updated, unload and create a new sound
-		bool soundIs3d;
+		int lastSwappedDSP = -1;
+		int lastSrcDSPIndex;
 	};
 
 	// Each panel should have an enum associated with it

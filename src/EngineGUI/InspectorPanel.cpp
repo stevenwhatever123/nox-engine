@@ -1,8 +1,12 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui/imgui_internal.h>
+
 #include <EngineGUI/InspectorPanel.h>
 
 #include <Managers/EventNames.h>
 #include <Managers/GameManager.h>
 
+#include <Core/AudioTypes.h>
 #include <Core/Entity.h>
 #include <Components/IComponent.h>
 #include <Components/TransformComponent.h>
@@ -16,10 +20,24 @@
 using namespace NoxEngine;
 
 
+// TODO: move to widgets
+void HoverTooltip(const char* text, float pushTextWrapPos = ImGui::GetFontSize() * 35.0f) {
+
+	if (ImGui::IsItemHovered()) {
+		ImGui::BeginTooltip();
+		ImGui::PushTextWrapPos(pushTextWrapPos);
+		ImGui::TextUnformatted(text);
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
+	}
+}
+
+
 void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *params) {
 
 	// Variables
 	std::string name = kPanelNameMap[PanelName::Inspector];
+	ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
 
 	// Window Begin
 	ImGui::Begin(name.c_str());
@@ -310,10 +328,10 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					bool expand = ImGui::TreeNode("Audio Source");		// TODO (Vincent): How to change the width of treenode?
 
 					ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
-					ImGui::Checkbox("##EnablePos", &enable);
+					ImGui::Checkbox("##EnableAudioSrc", &enable);
 
 					ImGui::SameLine();
-					bool remove = ImGui::SmallButton("-##RemovePos");	//TODO: Use ImageButton?
+					bool remove = ImGui::SmallButton("-##RemoveAudioSrc");	//TODO: Use ImageButton?
 
 					ent->setEnabled<AudioSourceComponent>(enable);
 
@@ -342,24 +360,229 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 							ImGui::Text("File path: %s", audioSrcComp->filePath.c_str());
 
-							if (ImGui::TreeNode("DSP Filter")) {
+							bool editDSP = ImGui::TreeNode("DSP Filter");
+							ImGui::SameLine();
+							bool enableDSP;   ImGui::Checkbox("##enable_DSP", &enableDSP);
+
+							if (editDSP) {
 
 								// Dropdown list of all DSP filter enums
-								//const char* filterNames[] = { "Pitch Shift", "Echo" };
-								//ImGui::BeginCombo()
+								const char* filterNames[] = { "Echo", "Flange", "Pitch Shift", "Tremolo" };
+								u32 nFilterNames = IM_ARRAYSIZE(filterNames);
 
+								ImGui::Text("Filters");		ImGui::SameLine();
+								ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.6f);
+								ImGui::Combo("##dsp_filters", &audioSrcComp->selectedDspFilter, filterNames, nFilterNames);
 
-								if (ImGui::Button("Create and apply##audio_dsp_create_apply")) {
+								ImGui::SameLine();
+
+								if (ImGui::Button("Add to filter chain")) {
+									int dspID = GameManager::Instance()->createDSP(static_cast<DSP_TYPE>(audioSrcComp->selectedDspFilter));
+									audioSrcComp->dspChain.emplace_back(dspID);
+								}
+
+								// Display DSP chain, allow reorder
+								for (int f = 0; f < audioSrcComp->dspChain.size(); f++) {
+
+									DSP *dsp = GameManager::Instance()->getDSP(audioSrcComp->dspChain[f]);
+
+									// DSP object removed but it still exists in a component. This indicates improper cleanup
+									if (dsp == nullptr) continue;
+
+									const char *name = kDSPNamesMap[dsp->type];
+
+									// Unique header
+									ImGui::PushID(f);
+									bool expandDSP = ImGui::CollapsingHeader(name);
+									ImGui::PopID();
+
+									// Header is a drag source: define payload
+									if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+
+										// Set payload to carry the index of our item (could be anything)
+										ImGui::SetDragDropPayload("DSP_FILTER_REORDER_DND", &f, sizeof(int));
+
+										params->lastSwappedDSP = f;
+
+										// Display preview
+										ImGui::Text("Reordering %s (Filter %d)...", name, f);
+										ImGui::EndDragDropSource();
+									}
+
+									// Header can also receive drag payload from other headers
+									if (ImGui::BeginDragDropTarget()) {
+
+										const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DSP_FILTER_REORDER_DND", ImGuiDragDropFlags_AcceptBeforeDelivery);
+										if (payload && f != params->lastSwappedDSP) {
+											IM_ASSERT(payload->DataSize == sizeof(int));
+											auto srcPair = *(const int*)payload->Data;
+											
+											// Swap the two filters in the DSP chain
+											// TODO-FIX: this relies on the user hovering over all the filters they want to reorder
+											//           if they want to change (0 1 2) to (1 2 0) but they skip hovering over 1, they would get (2 1 0)
+											std::swap(audioSrcComp->dspChain[f], audioSrcComp->dspChain[params->lastSwappedDSP]);
+
+											// Don't swap with the source back and forth
+											params->lastSwappedDSP = f;
+											if (payload->IsDelivery()) params->lastSwappedDSP = -1;		// Payload delivered (mouse released), source dropped
+										}
+										ImGui::EndDragDropTarget();
+									}
+
+									ImGui::PushID(f);
+									if (expandDSP) {
+
+										int windowLen, maxChannels;
+
+										// Display different parameters based on filter type
+										switch (dsp->type) {
+										case Echo:
+											ImGui::PushID("Echo");
+											ImGui::SliderFloat("Delay", 
+												&dsp->params[FMOD_DSP_ECHO_DELAY], 
+												1.f, 5000.f);
+											HoverTooltip("Echo delay. (Unit: ms)");
+
+											ImGui::SliderFloat("Feedback", 
+												&dsp->params[FMOD_DSP_ECHO_FEEDBACK], 
+												0.f, 100.f);
+											HoverTooltip("Echo decay per delay. 100.0 = No decay, 0.0 = total decay. (Unit: Percentage)"); 
+
+											ImGui::SliderFloat("Dry Level", 
+												&dsp->params[FMOD_DSP_ECHO_DRYLEVEL], 
+												-80.f, 10.f);
+											HoverTooltip("Original sound volume. (Unit: Decibels)"); 
+
+											ImGui::SliderFloat("Wet Level", 
+												&dsp->params[FMOD_DSP_ECHO_WETLEVEL], 
+												-80.f, 10.f);
+											HoverTooltip("Volume of echo signal to pass to output. (Unit: Decibels)"); 
+											ImGui::PopID();
+											break;
+
+										///////////////////////////////////////////////////
+										case Flange:
+											ImGui::PushID("Flange");
+											ImGui::SliderFloat("Mix", 
+												&dsp->params[FMOD_DSP_FLANGE_MIX], 
+												1.f, 100.f);
+											HoverTooltip("Percentage of wet signal in mix. (Unit: Percentage)");
+
+											ImGui::SliderFloat("Depth", 
+												&dsp->params[FMOD_DSP_FLANGE_DEPTH], 
+												0.01f, 1.f);
+											HoverTooltip("Flange depth. (Unit: Linear)");
+
+											ImGui::SliderFloat("Rate", 
+												&dsp->params[FMOD_DSP_FLANGE_RATE], 
+												0.f, 20.f);
+											HoverTooltip("Flange speed. (Unit: Hertz)");
+											ImGui::PopID();
+											break;
+
+										///////////////////////////////////////////////////
+										case PitchShift:
+											ImGui::PushID("PitchShift");
+											ImGui::SliderFloat("Pitch (octave)",
+												&dsp->params[FMOD_DSP_PITCHSHIFT_PITCH],
+												0.5f, 2.f);
+											HoverTooltip("Pitch value. 0.5 = one octave down, 2.0 = one octave up. 1.0 does not change the pitch.");
+
+											//windowLen = (int)dsp->params[FMOD_DSP_PITCHSHIFT_FFTSIZE];
+											//ImGui::SliderInt("FFT Window Length",
+											//	&windowLen,
+											//	0, 4,
+											//	"%d");
+											//HoverTooltip("FFT window size. Increase this to reduce 'smearing'. This effect is a warbling sound similar to when an mp3 is encoded at very low bitrates.");
+											//dsp->params[FMOD_DSP_PITCHSHIFT_FFTSIZE] = (float)(1 << (windowLen + 8));
+
+											maxChannels = (int)dsp->params[FMOD_DSP_PITCHSHIFT_MAXCHANNELS];
+											ImGui::SliderInt("Max Channels",
+												&maxChannels,
+												0, 16);
+											HoverTooltip("Maximum channels supported. 0 = same as FMOD's default output polyphony, 1 = mono, 2 = stereo etc. It is recommended to leave it at 0.");
+											dsp->params[FMOD_DSP_PITCHSHIFT_MAXCHANNELS] = (float)maxChannels;
+											ImGui::PopID();
+											break;
+
+										case Tremolo:
+											ImGui::PushID("Tremolo");
+											ImGui::SliderFloat("LFO Frequency",
+												&dsp->params[FMOD_DSP_TREMOLO_FREQUENCY],
+												0.1f, 20.f,
+												"%f Hz");
+
+											ImGui::SliderFloat("Depth",
+												&dsp->params[FMOD_DSP_TREMOLO_DEPTH],
+												0.f, 1.f);
+
+											ImGui::SliderFloat("Shape",
+												&dsp->params[FMOD_DSP_TREMOLO_SHAPE],
+												0.f, 1.f);
+											HoverTooltip("LFO shape morph between triangle (0) and sine (1). (Unit: Linear)");
+
+											ImGui::SliderFloat("Time-skewing",
+												&dsp->params[FMOD_DSP_TREMOLO_SKEW],
+												-1.f, 1.f);
+											HoverTooltip("Time-skewing of LFO cycle.");
+
+											ImGui::SliderFloat("Duty",
+												&dsp->params[FMOD_DSP_TREMOLO_DUTY],
+												0.5f, 2.f);
+											HoverTooltip("LFO on-time.");
+
+											ImGui::SliderFloat("Square",
+												&dsp->params[FMOD_DSP_TREMOLO_SQUARE],
+												0.5f, 2.f);
+											HoverTooltip("Flatness of the LFO shape.");
+
+											ImGui::SliderFloat("Phase",
+												&dsp->params[FMOD_DSP_TREMOLO_PHASE],
+												0.5f, 2.f);
+											HoverTooltip("Instantaneous LFO phase.");
+
+											ImGui::SliderFloat("Spread",
+												&dsp->params[FMOD_DSP_TREMOLO_SPREAD],
+												0.5f, 2.f);
+											HoverTooltip("Rotation / auto-pan effect.");
+											ImGui::PopID();
+											break;
+										}
+									}
+									ImGui::PopID();
+
+#if 0
+									// TODO: Reorder logic
+									ImVec2 itemRectMin = ImGui::GetItemRectMin();
+									ImVec2 itemRectMax = ImGui::GetItemRectMax();
+									ImVec2 itemRectMaxWithSpacing = ImVec2(itemRectMax.x, itemRectMax.y + itemSpacing.y);
+
+									bool isHovering = ImGui::IsMouseHoveringRect(itemRectMin, itemRectMaxWithSpacing);
+									bool isActive = ImGui::IsMouseDown(0) && isHovering;
+
+									printf("%d active=%d ; hover=%d\n", f, isActive, isHovering);
+
+									if (isActive && !isHovering) {
+
+										int n_next = audioSrcComp->dspChain.size() + (ImGui::GetMouseDragDelta(0).y < 0.f ? -1 : 1);
+										if (n_next >= 0 && n_next < audioSrcComp->dspChain.size()) {
+
+											std::swap(audioSrcComp->dspChain[f], audioSrcComp->dspChain[n_next]);
+											//filterNames[f] = filterNames[n_next];
+											//filterNames[n_next] = filterName;
+											ImGui::ResetMouseDragDelta();
+										}
+									}
+#endif
 
 								}
 
 								ImGui::TreePop();
 							}
 
-							ImGui::SameLine();
-							bool enableDSP;   ImGui::Checkbox("##enable_DSP", &enableDSP);
+							ImGui::Spacing();
 
-							ImGui::SliderFloat("Volume", &audioSrcComp->volume, 0.0f, 1.0f, "%.1f");
+							ImGui::SliderFloat("Volume##audio_source_volume", &audioSrcComp->volume, 0.0f, 1.0f, "%.1f");
 							if (ImGui::Button(audioSrcComp->channelId == -1 ? "Play" : (audioSrcComp->paused ? "Unpause" : "Pause"))) {
 
 								// first play
@@ -367,6 +590,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 								// pause state
 								else if (!audioSrcComp->stopped) audioSrcComp->paused = GameManager::Instance()->pauseUnpauseSound(ent, audioSrcComp);
+								
 								//else // TODO: sync channelId to -1 when stopped (!am->isPlaying), so sound can be assigned a new channel
 							}
 
@@ -420,13 +644,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						ImGui::DragFloat3("Velocity##audio_listener_velocity", &audioLisComp->vVel.x);
 						ImGui::SameLine();
 						ImGui::TextDisabled("(?)");
-						if (ImGui::IsItemHovered()) {
-							ImGui::BeginTooltip();
-							ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-							ImGui::TextUnformatted("Velocity for Doppler effect");
-							ImGui::PopTextWrapPos();
-							ImGui::EndTooltip();
-						}
+						HoverTooltip("Velocity for Doppler effect");
 						ImGui::TreePop();
 
 						// End: grey out

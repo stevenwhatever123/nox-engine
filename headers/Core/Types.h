@@ -41,7 +41,3 @@ typedef glm::vec3 vec3;
 typedef glm::vec4 vec4;
 typedef glm::mat4 mat4;
 typedef glm::ivec3 ivec3;
-
-// Audio
-typedef u32 DspId;
-typedef u32 ChannelId;

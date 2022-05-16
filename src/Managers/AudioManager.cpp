@@ -41,6 +41,23 @@ using namespace NoxEngine;
 using namespace NoxEngineUtils;
 
 
+// Constant values for audio types
+std::map<DSP_TYPE, const char*> kDSPNamesMap = {
+	{ Echo,			"Echo" },
+	{ Flange,		"Flange" },
+	{ PitchShift,	"Pitch Shift" },
+	{ Tremolo,		"Tremolo" },
+};
+
+// Conversion from supported DSP type to FMOD internal DSP type
+std::map<DSP_TYPE, FMOD_DSP_TYPE> kDSPTypeMap = {
+	{ Echo,			FMOD_DSP_TYPE_ECHO },
+	{ Flange,		FMOD_DSP_TYPE_FLANGE },
+	{ PitchShift,	FMOD_DSP_TYPE_PITCHSHIFT },
+	{ Tremolo,		FMOD_DSP_TYPE_TREMOLO },
+};
+
+
 /////////////////////
 //   CTOR / DTOR   //
 /////////////////////
@@ -192,7 +209,11 @@ void AudioManager::unLoadSound(const char *strSoundName) {
 }
 
 
-int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float fVolumedB) {
+int AudioManager::playSounds(const IAudioSource* src, const vec3 &pos) {
+	return playSounds(src->filePath, pos, src->volume, src->dspChain);
+}
+
+int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float fVolumedB, const Array<int> &dspChain) {
 
 	// Has this sound been loaded?
 	auto sound = mSounds.find(strSoundName);
@@ -256,59 +277,21 @@ int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float
 				//channel->getFrequency(&freq);
 				//channel->setFrequency(freq * 2);
 
-				// Create the DSP
-				FMOD::DSP* dsp;
-				u32 position = 0;
+				// Create DSP chain in this channel
+				for (int f = 0; f < dspChain.size(); f++) {
+					DSP* engineDSP = mDSPs[f];
+					FMOD::DSP* dsp = engineDSP->dsp;
 
-				// Channel Mix
-				// Chorus
-				// Compressor
-				// Convolutional Reverb
-				// Delay
-				// Distortion
-				
-				// Echo
-				//ERRCHK(coreSystem->createDSPByType(FMOD_DSP_TYPE_ECHO, &dsp));
-				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_ECHO_DELAY, 250)); 
-				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_ECHO_FEEDBACK, 10));
-				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_ECHO_DRYLEVEL, 0));
-				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_ECHO_WETLEVEL, -10));
+					// Apply all parameters. The parameter values are initialized when the DSP engine handle is created,
+					// so we just need to iterate through this map, discarding all type information.
+					for (const auto& itr : engineDSP->params) {
+						ERRCHK(dsp->setParameterFloat(itr.first, itr.second));
+					}
 
-				// Fader (volume control)
-				// FFT
-				
-				// Flange (wooshing, sweeping effect)
-				//ERRCHK(coreSystem->createDSPByType(FMOD_DSP_TYPE_FLANGE, &dsp));
-				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_FLANGE_DEPTH, 1));
-				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_FLANGE_RATE, 0.1));
-				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_FLANGE_MIX, 50));
-
-				// IT Echo
-				// IT Lowpass
-				// Limiter
-				// Loudness meter
-				// Multiband equalizer / Three Equalizer
-				// Normalize (normalize volume)
-				// Object pan
-				// Oscillator (simple signal generator)
-				// Pan (possible but we don't have speakers in the demo, so let's not implement it)
-
-				// Pitch shifter
-				//ERRCHK( coreSystem->createDSPByType(FMOD_DSP_TYPE_PITCHSHIFT, &dsp) );
-				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, 0.8));
-
-				// Return / Send
-				
-				// SFX Reverb: tons of customization
-				// TODO: lookup
-				
-				// Transceiever
-				
-				// Tremolo
-				//ERRCHK(coreSystem->createDSPByType(FMOD_DSP_TYPE_TREMOLO, &dsp));
-				//ERRCHK(dsp->setParameterFloat(FMOD_DSP_TREMOLO_SKEW, 0.5));
-
-				//ERRCHK( channel->addDSP(position, dsp) );
+					// Add DSP to this channel
+					// TODO: option to add to channel group
+					ERRCHK( channel->addDSP(f, dsp) );
+				}
 			}
 
 			// unpause
@@ -485,23 +468,103 @@ int AudioManager::loadGeometry(const String& filePath) {
 /*    DSP FUNCTIONS     */
 //////////////////////////
 
-//
-//DspId AudioManager::createDSP(FMOD_DSP_TYPE type, int channel, int position) {
-//
-//	// Create the DSP
-//	FMOD::DSP* dsp;
-//	ERRCHK( coreSystem->createDSPByType(type, &dsp) );
-//	
-//	// Add to the map
-//	mDSPs[channel].insert(mDSPs[channel].begin() + position, dsp);
-//
-//	ERRCHK(dsp->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, 0.8));
-//	ERRCHK( channel->addDSP(position, dsp) );
-//
-//	// Return a unique id for this DSP for reference
-//	return nextDSPId++;
-//}
+int AudioManager::createDSP(DSP_TYPE engineType, int channel, int position) {
 
+	// Convert from engine DSP type to fmod's internal DSP type
+	const auto internalTypeItr = kDSPTypeMap.find(engineType);
+	if (internalTypeItr == kDSPTypeMap.end()) return -1;
+
+	// Create the DSP
+	FMOD::DSP* internalHandle;
+	ERRCHK( coreSystem->createDSPByType(internalTypeItr->second, &internalHandle) );
+
+	DSP *engineDSP = new DSP();
+	engineDSP->dspId		= nextDSPId;
+	engineDSP->type			= engineType;
+	engineDSP->dsp			= internalHandle;
+
+	// Unsupported DSP filters:
+	// Channel Mix
+	// Chorus
+	// Compressor
+	// Convolutional Reverb
+	// Delay
+	// Distortion
+
+	// Fader (volume control)
+	// FFT
+
+	// IT Echo
+	// IT Lowpass
+	// Limiter
+	// Loudness meter
+	// Multiband equalizer / Three Equalizer
+	// Normalize (normalize volume)
+	// Object pan
+	// Oscillator (simple signal generator)
+	// Pan (possible but we don't have speakers in the demo, so let's not implement it)
+
+	// Return / Send
+
+	// SFX Reverb: tons of customization
+	// TODO: lookup
+
+	// Transceiever
+	switch (engineDSP->type) {
+	case Echo:
+		// Test values: 250, 10, 0, -10
+		engineDSP->params[FMOD_DSP_ECHO_DELAY]		= 250.f;	// Default: 500		Range: [1, 5000]	Unit: ms
+		engineDSP->params[FMOD_DSP_ECHO_FEEDBACK]	= 10.f;		// Default: 50		Range: [0, 100]		Unit: Percentage
+		engineDSP->params[FMOD_DSP_ECHO_DRYLEVEL]	= 0.f;		// Default: 0		Range: [-80, 10]	Unit: dB
+		engineDSP->params[FMOD_DSP_ECHO_WETLEVEL]	= -10.f;		// Default: 0		Range: [-80, 10]	Unit: dB
+		break;
+
+	case Flange:	// (wooshing, sweeping effect)
+		// Test values: 50, 1, 0.6
+		engineDSP->params[FMOD_DSP_FLANGE_MIX]		= 50.f;		// Default: 50		Range: [1, 100]		Unit: Percentage
+		engineDSP->params[FMOD_DSP_FLANGE_DEPTH]	= 1.0f;		// Default: 1		Range: [0.01, 1]	Unit: Linear
+		engineDSP->params[FMOD_DSP_FLANGE_RATE]		= 0.6f;		// Default: 0.1		Range: [0, 20]		Unit: Hertz
+		break;
+
+	case PitchShift:
+		// Test values: 2, 1024, 0
+		engineDSP->params[FMOD_DSP_PITCHSHIFT_PITCH]		= 1.f;		// Default: 1		Range: [0.5, 2]		Unit: Octave
+		engineDSP->params[FMOD_DSP_PITCHSHIFT_FFTSIZE]		= 1024.f;	// Default: 1024	Set: {256, 512, 1024, 2048, 4096}
+		engineDSP->params[FMOD_DSP_PITCHSHIFT_MAXCHANNELS]	= 0.f;		// Default: 0		Range: [0, 16]
+		break;
+
+	case Tremolo:
+		// Test values: skew 0.5
+		engineDSP->params[FMOD_DSP_TREMOLO_FREQUENCY] = 5.f;	// Default: 5		Range: [0.1, 20]	Unit: Hertz
+		engineDSP->params[FMOD_DSP_TREMOLO_DEPTH]	= 1.f;		// Default: 1		Range: [0, 1]		Unit: Linear
+		engineDSP->params[FMOD_DSP_TREMOLO_SHAPE]	= 1.f;		// Default: 1		Range: [0, 1]		Unit: Linear (morph between triangle and sine)
+		engineDSP->params[FMOD_DSP_TREMOLO_SKEW]	= 0.f;		// Default: 0		Range: [-1, 1]		Unit: Linear
+		engineDSP->params[FMOD_DSP_TREMOLO_DUTY]	= 0.5f;		// Default: 0.5		Range: [0, 1]		Unit: Linear
+		engineDSP->params[FMOD_DSP_TREMOLO_SQUARE]	= 1.f;		// Default: 1		Range: [0, 1]		Unit: Linear
+		engineDSP->params[FMOD_DSP_TREMOLO_PHASE]	= 0.f;		// Default: 0		Range: [0, 1]		Unit: Linear
+		engineDSP->params[FMOD_DSP_TREMOLO_SPREAD]	= 0.f;		// Default: 0		Range: [-1, 1]		Unit: Linear
+		break;
+
+	default:	break;
+	}
+
+	mDSPs[nextDSPId] = engineDSP;
+	
+	// Add to the map
+	//mDSPs[channel].insert(mDSPs[channel].begin() + position, dsp);
+
+	//ERRCHK(dsp->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, 0.8));
+	//ERRCHK( channel->addDSP(position, dsp) );
+
+	// Return a unique id for this DSP for reference, increment for next DSP
+	return nextDSPId++;
+}
+
+DSP* AudioManager::getDSP(int dspId) {
+
+	const auto itr = mDSPs.find(dspId);
+	return itr == mDSPs.end() ? nullptr : itr->second;
+}
 
 
 

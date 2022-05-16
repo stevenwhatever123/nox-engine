@@ -723,17 +723,26 @@ bool GameManager::playSound(Entity* ent, IAudioSource* isrc) {
 	vec3 pos{ itrans->x, itrans->y, itrans->z };
 
 	audioManager->loadSound(isrc);
-	isrc->channelId = audioManager->playSounds(isrc->filePath, pos, isrc->volume);
+	isrc->channelId = audioManager->playSounds(isrc, pos);
 
 	return true;
 }
 
 bool GameManager::pauseUnpauseSound(Entity* ent, IAudioSource* isrc) {
-
-	return audioManager->pauseUnpauseSound(isrc);;
+	return audioManager->pauseUnpauseSound(isrc);
 }
 
 bool GameManager::stopSound(Entity* ent, IAudioSource* isrc) {
+	return audioManager->stopSound(isrc);
+}
 
-	return audioManager->stopSound(isrc);;
+int GameManager::createDSP(DSP_TYPE type) {
+
+	return audioManager->createDSP(type);
+}
+
+//int GameManager::destroyDSP(int dspId) {}
+
+DSP* GameManager::getDSP(int dspId) {
+	return audioManager->getDSP(dspId);
 }

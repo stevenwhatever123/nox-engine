@@ -24,6 +24,7 @@
 #pragma once
 
 #include <Core/Types.h>
+#include <Core/AudioTypes.h>
 #include <fmod.hpp>
 #include <fmod_studio.hpp>
 #include <fmod_studio_common.h>
@@ -43,18 +44,6 @@ namespace NoxEngine {
 	class IAudioSource;
 
 
-	struct DSP {
-		friend class AudioManager;
-
-	public:
-		DspId dspId;
-		ChannelId channelId;
-
-	protected:
-		FMOD::DSP* effect;
-	};
-
-
 	class AudioManager : public Singleton<AudioManager> {
 
 		friend class Singleton<AudioManager>;
@@ -72,26 +61,21 @@ namespace NoxEngine {
 		///////////////////
 		
 		// Sound filepath -> Sound object
-		typedef std::map<String, FMOD::Sound*> SoundMap;
 		SoundMap mSounds;
 
 		// Channel id (monotonically increasing) -> Channel object
-		typedef std::map<int, FMOD::Channel*> ChannelMap;
 		ChannelMap mChannels;
 
 		// Sound filepath -> Channel id
-		typedef std::map<String, int> SoundChannelIdMap;
 		SoundChannelIdMap mSoundChannelIds;
 
 		// TODO: ChannelGroup...
 
-		// DSP	
-		// Array of DSP filters, intended to be retrieved by index
-		Array<FMOD::DSP*> dsps;
+		// DSP id (monotonically increasing) -> DSP object
+		DSPMap mDSPs;
 
 		// Channel -> Chain of DSPs
-		typedef std::map<int, Array<int>> ChannelDSPMap;
-		ChannelDSPMap mDSPs;
+		//ChannelDSPMap mDSPs;
 
 		// Geometry objects for occlusion
 		Array<FMOD::Geometry*> geometries;
@@ -99,8 +83,6 @@ namespace NoxEngine {
 		/////////////////////
 		/*   FMOD Studio   */
 		/////////////////////
-		typedef std::map<String, FMOD::Studio::EventInstance*> EventMap;
-		typedef std::map<String, FMOD::Studio::Bank*> BankMap;
 		BankMap mBanks;
 		EventMap mEvents;
 
@@ -142,7 +124,8 @@ namespace NoxEngine {
 		void loadSound(const String& strSoundName, bool is3d = true, bool isLooping = false, bool isStream = false);
 		void unLoadSound(const String& strSoundName);
 		void unLoadSound(const char* strSoundName);
-		int playSounds(const String& strSoundName, const vec3& vPos = vec3{ 0, 0, 0 }, float fVolumedB = 0.0f);
+		int playSounds(const IAudioSource* src, const vec3& vPos = vec3{ 0, 0, 0 });
+		int playSounds(const String& strSoundName, const vec3& vPos = vec3{ 0, 0, 0 }, float fVolumedB = 0.0f, const Array<int>& dspChain = {});
 
 		bool pauseUnpauseSound(IAudioSource* src);
 		bool stopSound(IAudioSource* src);
@@ -191,9 +174,10 @@ namespace NoxEngine {
 		
 
 		/*   DSP Filters   */ 
-		DspId createDSP(FMOD_DSP_TYPE type, int channelGroup = 0, int channel = 0, int chainPosition = 0);
-		void addDSP();	// add to channel group
-		//void addDSP();  // add to DSP input
+		int createDSP(DSP_TYPE type, int channelGroup = 0, int channel = 0);
+		//void addDSP();	// add to channel group
+		//void addDSP();	// add to DSP input
+		DSP* getDSP(int dspId);
 		
 
 		bool isPlaying(int nChannelId) const;

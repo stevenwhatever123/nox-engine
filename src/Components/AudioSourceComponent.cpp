@@ -14,6 +14,8 @@ AudioSourceComponent::AudioSourceComponent() {
 	isStream = false;
 	channelId = -1;
 
+	selectedDspFilter = 0;
+
 	loaded = false;
 	paused = false;
 	stopped = false;
