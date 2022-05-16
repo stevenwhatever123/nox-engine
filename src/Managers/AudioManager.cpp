@@ -43,18 +43,24 @@ using namespace NoxEngineUtils;
 
 // Constant values for audio types
 std::map<DSP_TYPE, const char*> kDSPNamesMap = {
+	{ Distortion,	"Distortion" },
 	{ Echo,			"Echo" },
+	{ Fader,		"Fader (Volume Control)" },
 	{ Flange,		"Flange" },
+	{ Limiter,		"Limiter" },
 	{ PitchShift,	"Pitch Shift" },
-	{ Tremolo,		"Tremolo" },
+	{ Tremolo,		"Tremolo" }
 };
 
 // Conversion from supported DSP type to FMOD internal DSP type
 std::map<DSP_TYPE, FMOD_DSP_TYPE> kDSPTypeMap = {
+	{ Distortion,	FMOD_DSP_TYPE_DISTORTION },
 	{ Echo,			FMOD_DSP_TYPE_ECHO },
+	{ Fader,		FMOD_DSP_TYPE_FADER },
 	{ Flange,		FMOD_DSP_TYPE_FLANGE },
+	{ Limiter,		FMOD_DSP_TYPE_LIMITER },
 	{ PitchShift,	FMOD_DSP_TYPE_PITCHSHIFT },
-	{ Tremolo,		FMOD_DSP_TYPE_TREMOLO },
+	{ Tremolo,		FMOD_DSP_TYPE_TREMOLO }
 };
 
 
@@ -128,20 +134,20 @@ void AudioManager::update() {
 	// State of geometries (e.g. enable, transform, etc) is updated in GameManager
 
 	/*   If a sound is stopped, remove it from the SoundMap so that it can be played again   */
-	std::vector<SoundChannelIdMap::iterator> pStoppedSoundChannelIds;
-	for (auto it = mSoundChannelIds.begin(), itEnd = mSoundChannelIds.end(); it != itEnd; ++it) {
+	//std::vector<SoundChannelIdMap::iterator> pStoppedSoundChannelIds;
+	//for (auto it = mSoundChannelIds.begin(), itEnd = mSoundChannelIds.end(); it != itEnd; ++it) {
 
-		int channelId = it->second;
-		bool bIsPlaying = false;	 mChannels[channelId]->isPlaying(&bIsPlaying);
+	//	int channelId = it->second;
+	//	bool bIsPlaying = false;	 mChannels[channelId]->isPlaying(&bIsPlaying);
 
-		if (!bIsPlaying) {
-			pStoppedSoundChannelIds.push_back(it);
-		}
-	}
+	//	if (!bIsPlaying) {
+	//		pStoppedSoundChannelIds.push_back(it);
+	//	}
+	//}
 
-	for (auto& it : pStoppedSoundChannelIds) {
-		mSoundChannelIds.erase(it);
-	}
+	//for (auto& it : pStoppedSoundChannelIds) {
+	//	mSoundChannelIds.erase(it);
+	//}
 
 
 	/*   Mark stopped channels for removal   */
@@ -164,6 +170,14 @@ void AudioManager::update() {
 	}
 
 	for (auto& it : pStoppedChannels) {
+		int nDSPs = 0;		 
+		it->second->getNumDSPs(&nDSPs);
+
+		for (int i = 0; i < nDSPs; i++) {
+			FMOD::DSP* dsp = nullptr;	
+			it->second->getDSP(i, &dsp);
+			it->second->removeDSP(dsp);
+		}
 		mChannels.erase(it);
 	}
 
@@ -293,14 +307,26 @@ int AudioManager::playSounds(const String& strSoundName, const vec3& vPos, float
 				//channel->setFrequency(freq * 2);
 
 				// Create DSP chain in this channel
-				for (int f = 0; f < dspChain.size(); f++) {
-					DSP* engineDSP = mDSPs[f];
+				for (int pos = 0; pos < dspChain.size(); pos++) {
+					int dspId = dspChain[pos];
+					DSP* engineDSP = mDSPs[dspId];
 					FMOD::DSP* dsp = engineDSP->dsp;
 
-					// Apply all parameters. The parameter values are initialized when the DSP engine handle is created,
-					// so we just need to iterate through this map, discarding all type information.
-					for (const auto& itr : engineDSP->params) {
-						ERRCHK(dsp->setParameterFloat(itr.first, itr.second));
+					if (engineDSP->type == Limiter) {
+
+						ERRCHK(dsp->setParameterFloat(FMOD_DSP_LIMITER_RELEASETIME, engineDSP->params[FMOD_DSP_LIMITER_RELEASETIME]));
+						ERRCHK(dsp->setParameterFloat(FMOD_DSP_LIMITER_CEILING, engineDSP->params[FMOD_DSP_LIMITER_CEILING]));
+						ERRCHK(dsp->setParameterFloat(FMOD_DSP_LIMITER_MAXIMIZERGAIN, engineDSP->params[FMOD_DSP_LIMITER_MAXIMIZERGAIN]));
+						ERRCHK(dsp->setParameterBool(FMOD_DSP_LIMITER_MODE, engineDSP->params[FMOD_DSP_LIMITER_MODE]));
+					}
+
+					else {
+
+						// Apply all parameters. The parameter values are initialized when the DSP engine handle is created,
+						// so we just need to iterate through this map, discarding all type information.
+						for (const auto& itr : engineDSP->params) {
+							ERRCHK(dsp->setParameterFloat(itr.first, itr.second));
+						}
 					}
 
 					// Add DSP to this channel
@@ -504,15 +530,12 @@ int AudioManager::createDSP(DSP_TYPE engineType, int channel, int position) {
 	// Compressor
 	// Convolutional Reverb
 	// Delay
-	// Distortion
 
-	// Fader (volume control)
 	// FFT
 
 	// IT Echo
 	// IT Lowpass
-	// Limiter
-	// Loudness meter
+	// (?) Loudness meter
 	// Multiband equalizer / Three Equalizer
 	// Normalize (normalize volume)
 	// Object pan
@@ -525,13 +548,22 @@ int AudioManager::createDSP(DSP_TYPE engineType, int channel, int position) {
 	// TODO: lookup
 
 	// Transceiever
+
 	switch (engineDSP->type) {
+	case Distortion:
+		engineDSP->params[FMOD_DSP_DISTORTION_LEVEL] = 0.5f;	// Default: 0.5		Range: [0, 1]	Unit: Linear
+		break;
+
 	case Echo:
 		// Test values: 250, 10, 0, -10
 		engineDSP->params[FMOD_DSP_ECHO_DELAY]		= 250.f;	// Default: 500		Range: [1, 5000]	Unit: ms
 		engineDSP->params[FMOD_DSP_ECHO_FEEDBACK]	= 10.f;		// Default: 50		Range: [0, 100]		Unit: Percentage
 		engineDSP->params[FMOD_DSP_ECHO_DRYLEVEL]	= 0.f;		// Default: 0		Range: [-80, 10]	Unit: dB
-		engineDSP->params[FMOD_DSP_ECHO_WETLEVEL]	= -10.f;		// Default: 0		Range: [-80, 10]	Unit: dB
+		engineDSP->params[FMOD_DSP_ECHO_WETLEVEL]	= -10.f;	// Default: 0		Range: [-80, 10]	Unit: dB
+		break;
+
+	case Fader:
+		engineDSP->params[FMOD_DSP_FADER_GAIN]		= 0.f;		// Default: 0		Range: [-80, 10]	Unit: dB
 		break;
 
 	case Flange:	// (wooshing, sweeping effect)
@@ -539,6 +571,13 @@ int AudioManager::createDSP(DSP_TYPE engineType, int channel, int position) {
 		engineDSP->params[FMOD_DSP_FLANGE_MIX]		= 50.f;		// Default: 50		Range: [1, 100]		Unit: Percentage
 		engineDSP->params[FMOD_DSP_FLANGE_DEPTH]	= 1.0f;		// Default: 1		Range: [0.01, 1]	Unit: Linear
 		engineDSP->params[FMOD_DSP_FLANGE_RATE]		= 0.6f;		// Default: 0.1		Range: [0, 20]		Unit: Hertz
+		break;
+
+	case Limiter:
+		engineDSP->params[FMOD_DSP_LIMITER_RELEASETIME]		= 10.f;		// Default: 10		Range: [1, 100]		Unit: ms
+		engineDSP->params[FMOD_DSP_LIMITER_CEILING]			= 0.f;		// Default: 0		Range: [-12, 0]		Unit: dB
+		engineDSP->params[FMOD_DSP_LIMITER_MAXIMIZERGAIN]	= 0.f;		// Default: 0		Range: [0, 12]		Unit: dB
+		engineDSP->params[FMOD_DSP_LIMITER_MODE]			= 0.f;		// Default: false
 		break;
 
 	case PitchShift:
@@ -563,9 +602,9 @@ int AudioManager::createDSP(DSP_TYPE engineType, int channel, int position) {
 	default:	break;
 	}
 
+	// Add to the map
 	mDSPs[nextDSPId] = engineDSP;
 	
-	// Add to the map
 	//mDSPs[channel].insert(mDSPs[channel].begin() + position, dsp);
 
 	//ERRCHK(dsp->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, 0.8));

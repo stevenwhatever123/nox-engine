@@ -368,7 +368,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 								// Dropdown list of all DSP filter enums
 								// TODO: use kDSPNamesMap and ImGui::BeginCombo()
-								const char* filterNames[] = { "Echo", "Flange", "Pitch Shift", "Tremolo" };
+								const char* filterNames[] = { "Distortion", "Echo", "Fader (Volume Control)", "Flange", "Limiter", "Pitch Shift", "Tremolo" };
 								u32 nFilterNames = IM_ARRAYSIZE(filterNames);
 
 								ImGui::Text("Filters");		ImGui::SameLine();
@@ -382,6 +382,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 									audioSrcComp->dspChain.emplace_back(dspID);
 								}
 
+								Array<bool> dspRemoveFlags(audioSrcComp->dspChain.size(), false);
+
 								// Display DSP chain, allow reorder
 								for (int f = 0; f < audioSrcComp->dspChain.size(); f++) {
 
@@ -394,6 +396,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 									// Unique header
 									ImGui::PushID(f);
+									dspRemoveFlags[f] = ImGui::SmallButton("-##RemoveDSP");		ImGui::SameLine();
 									bool expandDSP = ImGui::CollapsingHeader(name);
 									ImGui::PopID();
 
@@ -433,10 +436,20 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 									ImGui::PushID(f);
 									if (expandDSP) {
 
-										int windowLen, maxChannels;
+										int limiterMode;			// limiter
+										int windowLen, maxChannels;	// pitchshift
 
 										// Display different parameters based on filter type
 										switch (dsp->type) {
+										case Distortion:
+											ImGui::PushID("Distortion");
+											ImGui::SliderFloat("Distortion Level",
+												&dsp->params[FMOD_DSP_DISTORTION_LEVEL],
+												0.f, 1.f);
+											ImGui::PopID();
+											break;
+
+										///////////////////////////////////////////////////
 										case Echo:
 											ImGui::PushID("Echo");
 											ImGui::SliderFloat("Delay", 
@@ -462,6 +475,16 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 											break;
 
 										///////////////////////////////////////////////////
+										case Fader:
+											ImGui::PushID("Fader (Volume Control)");
+											ImGui::SliderFloat("Gain",
+												&dsp->params[FMOD_DSP_FADER_GAIN],
+												-80.f, 10.f);
+											HoverTooltip("Signal gain. (Unit: Decibels)");
+											ImGui::PopID();
+											break;
+
+										///////////////////////////////////////////////////
 										case Flange:
 											ImGui::PushID("Flange");
 											ImGui::SliderFloat("Mix", 
@@ -478,6 +501,33 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 												&dsp->params[FMOD_DSP_FLANGE_RATE], 
 												0.f, 20.f);
 											HoverTooltip("Flange speed. (Unit: Hertz)");
+											ImGui::PopID();
+											break;
+
+										///////////////////////////////////////////////////
+										case Limiter:
+											ImGui::PushID("Flange");
+											ImGui::SliderFloat("Release Time",
+												&dsp->params[FMOD_DSP_LIMITER_RELEASETIME],
+												1.f, 100.f);
+											HoverTooltip("Time to return the gain reduction to full in ms. (Unit: ms)");
+
+											ImGui::SliderFloat("Ceiling",
+												&dsp->params[FMOD_DSP_LIMITER_CEILING],
+												-12.f, 0.f);
+											HoverTooltip("Maximum level of the output signal. (Unit: Decibels)");
+
+											ImGui::SliderFloat("Maximize Gain",
+												&dsp->params[FMOD_DSP_LIMITER_MAXIMIZERGAIN],
+												0.f, 12.f);
+											HoverTooltip("Maximum amplification allowed. (Unit: Decibels)");
+
+											limiterMode = (int)dsp->params[FMOD_DSP_LIMITER_MODE];
+											ImGui::SliderInt("Mode",
+												&limiterMode,
+												0, 1);
+											HoverTooltip("Channel processing mode where false is independent (limiter per channel) and true is linked (all channels are summed together before processing).");
+											dsp->params[FMOD_DSP_LIMITER_MODE] = limiterMode;
 											ImGui::PopID();
 											break;
 
@@ -576,6 +626,11 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 									}
 #endif
 
+								}
+
+
+								for (int f = audioSrcComp->dspChain.size() - 1; f >= 0; f--) {
+									if (dspRemoveFlags[f]) audioSrcComp->dspChain.erase(audioSrcComp->dspChain.begin() + f);
 								}
 
 								ImGui::TreePop();

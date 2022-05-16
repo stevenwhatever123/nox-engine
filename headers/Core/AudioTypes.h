@@ -19,8 +19,11 @@
 
 // Supported DSP types
 enum DSP_TYPE {
+	Distortion = 0,
 	Echo,
+	Fader,
 	Flange,
+	Limiter,
 	PitchShift,
 	Tremolo,
 	SupportedDSPTypeCount
