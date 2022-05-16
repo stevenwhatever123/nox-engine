@@ -10,17 +10,29 @@ using namespace NoxEngine;
 
 void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 
-	String name = kPanelNameMap[ PanelName::Scene ];
-
+	// Variables
+	String name = kPanelNameMap[PanelName::Scene];
+	ImVec2 itemSpacing = ImGui::GetStyle().ItemSpacing;
 	ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize;
 
+	// Style: Begin
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
+	// Window Begin
 	ImGui::Begin(name.c_str(), NULL, flags);
-
-	ImGuiID id;
+	
 	ImRect bb = ImGui::GetCurrentWindow()->WorkRect;
-	ImGui::GetCurrentWindow()->GetID(&id);
+	ImGuiID id;		ImGui::GetCurrentWindow()->GetID(&id);
+
+	// RMB while hovering over the scene window should make the scene the active window,
+	// so you don't need to LMB in the scene then RMB to look around
+	if (!ImGui::IsWindowFocused() &&
+		ImGui::IsMouseDown(ImGuiMouseButton_Right) &&
+		ImGui::IsMouseHoveringRect(bb.GetTL(), bb.GetBR())) {
+		ImGui::SetActiveID(id, ImGui::GetCurrentWindow());
+		ImGui::SetWindowFocus();
+	}
+
 
 	if (ImGui::BeginDragDropTargetCustom(bb, id)) {
 	
@@ -194,6 +206,8 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 
 	// Window end
 	ImGui::End();
+
+	// Style: End
 	ImGui::PopStyleVar();
 }
 

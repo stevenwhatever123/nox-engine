@@ -390,7 +390,7 @@ void GameManager::init_renderer() {
 	renderer->setFrameBufferToTexture();
 	game_state.fullscreen_shader_texture_used = renderer->getTexture();
 
-	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(500, 0, 500), 50);
+	GridObject *obj = new GridObject(vec3(-1500, 0, -1500), vec3(1500, 0, 1500), 150);
 	renderer->addPermObject(obj);
 	renderer->updateBuffers();
 
