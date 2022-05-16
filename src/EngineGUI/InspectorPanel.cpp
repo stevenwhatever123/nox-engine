@@ -44,7 +44,6 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 	// Window Begin
 	ImGui::Begin(name.c_str());
 
-
 	/*   Logic   */
 
 	// No entity is selected - show text
@@ -85,7 +84,9 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 					//add a UI to edit that particular item
 					glm::mat4 translationMatrix = animComp->translationMatrices[animComp->animationIndex][animComp->frameIndex];
 					float translate[3] = { translationMatrix[3][0], translationMatrix[3][1], translationMatrix[3][2] };
-					ImGui::DragFloat3("Translation", translate, 0.005f, -100, 100, "%.3f", 0);
+					ImGui::Text("Translation");
+					ImGui::SameLine();
+					ImGui::DragFloat3("##Translation", translate, 0.005f, -100, 100, "%.3f", 0);
 					glm::vec3 translateVec(translate[0], translate[1], translate[2]);
 
 					// Apply value
@@ -98,7 +99,10 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						animComp->eulerAngleXYZ[animComp->animationIndex][animComp->frameIndex][1] ,
 						animComp->eulerAngleXYZ[animComp->animationIndex][animComp->frameIndex][2] 
 					};
-					ImGui::DragFloat3("Rotation", rotation, 0.005f, -10, 10, "%.3f", 0);
+					ImGui::SetNextItemWidth(100);
+					ImGui::Text("   Rotation");
+					ImGui::SameLine();
+					ImGui::DragFloat3("##Rotation", rotation, 0.005f, -10, 10, "%.3f", 0);
 
 					// Apply value
 					animComp->eulerAngleXYZ[animComp->animationIndex][animComp->frameIndex][0] = rotation[0];
@@ -108,7 +112,9 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 					glm::mat4 scalingMatrix = animComp->scalingMatrices[animComp->animationIndex][animComp->frameIndex];
 					float scaling[3] = { scalingMatrix[0][0], scalingMatrix[1][1], scalingMatrix[2][2] };
-					ImGui::DragFloat3("Scaling", scaling, 0.005f, 1, 100, "%.3f", 0);
+					ImGui::Text("    Scaling");
+					ImGui::SameLine();
+					ImGui::DragFloat3("##Scaling", scaling, 0.005f, 1, 100, "%.3f", 0);
 
 					// Apply value
 					(animComp->scalingMatrices[animComp->animationIndex][animComp->frameIndex])[0][0] = scaling[0];
@@ -196,9 +202,15 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						// Begin: grey out
 						ImGui::BeginDisabled(!enable);
 
-						ImGui::DragFloat3("Position", &transComp->x, 0.1f);
-						ImGui::DragFloat3("Rotation", &transComp->rx, 0.01f);
-						ImGui::DragFloat3("Scale", &transComp->sx, 0.01f);
+						ImGui::Text("Position");
+						ImGui::SameLine();
+						ImGui::DragFloat3("##Position", &transComp->x, 0.1f);
+						ImGui::Text("Rotation");
+						ImGui::SameLine();
+						ImGui::DragFloat3("##Rotation", &transComp->rx, 0.01f);
+						ImGui::Text("   Scale");
+						ImGui::SameLine();
+						ImGui::DragFloat3("##Scale", &transComp->sx, 0.01f);
 
 						ImGui::TreePop();
 
@@ -246,7 +258,9 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 						ImGui::Text("Diffuse Map");
 						ImGui::Text("Specular Map");
-						ImGui::DragFloat3("Colour", rend->color);
+						ImGui::Text("Colour");
+						ImGui::SameLine();
+						ImGui::DragFloat3("##Colour", rend->color);
 
 						ImGui::TreePop();
 
@@ -387,7 +401,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							ImGui::EndDisabled();
 
 							// Volume
-							ImGui::Text("Volume");	
+							ImGui::Text("Volume");	 
+							ImGui::SameLine();
 							//ImGui::SameLine(50.f);	
 							//ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 							int volume = audioSrcComp->volume * 100.f;
@@ -418,7 +433,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 								ImGui::SameLine();
 
-								if (ImGui::Button("Add to filter chain")) {
+								if (ImGui::Button("Add")) {
 									int dspID = GameManager::Instance()->createDSP(static_cast<DSP_TYPE>(audioSrcComp->selectedDspFilter));
 									audioSrcComp->dspChain.emplace_back(dspID);
 									audioSrcComp->dspBypass.emplace_back(false);
@@ -711,7 +726,9 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							state->activeAudioListener = ent;
 						}
 
-						ImGui::DragFloat3("Velocity##audio_listener_velocity", &audioLisComp->vVel.x);
+						ImGui::Text("Velocity");
+						ImGui::SameLine();
+						ImGui::DragFloat3("##audio_listener_velocity", &audioLisComp->vVel.x);
 						ImGui::SameLine();
 						ImGui::TextDisabled("(?)");
 						HoverTooltip("Velocity for Doppler effect");
@@ -751,7 +768,9 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 						const char* shapeNames[] = {"##geometry_undefined", "Plane", "Bounding Box", "Custom"};
 
-						if (ImGui::BeginCombo("Shape", shapeNames[(int)igeo->shape])) {
+						ImGui::Text("Shape");
+						ImGui::SameLine();
+						if (ImGui::BeginCombo("##Shape", shapeNames[(int)igeo->shape])) {
 
 							for (int i = 0; i < (int)IAudioGeometry::Shape::Count; i++) {
 
@@ -795,7 +814,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 
 							// Start: No renderable component - grey out the Generate button
 							ImGui::BeginDisabled(!ent->containsComps<RenderableComponent>());
-
+							ImGui::NewLine();
 							if (ImGui::Button("Generate##gen_audio_box")) {
 
 								geometryGenerated = geoComp->generateBoundingBox( rendComp->getVertices(), transformation );
@@ -805,7 +824,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							ImGui::EndDisabled();
 						}
 						if (igeo->shape == IAudioGeometry::Shape::Custom) {
-
+							ImGui::NewLine();
 							if (ImGui::Button("Load##load_audio_geometry")) {
 
 								geometryGenerated = GameManager::Instance()->loadAudioGeometry(ent, geoComp);
@@ -818,7 +837,10 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						}
 
 						// Show geometry status
-						if (igeo->geometryId == -1) ImGui::Text("Audio Geometry: Undefined");
+						if (igeo->geometryId == -1) {
+							ImGui::NewLine();
+							ImGui::Text("Audio Geometry: Undefined");
+						}
 						else {
 							if (igeo->shape == IAudioGeometry::Shape::Plane)	ImGui::Text("Audio Geometry: Plane");
 							if (igeo->shape == IAudioGeometry::Shape::Box)		ImGui::Text("Audio Geometry: Auto-generated bounding box");
@@ -892,28 +914,52 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				if (cameraComp) {
 
 					bool tree_open = ImGui::TreeNode("Camera");
+					bool enable = ent->isEnabled<CameraComponent>();
+
+					ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+					ImGui::Checkbox("##EnableCamera", &enable);
+
+					ent->setEnabled<CameraComponent>(enable);
+
 					ImGui::SameLine();
-					bool remove = ImGui::SmallButton("-##RemoveCamera");
+					bool remove = ImGui::SmallButton("-##RemoveCamera");	// TODO: Use ImageButton?
 
 					if (tree_open) {
 
+						// Begin: grey out
+						ImGui::BeginDisabled(!enable);
+
 						cameraComp->getCamera()->GetCameraYawPitchRoll();
 						auto vals = cameraComp->getCamera()->GetCameraYawPitchRoll();
-						ImGui::DragFloat("Yaw", &vals[0]);
-						ImGui::DragFloat("Pitch", &vals[1]);
+						ImGui::Text("  Yaw");
+						ImGui::SameLine();
+						ImGui::DragFloat("##Yaw", &vals[0]);
+						ImGui::Text("Pitch");
+						ImGui::SameLine();
+						ImGui::DragFloat("##Pitch", &vals[1]);
 						auto& m = cameraComp->getCamera()->GetCameraYawPitchRoll();
 						cameraComp->getCamera()->setYaw(vals.x);
 						cameraComp->getCamera()->setPitch(vals.y);
 
-						ImGui::DragFloat("X", &cameraComp->getCamera()->GetCameraPosition()[0]);
-						ImGui::DragFloat("Y", &cameraComp->getCamera()->GetCameraPosition()[1]);
-						ImGui::DragFloat("Z", &cameraComp->getCamera()->GetCameraPosition()[2]);
+						ImGui::Text("	X");
+						ImGui::SameLine();
+						ImGui::DragFloat("##X", &cameraComp->getCamera()->GetCameraPosition()[0]);
+						ImGui::Text("	Y");
+						ImGui::SameLine();
+						ImGui::DragFloat("##Y", &cameraComp->getCamera()->GetCameraPosition()[1]);
+						ImGui::Text("	Z");
+						ImGui::SameLine();
+						ImGui::DragFloat("##Z", &cameraComp->getCamera()->GetCameraPosition()[2]);
 
 						if(state->renderer->getCamera() == cameraComp->getCamera()) {
+							ImGui::Text("	 ");
+							ImGui::SameLine();
 							if(ImGui::Button("View Main Camera")) {
 								state->renderer->setCamera(state->cameras[0]);
 							}
 						} else {
+							ImGui::Text("	 ");
+							ImGui::SameLine();
 							if(ImGui::Button("View Camera")) {
 								state->renderer->setCamera(cameraComp->getCamera());
 							}
@@ -923,6 +969,9 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							ent->removeComp<CameraComponent>();
 						}
 
+						// End: grey out
+						ImGui::EndDisabled();
+
 						ImGui::TreePop();
 					}
 				}
@@ -930,16 +979,29 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 				if (emissionComp)
 				{
 					bool tree_open = ImGui::TreeNode("Emission Component");
+					bool enable = ent->isEnabled<EmissionComponent>();
+
+					ImGui::SameLine(width - 2.0f * ImGui::GetFrameHeight());
+					ImGui::Checkbox("##EnableEmission", &enable);
+
+					ent->setEnabled<EmissionComponent>(enable);
+
 					ImGui::SameLine();
-					bool remove = ImGui::SmallButton("-##RemoveEmission");
+					bool remove = ImGui::SmallButton("-##RemoveEmission");	// TODO: Use ImageButton?
 
 					if (tree_open) {
+
+						// Begin: grey out
+						ImGui::BeginDisabled(!enable);
 
 						ImGui::Text("Hello");
 
 						if (remove) {
-							ent->removeComp<CameraComponent>();
+							ent->removeComp<EmissionComponent>();
 						}
+
+						// End: grey out
+						ImGui::EndDisabled();
 
 						ImGui::TreePop();
 					}
