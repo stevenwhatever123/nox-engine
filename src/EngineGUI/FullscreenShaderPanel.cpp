@@ -16,11 +16,25 @@ void NoxEngineGUI::updateFullscreenShaderPanel(GameState* state, GUIParams *ui_p
 	
 	ImGui::Begin(name.c_str(), NULL, flags);
 
-	if(ImGui::IsWindowFocused()) {
-		ui_params->full_screen = true;
-	}
+	
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
+	if(ImGui::IsWindowFocused()) {
+		ui_params->full_screen = true;
+		
+	}
+
+
+	if(ui_params->full_screen) {
+		state->prev_win_width  = state->win_width;
+		state->prev_win_height = state->win_height;
+
+		state->win_width  = (u32)wsize.x;
+		state->win_height = (u32)wsize.y;
+	}
+
+
+	
 	state->renderer->updateProjection((i32)wsize.x, (i32)wsize.y);
 	ImGui::Image((ImTextureID)(u64)state->fullscreen_shader_texture_used, wsize, ImVec2(0, 1), ImVec2(1, 0));
 
@@ -39,6 +53,8 @@ void TextureView(const char *tree_name, const char *file_path, FullscreenShader&
 
 		ImGui::Unindent();
 		ImGui::Indent(padding_right);
+
+		ImGui::Text("Texture ID: %d", pp.GetTexture());
 
 		bool openInputs = ImGui::TreeNode("Inputs");
 

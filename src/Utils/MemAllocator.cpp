@@ -134,6 +134,7 @@ void StackMemAllocator::free(u8 *allocated_mem) {
 
 	if(data_to_free != _last_alloc) {
 		LOG_DEBUG("Memory being freed is not the latest allocated, no changes.");
+		__debugbreak();
 		return;
 	}
 

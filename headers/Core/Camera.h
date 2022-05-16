@@ -31,7 +31,7 @@ namespace NoxEngine {
 			void turndirLEFT(f32 shift);
 			void turndirRIGHT(f32 shift);
 
-			void moveToMousePos(f32 x, f32 y);
+			void moveToMousePos(f64 x, f64 y);
 
 			void changePitch(f32 amount);
 			void setPitch(f32 amount);
@@ -51,7 +51,7 @@ namespace NoxEngine {
 			vec3 user_shift;
 			vec3 yaw_pitch_roll;
 			vec3 yaw_pitch_roll_shift;
-
+			f32 sensetivity;
 			f32 fov;
 
 		private:

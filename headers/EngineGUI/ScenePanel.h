@@ -16,5 +16,5 @@ using NoxEngine::GameState;
 
 namespace NoxEngineGUI {
 	void updateScenePanel(GameState* game_state, GUIParams *ui_params);
-	glm::vec3 getPosOfMouseInWorldCoord(GameState* params, int pointX, int pointY, int width, int height);
+	glm::vec3 getPosOfMouseInWorldCoord(GameState* params, f32 pointX, f32 pointY, f32 width, f32 height);
 };

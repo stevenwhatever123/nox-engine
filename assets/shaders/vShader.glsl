@@ -35,7 +35,7 @@ void main(void)
 
 
 	// For normal mapping
-	vec3 T = normalize(tangent);
+	vec3 T = normalize(vec3(0.0, 0.0, 0.0));
 	vec3 N = normalize(normal);
 	vec3 B = cross(N, T);
 

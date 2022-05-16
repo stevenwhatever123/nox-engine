@@ -386,7 +386,7 @@ void MeshScene::extractGeometricInfo(const aiScene* scene) {
 
 		const aiMesh* pMesh = loadedMesh[i];
 
-		Mesh* mesh = new Mesh;
+		Mesh* mesh = new Mesh();
 
 		mesh->name = pMesh->mName.C_Str();
 		mesh->hasBones = pMesh->HasBones();

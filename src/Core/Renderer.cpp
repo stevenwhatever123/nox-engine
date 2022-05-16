@@ -67,13 +67,14 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 	tex(0),
 	curFBO(0),
 	color(0),
-	nextObjectId(0)
+	nextObjectId(0),
+	program(nullptr)
 {
 
 	// Initialise OpenGl
 
 	glEnable(GL_DEPTH_TEST);
-	// glEnable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 	glDepthMask(GL_TRUE);
 
 	// Create framebuffer  
@@ -148,14 +149,13 @@ void Renderer::updateBuffers() {
 
 RendObj Renderer::createRendObject(IRenderable *mesh) {
 
-	RendObj newObj;
+	RendObj newObj{0};
 	newObj.meshSrc = mesh;
 
 	newObj.renderType = mesh->glRenderType;
 	newObj.startInd = (i32)elements.size();
 	newObj.has_texture = mesh->has_texture;
 	newObj.has_normal = mesh->has_normal;
-	newObj.lineWidth = mesh->lineWidth;
 
 	// Generate textures for the object
 	if(mesh->has_texture) {
@@ -391,7 +391,7 @@ void Renderer::updateProjection(i32 width, i32 height) {
 void Renderer::createVertexArray(IRenderable* mesh)
 {
 	numberOfVertices += mesh->getNumOfVertices();
-	const auto v = mesh->getVertices();
+		const auto v = mesh->getVertices();
     copy(v.begin(), v.end(), back_inserter(vertices));
 }
 
@@ -771,7 +771,6 @@ void Renderer::drawSkyBox()
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // Reset everything back to normal
-    glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
 
@@ -781,9 +780,12 @@ void Renderer::drawSkyBox()
 
 
 void Renderer::updateTextureSizes(u32 width, u32 height) {
-	
 	w = width;
 	h = height;
+
+	if(program != nullptr) {
+		updateProjection(width, height);
+	}
 
     // Gen texture for framebuffer    
     glBindTexture(GL_TEXTURE_2D, textureToRenderTo);

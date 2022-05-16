@@ -174,15 +174,17 @@ void FullscreenShader::ChangeShader(String& shader_path) {
 	u32 shaders_attached[2];
 
 
-	glGetAttachedShaders(_id, 2, NULL, shaders_attached);
+	if(inited) {
+		glGetAttachedShaders(_id, 2, NULL, shaders_attached);
 
-	i32 shader_type = 0;
-	for(u32 i = 0; i < 2; i++) {
-		glGetShaderiv(shaders_attached[i], GL_SHADER_TYPE, &shader_type);
-		if(shader_type == GL_FRAGMENT_SHADER) {
-			glDetachShader(_id, shaders_attached[i]);
-			glDeleteShader(shaders_attached[i]);
-			break;
+		i32 shader_type = 0;
+		for(u32 i = 0; i < 2; i++) {
+			glGetShaderiv(shaders_attached[i], GL_SHADER_TYPE, &shader_type);
+			if(shader_type == GL_FRAGMENT_SHADER) {
+				glDetachShader(_id, shaders_attached[i]);
+				glDeleteShader(shaders_attached[i]);
+				break;
+			}
 		}
 	}
 
@@ -255,3 +257,30 @@ void FullscreenShader::draw(time_type deltaTime) {
 	restoreState();
 }
 
+
+void FullscreenShader::changeTextureSize(i32 width, i32 height) {
+
+	frame_width = width;
+	frame_height = height;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame_width, frame_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0 );
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
+
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+		LOG_DEBUG("Fullscreen post-processor successfully built.");
+	} else {
+		LOG_DEBUG("Failed to build fullscreen post-processor.");
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glViewport(0, 0, width, height);
+
+
+}

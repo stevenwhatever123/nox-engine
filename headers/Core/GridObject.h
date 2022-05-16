@@ -19,8 +19,8 @@ namespace NoxEngine {
 			GridObject(vec3 start_point, vec3 end_point, const i32 number_of_rects);
 
 			inline const i32 getNumOfVertices() const { return i32( vertices.size() ); }
-			inline const i32 getNumOfTexCoord() const { return i32( texCoords.size()/2 ); }
-			inline const i32 getNumOfNormals()  const { return i32( normals.size()/3 ); }
+			inline const i32 getNumOfTexCoord() const { return i32( texCoords.size() ); }
+			inline const i32 getNumOfNormals()  const { return i32( normals.size() ); }
 			inline const i32 getNumOfFaces()	const { return i32( faces.size() ); }
 
 			inline const String getNormalTexture() { return "assets/meshes/textures/leaves_normal.jpg"; }

@@ -37,7 +37,12 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 			const ImVec2 mouse_pos_in_canvas(io.MousePos.x - origin.x, io.MousePos.y - origin.y); // MousePos is mouse position relative to the whole window.
 
 			// Transform cursor position to the world position with depth set to 5 (arbitary)
-			glm::vec3 mouse_pos_in_world = getPosOfMouseInWorldCoord(state, mouse_pos_in_canvas.x, mouse_pos_in_canvas.y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+			glm::vec3 mouse_pos_in_world = getPosOfMouseInWorldCoord(
+				state, mouse_pos_in_canvas.x,
+				mouse_pos_in_canvas.y,
+				ImGui::GetWindowWidth(),
+				ImGui::GetWindowHeight()
+			);
 
 			// Create entity
 			Entity* ent = new Entity(state->activeScene, PRESET_OBJECT_NAMES_MAP[payloadObject].c_str());
@@ -73,17 +78,39 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 
 	ImVec2 wsize = ImGui::GetContentRegionAvail();
 
+
+	// LOG_DEBUG("b: cur: (%d %d), prev: (%d %d), new: (%f, %f)",
+	// 	state->win_width, state->win_height,
+	// 	state->prev_win_width, state->prev_win_height,
+	// 	wsize.x, wsize.y
+	// );
+
+	if(params->full_screen == false) {
+
+		state->prev_win_width  = state->win_width;
+		state->prev_win_height = state->win_height;
+
+		state->win_width  = (u32)wsize.x;
+		state->win_height = (u32)wsize.y;
+	}
+
+
+
 	state->renderer->updateProjection((i32)wsize.x, (i32)wsize.y);
-
-	state->prev_win_width  = state->win_width;
-	state->prev_win_height = state->win_height;
-
-	state->win_width  = (u32)wsize.x;
-	state->win_height = (u32)wsize.y;
 
 	if(ImGui::IsWindowFocused()) {
 		params->full_screen = false;
 		params->scene_active = true;
+
+
+		// LOG_DEBUG("a: cur: (%d %d), prev: (%d %d), new: (%f, %f)",
+		// 	state->win_width, state->win_height,
+		// 	state->prev_win_width, state->prev_win_height,
+		// 	wsize.x, wsize.y
+		// );
+
+
+
 	} else {
 		params->scene_active = false;
 	}
@@ -102,7 +129,12 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 		if (ent != nullptr)
 		{
 			// Set viewport
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, state->renderer->getWidth(), state->renderer->getHeight());
+			ImGuizmo::SetRect(
+				ImGui::GetWindowPos().x,
+				ImGui::GetWindowPos().y,
+				(f32)state->renderer->getWidth(),
+				(f32)state->renderer->getHeight()
+			);
 
 			// Camera
 			glm::mat4 cameraProjection = state->renderer->getProjMatr();
@@ -199,7 +231,7 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 
 // A function transformitng screen space pixel coord of the point to the world coord
 // Param: point coordinates in pixels relative to the window it is in. Width and Height of the window
-glm::vec3 NoxEngineGUI::getPosOfMouseInWorldCoord(GameState* params, int pointX, int pointY, int width, int height)
+glm::vec3 NoxEngineGUI::getPosOfMouseInWorldCoord(GameState* params, f32 pointX, f32 pointY, f32 width, f32 height)
 {
 	// x and y are coordinates of the pixel in the rendering window
 
