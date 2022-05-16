@@ -47,6 +47,12 @@ namespace NoxEngine {
 		// Component type of the meshSrc
 		ComponentType componentType;
 	};
+
+	struct Material
+	{
+
+
+	};
 	
 	extern GLenum GLRenderTypes[3];
 
@@ -109,6 +115,8 @@ namespace NoxEngine {
 		// Updates the view transformation using the current camera
 		void updateCamera();
 		void updateLightPos(int lightInd, f32 x, f32 y, f32 z);
+
+		void _change_num_of_light(u32 num) { program->changeLightNum(num); }
 
 		inline const Map<u32, RendObj>& getObjects() const { return objects; };
 

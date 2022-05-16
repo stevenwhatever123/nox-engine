@@ -21,10 +21,15 @@ namespace NoxEngine {
 	class GLProgram {
 		protected:
 			u32 compileShader(String& filename, i32 shaderType);
+			GLuint compileShaderFromString(std::string shaderData, GLenum shaderType);
 			u32 makeProgram(Array<ShaderFile> shaders);
 			u32 _id;
 
+			Array<ShaderFile> _shaders; // Need to hold onto the info on shaders to change them on the go
+
 		public:
+			u32 numOfLights = 0;
+
 			GLProgram(Array<ShaderFile> shaders);
 			void use();
 
@@ -42,6 +47,9 @@ namespace NoxEngine {
 			int getUniformLocation(const String& name);
 			int getAtrributeLocation(const String& name);
 			void printAttribInfo();
+
+			// The change of the num of the light sources requires 
+			void changeLightNum(i32 num_of_light);
 
 	};
 }

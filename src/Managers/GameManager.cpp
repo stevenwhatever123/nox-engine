@@ -365,11 +365,14 @@ void GameManager::init_renderer() {
 	renderer->updateBuffers();
 
 	// MULTIPLE LIGHTS Init lights. Will be removed when light will be added dinamically
-	for (int i = 0; i < 1; i++)
+	for (u32 i = 0; i < 3; i++)
 	{
 		game_state.lightSources.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
 		renderer->addLights(game_state.lightSources[i]);
 	}
+
+	renderer->_change_num_of_light(3);
+	renderer->useProgram();
 }
 
 void GameManager::init_gui() {

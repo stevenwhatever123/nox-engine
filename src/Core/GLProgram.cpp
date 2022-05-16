@@ -32,6 +32,31 @@ u32 GLProgram::compileShader(String& filename, i32 shaderType) {
 	return id;
 }
 
+GLuint GLProgram::compileShaderFromString(std::string shaderData, GLenum shaderType) {
+	GLuint id = glCreateShader(shaderType);
+
+	const char* data = &shaderData[0];
+
+	glShaderSource(id, 1, &data, NULL);
+	glCompileShader(id);
+
+	GLint result = GL_FALSE;
+
+	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+
+	if (result != GL_TRUE) {
+		i32 infoLogLength;
+		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &infoLogLength);
+		char* temp_buf = (char*)StackMemAllocator::Instance()->allocate(infoLogLength);
+		glGetShaderInfoLog(id, infoLogLength, NULL, temp_buf);
+		LOG_DEBUG("Error Compiling Shader: \n%s", temp_buf);
+		StackMemAllocator::Instance()->free((u8*)temp_buf);
+	}
+
+	return id;
+}
+
+
 u32 GLProgram::makeProgram(Array<ShaderFile> shaders) {
 	u32 id = glCreateProgram();
 	for(i32 i = 0; i < shaders.size(); i++) {
@@ -64,6 +89,7 @@ GLProgram::GLProgram(Array<ShaderFile> shaders)
 	}
 
 	_id = makeProgram(shaders);
+	_shaders = shaders;
 }
 
 void GLProgram::use()
@@ -128,6 +154,53 @@ void GLProgram::printAttribInfo()
 		LOG_DEBUG("Attribute %s idx %d", mem, i);
 		StackMemAllocator::Instance()->free((u8*)mem);
 	}
-	
+}
+
+void GLProgram::changeLightNum(i32 num_of_light)
+{
+	numOfLights = num_of_light;
+	for (u32 i = 0; i < _shaders.size(); i++)
+	{
+		// Read shader content
+		TempResourceData temp = IOManager::Instance()->ReadEntireFileTemp(_shaders[i].filename);
+		std::string shaderData = std::string((const char*)temp.data);
+
+		// Check if the shaders attached to this program have num_of_lights defined
+		size_t found = shaderData.find("#define NUM_OF_LIGHTS");
+
+		// If not -> assume that the shaders don't have multiple lights and escape
+		if (found == std::string::npos)
+		{
+			// TODO: find it/ask it LOG MESSAGE HERE
+			return;
+		}
+
+		// If has -> change the num of lights
+
+		std::string result;
+		result = "#version 450 core\n#define NUM_OF_LIGHTS " + std::to_string(num_of_light);
+		num_of_light;
+		result += "\n";
+
+		std::string restOf = shaderData.substr(found);
+		found = restOf.find("\n");
+		result += restOf.substr(found + 1);
+
+		// Create shaders
+		_shaders[i].id = compileShaderFromString(result, _shaders[i].shader_type);
+
+	}
+
+	// Make the program
+	GLuint newId = makeProgram(_shaders);
+
+	// Delete existing program
+	glDeleteProgram(_id);
+
+	// Store new one
+	_id = newId;
+
+	return;
 
 }
+

@@ -560,9 +560,22 @@ void Renderer::useProgram()
 	updateCamera();
 
     program->set3Float("cameraPosition", camera->GetCameraPosition());
-    program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
+    //program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
     program->set4Matrix("toWorld", mat4(1.0f));
     program->set4Matrix("modelMatrix", mat4(1.0f));
+
+	updateBuffers();
+
+	// Load textures
+	GLuint textureLoc = program->getUniformLocation("AmbTexture");
+	glUniform1i(textureLoc, 1);
+
+	textureLoc = program->getUniformLocation("NormTexture");
+	glUniform1i(textureLoc, 2);
+
+	// Reload lights
+	for (int i = 0; i < program->numOfLights; i++)
+		updateLightPos(i, 0.0f, 0.0f, 0.0f);
 
 }
 

@@ -27,8 +27,8 @@ void NoxEngineGUI::updateSkyboxPanel(NoxEngine::GameState* game_state) {
 	for (int i = 0; i < game_state->lightSources.size(); i++)
 	{
 		ImGui::PushID(i);
-		const char* text = "Light " + i;
-		ImGui::SliderFloat3(text, glm::value_ptr(game_state->lightSources[i]), -100.0f, 100.0f);
+		std::string title = std::format("Light {}", i);
+		ImGui::SliderFloat3(title.c_str(), glm::value_ptr(game_state->lightSources[i]), -100.0f, 100.0f);
 		ImGui::PopID();
 	}
 
