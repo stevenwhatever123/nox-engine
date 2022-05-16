@@ -61,7 +61,10 @@ void TextureView(const char *tree_name, const char *file_path, FullscreenShader&
 				snprintf(temp_buf, 256, "Tex: %s, TexID: %d", pps[selected_texture - 1].GetName(), pps[selected_texture - 1].GetTexture());
 			}
 
-			if(ImGui::BeginCombo("Available Inputs", temp_buf)) {
+			ImGui::Text("Available Inputs");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::CalcTextSize("Available Inputs").x - 55.0f);
+			if(ImGui::BeginCombo("##Available Inputs", temp_buf)) {
 
 				if(ImGui::Selectable("Main Renderer")) {
 					selected_texture = 0;
@@ -83,9 +86,11 @@ void TextureView(const char *tree_name, const char *file_path, FullscreenShader&
 
 			static i32 selected_texture_unit = 0;
 
-			ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::CalcTextSize("Texture Units").x - 55.0f);
+			ImGui::Text("Texture Units   ");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::CalcTextSize("Texture Units   ").x - 55.0f);
 			snprintf(temp_buf, 256,  "Texture Unit: %d", selected_texture_unit);
-			if(ImGui::BeginCombo("Texture Units", temp_buf)) {
+			if(ImGui::BeginCombo("##Texture Units", temp_buf)) {
 
 				for(u32 i = GL_TEXTURE0; i <= GL_TEXTURE31; i++) {
 					snprintf(temp_buf, 256,  "Texture Unit: %d", i - GL_TEXTURE0);

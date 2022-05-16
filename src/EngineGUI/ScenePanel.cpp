@@ -67,6 +67,15 @@ void NoxEngineGUI::updateScenePanel(GameState* state, GUIParams *params) {
 
 			// Add an entity to the active scene
 			state->activeScene->addEntity(ent);
+
+			// Set it to the selected entity
+			for (u32 i = 0; i < state->activeScene->entities.size(); i++)
+			{
+				if (state->activeScene->entities[i]->get_id() == ent->get_id())
+				{
+					params->selectedEntity = i;
+				}
+			}
 		}
 		ImGui::EndDragDropTarget();
 	}
