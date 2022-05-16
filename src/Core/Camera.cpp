@@ -12,7 +12,8 @@ Camera::Camera(vec3 stPos, vec3 lookAt) :
 	user_rotate(vec3(0.0f)),
 	yaw_pitch_roll(0),
 	fov(50),
-	user_shift(0)
+	user_shift(0),
+	sensetivity(10)
 {	
 	cameraTransf = glm::lookAt(pos, lookAt, up);
 	generateCameraParameters();
@@ -64,37 +65,25 @@ void Camera::moveVerBy(f32 shift) {
 	user_shift += up*shift;
 }
 
-void Camera::moveToMousePos(f32 pitch, f32 yaw) {
-	yaw_pitch_roll.x += yaw;
-	yaw_pitch_roll.y += pitch;
-
-	yaw_pitch_roll_shift.x = yaw;
-	yaw_pitch_roll_shift.y = pitch;
-
-
-	mat3 rotation = glm::rotate(
-		mat4(1.0f),
-		yaw_pitch_roll_shift.x,
-		glm::normalize(glm::cross(glm::normalize(forward), glm::normalize(up)))
-	);
-	forward = rotation*forward;
-
-	rotation = glm::eulerAngleY(yaw_pitch_roll_shift.y);
-	forward = rotation*forward;
-
+void Camera::moveToMousePos(f64 pitch, f64 yaw) {
+	changePitch((f32)pitch);
+	changeYaw((f32)yaw);
 }
 
 void Camera::changeYaw(f32 amount) {
 	yaw_pitch_roll.x += amount;
 	yaw_pitch_roll_shift.x = amount;
-	mat3 rotation = glm::rotate(mat4(1.0f), yaw_pitch_roll_shift.x, glm::normalize(glm::cross(glm::normalize(forward), glm::normalize(up))));
+	mat3 rotation = glm::rotate(
+		mat4(1.0f),
+		10*glm::radians( yaw_pitch_roll_shift.x ),
+		glm::normalize(glm::cross(glm::normalize(forward), glm::normalize(up))));
 	forward = rotation*forward;
 }
 
 void Camera::changePitch(f32 amount) {
 	yaw_pitch_roll.y += amount;
 	yaw_pitch_roll_shift.y = amount;
-	mat3 rotation = glm::eulerAngleY(yaw_pitch_roll_shift.y);
+	mat3 rotation = glm::eulerAngleY(10*glm::radians( yaw_pitch_roll_shift.y ));
 	forward = rotation*forward;
 }
 

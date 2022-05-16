@@ -152,8 +152,10 @@ void GLProgram::printAttribInfo()
 	{
 		glGetActiveAttrib(_id, i, 1024, NULL, &size, (GLenum*)&type, mem);
 		LOG_DEBUG("Attribute %s idx %d", mem, i);
-		StackMemAllocator::Instance()->free((u8*)mem);
+		
 	}
+	StackMemAllocator::Instance()->free((u8*)mem);
+	
 }
 
 void GLProgram::changeLightNum(i32 num_of_light)

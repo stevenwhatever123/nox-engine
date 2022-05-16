@@ -1021,7 +1021,6 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 		if (ImGui::Button("Add Component..."))
 			ImGui::OpenPopup("Component List Popup");
 
-		ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth());
 		if (ImGui::BeginPopup("Component List Popup")) {
 			ImGui::Text("                          ");
 			// Loop through all available components,

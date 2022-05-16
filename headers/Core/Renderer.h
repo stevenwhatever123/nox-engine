@@ -37,7 +37,6 @@ namespace NoxEngine {
 		i32 endInd; // Start and end indixes in the a united element array 
 		u32 normalTexture;
 		u32 ambientTexture; // Texture handlers
-		f32 lineWidth = 1.0f;
 		//mat4 pos;
 		mat4 transformation;
 

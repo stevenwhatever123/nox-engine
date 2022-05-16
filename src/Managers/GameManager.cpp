@@ -431,59 +431,8 @@ void GameManager::init_scene() {
 	game_state.activeScene = game_state.scenes[0];
 }
 
-void NoxEngine::GameManager::init_scripts()
-{
-	// Entity* ent = new Entity(game_state.activeScene, "Camera Test");
-
-	// ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
-	// CameraComponent *camera = new CameraComponent();
-
-	// ent->addComp(script);
-	// ent->addComp(camera);
-
-	// game_state.activeScene->addEntity(ent);
-
-
-	// Steven: That's how I would do it
-	// clean up: leaky mem
-	String file_name = "assets/meshes/card.fbx";
-
-	// Add to hash map if it does not exist
-	if (game_state.meshScenes.find(file_name) == game_state.meshScenes.end()) {
-		game_state.meshScenes.emplace(file_name, NoxEngine::readFBX(file_name.c_str()));
-	}
-	MeshScene& meshScene = game_state.meshScenes.find(file_name)->second;
-
-	i32 index = game_state.activeScene->entities.size();
-	// We're treating every mesh as an entity
-	for (u32 i = 0; i < meshScene.meshes.size(); i++)
-	{
-		Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
-
-		RenderableComponent* comp = new RenderableComponent(*meshScene.meshes[i]);
-		TransformComponent* trans = new TransformComponent(0.0, 0.0, 0.0);
-
-		ScriptComponent *script = new ScriptComponent("assets/scripts/test2.lua");
-		ent->addComp(comp);
-		ent->addComp(trans);
-		ent->addComp(script);
-
-		if (meshScene.hasAnimations())
-		{
-			for (MeshNode* node : meshScene.allNodes)
-			{
-				if (node->hasAnimations() && node->meshIndex[0] == i)
-				{
-					AnimationComponent* anim = new AnimationComponent(meshScene, node);
-					ent->addComp(anim);
-					break;
-				}
-			}
-		}
-
-		game_state.activeScene->addEntity(ent);
-	}
-
+void NoxEngine::GameManager::init_scripts() {
+	
 }
 
 void GameManager::init_postprocess() { 
@@ -533,7 +482,10 @@ void GameManager::update_inputs() {
 
 	// full_screen is set to false when ScenePanel is focused
 	if(game_state.mouse_right && ui_params.scene_active) {
-		renderer->getCamera()->moveToMousePos((f32)game_state.mouse_x_delta*deltaTime, (f32)game_state.mouse_y_delta*deltaTime);
+		renderer->getCamera()->moveToMousePos(
+			game_state.mouse_x_delta*deltaTime,
+			game_state.mouse_y_delta*deltaTime
+		);
 	}
 
 	if (keys['Z']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::TRANSLATE; };
@@ -742,7 +694,16 @@ void GameManager::update_renderer() {
 	if(game_state.prev_win_width != game_state.win_width ||
 	   game_state.prev_win_height != game_state.win_height)
 	{
+		LOG_DEBUG("hello");
 		renderer->updateTextureSizes(game_state.win_width, game_state.win_height);
+	}
+
+	for(u32 i = 0; i < game_state.post_processors.size(); i++) {
+		if(game_state.prev_win_width != game_state.win_width ||
+			game_state.prev_win_height != game_state.win_height)
+		{
+			game_state.post_processors[i].changeTextureSize(game_state.win_width, game_state.win_height);
+		}
 	}
 
 

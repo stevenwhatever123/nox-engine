@@ -9,7 +9,7 @@ uniform float dt;
 
 void main() {
 
-	if(int(gl_FragCoord.y)%2 == 1)
+	if(int(gl_FragCoord.y)%2 == 0)
 		fragColor = texture(texture1, texture_coords);
 	else
 		fragColor = vec4(0.1, 0.0, 0, 1);

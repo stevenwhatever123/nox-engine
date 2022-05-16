@@ -4,9 +4,6 @@
 #include <Core/Camera.h>
 
 namespace NoxEngine {
-	/*
-	 * A mock up class for Renderer to render a cube
-	 */
 	class CameraComponent : public IComponent {
 		public:
 			static const ComponentType id = ComponentType::CameraType;
