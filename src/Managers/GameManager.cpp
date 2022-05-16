@@ -12,6 +12,21 @@
 #include <Components/AudioListenerComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
+#include <Components/CameraComponent.h>
+#include <Components/EmissionComponent.h>
+
+// GUI
+#include <EngineGUI/AudioPanel.h>
+#include <EngineGUI/AnimationPanel.h>
+#include <EngineGUI/ScenePanel.h>
+#include <EngineGUI/PresetObjectPanel.h>
+#include <EngineGUI/HierarchyPanel.h>
+#include <EngineGUI/InspectorPanel.h>
+#include <EngineGUI/ImGuizmoTool.h>
+#include <EngineGUI/SkyboxPanel.h>
+#include <EngineGUI/FullscreenShaderPanel.h>
+
+#include <FullscreenShader.h>
 
 using NoxEngineUtils::Logger;
 using NoxEngine::EventManager;
@@ -21,14 +36,14 @@ using namespace NoxEngine;
 using namespace NoxEngineGUI;
 
 GameManager::GameManager() :
-	win_width(WINDOW_WIDTH),
-	win_height(WINDOW_HEIGHT),
 	title(WINDOW_TITLE),
 	ui_params(),
 	should_close(false),
 	keys(),
 	game_state()
 {
+	game_state.win_width = WINDOW_WIDTH;
+	game_state.win_height = WINDOW_HEIGHT;
 }
 
 void GameManager::init() {
@@ -43,23 +58,20 @@ void GameManager::init() {
 	init_gui();
 	init_animation();
 	init_renderer();
-	//init_scripts();
+	init_scripts();
+	init_postprocess();
 }
 
 void GameManager::update() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	update_livereloads();
 	update_inputs();
 	update_ecs();
-	update_renderer();
-	update_gui();
-	update_audio();
 	update_animation();
-
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(window)) {
-		should_close = true;
-	}
+	update_audio();
+	update_renderer();
+	update_postprocessors();
+	update_gui();
 
 	glfwSwapBuffers(window);
 }
@@ -123,7 +135,7 @@ void GameManager::init_window() {
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	window = glfwCreateWindow(win_width, win_height, title.c_str(), nullptr, nullptr);
+	window = glfwCreateWindow(game_state.win_width, game_state.win_height, title.c_str(), nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
 	glfwSetWindowPos(window, 100, 100);
@@ -144,18 +156,37 @@ void GameManager::init_window() {
 
 	glfwSetWindowUserPointer(window, this);
 
-	auto func = [](GLFWwindow *w, i32 key, i32 scan, i32 action, i32 mods){
+	auto keysFunc = [](GLFWwindow *w, i32 key, i32 scan, i32 action, i32 mods){
 		glfwGetWindowUserPointer(w);
 
 		GameManager *gm = (GameManager *)glfwGetWindowUserPointer(w);
-		if(action == GLFW_PRESS)
-			gm->keys[(char)key] = 1;
-		if(action == GLFW_RELEASE)
-			gm->keys[(char)key] = 0;
+		if(key >= GLFW_KEY_SPACE && key < GLFW_KEY_ESCAPE) {
+			if(action == GLFW_PRESS) gm->keys[(char)(key)] = 1;
+			if(action == GLFW_RELEASE) gm->keys[(char)(key)] = 0;
+		}
+
+		if(key == GLFW_KEY_ESCAPE) gm->should_close = true;
+
 	};
 
-	glfwSetKeyCallback(window, func);
+	auto mouseKeysFunc = [](GLFWwindow *w, i32 key, i32 action, i32 mods){
+		glfwGetWindowUserPointer(w);
 
+		GameManager *gm = (GameManager *)glfwGetWindowUserPointer(w);
+		if(key == GLFW_MOUSE_BUTTON_LEFT) {
+			if(action == GLFW_PRESS) gm->game_state.mouse_left = 1;
+			else if(action == GLFW_RELEASE) gm->game_state.mouse_left = 0;
+		}
+
+		if(key == GLFW_MOUSE_BUTTON_RIGHT) {
+			if(action == GLFW_PRESS) gm->game_state.mouse_right = 1;
+			else if(action == GLFW_RELEASE) gm->game_state.mouse_right = 0;
+		}
+	};
+
+
+	glfwSetKeyCallback(window, keysFunc);
+	glfwSetMouseButtonCallback(window, mouseKeysFunc);
 }
 
 // Similar to activateScene
@@ -163,12 +194,6 @@ void GameManager::init_ecs() {
 
 	initComponentTypes();
 
-	// cleanup all subsystems
-
-	// loop through all existing entities (loaded from a file?)
-		// add to subsystems
-
-	// prepare entities for subsystems
 	update_ecs();
 }
 
@@ -193,9 +218,11 @@ void GameManager::init_events() {
 			{
 				// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
 				//                 because the entity ID is managed by the scene
-				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
+				Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str(),
+					file_name.c_str());
 
-				RenderableComponent* comp = new RenderableComponent(*meshScene.meshes[i]);
+				Mesh* mesh = new Mesh(*meshScene.meshes[i]);
+				RenderableComponent* comp = mesh;
 				TransformComponent* trans = new TransformComponent(0.0, 0.0, 0.0);
 
 				// ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
@@ -228,11 +255,10 @@ void GameManager::init_events() {
 			Entity* ent = va_arg(args, Entity*);
 			const std::type_index compTypeId = va_arg(args, std::type_index);
 
-			RenderableComponent *rendComp	= ent->getComp<RenderableComponent>();
-			AudioListenerComponent *lisComp = ent->getComp<AudioListenerComponent>();
-
 			// Renderer
-			if (rendComp) {
+			if (ent->containsComps<RenderableComponent>()) {
+
+				RenderableComponent* rendComp = ent->getComp<RenderableComponent>();
 
 				if (!renderer->hasRendObj(rendComp->rendObjId)) {
 
@@ -242,6 +268,11 @@ void GameManager::init_events() {
 				}
 			}
 
+			// Light/Emission
+			if (ent->containsComps<EmissionComponent>())
+			{
+				renderer->addLights(ent);
+			}
 
 			// Audio
 			// Geometry: 
@@ -254,12 +285,14 @@ void GameManager::init_events() {
 			//		Add fake mesh to renderer
 			if (compTypeId == typeid(AudioListenerComponent)) {
 
+				AudioListenerComponent* lisComp = ent->getComp<AudioListenerComponent>();
+
 				// First listener
 				if (game_state.activeAudioListener == nullptr) game_state.activeAudioListener = ent;
 
 				// Add mesh to renderer
 				if (!renderer->hasRendObj(lisComp->rendObjId)) {
-
+					
 					renderer->addObject(ent, lisComp, ComponentType::AudioListenerType);
 
 					this->renderer->updateBuffers();
@@ -291,7 +324,6 @@ void GameManager::init_events() {
 				renderer->removeObject(geoComp->rendObjId);
 			}
 
-
 			if (compTypeId == typeid(AudioListenerComponent)) {
 
 				AudioListenerComponent* lisComp = ent->getComp<AudioListenerComponent>();
@@ -302,8 +334,7 @@ void GameManager::init_events() {
 				// TODO: Invalidate listener
 			}
 
-
-
+			// ...
 	});
 }
 
@@ -322,7 +353,10 @@ void GameManager::init_audio() {
 }
 
 void GameManager::init_camera() {
-	camera = new Camera(vec3(100.0f, 100.0f, 100.0f));
+
+	game_state.cameras.push_back(new Camera(vec3(100.0f, 100.0f, 100.0f), vec3(0.0f, 0.0f, 0.0f)));
+	game_state.cameras.push_back(new Camera(vec3(100.0f, 10.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f)));
+	game_state.cameras.push_back(new Camera(vec3(20.0f, 0.0f, 20.0f), vec3(0.0f, 0.0f, 0.0f)));
 }
 
 void GameManager::init_shaders() {
@@ -347,15 +381,28 @@ void GameManager::init_animation() {
 }
 
 void GameManager::init_renderer() { 
-	renderer = new Renderer(win_width, win_height, camera);
+	renderer = new Renderer(game_state.win_width, game_state.win_height, game_state.cameras[0]);
+	renderer->setCamera(game_state.cameras[0]);
 	renderer->setProgram(current_program);
-	renderer->useProgram();
+	renderer->updateProgram();
+
 	game_state.renderer = renderer;
 	renderer->setFrameBufferToTexture();
+	game_state.fullscreen_shader_texture_used = renderer->getTexture();
 
 	GridObject *obj = new GridObject(vec3(-500, 0, -500), vec3(500, 0, 500), 50);
 	renderer->addPermObject(obj);
 	renderer->updateBuffers();
+
+	// MULTIPLE LIGHTS Init lights. Will be removed when light will be added dinamically
+	//for (u32 i = 0; i < 3; i++)
+	//{
+	//	game_state.lightSources.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+	//	renderer->addLights(game_state.lightSources[i]);
+	//}
+
+	//renderer->_change_num_of_light(3);
+	//renderer->updateProgram();
 }
 
 void GameManager::init_gui() {
@@ -371,7 +418,6 @@ void GameManager::init_gui() {
 
 	// Initialize gui params
 	ui_params.selectedEntity = -1;
-	ui_params.current_cam = camera;
 	ui_params.sceneBackgroundColor = 0x282828FF;
 }
 
@@ -382,6 +428,15 @@ void GameManager::init_scene() {
 
 void NoxEngine::GameManager::init_scripts()
 {
+	// Entity* ent = new Entity(game_state.activeScene, "Camera Test");
+
+	// ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
+	// CameraComponent *camera = new CameraComponent();
+
+	// ent->addComp(script);
+	// ent->addComp(camera);
+
+	// game_state.activeScene->addEntity(ent);
 
 
 	// Steven: That's how I would do it
@@ -395,25 +450,21 @@ void NoxEngine::GameManager::init_scripts()
 	MeshScene& meshScene = game_state.meshScenes.find(file_name)->second;
 
 	i32 index = game_state.activeScene->entities.size();
-	// We're treating every mesh as an entity FOR NOW
+	// We're treating every mesh as an entity
 	for (u32 i = 0; i < meshScene.meshes.size(); i++)
 	{
-		// Note (Vincent): this is more or less the same as letting the scene automatically allocate an entity,
-		//                 because the entity ID is managed by the scene
 		Entity* ent = new Entity(game_state.activeScene, std::filesystem::path(file_name).filename().string().c_str());
 
 		RenderableComponent* comp = new RenderableComponent(*meshScene.meshes[i]);
 		TransformComponent* trans = new TransformComponent(0.0, 0.0, 0.0);
 
-		ScriptComponent *script = new ScriptComponent("assets/scripts/test.lua");
-
+		ScriptComponent *script = new ScriptComponent("assets/scripts/test2.lua");
 		ent->addComp(comp);
 		ent->addComp(trans);
 		ent->addComp(script);
 
 		if (meshScene.hasAnimations())
 		{
-			// Get the node associated to this mesh
 			for (MeshNode* node : meshScene.allNodes)
 			{
 				if (node->hasAnimations() && node->meshIndex[0] == i)
@@ -428,46 +479,61 @@ void NoxEngine::GameManager::init_scripts()
 		game_state.activeScene->addEntity(ent);
 	}
 
-
 }
 
-void GameManager::main_contex_ui() {
+void GameManager::init_postprocess() { 
 
-	ImGuiWindowFlags flags =
-		ImGuiWindowFlags_NoTitleBar  |
-		ImGuiWindowFlags_NoScrollbar |
-		ImGuiWindowFlags_NoCollapse;
+	i32 indices[6] = { 0, 2, 1, 0, 3, 2 };
 
-	ImGui::SetNextWindowPos(ImVec2( 100, 100 ), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2( 100, 100 ), ImGuiCond_FirstUseEver);
+	glGenVertexArrays(1, &post_process_vao);
+	glBindVertexArray(post_process_vao);
+	glGenBuffers(1, &post_process_quad_index);
 
-	ImGui::Begin("Player", NULL, flags);
-
-	ImVec2 wsize = ImGui::GetWindowSize();
-	f32 locWidth = wsize.x;
-	f32 locHeight = wsize.y;
-	ImGui::Image((ImTextureID)(u64)renderer->getTexture(), wsize, ImVec2(0, 1), ImVec2(1, 0));
-
-	ImGui::End();
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, post_process_quad_index);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i32)*6, indices, GL_STATIC_DRAW);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
 
 void GameManager::update_livereloads() {
-
 	LiveReloadManager *lrManager = LiveReloadManager::Instance();
 	lrManager->checkFiles();
-
 }
 
 void GameManager::update_inputs() {
 	glfwPollEvents();
 
-	float unit = 0.25;
-	if(keys['W']) { camera->moveFwdBy( unit); }
-	if(keys['S']) { camera->moveFwdBy(-unit); }
-	if(keys['D']) { camera->moveHorBy(-unit); }
-	if(keys['A']) { camera->moveHorBy( unit); }
-	if(keys[' ']) { camera->moveVerBy( unit); }
-	if(keys['K']) { camera->moveVerBy(-unit); }
+	if(keys['W']) { renderer->getCamera()->moveFwdBy(0.9f); }
+	if(keys['S']) { renderer->getCamera()->moveFwdBy(-0.9f); }
+	if(keys['D']) { renderer->getCamera()->moveHorBy(0.9f); }
+	if(keys['A']) { renderer->getCamera()->moveHorBy(-0.9f); }
+	if(keys[' ']) { renderer->getCamera()->moveVerBy(0.9f); }
+	if(keys['K']) { renderer->getCamera()->moveVerBy(-0.9f); }
+
+	if(keys['1']) { renderer->setCamera(game_state.cameras[0]); }
+	if(keys['2']) { renderer->setCamera(game_state.cameras[1]); }
+	if(keys['3']) { renderer->setCamera(game_state.cameras[2]); }
+
+	f64 x;
+	f64 y;
+
+	glfwGetCursorPos(window, &x, &y);
+	game_state.mouse_x_delta = game_state.mouse_x - x;
+	game_state.mouse_y_delta = game_state.mouse_y - y;
+
+	game_state.mouse_x = x;
+	game_state.mouse_y = y;
+
+	// full_screen is set to false when ScenePanel is focused
+	if(game_state.mouse_right && ui_params.scene_active) {
+		renderer->getCamera()->moveToMousePos((f32)game_state.mouse_x_delta*deltaTime, (f32)game_state.mouse_y_delta*deltaTime);
+	}
+
+	if (keys['Z']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::TRANSLATE; };
+	if (keys['X']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::ROTATE; };
+	if (keys['C']) { ui_params.imguizmoMode = ImGuizmo::OPERATION::SCALE; };
 
 }
 
@@ -486,15 +552,9 @@ void GameManager::update_ecs() {
 		if (lisComp) lisComp->active = (game_state.activeAudioListener == entities[i]);
 	}
 
-
 	if (!updateNeededECS) return;
 
-	//bool updateRenderer = false;
-	//bool updateAudioManager = false;
-
 	bool entityRemoved = false;
-
-
 
 	// Check for entity removal. 
 	// Free resources explicitly (since `entities` contain raw `Entity*` pointers) and resize vector
@@ -512,7 +572,6 @@ void GameManager::update_ecs() {
 	);
 
 	entityRemoved = nEntities != game_state.activeScene->entities.size();
-
 
 	// update subsystems if needed
 	if (/*updateRenderer && */entityRemoved) renderer->updateBuffers();
@@ -533,20 +592,37 @@ void GameManager::update_gui() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
+	//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));		// Vincnet: pushing no padding style then drawing all panels causes all panels to lose padding.
+	
 	ImGui::PushFont(font);
 
 	NoxEngineGUI::updateGUI(game_state, &ui_params);
-	//NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
-	NoxEngineGUI::updatePresetObjectPanel(&game_state);
-	NoxEngineGUI::updateScenePanel(&game_state);
-	NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
-	NoxEngineGUI::updateSkyboxPanel(&game_state);
 
-	// NoxEngineGUI::updateImGuizmoDemo(&ui_params);
+	if(!ui_params.full_screen) {
+		// NoxEngineGUI::updateAudioPanel(&game_state, &ui_params);
+		NoxEngineGUI::updateAnimationPanel(&game_state, &ui_params);
+		NoxEngineGUI::updateHierarchyPanel(&game_state, &ui_params);
+		NoxEngineGUI::updateSkyboxPanel(&game_state);
+		NoxEngineGUI::updateInspectorPanel(&game_state, &ui_params);
+	} else {
+		NoxEngineGUI::updatePostProcessorsPanel(&game_state, &ui_params);
+	}
+
+	NoxEngineGUI::updatePresetObjectPanel(&game_state);
+	NoxEngineGUI::updateScenePanel(&game_state, &ui_params);
+	NoxEngineGUI::updateFullscreenShaderPanel(&game_state, &ui_params);
+	
+	// Make sure the scene panel is focused when we run
+	if(ui_params.firstLoop) {
+		ImGui::SetWindowFocus(kPanelNameMap[ PanelName::Scene ].c_str());
+		ui_params.firstLoop = false;
+		ui_params.full_screen = false;
+	}
+
 
 	ImGui::PopFont();
+	//ImGui::PopStyleVar();
 	ImGui::Render();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -616,8 +692,6 @@ void GameManager::update_audio() {
 			// TODO: stop audio if it's disabled
 			//if (!ent->isEnabled<AudioSourceComponent>()) audioManager->stopSound(0);
 
-			// TODO: check audio is playing
-			// TODO: set correct channel id (not 0)
 			audioManager->setChannel3dPosition(isrc->channelId, pos);
 			audioManager->setChannelVolume(isrc->channelId, isrc->volume);
 		}
@@ -660,32 +734,56 @@ void GameManager::update_animation() {
 
 void GameManager::update_renderer() {
 
-	renderer->setFrameBufferToTexture();
+	if(game_state.prev_win_width != game_state.win_width ||
+	   game_state.prev_win_height != game_state.win_height)
+	{
+		renderer->updateTextureSizes(game_state.win_width, game_state.win_height);
+	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	for (Entity* ent : game_state.activeScene->entities) {
-
 		if (ent->containsComps<RenderableComponent, AnimationComponent>())
 		{
 			RenderableComponent *rendComp = ent->getComp<RenderableComponent>();
 			AnimationComponent* animComp = ent->getComp<AnimationComponent>();
-
 			mat4 transformation = animComp->getTransformation();
 			renderer->updateObjectTransformation(transformation, rendComp->rendObjId);
 		}
 	}
 
+	for (u32 i = 0; i < renderer->getNumLights(); i++)
+	{
+		renderer->updateLightPos(i);
+	}
+
+	renderer->setFrameBufferToTexture();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	renderer->updateCamera();
-	renderer->updateLightPos(game_state.light[0], game_state.light[1], game_state.light[2]);
-	renderer->fillBackground(ui_params.sceneBackgroundColor);
 
 	renderer->setProgram(&programs[1]);
+	// maybe have a sun? 
 	renderer->drawSkyBox();
 
 	renderer->setProgram(current_program);
+
+	// Update lights
+	//for(int i = 0; i < game_state.lightSources.size(); i++)
+	//	renderer->updateLightPos(i, game_state.lightSources[i][0], game_state.lightSources[i][1], game_state.lightSources[i][2]);
+	renderer->fillBackground(ui_params.sceneBackgroundColor);
 	renderer->draw();
 
+	renderer->setFrameBufferToDefault();
+}
+
+
+void GameManager::update_postprocessors() {
+	if(ui_params.full_screen) {
+		glBindVertexArray(post_process_vao);
+		for(u32 i = 0; i < game_state.post_processors.size(); i++) {
+			if(game_state.post_processors[i].IsInit())
+				game_state.post_processors[i].draw(currentTime);
+		}
+	}
 }
 
 ////////////////////////////

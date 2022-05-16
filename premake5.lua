@@ -10,7 +10,6 @@ newaction {
 		os.remove('*.sln')
 		os.remove('*.vcxproj*')
 	end
-	
 }
 
 

@@ -17,7 +17,7 @@ int AnimationSequencer::GetItemTypeCount() const
     //return (i32) game_state->audioSources.size();
 }
 
-const char* AnimationSequencer::GetItemTypeName(int index) const
+const char* AnimationSequencer::GetItemTypeName(i32 index) const
 {
     //if (!game_state->audioSources.empty())
     //{

@@ -2,13 +2,15 @@
 #include <glm/glm.hpp>
 #include <iterator>
 
+#include <Core/Types.h>
 #include <Core/Renderer.h>
 #include <Utils/Utils.h>
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/AudioListenerComponent.h>
-#include <Core/Types.h>
+#include <Components/EmissionComponent.h>
+#include <Managers/LiveReloadManager.h>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -21,7 +23,6 @@
 
 using NoxEngineUtils::Logger;
 using namespace NoxEngine;
-
 
 Renderer::~Renderer()
 {
@@ -73,39 +74,18 @@ Renderer::Renderer(int width, int height, Camera* cam) :
 
 	// Initialise OpenGl
 
-	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
 	// glEnable(GL_CULL_FACE);
-	// glDepthMask(GL_TRUE);
+	glDepthMask(GL_TRUE);
 
 	// Create framebuffer  
 	glGenFramebuffers(1, &FBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-
-    // Gen texture for framebuffer    
+	glGenTextures(1, &depthStencilTexture);
     glGenTextures(1, &textureToRenderTo);
 
-    glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Attach tex to framebuffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
-
-	glGenTextures(1, &depthStencilTexture);
-	glBindTexture(GL_TEXTURE_2D, depthStencilTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilTexture, 0);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		LOG_DEBUG("Troubles with creating a framebuffer");
-    }
-
-
+	updateTextureSizes(width, height);
+    
 	glBindTexture(GL_TEXTURE_2D, 0);
-
     // Generate buffer handlers
     glGenVertexArrays(1, &VAO);
 
@@ -210,6 +190,21 @@ void Renderer::addObject(Entity *ent, IRenderable *meshSrc, ComponentType compon
 
 	// give the IRenderable a reference to this rendObj
 	meshSrc->rendObjId = nextObjectId++;
+
+	// If the entity has emission component, add it as a light source and update shaders
+	IEmission* lightS = ent->getComp<EmissionComponent>()->CastType<IEmission>();
+	if (lightS != nullptr)
+	{
+		// ATM will add 0s pos
+		// Add to light arrays
+		lightSources.push_back(ent);
+		// Change the program
+		program->changeLightNum(lightSources.size());
+		// Update the program
+		updateProgram();
+
+
+	}
 }
 
 void Renderer::addPermObject(IRenderable *mesh, ITransform *trans)
@@ -277,7 +272,7 @@ GLuint Renderer::setTexture(const String texturePath, const char* uniName, int n
 	stbi_image_free(data);
 
 	GLuint textureLoc = program->getUniformLocation(uniName);
-	glUniform1i(textureLoc, num);
+	glProgramUniform1i(program->getProgramId(), textureLoc, num);
 
 	return tex;
 }
@@ -288,15 +283,25 @@ void Renderer::clearObject()
 }
 
 
+void Renderer::addLights(Entity *ent)
+{
+	if (std::find(lightSources.begin(), lightSources.end(), ent) == lightSources.end())
+	{
+		lightSources.push_back(ent);
+
+		program->changeLightNum(lightSources.size());
+		// Update the program
+		updateProgram();
+	}
+}
 
 void Renderer::draw() {
 
 	// Render
 	program->use();
+
 	setFrameBufferToTexture();	
-
     glDepthFunc(GL_LESS);
-
 	glBindVertexArray(VAO);
 
 	for (u32 i = 0; i < perm_objects.size(); i++)
@@ -328,6 +333,10 @@ void Renderer::draw() {
 	}
 
 	for (u32 i = 0; i < objects.size(); i++) {
+
+		// We don't want to render something that has been removed or doesn't exist
+		if (objects[i].ent == nullptr)
+			continue;
 
 		Entity* ent = objects[i].ent;
 
@@ -373,6 +382,7 @@ void Renderer::draw() {
 
 		// Draw the object
 		glDrawElements(objects[i].renderType, (objects[i].endInd - objects[i].startInd), GL_UNSIGNED_INT, (void*)(objects[i].startInd * sizeof(i32)));
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
 	}
 
 
@@ -384,23 +394,9 @@ void Renderer::draw() {
 void Renderer::fillBackground(f32 r, f32 g, f32 b) {
 
 	// Set background color
-	
 	program->use();
-
-	f32 current_clear_color[4];
-	glGetFloatv(GL_COLOR_CLEAR_VALUE, current_clear_color);
-
-	setFrameBufferToTexture();
 	glClearColor(r,g,b, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	setFrameBufferToDefault();
-
-	glClearColor(
-			current_clear_color[0],
-			current_clear_color[1],
-			current_clear_color[2],
-			current_clear_color[3] );
-
+	
 }
 
 void Renderer::fillBackground(i32 hex) {
@@ -409,68 +405,21 @@ void Renderer::fillBackground(i32 hex) {
 	
 	program->use();
 
-	f32 current_clear_color[4];
-	glGetFloatv(GL_COLOR_CLEAR_VALUE, current_clear_color);
-
 	f32 red =   (f32)((hex & 0xFF000000) >> 24)/255.0f;
 	f32 green = (f32)((hex & 0x00FF0000) >> 16)/255.0f;
 	f32 blue =  (f32)((hex & 0x0000FF00) >>  8)/255.0f;
 	f32 alpha = (f32)((hex & 0x000000FF) >>  0)/255.0f;
 
-	setFrameBufferToTexture();
+	// setFrameBufferToTexture();
 	glClearColor(red , green , blue, alpha);
-	glClear(GL_COLOR_BUFFER_BIT);
-	setFrameBufferToDefault();
-
-	glClearColor(
-			current_clear_color[0],
-			current_clear_color[1],
-			current_clear_color[2],
-			current_clear_color[3] );
-
 }
 
-
-
-void Renderer::updateProjection(int width, int height) {
-
+void Renderer::updateProjection(i32 width, i32 height) {
 	w = width;
 	h = height;
-
-	program->use();
-
-	glViewport(0, 0, w, h);
-
-    // Set up Projection matrix
-    projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
-
-    //int toProjectionLoc = shader->getUniformLocation("toProjection");
-    //glUniformMatrix4fv(toProjectionLoc, 1, GL_FALSE, value_ptr(projection));
-
-    program->set4Matrix("toProjection", projection);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, curFBO);
-
-	// Gen texture for framebuffer
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-	// Attach tex to framebuffer
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
-
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		printf("Troubles with creating a framebuffer\n");
-	}
-
+	//projection = glm::infinitePerspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f);
+	projection = glm::perspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f, 1000.0f);
+	program->set4Matrix("toProjection", projection);
 }
 
 void Renderer::createVertexArray(IRenderable* mesh)
@@ -542,7 +491,7 @@ void Renderer::createTangents(IRenderable* mesh)
 	{
 		Array<vec3> newTangents(mesh->getNumOfVertices());
 		copy(newTangents.begin(), newTangents.end(), back_inserter(tangents));
-		numOfTangents += (i32)tangents.size();
+		numOfTangents += (i32)newTangents.size();
 
 		return;
 	}
@@ -558,11 +507,8 @@ void Renderer::createTangents(IRenderable* mesh)
 		itr->g = 0;
 	}
 
-	tangents.resize(newTangents.size());
-	numOfTangents = (i32) tangents.size();
-
     // For each triangle in the mesh
-    for (int i = 0; i < elem.size(); i+=3)
+    for (int i = 0; i < elem.size(); i++)
     {
         // Get the positions of the vertices, their tex coordinates and the normal coordinates
         // Positions
@@ -617,7 +563,7 @@ void Renderer::createTangents(IRenderable* mesh)
 
     // Add calculated tangents to the container
     copy(newTangents.begin(), newTangents.end(), back_inserter(tangents));
-    numOfTangents += (i32)tangents.size();
+    numOfTangents += (i32)newTangents.size();
 }
 
 void Renderer::updateCamera()
@@ -631,31 +577,50 @@ void Renderer::updateCamera(Camera* cam)
     program->set4Matrix("toCamera", camera->getCameraTransf());
 }
 
-void Renderer::useProgram()
+void Renderer::updateProgram()
 {
 	program->use();
 	// Set up Projection matrix
-	// int toProjectionLoc = program->getUniformLocation("toProjection");
     projection = glm::perspective(glm::radians(45.0f), (GLfloat)w / (GLfloat)h, 0.1f, 1000.0f);
-
 	program->set4Matrix("toProjection", projection);
 
 	updateCamera();
-	// Set up color for mesh
-	// glUniform3f(program->getUniformLocation("Color"), color.x, color.y, color.z);
 
-    // Set up camera position
     program->set3Float("cameraPosition", camera->GetCameraPosition());
-    // Set up light position
-    program->set3Float("lightPosition", 0.0f, 60.0f, 0.0f);
+	// Default transformation matrices
     program->set4Matrix("toWorld", mat4(1.0f));
     program->set4Matrix("modelMatrix", mat4(1.0f));
+
+	updateBuffers();
+
+	// Load textures
+	GLuint textureLoc = program->getUniformLocation("AmbTexture");
+	glUniform1i(textureLoc, 1);
+
+	textureLoc = program->getUniformLocation("NormTexture");
+	glUniform1i(textureLoc, 2);
+
+	// Update lights
+	for (int i = 0; i < lightSources.size(); i++)
+	{
+		updateLightPos(i);
+	}
+
 }
 
-void Renderer::updateLightPos(float x, float y, float z) 
+void Renderer::updateLightPos(u32 lightInd) 
 {
-    program->use();
-    program->set3Float("lightPosition",x, y, z);
+	if (lightSources.size() - 1 < lightInd)
+		return;
+
+	// Get position 
+	ITransform* pos = lightSources[lightInd]->getComp<TransformComponent>();
+
+	// Get the light position
+	String attr = std::format("lightPosition[{}].tanPos", lightInd);
+
+	program->use();
+	program->set3Float(attr, pos->get_x(), pos->get_y(), -pos->get_z());
 }
 
 void Renderer::updateObjectTransformation(mat4 transformation, u32 rendObjId) {
@@ -749,22 +714,60 @@ void Renderer::setupSkybox() {
 	glBindVertexArray(0);
 
 	Array<String> images {
-		"assets/skybox/textures/picture/bak0/right.jpg",
-		"assets/skybox/textures/picture/bak0/left.jpg",
-		"assets/skybox/textures/picture/bak0/top.jpg",
-		"assets/skybox/textures/picture/bak0/down.jpg",
-		"assets/skybox/textures/picture/bak0/front.jpg",
-		"assets/skybox/textures/picture/bak0/back.jpg"
+		"assets/skybox/1/right.jpg",
+		"assets/skybox/1/left.jpg",
+		"assets/skybox/1/top.jpg",
+		"assets/skybox/1/down.jpg",
+		"assets/skybox/1/front.jpg",
+		"assets/skybox/1/back.jpg"
 	};
 
 	setSkyBoxImages(images);
 
+}
 
+void Renderer::liveReloadFile(const char *file, LiveReloadEntry *entry) {
+
+	i32 image_index = -1;
+
+	for(u32 i = 0; i < skyboxImages.size(); i++) {
+		if(skyboxImages[i] == file) {
+			image_index = i;
+			break;
+		}
+	}
+
+	if(image_index > -1 && image_index < 6) {
+		i32 width;
+		i32 height;
+		i32 channels;
+
+		skyboxImages[image_index] = file;
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+		stbi_set_flip_vertically_on_load(false); // flip loaded texture's on the y-axis.
+		u8 *TextureData = stbi_load(file, &width, &height, &channels, 0);
+
+		if(TextureData) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + image_index, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
+			stbi_image_free(TextureData);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+			entry->changed = 0;
+		}
+
+	}
 }
 
 void Renderer::setSkyBoxImages(const Array<String> &_skyboxImages)
 {
 	skyboxImages = _skyboxImages;
+
+	for(u32 i = 0; i < skyboxImages.size(); i++) {
+		LiveReloadManager::Instance()->addLiveReloadEntry(skyboxImages[i].c_str(), static_cast<IReloadableFile*>(this));
+	}
+
 	skyboxLoadTexture();
 }
 
@@ -795,22 +798,13 @@ void Renderer::skyboxLoadTexture()
 void Renderer::drawSkyBox()
 {
     // draw scene
-    glm::mat4 view;
-    glm::mat4 projection;
-
-
-	view = camera->getCameraTransf();
+    glm::mat4 view = camera->getCameraTransf();;
 
 	view[3][0] = 0;
 	view[3][1] = 0;
 	view[3][2] = 0;
 
-
-	projection = glm::perspective(glm::radians(camera->fov), (float)(w / h), 0.1f, 1000.0f);
-
     program->use();
-
-    setFrameBufferToTexture();
 
     // draw skybox 
     glDepthMask(GL_FALSE);
@@ -823,7 +817,7 @@ void Renderer::drawSkyBox()
     glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
     program->set4Matrix("view", view);
@@ -832,14 +826,42 @@ void Renderer::drawSkyBox()
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // Reset everything back to normal
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
 
-    setFrameBufferToDefault();
-
     glBindVertexArray(0);
 
+}
+
+
+void Renderer::updateTextureSizes(u32 width, u32 height) {
+	
+	w = width;
+	h = height;
+
+    // Gen texture for framebuffer    
+    glBindTexture(GL_TEXTURE_2D, textureToRenderTo);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindTexture(GL_TEXTURE_2D, depthStencilTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureToRenderTo, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencilTexture, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		LOG_DEBUG("Troubles with creating a framebuffer");
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glViewport(0, 0, width, height);
 }
 
 const char* Renderer::getSkyboxImagePath(u32 skyboxPosition) {
@@ -854,16 +876,26 @@ void Renderer::setSkyboxImage(const String& image_path, u32 skyboxPosition) {
 	i32 height;
 	i32 channels;
 
-	skyboxImages[skyboxPosition] = image_path;
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
 	stbi_set_flip_vertically_on_load(false); // flip loaded texture's on the y-axis.
 	u8 *TextureData = stbi_load(image_path.c_str(), &width, &height, &channels, 0);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + skyboxPosition, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
-	stbi_image_free(TextureData);
 
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	if(TextureData) {
 
+		if(skyboxPosition >= 0 && skyboxPosition < 6 && skyboxImages[skyboxPosition] != image_path) {
+			LiveReloadManager::Instance()->removeLiveReloadEntry(skyboxImages[skyboxPosition].c_str(), static_cast<IReloadableFile*>(this));
+			LiveReloadManager::Instance()->addLiveReloadEntry(image_path.c_str(), static_cast<IReloadableFile*>(this));
+		}
+
+		skyboxImages[skyboxPosition] = image_path;
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + skyboxPosition, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, TextureData);
+		stbi_image_free(TextureData);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	}
+	
 }

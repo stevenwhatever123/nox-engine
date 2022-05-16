@@ -9,7 +9,7 @@ namespace NoxEngine {
 	// Note (Vincent): This implies the developer cannot create new component types
 	enum ComponentType : i32 {
 		AbstractType = 0,
-		TransformType,		// TODO: change to Transform (pos, rot, scale)
+		TransformType,
 		RenderableType,
 		AnimationType,
 		LightSourceType,
@@ -18,6 +18,7 @@ namespace NoxEngine {
 		AudioGeometryType,
 		//CollisionType,	// If we want to implement physics, collision can be implement similarlly to audio obstruction
 		ScriptType,
+		CameraType,
 		ComponentTypeCount
 	};
 
@@ -31,10 +32,11 @@ namespace NoxEngine {
 		AudioListenerFlag		= 1 << (AudioListenerType		- 1),
 		AudioGeometryFlag		= 1 << (AudioGeometryType		- 1),
 		ScriptFlag				= 1 << (ScriptType				- 1),
+		CameraFlag				= 1 << (CameraType				- 1),
 	};
 
-	extern std::map<std::type_index, ComponentType> kComponentTypeMap;
-	extern std::map<ComponentType, String> kComponentTypeNames;
+	extern Map<std::type_index, ComponentType> kComponentTypeMap;
+	extern Map<ComponentType, String> kComponentTypeNames;
 
 
 	// Fill maps

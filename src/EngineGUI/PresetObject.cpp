@@ -2,12 +2,15 @@
 
 namespace NoxEngineGUI {
 	// Give the extern maps/lists a definition in one compile unit
+	// TODO: Rename these to kXXXXX
 	std::map< PresetCategory, std::string > PRESET_CATEGORY_NAMES_MAP;
 	std::map< PresetObject, std::string > PRESET_OBJECT_NAMES_MAP;
 	std::map< PresetObject, std::tuple<i32, vec2, vec2> > PRESET_OBJECT_TEXTCOORDS_MAP;
 	std::vector< std::string > PRESET_CATEGORY_NAMES_LIST;
 	std::vector< std::string > PRESET_OBJECT_NAMES_LIST;
 	std::map< PresetCategory, std::vector<PresetObject> > PRESET_OBJECTS;
+
+	std::map< PresetObject, std::map<NoxEngine::ComponentType, NoxEngine::IComponent *>> PRESET_OBJECT_COMPONENTS;
 }
 
 
@@ -96,6 +99,7 @@ void NoxEngineGUI::initPresetObjectVars() {
 		// "All" is just the values in the map, so we don't define them
 	};
 
+	initPresetObject();
 
 	for (int i = 0; i <= PresetCategory::PresetCategoryEND; i++) {
 		assert(PRESET_CATEGORY_NAMES_MAP.find(static_cast<PresetCategory>(i)) != PRESET_CATEGORY_NAMES_MAP.end() && "A preset category must have a name as a string - define it!");
@@ -108,4 +112,32 @@ void NoxEngineGUI::initPresetObjectVars() {
 	}
 
 	// TODO: assert each object appears exactly once in PRESET_OBJECTS
+}
+
+void NoxEngineGUI::initPresetObject()
+{
+	// Steven: Seems like we cannot initialise like the way we did above
+	// Transform Preset
+	PRESET_OBJECT_COMPONENTS[PresetObject::Transform] = {
+		{NoxEngine::TransformType,		new NoxEngine::TransformComponent(0, 0, 0)}
+	};
+	// Cube Preset
+	PRESET_OBJECT_COMPONENTS[PresetObject::Cube] = {
+		{NoxEngine::TransformType,		new NoxEngine::TransformComponent(0, 0, 0)},
+		{NoxEngine::RenderableType,		new NoxEngine::RenderableComponent(0.0f, 0.0f, 0.0f, "")}
+	};
+	// Sphere Preset
+	String file_name = "assets/meshes/sphere.fbx";
+	NoxEngine::MeshScene sphereScene = NoxEngine::readFBX(file_name.c_str());
+	PRESET_OBJECT_COMPONENTS[PresetObject::Sphere] = {
+		{NoxEngine::TransformType,		new NoxEngine::TransformComponent(0, 0, 0)},
+		{NoxEngine::RenderableType,		new NoxEngine::Mesh(*sphereScene.meshes[0])}
+	};
+	// Card Preset
+	file_name = "assets/meshes/card.fbx";
+	NoxEngine::MeshScene cardScene = NoxEngine::readFBX(file_name.c_str());
+	PRESET_OBJECT_COMPONENTS[PresetObject::RectangleCard] = {
+		{NoxEngine::TransformType,		new NoxEngine::TransformComponent(0, 0, 0)},
+		{NoxEngine::RenderableType,		new NoxEngine::Mesh(*cardScene.meshes[0])}
+	};
 }

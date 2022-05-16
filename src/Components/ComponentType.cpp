@@ -9,6 +9,8 @@
 #include <Components/AudioListenerComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
+#include <Components/CameraComponent.h>
+#include <Components/EmissionComponent.h>
 
 
 namespace NoxEngine {
@@ -26,11 +28,12 @@ void NoxEngine::initComponentTypes() {
 		{ typeid(TransformComponent),		TransformType },
 		{ typeid(RenderableComponent),		RenderableType },
 		{ typeid(AnimationComponent),		AnimationType},
-		//{ typeid(LightSourceComponent),	LightSourceType },
+		{ typeid(EmissionComponent),		LightSourceType },
 		{ typeid(AudioSourceComponent),		AudioSourceType },
 		{ typeid(AudioListenerComponent),	AudioListenerType },
 		{ typeid(AudioGeometryComponent),	AudioGeometryType },
-		{ typeid(ScriptComponent),			ScriptType }
+		{ typeid(ScriptComponent),			ScriptType },
+		{ typeid(CameraComponent),			CameraType }
 	};
 
 	kComponentTypeNames = {
@@ -38,11 +41,12 @@ void NoxEngine::initComponentTypes() {
 		{ TransformType,		"Transform Component" },
 		{ RenderableType,		"Renderable Component" },
 		{ AnimationType,		"Animation Component" },
-		{ LightSourceType,		"Light Source Component" },		// TODO: Implement
+		{ LightSourceType,		"Light Source Component" },		
 		{ AudioSourceType,		"Audio Source Component" },
-		{ AudioListenerType,	"Audio Listener Component" },	// TODO: Implement
+		{ AudioListenerType,	"Audio Listener Component" },	
 		{ AudioGeometryType,	"Audio Geometry Component" },
-		{ ScriptType,			"Script Component" }
+		{ ScriptType,			"Script Component" },
+		{ CameraType,			"Camera Component" }
 	};
 
 	// assert every type has a name

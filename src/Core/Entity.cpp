@@ -12,6 +12,8 @@
 #include <Components/AudioListenerComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
+#include <Components/CameraComponent.h>
+#include <Components/EmissionComponent.h>
 
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
@@ -22,8 +24,8 @@ Entity::Entity(i32 _id, char* _name)
 	id(_id), 
 	hasComp(0),
 	_isEnabled(~0),
-	remove(false),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 
 	if (_name != nullptr) name = _name;
 	else name = (char *)calloc(ENTITY_NAME_MAX_LEN, sizeof(char));
@@ -35,8 +37,8 @@ Entity::Entity(Scene* scene, char* _name)
 	:
 	hasComp(0),
 	_isEnabled(~0),
-	remove(false),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 
 	assert(scene != nullptr);
 
@@ -56,7 +58,8 @@ Entity::Entity(Scene* scene, const char* _name)
 	:
 	hasComp(0),
 	_isEnabled(~0),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 
 	assert(scene != nullptr);
 
@@ -73,7 +76,8 @@ Entity::Entity(Scene* scene, const char* _name, const char* _filepath)
 	:
 	hasComp(0),
 	_isEnabled(~0),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 
 	assert(scene != nullptr);
 
@@ -93,7 +97,8 @@ Entity::Entity(Entity&& other)
 	components(other.components), 
 	name(other.name), 
 	_isEnabled(other._isEnabled),
-	entityEnabled(true) {
+	entityEnabled(true),
+	remove(false) {
 }
 
 Entity::~Entity() {
@@ -127,6 +132,8 @@ void Entity::addComp(ComponentType type) {
 	case AudioListenerType:		addComp<AudioListenerComponent>();		break;
 	case AudioGeometryType:		addComp<AudioGeometryComponent>();		break;
 	case ScriptType:			addComp<ScriptComponent>(); 			break;
+	case CameraType:			addComp<CameraComponent>(); 			break;
+	case LightSourceType:		addComp<EmissionComponent>();			break;
 	default:					LOG_DEBUG("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
 	}
 }
@@ -191,3 +198,5 @@ template AudioSourceComponent* Entity::getComp<AudioSourceComponent>();
 template AudioListenerComponent* Entity::getComp<AudioListenerComponent>();
 template AudioGeometryComponent* Entity::getComp<AudioGeometryComponent>();
 template ScriptComponent* Entity::getComp<ScriptComponent>();
+template CameraComponent* Entity::getComp<CameraComponent>();
+template EmissionComponent* Entity::getComp<EmissionComponent>();

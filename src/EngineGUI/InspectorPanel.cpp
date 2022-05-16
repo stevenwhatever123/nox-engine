@@ -16,6 +16,8 @@
 #include <Components/AudioListenerComponent.h>
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
+#include <Components/CameraComponent.h>
+#include <Components/EmissionComponent.h>
 
 using namespace NoxEngine;
 
@@ -62,6 +64,8 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 		AudioListenerComponent* audioLisComp	= ent->getComp<AudioListenerComponent>();
 		AudioGeometryComponent* geoComp			= ent->getComp<AudioGeometryComponent>();
 		ScriptComponent*		scriptComp		= ent->getComp<ScriptComponent>();
+		CameraComponent*		cameraComp		= ent->getComp<CameraComponent>();
+		EmissionComponent*		emissionComp	= ent->getComp<EmissionComponent>();
 
 		bool animationEditing = animComp ? animComp->editing : false;
 
@@ -70,7 +74,7 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 		// Entity name
 		if (ImGui::CollapsingHeader(ent->name)) {
 
-			int width = ImGui::GetContentRegionAvail().x;
+			int width = (i32)ImGui::GetContentRegionAvail().x;
 
 			// Use inspector as editor (?)
 			if (animationEditing) {
@@ -884,7 +888,62 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 						ImGui::TreePop();
 					}
 				}
-			
+
+				if (cameraComp) {
+
+					bool tree_open = ImGui::TreeNode("Camera");
+					ImGui::SameLine();
+					bool remove = ImGui::SmallButton("-##RemoveCamera");
+
+					if (tree_open) {
+
+						cameraComp->getCamera()->GetCameraYawPitchRoll();
+						auto vals = cameraComp->getCamera()->GetCameraYawPitchRoll();
+						ImGui::DragFloat("Yaw", &vals[0]);
+						ImGui::DragFloat("Pitch", &vals[1]);
+						auto& m = cameraComp->getCamera()->GetCameraYawPitchRoll();
+						cameraComp->getCamera()->setYaw(vals.x);
+						cameraComp->getCamera()->setPitch(vals.y);
+
+						ImGui::DragFloat("X", &cameraComp->getCamera()->GetCameraPosition()[0]);
+						ImGui::DragFloat("Y", &cameraComp->getCamera()->GetCameraPosition()[1]);
+						ImGui::DragFloat("Z", &cameraComp->getCamera()->GetCameraPosition()[2]);
+
+						if(state->renderer->getCamera() == cameraComp->getCamera()) {
+							if(ImGui::Button("View Main Camera")) {
+								state->renderer->setCamera(state->cameras[0]);
+							}
+						} else {
+							if(ImGui::Button("View Camera")) {
+								state->renderer->setCamera(cameraComp->getCamera());
+							}
+						}
+
+						if(remove) {
+							ent->removeComp<CameraComponent>();
+						}
+
+						ImGui::TreePop();
+					}
+				}
+
+				if (emissionComp)
+				{
+					bool tree_open = ImGui::TreeNode("Emission Component");
+					ImGui::SameLine();
+					bool remove = ImGui::SmallButton("-##RemoveEmission");
+
+					if (tree_open) {
+
+						ImGui::Text("Hello");
+
+						if (remove) {
+							ent->removeComp<CameraComponent>();
+						}
+
+						ImGui::TreePop();
+					}
+				}
 			}
 
 		}
@@ -896,8 +955,9 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 		if (ImGui::Button("Add Component..."))
 			ImGui::OpenPopup("Component List Popup");
 
+		ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth());
 		if (ImGui::BeginPopup("Component List Popup")) {
-
+			ImGui::Text("                          ");
 			// Loop through all available components,
 			// gray out the ones that this entity has
 			for (int i = 1; i < ComponentType::ComponentTypeCount; i++) {

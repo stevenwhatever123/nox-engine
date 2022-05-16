@@ -3,6 +3,7 @@
 #include <Managers/GameManager.h>
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
+#include <Components/EmissionComponent.h>
 #include <Core/Entity.h>
 
 using namespace NoxEngine;
@@ -34,23 +35,31 @@ void Scene::addEntity(PresetObject obj) {
 	
 	// Empty components created before the switch/case, allocate memory with `new` inside
 	TransformComponent* transform;
+	EmissionComponent* em;
 
 	// Check which preset object is needed, create components accordingly
 	switch (obj) {
 
-	// Object with only transform component
-	case Transform:
-		transform = new TransformComponent(0.0, 0.0, 0.0);
-		ent->addComp<TransformComponent>(transform);
-		break;
+		// Object with only transform component
+		case Transform:
+			transform = new TransformComponent(0.0, 0.0, 0.0);
+			ent->addComp<TransformComponent>(transform);
+			break;
 
-	// No need to add any component
-	case EmptyEntity:
-	default:
-		break;
+		// In case it is light 
+		// Create pos comp and light comp
+		case PointLight:
+			transform = new TransformComponent(0.0, 0.0, 0.0);
+			em = new EmissionComponent();
+			ent->addComp<TransformComponent>(transform);
+			ent->addComp<EmissionComponent>(em);
+			break;
+
+
+		case EmptyEntity:
+		default:
+			break;
 
 	}
-
-	// Finally add the entity to the scene
 	this->addEntity(ent);
 }
