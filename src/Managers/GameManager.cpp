@@ -58,7 +58,7 @@ void GameManager::init() {
 	init_gui();
 	init_animation();
 	init_renderer();
-	init_scripts();
+	//init_scripts();
 	init_postprocess();
 }
 
@@ -140,7 +140,7 @@ void GameManager::init_window() {
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	window = glfwCreateWindow(game_state.win_width, game_state.win_height, title.c_str(), nullptr, nullptr);
+	window = glfwCreateWindow(game_state.win_width, game_state.win_height, title.c_str(), glfwGetPrimaryMonitor(), nullptr);
 
 	glfwMakeContextCurrent(window);
 	glfwSetWindowPos(window, 100, 100);

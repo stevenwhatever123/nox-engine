@@ -18,7 +18,7 @@ const aiScene* NoxEngine::readFBX(const char* filename)
 		importer.ReadFile(filename,
 			aiProcess_Triangulate |
 			aiProcess_GenSmoothNormals |
-			aiProcess_FlipUVs |
+			//aiProcess_FlipUVs |
 			aiProcess_JoinIdenticalVertices);
 
 		// The code above only returns a pointer to the imported data
@@ -38,7 +38,7 @@ const aiScene* NoxEngine::readFBX(const char* filename)
 				importer.ReadFile(filename,
 					aiProcess_Triangulate |
 					aiProcess_GenSmoothNormals |
-					aiProcess_FlipUVs |
+					//aiProcess_FlipUVs |
 					aiProcess_JoinIdenticalVertices | 
 					aiProcess_PreTransformVertices);
 

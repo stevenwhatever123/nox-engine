@@ -89,7 +89,9 @@ namespace NoxEngineGUI {
 			ImGuiComboFlags flags = 0;
 			const char* previewValue = PRESET_CATEGORY_NAMES_LIST[selectedCategory].c_str();
 			
-			if (ImGui::BeginCombo("Preset Categories", previewValue, flags)) {
+			ImGui::Text("Category");	ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+			if (ImGui::BeginCombo("##preset_categories", previewValue, flags)) {
 				for (auto &itr : PRESET_CATEGORY_NAMES_MAP) {
 
 					// change selected category on press

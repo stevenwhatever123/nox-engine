@@ -256,11 +256,11 @@ void NoxEngineGUI::updateInspectorPanel(NoxEngine::GameState* state, GUIParams *
 							state->renderer->changeTexture(ent);
 						}
 
-						ImGui::Text("Diffuse Map");
-						ImGui::Text("Specular Map");
-						ImGui::Text("Colour");
-						ImGui::SameLine();
-						ImGui::DragFloat3("##Colour", rend->color);
+						//ImGui::Text("Diffuse Map");
+						//ImGui::Text("Specular Map");
+						//ImGui::Text("Colour");
+						//ImGui::SameLine();
+						//ImGui::DragFloat3("##Colour", rend->color);
 
 						ImGui::TreePop();
 
