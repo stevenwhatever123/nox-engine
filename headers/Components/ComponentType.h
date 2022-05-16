@@ -32,7 +32,7 @@ namespace NoxEngine {
 		AudioListenerFlag		= 1 << (AudioListenerType		- 1),
 		AudioGeometryFlag		= 1 << (AudioGeometryType		- 1),
 		ScriptFlag				= 1 << (ScriptType				- 1),
-		CameraFlag				= 1 << (ScriptType				- 1),
+		CameraFlag				= 1 << (CameraType				- 1),
 	};
 
 	extern Map<std::type_index, ComponentType> kComponentTypeMap;

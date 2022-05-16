@@ -7,6 +7,7 @@
 #include <Components/TransformComponent.h>
 #include <Components/RenderableComponent.h>
 #include <Components/AudioGeometryComponent.h>
+#include <Components/EmissionComponent.h>
 #include <Managers/LiveReloadManager.h>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -189,6 +190,21 @@ void Renderer::addObject(Entity *ent, IRenderable *meshSrc, ComponentType compon
 
 	// give the IRenderable a reference to this rendObj
 	meshSrc->rendObjId = nextObjectId++;
+
+	// If the entity has emission component, add it as a light source and update shaders
+	IEmission* lightS = ent->getComp<EmissionComponent>()->CastType<IEmission>();
+	if (lightS != nullptr)
+	{
+		// ATM will add 0s pos
+		// Add to light arrays
+		lightSources.push_back(ent);
+		// Change the program
+		program->changeLightNum(lightSources.size());
+		// Update the program
+		updateProgram();
+
+
+	}
 }
 
 void Renderer::addPermObject(IRenderable *mesh, ITransform *trans)
@@ -264,11 +280,6 @@ GLuint Renderer::setTexture(const String texturePath, const char* uniName, int n
 void Renderer::clearObject()
 {
 	objects.clear();
-}
-
-void Renderer::addLights(const vec3 light)
-{
-	lightSources.push_back(light);
 }
 
 void Renderer::draw() {
@@ -572,21 +583,24 @@ void Renderer::updateProgram()
 	textureLoc = program->getUniformLocation("NormTexture");
 	glUniform1i(textureLoc, 2);
 
-	// Reload lights
-	for (int i = 0; i < program->numOfLights; i++)
-		updateLightPos(i, 0.0f, 0.0f, 0.0f);
+	// Update lights
+	for (int i = 0; i < lightSources.size(); i++)
+	{
+		updateLightPos(i);
+	}
+
 }
 
-void Renderer::updateLightPos(int lightInd, f32 x, f32 y, f32 z) 
+void Renderer::updateLightPos(u32 lightInd) 
 {
-	lightSources[lightInd][0] = x;
-	lightSources[lightInd][1] = y;
-	lightSources[lightInd][2] = z;
+	// Get position 
+	ITransform* pos = lightSources[lightInd]->getComp<TransformComponent>();
 
 	// Get the light position
 	String attr = std::format("lightPosition[{}].tanPos", lightInd);
 
-    program->set3Float(attr, x, y, z);
+	program->use();
+	program->set3Float(attr, pos->get_x(), pos->get_y(), pos->get_z());
 }
 
 void Renderer::updateObjectTransformation(mat4 transformation, u32 rendObjId) {

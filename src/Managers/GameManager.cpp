@@ -705,8 +705,8 @@ void GameManager::update_renderer() {
 	renderer->setProgram(current_program);
 
 	// Update lights
-	for(int i = 0; i < game_state.lightSources.size(); i++)
-		renderer->updateLightPos(i, game_state.lightSources[i][0], game_state.lightSources[i][1], game_state.lightSources[i][2]);
+	//for(int i = 0; i < game_state.lightSources.size(); i++)
+	//	renderer->updateLightPos(i, game_state.lightSources[i][0], game_state.lightSources[i][1], game_state.lightSources[i][2]);
 	renderer->fillBackground(ui_params.sceneBackgroundColor);
 	renderer->draw();
 

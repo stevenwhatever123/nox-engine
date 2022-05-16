@@ -109,7 +109,6 @@ namespace NoxEngine {
 
 		// Updates the view transformation using the current camera
 		void updateCamera();
-		void updateLightPos(int lightInd, f32 x, f32 y, f32 z);
 
 		void _change_num_of_light(u32 num) { program->changeLightNum(num); }
 
@@ -149,6 +148,8 @@ namespace NoxEngine {
 		Map<u32, RendObj> objects;
 		Array<RendObj> perm_objects;
 
+		Array<Entity* > lightSources;
+
 		// Global buffers of attributes
 		GLuint VBO;
 		GLuint NBO;
@@ -169,8 +170,6 @@ namespace NoxEngine {
 		Array<vec2> texCoords;
 		Array<vec3> tangents;
 		Array<i32> elements;
-
-		Array<vec3> lightSources;
 
 		// Buffer and texture to render to.
 		GLuint textureToRenderTo;
@@ -201,5 +200,12 @@ namespace NoxEngine {
 		void skyboxLoadTexture(); 
 
 		u32 nextObjectId;
+
+		public:
+			
+		void _change_num_of_lights_remove_this(u32 num) { program->changeLightNum(num); updateProgram(); }
+
+		void updateLightPos(u32 lightInd);
+		void updateLightMaterial(u32 lightInd);
 	};
 }

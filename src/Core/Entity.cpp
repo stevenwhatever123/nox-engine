@@ -12,6 +12,7 @@
 #include <Components/AudioGeometryComponent.h>
 #include <Components/ScriptComponent.h>
 #include <Components/CameraComponent.h>
+#include <Components/EmissionComponent.h>
 
 using namespace NoxEngine;
 using NoxEngineUtils::Logger;
@@ -130,6 +131,7 @@ void Entity::addComp(ComponentType type) {
 	case AudioGeometryType:		addComp<AudioGeometryComponent>();		break;
 	case ScriptType:			addComp<ScriptComponent>(); 			break;
 	case CameraType:			addComp<CameraComponent>(); 			break;
+	case LightSourceType:		addComp<EmissionComponent>();			break;
 	default:					LOG_DEBUG("Attempted to add invalid component type (%s), aborted", kComponentTypeNames[type].c_str());
 	}
 }
@@ -194,3 +196,4 @@ template AudioSourceComponent* Entity::getComp<AudioSourceComponent>();
 template AudioGeometryComponent* Entity::getComp<AudioGeometryComponent>();
 template ScriptComponent* Entity::getComp<ScriptComponent>();
 template CameraComponent* Entity::getComp<CameraComponent>();
+template EmissionComponent* Entity::getComp<EmissionComponent>();
