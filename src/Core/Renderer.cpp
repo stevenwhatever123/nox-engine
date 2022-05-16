@@ -384,7 +384,8 @@ void Renderer::fillBackground(i32 hex) {
 void Renderer::updateProjection(i32 width, i32 height) {
 	w = width;
 	h = height;
-	projection = glm::infinitePerspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f);
+	//projection = glm::infinitePerspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f);
+	projection = glm::perspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 0.1f, 1000.0f);
 	program->set4Matrix("toProjection", projection);
 }
 
@@ -457,7 +458,7 @@ void Renderer::createTangents(IRenderable* mesh)
 	{
 		Array<vec3> newTangents(mesh->getNumOfVertices());
 		copy(newTangents.begin(), newTangents.end(), back_inserter(tangents));
-		numOfTangents += (i32)tangents.size();
+		numOfTangents += (i32)newTangents.size();
 
 		return;
 	}
@@ -473,11 +474,8 @@ void Renderer::createTangents(IRenderable* mesh)
 		itr->g = 0;
 	}
 
-	tangents.resize(newTangents.size());
-	numOfTangents = (i32) tangents.size();
-
     // For each triangle in the mesh
-    for (int i = 0; i < elem.size(); i+=3)
+    for (int i = 0; i < elem.size(); i++)
     {
         // Get the positions of the vertices, their tex coordinates and the normal coordinates
         // Positions
@@ -532,7 +530,7 @@ void Renderer::createTangents(IRenderable* mesh)
 
     // Add calculated tangents to the container
     copy(newTangents.begin(), newTangents.end(), back_inserter(tangents));
-    numOfTangents += (i32)tangents.size();
+    numOfTangents += (i32)newTangents.size();
 }
 
 void Renderer::updateCamera()

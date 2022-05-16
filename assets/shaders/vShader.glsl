@@ -29,19 +29,20 @@ void main(void)
 {
 	gl_Position = toProjection * toCamera * toWorld * modelMatrix * vec4(position, 1.0f);
 
-	v.theNormal = normal;
+	v.theNormal = normalize(vec3(toWorld * modelMatrix * vec4(normal, 0.0f)));
 	v.theTexCoord = texCoord;
-	v.thePosition = position;
+	v.thePosition = vec3(toWorld * modelMatrix * vec4(position, 1.0f));
 
 
 	// For normal mapping
-	vec3 T = normalize(tangent);
-	vec3 N = normalize(normal);
+	vec3 T = normalize(vec3(toWorld * modelMatrix * vec4(tangent, 0.0f)));
+	vec3 N = normalize(vec3(toWorld * modelMatrix * vec4(normal, 0.0f)));
+
 	vec3 B = cross(N, T);
 
 	mat3 TBN = transpose(mat3(T, B, N));
 
 	v.tangentLightPos = TBN * lightPosition;
 	v.tangentCamPos   = TBN * cameraPosition;
-	v.tangentPos      = TBN * position;
+	v.tangentPos      = TBN * vec3(toWorld * modelMatrix * vec4(position, 1.0f));
 };  
