@@ -12,10 +12,6 @@ struct LightSource
 	vec3 tanPos;
 };
 
-
-
-
-
 out Vertex {
 	vec3 thePosition;
 	vec2 theTexCoord;
@@ -23,16 +19,11 @@ out Vertex {
 	vec3 tangentPos;
 } v;
 
-
 out LightSource lS[NUM_OF_LIGHTS];
-
-
 out vec3 tanCamPos;
-
 
 // Uniforms
 uniform LightSource lightPosition[NUM_OF_LIGHTS];
-
 uniform vec3 cameraPosition;
 
 uniform mat4 toCamera = mat4(1);
@@ -50,15 +41,14 @@ void main(void)
 
 
 	// For normal mapping
-	vec3 T = normalize(vec3(toWorld * modelMatrix * vec4(tangent, 0.0f)));
+	vec3 T = vec3(0);//normalize(vec3(0));
 	vec3 N = v.theNormal;
 	vec3 B = cross(N, T);
 
 	mat3 TBN = transpose(mat3(T, B, N));
 
 	tanCamPos         = TBN * cameraPosition;
-	v.tangentPos      = TBN * vec3(toWorld * modelMatrix * vec4(position, 1.0f));
-
+	v.tangentPos      = vec3(0);// TBN * vec3(toWorld * modelMatrix * vec4(0, 0, 0, 1.0f));
 
 	// Translate light
 	for(int i = 0; i < NUM_OF_LIGHTS; i++)

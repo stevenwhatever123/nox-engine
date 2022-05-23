@@ -26,7 +26,7 @@ void NoxEngineGUI::updateAnimationPanel(NoxEngine::GameState* game_state, GUIPar
 	// Window Begin
 	ImGui::Begin(name.c_str());
 	if (ImGui::Button("Load FBX File")) {
-		String picked_file = IOManager::Instance()->PickFile("FBX Files\0*.FBX\0\0");
+		String picked_file = IOManager::Instance()->PickFile("FBX Files\0*.*\0\0");
 		if (picked_file.length() > 0)
 		{
 			SIGNAL_EVENT(EventNames::meshAdded, picked_file.c_str());
