@@ -7,7 +7,7 @@ This engine is made from the ground up by using a few different libraries and ha
 - Fullscreen shaders & post processing
 - Scripting using Lua.
 - Live File Reloading for almost all the files including scripts, shaders, skybox images and can be extended further too.
-- Framebased animation and animation editing.
+- Frame-based animation and animation editing.
 
 ## Getting started
 
